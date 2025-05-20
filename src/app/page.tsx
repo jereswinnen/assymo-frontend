@@ -1,9 +1,14 @@
+import { getPageMetadata } from "@/lib/getPageMetadata";
 import { client } from "@/sanity/client";
 import { PortableText } from "@portabletext/react";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "home"
 ][0]{_id, title, body}`;
+
+export async function generateMetadata() {
+  return getPageMetadata("home");
+}
 
 export default async function Home() {
   const page = await client.fetch(PAGE_QUERY);
