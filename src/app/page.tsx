@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getPageMetadata } from "@/lib/getPageMetadata";
 import { client } from "@/sanity/client";
 import { PortableText } from "@portabletext/react";
