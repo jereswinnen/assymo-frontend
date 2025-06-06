@@ -4,7 +4,6 @@ import { getPageMetadata } from "@/lib/getPageMetadata";
 import { client } from "@/sanity/client";
 import { urlFor } from "@/sanity/imageUrl";
 import { PortableText } from "@portabletext/react";
-import Image from "next/image";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "home"
