@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Instrument_Sans } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const instrumentSans = Instrument_Sans({
+  variable: "--font-instrument-sans",
   subsets: ["latin"],
 });
 
@@ -27,11 +22,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${instrumentSans.variable} o-grid !gap-y-0 font-sans antialiased`}
       >
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        <section className="px-container-sm md:px-container-md col-span-full grid grid-cols-subgrid"></section>
+        <Header className="bg-amber-200" />
+        <main className="bg-amber-100 col-span-full grid grid-cols-subgrid">
+          {children}
+        </main>
+        <Footer className="bg-amber-300" />
       </body>
     </html>
   );

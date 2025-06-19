@@ -1,6 +1,14 @@
-export default function Footer() {
+type FooterProps = {
+  className?: string;
+};
+
+export default function Footer({ className }: FooterProps = {}) {
   return (
-    <footer className="w-full py-6 text-center border-t text-sm text-gray-500">
+    <footer
+      className={`py-6 text-center text-sm text-gray-500${
+        className ? ` ${className}` : ""
+      }`}
+    >
       &copy; {new Date().getFullYear()} Assymo. All rights reserved.
     </footer>
   );
