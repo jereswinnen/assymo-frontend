@@ -39,22 +39,24 @@ export default async function ProductPage({ params }: any) {
   }
 
   return (
-    <main className="container mx-auto min-h-screen max-w-3xl p-8">
-      {product.headerImage && (
-        <img
-          src={urlFor(product.headerImage).url()}
-          alt={product.headerImage.alt || product.name || "Product image"}
-          className="w-full h-auto mb-8 rounded-lg"
-        />
-      )}
-      <h1 className="text-4xl font-bold mb-8">
-        {product.name || "Untitled Product"}
-      </h1>
-      {product.body && (
-        <div className="prose max-w-none">
-          <PortableText value={product.body} />
-        </div>
-      )}
-    </main>
+    <section className="col-span-full grid grid-cols-subgrid">
+      <article className="col-span-4 col-start-3">
+        {product.headerImage && (
+          <img
+            src={urlFor(product.headerImage).url()}
+            alt={product.headerImage.alt || product.name || "Product image"}
+            className="w-full h-auto mb-8 rounded-lg"
+          />
+        )}
+        <h1 className="text-4xl font-bold mb-8">
+          {product.name || "Untitled Product"}
+        </h1>
+        {product.body && (
+          <div className="prose max-w-none">
+            <PortableText value={product.body} />
+          </div>
+        )}
+      </article>
+    </section>
   );
 }

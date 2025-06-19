@@ -22,15 +22,16 @@ export default async function ProductsPage() {
   const products = await client.fetch(PRODUCTS_QUERY);
 
   return (
-    <main className="container mx-auto min-h-screen max-w-6xl p-8">
-      <h1 className="text-4xl font-bold mb-12">Onze Producten</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <section className="col-span-full grid grid-cols-subgrid">
+      <header className="col-span-full">
+        <h1>Onze Producten</h1>
+      </header>
+      <div className="col-span-full grid grid-cols-subgrid">
         {products.map((product: any) => (
           <Link
             href={`/producten/${product.slug.current}`}
             key={product._id}
-            className="group"
+            className="group col-span-2"
           >
             <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-200 group-hover:scale-105">
               {product.headerImage && (
@@ -42,7 +43,7 @@ export default async function ProductsPage() {
                   />
                 </div>
               )}
-              <div className="p-6">
+              <div className="p-4">
                 <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-600 transition-colors">
                   {product.name}
                 </h2>
@@ -51,6 +52,6 @@ export default async function ProductsPage() {
           </Link>
         ))}
       </div>
-    </main>
+    </section>
   );
 }

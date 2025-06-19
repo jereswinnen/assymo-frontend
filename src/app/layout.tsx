@@ -24,12 +24,13 @@ export default function RootLayout({
       <body
         className={`${instrumentSans.variable} o-grid !gap-y-0 font-sans antialiased`}
       >
-        <section className="px-container-sm md:px-container-md col-span-full grid grid-cols-subgrid"></section>
-        <Header className="bg-amber-200" />
-        <main className="bg-amber-100 col-span-full grid grid-cols-subgrid">
-          {children}
-        </main>
-        <Footer className="bg-amber-300" />
+        <section className="px-container-sm md:px-container-md col-span-full grid grid-cols-subgrid">
+          <Header className="bg-amber-200 col-span-full" />
+          <main className="bg-amber-100 col-span-full grid grid-cols-subgrid">
+            {children}
+          </main>
+          <Footer className="bg-amber-300 col-span-full" />
+        </section>
       </body>
     </html>
   );

@@ -18,19 +18,24 @@ export default async function Home() {
 
   if (!page) {
     return (
-      <main className="container mx-auto min-h-screen max-w-3xl p-8">
-        <h1 className="text-4xl font-bold mb-8">Home page not found</h1>
-      </main>
+      <section>
+        <h1 className="text-4xl font-bold">Home page not found</h1>
+      </section>
     );
   }
 
   return (
-    <main className="container mx-auto min-h-screen max-w-3xl p-8">
+    <section className="col-span-full grid grid-cols-subgrid">
       {page.headerImage && (
-        <img src={urlFor(page.headerImage).url()} alt={page.headerImage.alt} />
+        <img
+          className="col-span-3"
+          src={urlFor(page.headerImage).url()}
+          alt={page.headerImage.alt}
+        />
       )}
-      <h1 className="text-4xl font-bold mb-8">{page.title}</h1>
-      <PortableText value={page.body} />
-    </main>
+      <article className="col-span-5">
+        <PortableText value={page.body} />
+      </article>
+    </section>
   );
 }
