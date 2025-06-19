@@ -16,11 +16,11 @@ const PRODUCT_QUERY = `*[
   body
 }`;
 
-type Props = {
+export async function generateMetadata({
+  params,
+}: {
   params: { slug: string };
-};
-
-export async function generateMetadata({ params }: Props) {
+}) {
   const product = await client.fetch(PRODUCT_QUERY, { slug: params.slug });
 
   if (!product) {
@@ -35,7 +35,11 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-export default async function ProductPage({ params }: Props) {
+export default async function ProductPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const product = await client.fetch(PRODUCT_QUERY, { slug: params.slug });
 
   if (!product) {
