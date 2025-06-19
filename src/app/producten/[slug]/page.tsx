@@ -16,11 +16,7 @@ const PRODUCT_QUERY = `*[
   body
 }`;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export async function generateMetadata({ params }: any) {
   const product = await client.fetch(PRODUCT_QUERY, { slug: params.slug });
 
   if (!product) {
@@ -35,11 +31,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default async function ProductPage({ params }: any) {
   const product = await client.fetch(PRODUCT_QUERY, { slug: params.slug });
 
   if (!product) {
