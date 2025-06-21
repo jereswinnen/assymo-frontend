@@ -4,8 +4,8 @@ import { client } from "@/sanity/client";
 import { urlFor } from "@/sanity/imageUrl";
 import Link from "next/link";
 
-const PRODUCTS_QUERY = `*[
-  _type == "product"
+const SOLUTIONS_QUERY = `*[
+  _type == "solution"
 ] | order(name asc) {
   _id,
   name,
@@ -14,38 +14,38 @@ const PRODUCTS_QUERY = `*[
 }`;
 
 export const metadata = {
-  title: "Producten",
-  description: "Bekijk ons aanbod",
+  title: "Oplossingen",
+  description: "Bekijk onze oplossingen",
 };
 
-export default async function ProductsPage() {
-  const products = await client.fetch(PRODUCTS_QUERY);
+export default async function SolutionsPage() {
+  const solutions = await client.fetch(SOLUTIONS_QUERY);
 
   return (
     <section className="col-span-full grid grid-cols-subgrid">
       <header className="col-span-full">
-        <h1>Onze Producten</h1>
+        <h1>Onze Oplossingen</h1>
       </header>
       <div className="col-span-full grid grid-cols-subgrid">
-        {products.map((product: any) => (
+        {solutions.map((solution: any) => (
           <Link
-            href={`/producten/${product.slug.current}`}
-            key={product._id}
+            href={`/oplossingen/${solution.slug.current}`}
+            key={solution._id}
             className="group col-span-2"
           >
             <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-200 group-hover:scale-105">
-              {product.headerImage && (
+              {solution.headerImage && (
                 <div className="aspect-w-16 aspect-h-9">
                   <img
-                    src={urlFor(product.headerImage).url()}
-                    alt={product.headerImage.alt || product.name}
+                    src={urlFor(solution.headerImage).url()}
+                    alt={solution.headerImage.alt || solution.name}
                     className="w-full h-full object-cover"
                   />
                 </div>
               )}
               <div className="p-4">
                 <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-600 transition-colors">
-                  {product.name}
+                  {solution.name}
                 </h2>
               </div>
             </div>
