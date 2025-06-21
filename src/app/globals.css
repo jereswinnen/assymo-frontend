@@ -3,6 +3,8 @@
 :root {
   --u-grid-columns: 2;
   --u-grid-gap: 4rem;
+  --c-accent-light: #22df90;
+  --c-accent-dark: #1f3632;
   @media (min-width: 46em) {
     --u-grid-columns: 8;
   }
@@ -37,4 +39,16 @@ h1 {
   line-height: 1.2;
   letter-spacing: -0.02em;
   font-weight: 700;
+}
+
+.c-action {
+  font: 1.25rem/1.5 var(--font-sans);
+  font-weight: 600;
+  color: var(--c-accent-dark);
+  background-color: var(--c-accent-light);
+  padding: 0.8rem 1rem;
+  transition: all 0.2s ease-in-out;
+}
+.c-action:hover {
+  opacity: 0.8;
 }
