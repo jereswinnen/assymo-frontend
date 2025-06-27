@@ -4,10 +4,21 @@ import { getPageMetadata } from "@/lib/getPageMetadata";
 import { client } from "@/sanity/client";
 import { urlFor } from "@/sanity/imageUrl";
 import { PortableText } from "@portabletext/react";
+import Link from "next/link";
+import SolutionCard from "@/components/SolutionCard";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "home"
 ][0]{_id, title, body, headerImage}`;
+
+const SOLUTIONS_QUERY = `*[
+  _type == "solution"
+] | order(name asc)[0...3] {
+  _id,
+  name,
+  slug,
+  headerImage
+}`;
 
 export async function generateMetadata() {
   return getPageMetadata("home");
@@ -15,6 +26,7 @@ export async function generateMetadata() {
 
 export default async function Home() {
   const page = await client.fetch(PAGE_QUERY);
+  const solutions = await client.fetch(SOLUTIONS_QUERY);
 
   if (!page) {
     return (
@@ -48,10 +60,24 @@ export default async function Home() {
           <PortableText value={page.body} />
         </header>
       </section>
+
+      {/* Solutions preview section */}
+
       <section className="px-container-sm md:px-container-md col-span-full grid grid-cols-subgrid">
-        <article className="col-span-full">
-          <p>This is some more dummy content.</p>
-        </article>
+        <header className="col-span-full mb-6 flex items-center justify-between">
+          <h4>Een greep uit ons aanbod</h4>
+          {/* <Link
+            href="/oplossingen"
+            className="text-blue-600 hover:underline font-medium"
+          >
+            Bekijk alle oplossingen
+          </Link> */}
+        </header>
+        <div className="col-span-full grid grid-cols-1 md:grid-cols-3 gap-6">
+          {solutions.map((solution: any) => (
+            <SolutionCard key={solution._id} solution={solution} />
+          ))}
+        </div>
       </section>
     </>
   );

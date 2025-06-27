@@ -48,6 +48,14 @@ h1 {
   font-weight: 400;
 }
 
+h4 {
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
 .c-action {
   font: 1rem/1.5 var(--font-sans);
   font-weight: 600;
