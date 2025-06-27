@@ -26,16 +26,28 @@ export default async function Home() {
 
   return (
     <section className="col-span-full grid grid-cols-subgrid">
-      {page.headerImage && (
-        <img
-          className="col-span-3"
-          src={urlFor(page.headerImage).url()}
-          alt={page.headerImage.alt}
-        />
-      )}
-      <article className="col-span-5">
-        <PortableText value={page.body} />
-      </article>
+      <section className="relative col-span-full h-[55vh]">
+        {page.headerImage && (
+          <div className="relative h-full">
+            <img
+              src={urlFor(page.headerImage).url()}
+              alt={page.headerImage.alt}
+              className="w-full h-full object-cover"
+            />
+            <div
+              className="absolute inset-0 bg-black/30 z-10"
+              aria-hidden="true"
+            />
+            <div
+              className="absolute inset-0 bg-gradient-to-t from-white to-white/0 z-20"
+              aria-hidden="true"
+            />
+          </div>
+        )}
+        <header className="absolute bottom-0 left-0 right-0 z-30 w-[40%]">
+          <PortableText value={page.body} />
+        </header>
+      </section>
     </section>
   );
 }
