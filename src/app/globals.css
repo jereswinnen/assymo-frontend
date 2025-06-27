@@ -30,19 +30,26 @@
 }
 
 body {
+  font-size: 1.125rem;
+  line-height: 1.5;
   background: white;
   color: var(--c-accent-dark);
 }
 
+p:not(:last-child) {
+  margin-bottom: 0.8rem;
+}
+
 h1 {
-  font-size: 2.5rem;
+  margin-bottom: 1.2rem;
+  font-size: 3rem;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .c-action {
-  font: 1.25rem/1.5 var(--font-sans);
+  font: 1rem/1.5 var(--font-sans);
   font-weight: 600;
   color: var(--c-accent-dark);
   background-color: var(--c-accent-light);

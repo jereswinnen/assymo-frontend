@@ -41,7 +41,7 @@ export default async function Header({ className }: HeaderProps = {}) {
         <Link href="/">Assymo</Link>
       </div>
       <div className="w-full flex items-center justify-between">
-        <nav>
+        <nav className="text-base">
           <NavLinks links={nav?.links || []} solutions={solutions} />
         </nav>
         <Link href="/contact" className="c-action">

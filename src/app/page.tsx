@@ -25,7 +25,7 @@ export default async function Home() {
   }
 
   return (
-    <section className="col-span-full grid grid-cols-subgrid">
+    <>
       <section className="relative col-span-full h-[55vh]">
         {page.headerImage && (
           <div className="relative h-full">
@@ -44,10 +44,15 @@ export default async function Home() {
             />
           </div>
         )}
-        <header className="absolute bottom-0 left-0 right-0 z-30 w-[40%]">
+        <header className="absolute bottom-0 left-0 right-0 z-30 p-container-sm md:p-container-md w-[50%]">
           <PortableText value={page.body} />
         </header>
       </section>
-    </section>
+      <section className="px-container-sm md:px-container-md col-span-full grid grid-cols-subgrid">
+        <article className="col-span-full">
+          <p>This is some more dummy content.</p>
+        </article>
+      </section>
+    </>
   );
 }
