@@ -6,6 +6,7 @@ import { urlFor } from "@/sanity/imageUrl";
 import { PortableText } from "@portabletext/react";
 import Link from "next/link";
 import SolutionCard from "@/components/SolutionCard";
+import SectionUSPs from "@/components/SectionUSPs";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "home"
@@ -79,6 +80,8 @@ export default async function Home() {
           ))}
         </div>
       </section>
+
+      <SectionUSPs />
     </>
   );
 }
