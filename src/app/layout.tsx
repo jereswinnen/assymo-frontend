@@ -29,7 +29,7 @@ export default function RootLayout({
           <main className="col-span-full grid grid-cols-subgrid gap-y-14">
             {children}
           </main>
-          <Footer className="px-container-sm md:px-container-md  col-span-full" />
+          <Footer className="px-container-sm md:px-container-md col-span-full" />
         </section>
       </body>
     </html>

@@ -74,7 +74,7 @@ export default async function Home() {
             Bekijk alle oplossingen
           </Link> */}
         </header>
-        <div className="col-span-full grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="col-span-full grid grid-cols-1 md:grid-cols-3 gap-10">
           {solutions.map((solution: any) => (
             <SolutionCard key={solution._id} solution={solution} />
           ))}
