@@ -36,8 +36,8 @@ export default async function Footer({ className }: FooterProps = {}) {
         <aside className="col-span-2">
           <ul className="w-full flex flex-col items-end [&>*]:w-full [&>*]:flex [&>*]:flex-col [&>*]:items-end [&>*]:gap-1.5 text-base divide-y divide-(--c-accent-dark)/10">
             <ul className="pb-2 mb-2">
-              <li>Straatnaam 123</li>
-              <li>1234 AB, Stad</li>
+              <li>Eikenlei 159</li>
+              <li>2960 Brecht</li>
             </ul>
             <ul className="pb-2 mb-2">
               <li>
@@ -47,7 +47,7 @@ export default async function Footer({ className }: FooterProps = {}) {
               </li>
               <li>
                 <Link href="tel:+32123456789" className="hover:underline">
-                  +32 123 456 789
+                  +32 3 434 74 98
                 </Link>
               </li>
               <li className="pt-3">
