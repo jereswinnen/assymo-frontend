@@ -27,15 +27,15 @@ export default async function Home() {
 
   return (
     <section className="px-container-sm md:px-container-md col-span-full grid grid-cols-subgrid gap-y-14">
-      <header className="col-span-full grid grid-cols-subgrid">
+      <header className="col-span-full grid grid-cols-subgrid gap-y-8 md:gap-y-0">
         {page.headerImage && (
           <img
-            className="col-span-4 rounded-2xl"
+            className="col-span-full md:col-span-4 rounded-2xl"
             src={urlFor(page.headerImage).url()}
             alt={page.headerImage.alt}
           />
         )}
-        <article className="col-span-4 flex flex-col gap-10">
+        <article className="col-span-full md:col-span-4 flex flex-col gap-10">
           <div>
             <PortableText value={page.body} />
           </div>
