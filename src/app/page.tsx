@@ -39,7 +39,7 @@ export default async function Home() {
 
   return (
     <>
-      <section className="hidden relative col-span-full h-[55vh]">
+      <section className="relative col-span-full h-[55vh]">
         {page.headerImage && (
           <div className="relative h-full">
             <img
@@ -57,7 +57,7 @@ export default async function Home() {
             />
           </div>
         )}
-        <header className="absolute bottom-0 left-0 right-0 z-30 p-container-sm md:p-container-md w-[50%]">
+        <header className="absolute bottom-0 left-0 right-0 z-30 p-container-sm md:p-container-md w-full lg:w-[50%]">
           <PortableText value={page.body} />
         </header>
       </section>
