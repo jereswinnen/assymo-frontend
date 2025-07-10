@@ -39,7 +39,7 @@ export default async function Home() {
 
   return (
     <>
-      <section className="relative col-span-full h-[55vh]">
+      <section className="hidden relative col-span-full h-[55vh]">
         {page.headerImage && (
           <div className="relative h-full">
             <img
