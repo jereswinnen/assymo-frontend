@@ -7,10 +7,34 @@ import { PortableText } from "@portabletext/react";
 import Link from "next/link";
 import SolutionCard from "@/components/SolutionCard";
 import SectionUSPs from "@/components/SectionUSPs";
+import SectionRenderer from "@/components/SectionRenderer";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "home"
-][0]{_id, title, body, headerImage}`;
+][0]{
+  _id, 
+  title, 
+  body, 
+  headerImage,
+  sections[]{
+    _type,
+    _key,
+    heading,
+    image{
+      asset,
+      hotspot,
+      alt
+    },
+    content{
+      heading,
+      body,
+      cta{
+        text,
+        url
+      }
+    }
+  }
+}`;
 
 const SOLUTIONS_QUERY = `*[
   _type == "solution"
@@ -25,7 +49,7 @@ export async function generateMetadata() {
   return getPageMetadata("home");
 }
 
-export default async function Home() {
+export default async function HomePage() {
   const page = await client.fetch(PAGE_QUERY);
   const solutions = await client.fetch(SOLUTIONS_QUERY);
 
@@ -80,6 +104,11 @@ export default async function Home() {
           ))}
         </div>
       </section>
+
+      {/* Modular Sections */}
+      {page.sections && page.sections.length > 0 && (
+        <SectionRenderer sections={page.sections} />
+      )}
 
       <SectionUSPs />
     </>

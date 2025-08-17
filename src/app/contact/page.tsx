@@ -5,16 +5,40 @@ import { client } from "@/sanity/client";
 import { urlFor } from "@/sanity/imageUrl";
 import { PortableText } from "@portabletext/react";
 import Link from "next/link";
+import SectionRenderer from "@/components/SectionRenderer";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "contact"
-][0]{_id, title, body, headerImage}`;
+][0]{
+  _id, 
+  title, 
+  body, 
+  headerImage,
+  sections[]{
+    _type,
+    _key,
+    heading,
+    image{
+      asset,
+      hotspot,
+      alt
+    },
+    content{
+      heading,
+      body,
+      cta{
+        text,
+        url
+      }
+    }
+  }
+}`;
 
 export async function generateMetadata() {
   return getPageMetadata("contact");
 }
 
-export default async function Home() {
+export default async function ContactPage() {
   const page = await client.fetch(PAGE_QUERY);
 
   if (!page) {
@@ -75,6 +99,11 @@ export default async function Home() {
           loading="lazy"
         ></iframe>
       </section>
+
+      {/* Modular Sections */}
+      {page.sections && page.sections.length > 0 && (
+        <SectionRenderer sections={page.sections} />
+      )}
     </section>
   );
 }

@@ -4,16 +4,40 @@ import { getPageMetadata } from "@/lib/getPageMetadata";
 import { client } from "@/sanity/client";
 import { urlFor } from "@/sanity/imageUrl";
 import { PortableText } from "@portabletext/react";
+import SectionRenderer from "@/components/SectionRenderer";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "over-ons"
-][0]{_id, title, body, headerImage}`;
+][0]{
+  _id, 
+  title, 
+  body, 
+  headerImage,
+  sections[]{
+    _type,
+    _key,
+    heading,
+    image{
+      asset,
+      hotspot,
+      alt
+    },
+    content{
+      heading,
+      body,
+      cta{
+        text,
+        url
+      }
+    }
+  }
+}`;
 
 export async function generateMetadata() {
   return getPageMetadata("over-ons");
 }
 
-export default async function Home() {
+export default async function AboutPage() {
   const page = await client.fetch(PAGE_QUERY);
 
   if (!page) {
@@ -36,6 +60,11 @@ export default async function Home() {
       <article className="col-span-5">
         <PortableText value={page.body} />
       </article>
+
+      {/* Modular Sections */}
+      {page.sections && page.sections.length > 0 && (
+        <SectionRenderer sections={page.sections} />
+      )}
     </section>
   );
 }
