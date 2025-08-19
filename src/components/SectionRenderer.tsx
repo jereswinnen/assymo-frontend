@@ -1,6 +1,7 @@
 import TextLeftImageRight from "./sections/TextLeftImageRight";
 import TextRightImageLeft from "./sections/TextRightImageLeft";
 import Map from "./sections/Map";
+import TextCentered from "./sections/TextCentered";
 
 interface Section {
   _type: string;
@@ -51,6 +52,14 @@ export default function SectionRenderer({ sections }: SectionRendererProps) {
           case "kaart":
             return (
               <Map 
+                key={key} 
+                section={section as any} 
+              />
+            );
+            
+          case "textCentered":
+            return (
+              <TextCentered 
                 key={key} 
                 section={section as any} 
               />

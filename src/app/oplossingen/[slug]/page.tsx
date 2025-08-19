@@ -1,10 +1,8 @@
 export const dynamic = "force-dynamic";
 
-import { getPageMetadata } from "@/lib/getPageMetadata";
 import { client } from "@/sanity/client";
-import { urlFor } from "@/sanity/imageUrl";
-import { PortableText } from "@portabletext/react";
 import { notFound } from "next/navigation";
+import SectionRenderer from "@/components/SectionRenderer";
 
 const SOLUTIONS_QUERY = `*[
   _type == "solution" && slug.current == $slug
@@ -13,7 +11,25 @@ const SOLUTIONS_QUERY = `*[
   name,
   slug,
   headerImage,
-  body
+  body,
+  sections[]{
+    _type,
+    _key,
+    heading,
+    image{
+      asset,
+      hotspot,
+      alt
+    },
+    content{
+      heading,
+      body,
+      cta{
+        text,
+        url
+      }
+    }
+  }
 }`;
 
 export async function generateMetadata({ params }: any) {
@@ -39,24 +55,10 @@ export default async function SolutionPage({ params }: any) {
   }
 
   return (
-    <section className="col-span-full grid grid-cols-subgrid">
-      <article className="col-span-4 col-start-3">
-        {solution.headerImage && (
-          <img
-            src={urlFor(solution.headerImage).url()}
-            alt={solution.headerImage.alt || solution.name || "Solution image"}
-            className="w-full h-auto mb-8 rounded-lg"
-          />
-        )}
-        <h1 className="text-4xl font-bold mb-8">
-          {solution.name || "Untitled Solution"}
-        </h1>
-        {solution.body && (
-          <div className="prose max-w-none">
-            <PortableText value={solution.body} />
-          </div>
-        )}
-      </article>
+    <section className="px-container-sm md:px-container-md col-span-full grid grid-cols-subgrid gap-y-14">
+      {solution.sections && solution.sections.length > 0 && (
+        <SectionRenderer sections={solution.sections} />
+      )}
     </section>
   );
 }
