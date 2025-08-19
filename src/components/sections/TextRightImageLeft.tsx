@@ -32,13 +32,13 @@ export default function TextRightImageLeft({
         <img
           src={urlFor(section.image).url()}
           alt={section.image.alt}
-          className="w-full h-auto object-cover rounded-lg"
+          className="w-full h-auto object-cover rounded-2xl"
         />
       </div>
 
       {/* Text Content - Right Side */}
       <div className="col-span-full md:col-span-4 flex flex-col justify-center order-1 md:order-2">
-        <h2 className="mb-6">{section.content.heading}</h2>
+        <h1 className="mb-6">{section.content.heading}</h1>
 
         {section.content.body && (
           <div className="mb-6">
