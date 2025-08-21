@@ -24,7 +24,7 @@ export default function NavLinks({ links, solutions, className }: Props) {
   const pathname = usePathname();
 
   return (
-    <ul className={`flex gap-8${className ? ` ${className}` : ""}`}>
+    <ul className={`flex gap-8 ${className ? ` ${className}` : ""}`}>
       {links.map((link) => {
         const isActive =
           pathname === `/${link.slug}` ||
