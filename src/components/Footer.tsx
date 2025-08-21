@@ -60,7 +60,7 @@ export default async function Footer({ className }: FooterProps = {}) {
         </aside>
       </div>
 
-      <div className="col-span-full">
+      <div className="hidden col-span-full">
         <Image
           src="/assymoBrandFooter.svg"
           alt="Assymo Brand"
