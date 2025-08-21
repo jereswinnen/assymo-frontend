@@ -1,7 +1,7 @@
 "use client";
 
 import { urlFor } from "@/sanity/imageUrl";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 
 interface SlideshowImage {
@@ -21,43 +21,43 @@ export default function Slideshow({ images, className = "" }: SlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const goToPrevious = () => {
-    if (isTransitioning) return;
+  const goToPrevious = useCallback(() => {
+    if (isTransitioning || !images) return;
     setIsTransitioning(true);
     setTimeout(() => {
       setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
       setIsTransitioning(false);
     }, 250);
-  };
+  }, [isTransitioning, images]);
 
-  const goToNext = () => {
-    if (isTransitioning) return;
+  const goToNext = useCallback(() => {
+    if (isTransitioning || !images) return;
     setIsTransitioning(true);
     setTimeout(() => {
       setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
       setIsTransitioning(false);
     }, 250);
-  };
+  }, [isTransitioning, images]);
 
-  const goToSlide = (index: number) => {
-    if (isTransitioning || index === currentIndex) return;
+  const goToSlide = useCallback((index: number) => {
+    if (isTransitioning || index === currentIndex || !images) return;
     setIsTransitioning(true);
     setTimeout(() => {
       setCurrentIndex(index);
       setIsTransitioning(false);
     }, 250);
-  };
+  }, [isTransitioning, currentIndex, images]);
 
   // Auto-advance slideshow every 5 seconds
   useEffect(() => {
     if (!images || images.length <= 1) return;
     
     const interval = setInterval(() => {
-      goToNext();
+      setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [currentIndex, images?.length, isTransitioning]);
+  }, [images?.length]);
 
   if (!images || images.length === 0) {
     return null;
