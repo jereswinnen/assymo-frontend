@@ -21,7 +21,7 @@ export default function Slideshow({ section }: SlideshowProps) {
   return (
     <section className="col-span-full">
       {section.images && section.images.length > 0 ? (
-        <SlideshowComponent images={section.images} />
+        <SlideshowComponent images={section.images} className="slideshow-fullwidth" />
       ) : (
         <div className="p-4 bg-yellow-100 text-center rounded-lg">
           <h3 className="font-semibold mb-2">Slideshow Section</h3>

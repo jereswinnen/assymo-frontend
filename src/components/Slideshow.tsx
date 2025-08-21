@@ -1,7 +1,7 @@
 "use client";
 
 import { urlFor } from "@/sanity/imageUrl";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 interface SlideshowImage {
@@ -19,41 +19,73 @@ interface SlideshowProps {
 
 export default function Slideshow({ images, className = "" }: SlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   if (!images || images.length === 0) {
     return null;
   }
 
   const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+      setIsTransitioning(false);
+    }, 250);
   };
 
   const goToNext = () => {
-    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+      setIsTransitioning(false);
+    }, 250);
   };
 
   const goToSlide = (index: number) => {
-    setCurrentIndex(index);
+    if (isTransitioning || index === currentIndex) return;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex(index);
+      setIsTransitioning(false);
+    }, 250);
   };
+
+  // Auto-advance slideshow every 5 seconds
+  useEffect(() => {
+    if (images.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      goToNext();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [currentIndex, images.length, isTransitioning]);
 
   const currentImage = images[currentIndex];
 
   return (
     <div className={`relative ${className}`}>
-      <div className="relative overflow-hidden rounded-2xl">
-        <Image
-          src={urlFor(currentImage).url()}
-          alt={currentImage.alt || "Slideshow image"}
-          width={800}
-          height={600}
-          className="w-full h-auto object-cover"
-        />
+      <div className={`relative overflow-hidden rounded-2xl bg-gray-100 ${
+        className === "slideshow-fullwidth" ? "h-[60vh]" : "h-96"
+      }`}>
+        <div className={`absolute inset-0 transition-opacity duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+          <Image
+            src={urlFor(currentImage).url()}
+            alt={currentImage.alt || "Slideshow image"}
+            fill
+            className={className === "slideshow-fullwidth" ? "object-cover" : "object-contain"}
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        </div>
         
         {images.length > 1 && (
           <>
             <button
               onClick={goToPrevious}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all"
+              disabled={isTransitioning}
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all disabled:opacity-50 z-10"
               aria-label="Previous image"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +95,8 @@ export default function Slideshow({ images, className = "" }: SlideshowProps) {
             
             <button
               onClick={goToNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all"
+              disabled={isTransitioning}
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all disabled:opacity-50 z-10"
               aria-label="Next image"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,7 +117,8 @@ export default function Slideshow({ images, className = "" }: SlideshowProps) {
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-2 h-2 rounded-full transition-all ${
+              disabled={isTransitioning}
+              className={`w-2 h-2 rounded-full transition-all disabled:opacity-50 ${
                 index === currentIndex ? "bg-gray-900" : "bg-gray-300 hover:bg-gray-500"
               }`}
               aria-label={`Go to slide ${index + 1}`}
