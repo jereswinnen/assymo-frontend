@@ -21,6 +21,12 @@ const SOLUTIONS_QUERY = `*[
       hotspot,
       alt
     },
+    images[]{
+      asset,
+      hotspot,
+      alt,
+      caption
+    },
     content{
       heading,
       body,

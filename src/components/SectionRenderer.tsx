@@ -2,17 +2,27 @@ import TextLeftImageRight from "./sections/TextLeftImageRight";
 import TextRightImageLeft from "./sections/TextRightImageLeft";
 import Map from "./sections/Map";
 import TextCentered from "./sections/TextCentered";
+import Slideshow from "./sections/Slideshow";
+import SlideshowLeftTextRight from "./sections/SlideshowLeftTextRight";
+import SlideshowRightTextLeft from "./sections/SlideshowRightTextLeft";
 
 interface Section {
   _type: string;
   _key?: string;
-  image: {
+  image?: {
     _type: "image";
     asset: { _ref: string };
     hotspot?: { x: number; y: number };
     alt: string;
   };
-  content: {
+  images?: {
+    _type: "image";
+    asset: { _ref: string; _type: "reference" };
+    hotspot?: { x: number; y: number };
+    alt: string;
+    caption?: string;
+  }[];
+  content?: {
     heading: string;
     body?: any[];
     cta?: {
@@ -60,6 +70,30 @@ export default function SectionRenderer({ sections }: SectionRendererProps) {
           case "textCentered":
             return (
               <TextCentered 
+                key={key} 
+                section={section as any} 
+              />
+            );
+            
+          case "slideshow":
+            return (
+              <Slideshow 
+                key={key} 
+                section={section as any} 
+              />
+            );
+            
+          case "slideshowLeftTextRight":
+            return (
+              <SlideshowLeftTextRight 
+                key={key} 
+                section={section as any} 
+              />
+            );
+            
+          case "slideshowRightTextLeft":
+            return (
+              <SlideshowRightTextLeft 
                 key={key} 
                 section={section as any} 
               />

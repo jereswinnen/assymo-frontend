@@ -25,6 +25,12 @@ const PAGE_QUERY = `*[
       hotspot,
       alt
     },
+    images[]{
+      asset,
+      hotspot,
+      alt,
+      caption
+    },
     content{
       heading,
       body,
