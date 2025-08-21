@@ -21,10 +21,6 @@ export default function Slideshow({ images, className = "" }: SlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  if (!images || images.length === 0) {
-    return null;
-  }
-
   const goToPrevious = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
@@ -54,14 +50,18 @@ export default function Slideshow({ images, className = "" }: SlideshowProps) {
 
   // Auto-advance slideshow every 5 seconds
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (!images || images.length <= 1) return;
     
     const interval = setInterval(() => {
       goToNext();
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [currentIndex, images.length, isTransitioning]);
+  }, [currentIndex, images?.length, isTransitioning]);
+
+  if (!images || images.length === 0) {
+    return null;
+  }
 
   const currentImage = images[currentIndex];
 
