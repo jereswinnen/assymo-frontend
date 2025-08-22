@@ -5,10 +5,12 @@ import TextCentered from "./sections/TextCentered";
 import Slideshow from "./sections/Slideshow";
 import SlideshowLeftTextRight from "./sections/SlideshowLeftTextRight";
 import SlideshowRightTextLeft from "./sections/SlideshowRightTextLeft";
+import ProductGrid from "./sections/ProductGrid";
 
 interface Section {
   _type: string;
   _key?: string;
+  heading?: string;
   image?: {
     _type: "image";
     asset: { _ref: string };
@@ -21,6 +23,17 @@ interface Section {
     hotspot?: { x: number; y: number };
     alt: string;
     caption?: string;
+  }[];
+  products?: {
+    _id: string;
+    name: string;
+    slug: { current: string };
+    headerImage?: {
+      _type: "image";
+      asset: { _ref: string; _type: "reference" };
+      hotspot?: { x: number; y: number };
+      alt?: string;
+    };
   }[];
   content?: {
     heading: string;
@@ -94,6 +107,14 @@ export default function SectionRenderer({ sections }: SectionRendererProps) {
           case "slideshowRightTextLeft":
             return (
               <SlideshowRightTextLeft 
+                key={key} 
+                section={section as any} 
+              />
+            );
+            
+          case "productGrid":
+            return (
+              <ProductGrid 
                 key={key} 
                 section={section as any} 
               />

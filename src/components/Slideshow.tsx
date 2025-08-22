@@ -57,7 +57,7 @@ export default function Slideshow({ images, className = "" }: SlideshowProps) {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [images?.length]);
+  }, [images]);
 
   if (!images || images.length === 0) {
     return null;

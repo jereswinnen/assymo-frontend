@@ -29,6 +29,16 @@ const PAGE_QUERY = `*[
       alt,
       caption
     },
+    products[]->{
+      _id,
+      name,
+      slug,
+      headerImage{
+        asset,
+        hotspot,
+        alt
+      }
+    },
     content{
       heading,
       body,

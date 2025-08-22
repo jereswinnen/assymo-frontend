@@ -31,6 +31,16 @@ const PAGE_QUERY = `*[
       alt,
       caption
     },
+    products[]->{
+      _id,
+      name,
+      slug,
+      headerImage{
+        asset,
+        hotspot,
+        alt
+      }
+    },
     content{
       heading,
       body,
@@ -69,7 +79,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="relative col-span-full h-[55vh]">
+      <section className="hidden relative col-span-full h-[55vh]">
         {page.headerImage && (
           <div className="relative h-full">
             <img
@@ -92,9 +102,7 @@ export default async function HomePage() {
         </header>
       </section>
 
-      {/* Solutions preview section */}
-
-      <section className="px-container-sm md:px-container-md col-span-full grid grid-cols-subgrid">
+      <section className="hidden px-container-sm md:px-container-md col-span-full gid grid-cols-subgrid">
         <header className="col-span-full mb-6 flex items-center justify-between">
           <h4>Een greep uit ons aanbod</h4>
           {/* <Link
@@ -111,12 +119,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Modular Sections */}
       {page.sections && page.sections.length > 0 && (
         <SectionRenderer sections={page.sections} />
       )}
 
-      <SectionUSPs />
+      {/* <SectionUSPs /> */}
     </>
   );
 }
