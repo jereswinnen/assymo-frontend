@@ -102,7 +102,7 @@ export default async function HomePage() {
         </header>
       </section>
 
-      <section className="hidden px-container-sm md:px-container-md col-span-full gid grid-cols-subgrid">
+      <section className="hidden px-conainer-sm md:px-conainer-md col-span-full gid grid-cols-subgrid">
         <header className="col-span-full mb-6 flex items-center justify-between">
           <h4>Een greep uit ons aanbod</h4>
           {/* <Link

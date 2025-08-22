@@ -21,7 +21,7 @@ export default async function SolutionsPage() {
   const solutions = await client.fetch(SOLUTIONS_QUERY);
 
   return (
-    <section className="px-container-sm md:px-container-md col-span-full grid grid-cols-subgrid">
+    <section className="px-conainer-sm md:px-conainer-md col-span-full grid grid-cols-subgrid">
       <header className="col-span-full">
         <h1>
           Onze <b>oplossingen</b>
