@@ -25,11 +25,11 @@ export default function RootLayout({
         className={`${instrumentSans.variable} o-grid !gap-y-0 font-sans antialiased`}
       >
         <section className="col-span-full grid grid-cols-subgrid gap-y-10">
-          <Header className="px-container-sm md:px-container-md  col-span-full" />
+          <Header className="px-conainer-sm md:px-continer-md  col-span-full" />
           <main className="col-span-full grid grid-cols-subgrid gap-y-14">
             {children}
           </main>
-          <Footer className="px-container-sm md:px-container-md col-span-full" />
+          <Footer className="px-conainer-sm md:px-conainer-md col-span-full" />
         </section>
       </body>
     </html>

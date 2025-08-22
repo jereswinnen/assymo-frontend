@@ -18,6 +18,8 @@
 }
 
 .o-grid {
+  margin: 0 auto;
+  max-width: 80vw;
   display: grid;
   grid-template-columns: repeat(var(--u-grid-columns), 1fr);
   column-gap: var(--u-grid-gap);
