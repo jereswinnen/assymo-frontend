@@ -25,16 +25,27 @@ export default async function Footer({ className }: FooterProps = {}) {
 
   return (
     <footer
-      className={`py-12 grid grid-cols-subgrid border-t-2 border-(--c-accent-dark)/10 ${className ? ` ${className}` : ""}`}
+      className={`c-footer py-12 grid grid-cols-subgrid gap-y-10 md:gap-y-0 border-t-2 border-(--c-accent-dark)/10 ${className ? ` ${className}` : ""}`}
     >
-      <div className="col-span-full grid grid-cols-subgrid">
-        <NavLinks
-          className="col-span-6"
-          links={nav?.links || []}
-          solutions={solutions}
-        />
-        <aside className="col-span-2">
-          <ul className="w-full flex flex-col items-end [&>*]:w-full [&>*]:flex [&>*]:flex-col [&>*]:items-end [&>*]:gap-1.5 text-base divide-y divide-(--c-accent-dark)/10">
+      <div className="col-span-full grid grid-cols-subgrid gap-y-10 md:gap-y-0">
+        <div className="flex flex-col md:flex-row justify-start md:items-start gap-4 md:gap-8">
+          <Link href="/">
+            <Image
+              src="/assymoBrandHeader.svg"
+              alt="Assymo Brand"
+              width={1920}
+              height={100}
+              className="w-28"
+            />
+          </Link>
+          <NavLinks
+            className="col-span-6"
+            links={nav?.links || []}
+            solutions={solutions}
+          />
+        </div>
+        <aside className="col-span-full md:col-span-2">
+          <ul className="w-full flex flex-col items-end [&>*]:w-full [&>*]:flex [&>*]:flex-col [&>*]:md:items-end [&>*]:gap-1.5 text-base divide-y divide-(--c-accent-dark)/10">
             <ul className="pb-2 mb-2">
               <li>Eikenlei 159</li>
               <li>2960 Brecht</li>
@@ -58,16 +69,6 @@ export default async function Footer({ className }: FooterProps = {}) {
             </ul>
           </ul>
         </aside>
-      </div>
-
-      <div className="hidden col-span-full">
-        <Image
-          src="/assymoBrandFooter.svg"
-          alt="Assymo Brand"
-          width={1920}
-          height={100}
-          className="w-full"
-        />
       </div>
 
       <div className="col-span-full text-sm">

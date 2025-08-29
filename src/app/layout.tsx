@@ -22,15 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${instrumentSans.variable} o-grid !gap-y-0 font-sans antialiased`}
+        className={`${instrumentSans.variable} grid gap-y-14 font-sans antialiased`}
       >
-        <section className="col-span-full grid grid-cols-subgrid gap-y-10">
-          <Header className="px-conainer-sm md:px-continer-md  col-span-full" />
-          <main className="col-span-full grid grid-cols-subgrid gap-y-14">
-            {children}
-          </main>
-          <Footer className="px-conainer-sm md:px-conainer-md col-span-full" />
-        </section>
+        <Header className="px-container-sm md:px-container-md col-span-full bg-amber-200" />
+        <main className="col-span-full o-grid grid-cols-subgrid gap-y-14">
+          {children}
+        </main>
+        <Footer className="px-container-sm md:px-container-md col-span-full bg-amber-200" />
       </body>
     </html>
   );

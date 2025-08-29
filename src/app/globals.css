@@ -5,6 +5,7 @@
   --u-grid-gap: 4rem;
   --c-accent-light: #22df90;
   --c-accent-dark: #1f3632;
+  --c-accent-darkest: #1a2322;
   @media (min-width: 46em) {
     --u-grid-columns: 8;
   }
@@ -36,6 +37,12 @@ body {
   line-height: 1.5;
   background: white;
   color: var(--c-accent-dark);
+}
+
+.c-header,
+.c-footer {
+  color: white;
+  background: var(--c-accent-darkest);
 }
 
 p:not(:last-child) {

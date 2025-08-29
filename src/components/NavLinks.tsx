@@ -40,7 +40,7 @@ export default function NavLinks({ links, solutions, className }: Props) {
               >
                 {link.title}
               </Link>
-              <ul className="absolute left-0 top-full w-56 bg-white shadow-lg rounded invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-300 z-10 border border-gray-200">
+              <ul className="hidden absolute left-0 top-full w-56 bg-white shadow-lg rounded invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-300 z-10 border border-gray-200">
                 {solutions.map((solution) => {
                   const solutionActive =
                     pathname === `/oplossingen/${solution.slug.current}`;
