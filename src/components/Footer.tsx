@@ -1,51 +1,21 @@
 import Image from "next/image";
-import NavLinks from "./NavLinks";
-import { client } from "@/sanity/client";
 import Link from "next/link";
 
-type FooterProps = {
-  className?: string;
-};
-
-const NAV_QUERY = `*[_type == "navigation"][0]{links}`;
-
-const SOLUTIONS_QUERY = `*[
-  _type == "solution"
-] | order(name asc) {
-  _id,
-  name,
-  slug
-}`;
-
-export default async function Footer({ className }: FooterProps = {}) {
-  const [nav, solutions] = await Promise.all([
-    client.fetch(NAV_QUERY),
-    client.fetch(SOLUTIONS_QUERY),
-  ]);
-
+export default async function Footer() {
   return (
-    <footer
-      className={`c-footer py-12 grid grid-cols-subgrid gap-y-10 md:gap-y-0 border-t-2 border-(--c-accent-dark)/10 ${className ? ` ${className}` : ""}`}
-    >
-      <div className="col-span-full grid grid-cols-subgrid gap-y-10 md:gap-y-0">
-        <div className="flex flex-col md:flex-row justify-start md:items-start gap-4 md:gap-8">
-          <Link href="/">
-            <Image
-              src="/assymoBrandHeader.svg"
-              alt="Assymo Brand"
-              width={1920}
-              height={100}
-              className="w-28"
-            />
-          </Link>
-          <NavLinks
-            className="col-span-6"
-            links={nav?.links || []}
-            solutions={solutions}
+    <footer className="c-footer py-10 w-full">
+      <div className="o-grid grid-cols-subgrid !gap-y-8 md:gap-y-0">
+        <Link href="/" className="col-span-full md:col-span-2">
+          <Image
+            src="/assymoBrandHeader.svg"
+            alt="Assymo Brand"
+            width={1920}
+            height={100}
+            className="w-48"
           />
-        </div>
+        </Link>
         <aside className="col-span-full md:col-span-2">
-          <ul className="w-full flex flex-col items-end [&>*]:w-full [&>*]:flex [&>*]:flex-col [&>*]:md:items-end [&>*]:gap-1.5 text-base divide-y divide-(--c-accent-dark)/10">
+          <ul className="w-full flex flex-col [&>*]:w-full [&>*]:flex [&>*]:flex-col [&>*]:gap-1.5 text-base divide-y divide-(--c-accent-dark)/10">
             <ul className="pb-2 mb-2">
               <li>Eikenlei 159</li>
               <li>2960 Brecht</li>
@@ -61,18 +31,52 @@ export default async function Footer({ className }: FooterProps = {}) {
                   +32 3 434 74 98
                 </Link>
               </li>
-              <li className="pt-3">
-                <Link href="/contact" className="c-action">
-                  Maak een afspraak
-                </Link>
-              </li>
             </ul>
           </ul>
         </aside>
-      </div>
 
-      <div className="col-span-full text-sm">
-        &copy; {new Date().getFullYear()} Assymo. Alle rechten voorbehouden.
+        <div className="col-span-full md:col-span-2 grid items-center">
+          <Link href="/contact" className="c-action w-fit h-fit">
+            Maak een afspraak
+          </Link>
+        </div>
+
+        <div className="col-span-full md:col-span-2 grid">
+          <ul className="flex items-center gap-4">
+            <li>
+              <Link
+                href="https://instagram.com/assymo_tuinconstructies/"
+                className="block"
+              >
+                <Image
+                  src="/socialIconInstagram.svg"
+                  alt="Instagram"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8"
+                />
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="https://facebook.com/Assymo.Tuinconstructies.Op.Maat"
+                className="block"
+              >
+                <Image
+                  src="/socialIconFacebook.svg"
+                  alt="Facebook"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8"
+                />
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div className="col-span-full md:col-span-full text-sm">
+          &copy; {new Date().getFullYear()} Assymo. Alle rechten voorbehouden.
+        </div>
       </div>
     </footer>
   );

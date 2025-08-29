@@ -22,38 +22,34 @@ const SOLUTIONS_QUERY = `*[
   slug
 }`;
 
-type HeaderProps = {
-  className?: string;
-};
-
-export default async function Header({ className }: HeaderProps = {}) {
+export default async function Header() {
   const [nav, solutions] = await Promise.all([
     client.fetch(NAV_QUERY),
     client.fetch(SOLUTIONS_QUERY),
   ]);
 
   return (
-    <header
-      className={`c-header py-10 flex flex-col md:flex-row justify-start md:items-center gap-4 md:gap-8 ${
-        className ? ` ${className}` : ""
-      }`}
-    >
-      <Link href="/">
-        <Image
-          src="/assymoBrandHeader.svg"
-          alt="Assymo Brand"
-          width={1920}
-          height={100}
-          className="w-28"
-        />
-      </Link>
-      <div className="w-full flex items-center justify-between">
-        <nav className="text-base">
-          <NavLinks links={nav?.links || []} solutions={solutions} />
-        </nav>
-        <Link href="/contact" className="c-action">
-          Maak een afspraak
-        </Link>
+    <header className="c-header py-10 w-full">
+      <div className="o-grid grid-cols-subgrid">
+        <div className="col-span-full flex flex-col md:flex-row md:items-center justify-start md:justify-between gap-8">
+          <div className="flex flex-col md:flex-row md:items-center gap-8">
+            <Link href="/">
+              <Image
+                src="/assymoBrandHeader.svg"
+                alt="Assymo Brand"
+                width={1920}
+                height={100}
+                className="w-28"
+              />
+            </Link>
+            <nav className="text-base">
+              <NavLinks links={nav?.links || []} solutions={solutions} />
+            </nav>
+          </div>
+          <Link href="/contact" className="c-action w-fit">
+            Maak een afspraak
+          </Link>
+        </div>
       </div>
     </header>
   );
