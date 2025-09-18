@@ -32,6 +32,18 @@ export default function SlideshowLeftTextRight({
 
   return (
     <section className="col-span-full grid grid-cols-subgrid gap-y-8 md:gap-y-0">
+      {/* Slideshow - Right Side */}
+      <div className="col-span-full md:col-span-4">
+        {section.images && section.images.length > 0 ? (
+          <SlideshowComponent images={section.images} />
+        ) : (
+          <div className="p-4 bg-yellow-100 text-center rounded-lg">
+            <h3 className="font-semibold mb-2">Slideshow</h3>
+            <p>Images need to be added in Sanity CMS</p>
+          </div>
+        )}
+      </div>
+
       {/* Text Content - Left Side */}
       <div className="col-span-full md:col-span-4 flex flex-col justify-center">
         <h1 className="mb-6">{section.content.heading}</h1>
@@ -49,18 +61,6 @@ export default function SlideshowLeftTextRight({
           >
             {section.content.cta.text}
           </Link>
-        )}
-      </div>
-
-      {/* Slideshow - Right Side */}
-      <div className="col-span-full md:col-span-4">
-        {section.images && section.images.length > 0 ? (
-          <SlideshowComponent images={section.images} />
-        ) : (
-          <div className="p-4 bg-yellow-100 text-center rounded-lg">
-            <h3 className="font-semibold mb-2">Slideshow</h3>
-            <p>Images need to be added in Sanity CMS</p>
-          </div>
         )}
       </div>
     </section>
