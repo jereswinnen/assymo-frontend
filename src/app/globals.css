@@ -51,7 +51,7 @@ p:not(:last-child) {
 
 h1 {
   margin-bottom: 1.2rem;
-  font-size: 3rem;
+  font-size: 2.5rem;
   line-height: 1.2;
   letter-spacing: -0.02em;
   font-weight: 400;
@@ -59,7 +59,7 @@ h1 {
 
 h2 {
   margin-bottom: 1.2rem;
-  font-size: 1.875rem;
+  font-size: 1.75rem;
   line-height: 1.2;
   letter-spacing: -0.02em;
   font-weight: 500;
