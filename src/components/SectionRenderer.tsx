@@ -6,6 +6,8 @@ import Slideshow from "./sections/Slideshow";
 import SlideshowLeftTextRight from "./sections/SlideshowLeftTextRight";
 import SlideshowRightTextLeft from "./sections/SlideshowRightTextLeft";
 import ProductGrid from "./sections/ProductGrid";
+import TextLeftImageGridRight from "./sections/TextLeftImageGridRight";
+import TextRightImageGridLeft from "./sections/TextRightImageGridLeft";
 
 interface Section {
   _type: string;
@@ -54,72 +56,44 @@ export default function SectionRenderer({ sections }: SectionRendererProps) {
     <>
       {sections.map((section, index) => {
         const key = section._key || `section-${index}`;
-        
+
         switch (section._type) {
           case "textLeftImageRight":
-            return (
-              <TextLeftImageRight 
-                key={key} 
-                section={section as any} 
-              />
-            );
-            
+            return <TextLeftImageRight key={key} section={section as any} />;
+
           case "textRightImageLeft":
-            return (
-              <TextRightImageLeft 
-                key={key} 
-                section={section as any} 
-              />
-            );
-            
+            return <TextRightImageLeft key={key} section={section as any} />;
+
           case "kaart":
-            return (
-              <Map 
-                key={key} 
-                section={section as any} 
-              />
-            );
-            
+            return <Map key={key} section={section as any} />;
+
           case "textCentered":
-            return (
-              <TextCentered 
-                key={key} 
-                section={section as any} 
-              />
-            );
-            
+            return <TextCentered key={key} section={section as any} />;
+
           case "slideshow":
-            return (
-              <Slideshow 
-                key={key} 
-                section={section as any} 
-              />
-            );
-            
+            return <Slideshow key={key} section={section as any} />;
+
           case "slideshowLeftTextRight":
             return (
-              <SlideshowLeftTextRight 
-                key={key} 
-                section={section as any} 
-              />
+              <SlideshowLeftTextRight key={key} section={section as any} />
             );
-            
+
           case "slideshowRightTextLeft":
             return (
-              <SlideshowRightTextLeft 
-                key={key} 
-                section={section as any} 
-              />
+              <SlideshowRightTextLeft key={key} section={section as any} />
             );
-            
+
           case "productGrid":
+            return <ProductGrid key={key} section={section as any} />;
+          case "textLeftImageGridRight":
             return (
-              <ProductGrid 
-                key={key} 
-                section={section as any} 
-              />
+              <TextLeftImageGridRight key={key} section={section as any} />
             );
-            
+          case "textRightImageGridLeft":
+            return (
+              <TextRightImageGridLeft key={key} section={section as any} />
+            );
+
           default:
             console.warn(`Unknown section type: ${section._type}`);
             return null;
