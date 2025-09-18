@@ -3,10 +3,6 @@ import { PortableText } from "@portabletext/react";
 import Link from "next/link";
 import { urlFor } from "@/sanity/imageUrl";
 
-interface PortableTextBlock {
-  [key: string]: any;
-}
-
 interface Cta {
   text?: string;
   url?: string;
@@ -25,7 +21,7 @@ interface SectionProps {
     _type: "textRightImageGridLeft";
     content?: {
       heading?: string;
-      body?: PortableTextBlock[];
+      body?: any[];
       cta?: Cta;
     };
     images?: SanityImageLike[];
