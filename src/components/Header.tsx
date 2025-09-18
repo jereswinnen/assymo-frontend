@@ -29,7 +29,7 @@ export default async function Header() {
   ]);
 
   return (
-    <header className="sticky top-0 z-50 c-header py-10 w-full">
+    <header className="sticky top-0 z-50 c-header py-6 w-full">
       <div className="o-grid grid-cols-subgrid">
         <div className="col-span-full flex flex-col md:flex-row md:items-center justify-start md:justify-between gap-8">
           <div className="flex flex-col md:flex-row md:items-center gap-8">

@@ -81,22 +81,13 @@ h4 {
   opacity: 0.7;
 }
 
-/* .c-action {
-  font: 1rem/1.5 var(--font-sans);
-  font-weight: 600;
-  color: var(--c-accent-dark);
-  background-color: var(--c-accent-light);
-  padding: 0.8rem 1rem;
-  transition: all 0.2s ease-in-out;
-} */
-
 .c-header .c-action,
 .c-footer .c-action {
-  font: 1rem/1.5 var(--font-sans);
+  font-size: 1rem;
   font-weight: 500;
   color: white;
   border: 1px solid var(--c-accent-light);
-  padding: 0.8rem 1rem;
+  padding: 0.5rem 0.75rem;
   transition: all 0.2s ease-in-out;
   text-decoration: none;
 }

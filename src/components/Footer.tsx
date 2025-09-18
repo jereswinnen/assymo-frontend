@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default async function Footer() {
   return (
-    <footer className="c-footer py-10 w-full">
+    <footer className="c-footer py-6 w-full">
       <div className="o-grid grid-cols-subgrid !gap-y-8 md:gap-y-0">
         <Link href="/" className="col-span-full md:col-span-2">
           <Image
@@ -11,7 +11,7 @@ export default async function Footer() {
             alt="Assymo Brand"
             width={1920}
             height={100}
-            className="w-48"
+            className="w-38"
           />
         </Link>
         <aside className="col-span-full md:col-span-2">
@@ -74,7 +74,7 @@ export default async function Footer() {
           </ul>
         </div>
 
-        <div className="col-span-full md:col-span-full text-sm">
+        <div className="hidden col-span-full md:col-span-full text-sm">
           &copy; {new Date().getFullYear()} Assymo. Alle rechten voorbehouden.
         </div>
       </div>
