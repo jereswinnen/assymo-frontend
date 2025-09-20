@@ -11,6 +11,12 @@ interface SolutionCardProps {
 }
 
 export default function SolutionCard({ solution }: SolutionCardProps) {
+  // Helper function to remove the "XX_" prefix pattern
+  const cleanTitle = (title: string) => {
+    // Remove pattern: numbers followed by underscore at the start
+    return title.replace(/^\d+_/, "");
+  };
+
   return (
     <Link
       href={`/oplossingen/${solution.slug.current}`}
@@ -27,7 +33,7 @@ export default function SolutionCard({ solution }: SolutionCardProps) {
         </div>
       )}
       <span className="text-base font-medium px-3 p-1 bg-(--c-accent-dark)/15 rounded-full">
-        {solution.name}
+        {cleanTitle(solution.name)}
       </span>
     </Link>
   );

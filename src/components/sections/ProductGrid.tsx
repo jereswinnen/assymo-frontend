@@ -23,6 +23,12 @@ interface ProductGridProps {
 }
 
 export default function ProductGrid({ section }: ProductGridProps) {
+  // Helper function to remove the "XX_" prefix pattern
+  const cleanTitle = (title: string) => {
+    // Remove pattern: numbers followed by underscore at the start
+    return title.replace(/^\d+_/, "");
+  };
+
   if (!section.products || section.products.length === 0) {
     return (
       <section className="col-span-full">
@@ -66,7 +72,7 @@ export default function ProductGrid({ section }: ProductGridProps) {
             )}
             <div className="text-center mt-auto">
               <span className="text-base font-medium px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-full inline-block transition-colors">
-                {product.name}
+                {cleanTitle(product.name)}
               </span>
             </div>
           </Link>
