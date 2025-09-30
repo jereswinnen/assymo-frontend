@@ -8,6 +8,7 @@ import SlideshowRightTextLeft from "./sections/SlideshowRightTextLeft";
 import ProductGrid from "./sections/ProductGrid";
 import TextLeftImageGridRight from "./sections/TextLeftImageGridRight";
 import TextRightImageGridLeft from "./sections/TextRightImageGridLeft";
+import SalonizedBookingSection from "./sections/SalonizedBookingSection";
 
 interface Section {
   _type: string;
@@ -85,6 +86,13 @@ export default function SectionRenderer({ sections }: SectionRendererProps) {
 
           case "productGrid":
             return <ProductGrid key={key} section={section as any} />;
+          case "kalender":
+            return (
+              <SalonizedBookingSection
+                key={key}
+                heading={(section as any).heading}
+              />
+            );
           case "textLeftImageGridRight":
             return (
               <TextLeftImageGridRight key={key} section={section as any} />
