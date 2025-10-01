@@ -9,6 +9,7 @@ import ProductGrid from "./sections/ProductGrid";
 import TextLeftImageGridRight from "./sections/TextLeftImageGridRight";
 import TextRightImageGridLeft from "./sections/TextRightImageGridLeft";
 import SalonizedBookingSection from "./sections/SalonizedBookingSection";
+import ContactForm from "./sections/ContactForm";
 
 interface Section {
   _type: string;
@@ -93,6 +94,8 @@ export default function SectionRenderer({ sections }: SectionRendererProps) {
                 heading={(section as any).heading}
               />
             );
+          case "contactForm":
+            return <ContactForm key={key} section={section as any} />;
           case "textLeftImageGridRight":
             return (
               <TextLeftImageGridRight key={key} section={section as any} />
