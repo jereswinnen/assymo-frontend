@@ -29,10 +29,10 @@ export default async function Header() {
   ]);
 
   return (
-    <header className="sticky top-0 z-50 c-header py-6 w-full">
+    <header className="md:sticky md:top-0 z-50 c-header py-6 w-full">
       <div className="o-grid grid-cols-subgrid">
         <div className="col-span-full flex flex-col md:flex-row md:items-center justify-start md:justify-between gap-8">
-          <div className="flex flex-col md:flex-row md:items-center gap-8">
+          <div className="flex flex-row items-center justify-between gap-4 md:gap-8">
             <Link href="/">
               <Image
                 src="/assymoBrandHeader.svg"
