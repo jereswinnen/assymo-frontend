@@ -33,6 +33,13 @@ export const CHATBOT_CONFIG = {
   messageRetentionDays: 7,
 
   /**
+   * Maximum character length for user input messages
+   * Prevents abuse and keeps conversations focused
+   * @default 200
+   */
+  maxInputLength: 200,
+
+  /**
    * System prompt for the chatbot
    * Defines the chatbot's personality and instructions
    */

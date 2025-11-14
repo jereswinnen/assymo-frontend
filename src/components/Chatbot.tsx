@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/input-group";
 import { clearSession, getSessionId } from "@/lib/chatSession";
 import { Separator } from "./ui/separator";
+import { Spinner } from "./ui/spinner";
 import { CHATBOT_CONFIG, CHATBOT_COMPUTED } from "@/config/chatbot";
 
 interface ChatbotProps {
@@ -118,6 +119,9 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || status !== "ready") return;
+
+    // Enforce character limit
+    if (input.length > CHATBOT_CONFIG.maxInputLength) return;
 
     sendMessage({ text: input });
     setInput("");
@@ -245,28 +249,37 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                 ref={textareaRef}
                 placeholder="Waarmee kunnen we je helpen?"
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  // Enforce character limit
+                  if (newValue.length <= CHATBOT_CONFIG.maxInputLength) {
+                    setInput(newValue);
+                  }
+                }}
                 onKeyDown={handleKeyDown}
                 rows={2}
                 disabled={isLoading}
+                maxLength={CHATBOT_CONFIG.maxInputLength}
               />
               <InputGroupAddon align="block-end">
                 <InputGroupText className="text-xs text-muted-foreground">
                   {ipAddress}
                 </InputGroupText>
-                <InputGroupText className="ml-auto">
+                <InputGroupText className="ml-auto text-xs">
                   {messages.filter((m) => m.role === "user").length} /{" "}
                   {CHATBOT_CONFIG.rateLimitMaxMessages}
+                  {" • "}
+                  {CHATBOT_CONFIG.maxInputLength - input.length}
                 </InputGroupText>
                 <Separator orientation="vertical" className="!h-4" />
                 <InputGroupButton
                   type="submit"
                   variant="default"
-                  className="rounded-full bg-accent-light text-accent-dark"
+                  className="rounded-full"
                   size="icon-xs"
                   disabled={!input.trim() || isLoading}
                 >
-                  <ArrowUpIcon />
+                  {isLoading ? <Spinner className="size-4" /> : <ArrowUpIcon />}
                   <span className="sr-only">Verstuur bericht</span>
                 </InputGroupButton>
               </InputGroupAddon>
