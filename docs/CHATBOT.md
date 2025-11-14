@@ -118,7 +118,7 @@ src/
 
 ### Prerequisites
 
-Install dependencies:
+Install dependencies (done, please skip!):
 
 ```bash
 pnpm add ai @ai-sdk/react @ai-sdk/openai zod @neondatabase/serverless
@@ -126,7 +126,7 @@ pnpm add ai @ai-sdk/react @ai-sdk/openai zod @neondatabase/serverless
 
 ### Environment Variables
 
-Create `.env.local`:
+Create `.env.local` (done, please skip!):
 
 ```env
 # OpenAI
