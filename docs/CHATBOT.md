@@ -11,10 +11,10 @@
 
 ## Implementation Phases
 
-### Phase 1: Basic Chat with OpenAI ✅ (READY TO IMPLEMENT)
+### Phase 1: Basic Chat with OpenAI ✅ COMPLETE
 Frontend chat interface with OpenAI streaming responses and rate limiting.
 
-### Phase 2: RAG with PDF Embeddings 🔜 (AFTER PHASE 1)
+### Phase 2: RAG with PDF Embeddings 🔜 (NEXT)
 Admin panel for PDF upload, text extraction, embedding generation, and vector storage.
 
 ### Phase 3: Chat History Viewer 🔜 (AFTER PHASE 2)
@@ -352,9 +352,9 @@ export async function POST(req: NextRequest) {
 
     // Stream response from OpenAI
     const result = streamText({
-      model: openai('gpt-4o-mini'),
+      model: openai('gpt-5-nano-2025-08-07'),
       system: SYSTEM_PROMPT,
-      messages: convertToCoreMessages(coreMessages),
+      messages: convertToCoreMessages(messages as any),
     });
 
     // Get the full response text for logging
@@ -379,7 +379,7 @@ export async function POST(req: NextRequest) {
       )
     `.catch(err => console.error('Failed to log conversation:', err));
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error('Chat API error:', error);
     return new Response('Error processing chat', { status: 500 });
@@ -1485,6 +1485,6 @@ export default function ChatHistoryPage() {
 - **Rate limiting**: 10 messages per 24 hours per session
 - **Message persistence**: 7 days in localStorage
 - **Embeddings model**: text-embedding-3-small (1536 dimensions)
-- **Chat model**: gpt-4o-mini (cost-effective)
+- **Chat model**: gpt-5-nano-2025-08-07 (cost-effective)
 - **Vector search**: Cosine similarity with pgvector
 - **Security**: Admin endpoints protected with Bearer token
