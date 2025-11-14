@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpIcon, Plus as IconPlus, Trash2, X } from "lucide-react";
+import { ArrowUpIcon, PlusIcon, Trash2Icon, XIcon } from "lucide-react";
 import {
   InputGroup,
   InputGroupTextarea,
@@ -12,6 +12,7 @@ import {
 import { usePersistedChat } from "@/hooks/usePersistedChat";
 import type { Message } from "@/types/chat";
 import { clearSession } from "@/lib/chatSession";
+import { Separator } from "./ui/separator";
 
 interface ChatbotProps {
   onClose?: () => void;
@@ -86,7 +87,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
               aria-label="Wis gesprek"
               title="Wis gesprek"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2Icon className="size-4" />
             </button>
           )}
           {onClose && (
@@ -95,7 +96,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
               className="p-1 bg-muted text-muted-foreground rounded-full transition-colors"
               aria-label="Sluit chat"
             >
-              <X className="h-5 w-5" />
+              <XIcon className="size-5" />
             </button>
           )}
         </div>
@@ -159,13 +160,16 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                 className="rounded-full"
                 size="icon-xs"
               >
-                <IconPlus />
+                <PlusIcon />
               </InputGroupButton>
-              <InputGroupText className="ml-auto">52% used</InputGroupText>
+              <InputGroupText className="ml-auto">
+                8/10 berichten
+              </InputGroupText>
+              <Separator orientation="vertical" className="!h-4" />
               <InputGroupButton
                 type="submit"
                 variant="default"
-                className="rounded-full"
+                className="rounded-full bg-accent-light text-accent-dark"
                 size="icon-xs"
                 disabled={!inputValue.trim()}
               >
