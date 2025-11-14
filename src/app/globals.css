@@ -91,6 +91,8 @@
 }
 
 @theme inline {
+  --color-accent-light: #22df90;
+  --color-accent-dark: #1f3632;
   --font-sans: var(--font-instrument-sans);
   --ease-circ: cubic-bezier(0.645, 0, 0.045, 1);
   --spacing-container-sm: 1.4rem;

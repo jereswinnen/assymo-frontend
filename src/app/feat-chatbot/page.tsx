@@ -1,12 +1,7 @@
-import Chatbot from "@/components/Chatbot";
-import { Fullscreen, Section } from "lucide-react";
+import ChatbotWidget from "@/components/ChatbotWidget";
 
 export const dynamic = "force-dynamic";
 
 export default function FeatChatbotPage() {
-  return (
-    <section className="col-span-full">
-      <Chatbot />
-    </section>
-  );
+  return <ChatbotWidget />;
 }
