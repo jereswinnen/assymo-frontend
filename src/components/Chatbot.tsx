@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { ArrowUpIcon, Plus as IconPlus, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowUpIcon, Plus as IconPlus, Trash2, X } from "lucide-react";
 import {
   InputGroup,
   InputGroupTextarea,
@@ -9,63 +9,17 @@ import {
   InputGroupButton,
   InputGroupText,
 } from "@/components/ui/input-group";
-
-// Dummy chat data - used as initial state
-const initialMessages = [
-  {
-    id: 1,
-    role: "user" as const,
-    content: "Wat zijn houten tuingebouwen?",
-    timestamp: new Date("2025-01-13T10:00:00"),
-  },
-  {
-    id: 2,
-    role: "assistant" as const,
-    content:
-      "Houten tuingebouwen zijn constructies in de tuin gemaakt van hout, zoals tuinhuisjes, overkappingen, pergola's, carports en schuren. Ze worden vaak gebruikt als extra opslagruimte, werkplaats of als sfeervolle ontspanningsruimte in de tuin.",
-    timestamp: new Date("2025-01-13T10:00:15"),
-  },
-  {
-    id: 3,
-    role: "user" as const,
-    content: "Wat kost een houten tuingebouw gemiddeld?",
-    timestamp: new Date("2025-01-13T10:01:00"),
-  },
-  {
-    id: 4,
-    role: "assistant" as const,
-    content:
-      "De kosten van een houten tuingebouw variëren sterk afhankelijk van de grootte, het type hout en de afwerking. Een eenvoudig tuinhuisje begint rond €1.500, terwijl een hoogwaardige overkapping of tuinhuis tussen €3.000 en €10.000 kan kosten. Maatwerk en luxe uitvoeringen kunnen nog duurder zijn.",
-    timestamp: new Date("2025-01-13T10:01:20"),
-  },
-  {
-    id: 5,
-    role: "user" as const,
-    content: "Welke factoren beïnvloeden de prijs?",
-    timestamp: new Date("2025-01-13T10:02:30"),
-  },
-  {
-    id: 6,
-    role: "assistant" as const,
-    content:
-      "De belangrijkste factoren zijn: de afmetingen van het gebouw, de houtsoort (grenen, lariks, eiken), de dikte van het hout, isolatie, fundering, dakbedekking, ramen en deuren, behandeling tegen weersinvloeden, en of het om standaard of maatwerk gaat. Ook de plaatsing en montage kunnen de totaalprijs beïnvloeden.",
-    timestamp: new Date("2025-01-13T10:02:45"),
-  },
-];
-
-type Message = {
-  id: number;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-};
+import { usePersistedChat } from "@/hooks/usePersistedChat";
+import type { Message } from "@/types/chat";
+import { clearSession } from "@/lib/chatSession";
 
 interface ChatbotProps {
   onClose?: () => void;
 }
 
 export default function Chatbot({ onClose }: ChatbotProps = {}) {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const { messages, addMessage, clearMessages, isHydrated } =
+    usePersistedChat();
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -85,28 +39,31 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
 
     if (!inputValue.trim()) return;
 
-    // Add user message
     const userMessage: Message = {
-      id: messages.length + 1,
+      id: Date.now(),
       role: "user",
       content: inputValue,
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    addMessage(userMessage);
     setInputValue("");
 
-    // Simulate assistant response (dummy behavior)
     setTimeout(() => {
       const assistantMessage: Message = {
-        id: messages.length + 2,
+        id: Date.now() + 1,
         role: "assistant",
         content:
           "Bedankt voor je vraag! Dit is een dummy reactie. In de echte versie zou hier een API-response komen.",
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+      addMessage(assistantMessage);
     }, 1000);
+  };
+
+  const handleClearConversation = () => {
+    clearMessages();
+    clearSession();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -118,18 +75,30 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header with close button */}
+      {/* Header with clear and close buttons */}
       <div className="flex items-center justify-between text-foreground p-4 border-b">
         <p className="!mb-0 text-xl font-semibold">Chat</p>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="p-1 bg-muted text-muted-foreground rounded-full transition-colors"
-            aria-label="Sluit chat"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {messages.length > 0 && (
+            <button
+              onClick={handleClearConversation}
+              className="p-1 hover:bg-muted rounded-full transition-colors"
+              aria-label="Wis gesprek"
+              title="Wis gesprek"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-1 bg-muted text-muted-foreground rounded-full transition-colors"
+              aria-label="Sluit chat"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages area */}
