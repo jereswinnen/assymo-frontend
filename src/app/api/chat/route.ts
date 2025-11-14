@@ -65,22 +65,35 @@ export async function POST(req: NextRequest) {
         // Log conversation after streaming completes
         const responseTime = Date.now() - startTime;
 
-        sql`
-          INSERT INTO chat_conversations (
-            session_id,
-            ip_address,
-            user_message,
-            bot_response,
-            response_time_ms
-          )
-          VALUES (
-            ${sessionId},
-            ${ip},
-            ${userMessageText},
-            ${text},
-            ${responseTime}
-          )
-        `.catch((err) => console.error("Failed to log conversation:", err));
+        try {
+          await sql`
+            INSERT INTO chat_conversations (
+              session_id,
+              ip_address,
+              user_message,
+              bot_response,
+              response_time_ms
+            )
+            VALUES (
+              ${sessionId},
+              ${ip},
+              ${userMessageText},
+              ${text},
+              ${responseTime}
+            )
+          `;
+          console.log("✅ Conversation logged successfully");
+        } catch (err) {
+          console.error("❌ Failed to log conversation:", err);
+          // Log more details
+          console.error("Details:", {
+            sessionId,
+            ip,
+            userMessageLength: userMessageText?.length,
+            responseLength: text?.length,
+            responseTime,
+          });
+        }
       },
     });
 
