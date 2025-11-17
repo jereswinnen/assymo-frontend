@@ -36,7 +36,7 @@ export default function NavLinks({ links, solutions, className }: Props) {
             <li key={link.slug} className="relative group">
               <Link
                 href={`/${link.slug}`}
-                className={`font-medium${isSolutionActive ? " text-primary font-bold" : ""}`}
+                className={`font-medium${isSolutionActive ? " text-white font-bold" : ""}`}
               >
                 {link.title}
               </Link>
@@ -48,7 +48,7 @@ export default function NavLinks({ links, solutions, className }: Props) {
                     <li key={solution._id}>
                       <Link
                         href={`/oplossingen/${solution.slug.current}`}
-                        className={`block px-4 py-2 hover:bg-gray-100 whitespace-nowrap${solutionActive ? " text-primary font-bold" : ""}`}
+                        className={`block px-4 py-2 hover:bg-gray-100 whitespace-nowrap${solutionActive ? " text-white font-bold" : ""}`}
                       >
                         {solution.name}
                       </Link>

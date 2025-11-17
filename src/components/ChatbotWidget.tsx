@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MessageCircleMoreIcon, XIcon } from "lucide-react";
+import { MessageCircleMoreIcon, MessagesSquareIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Chatbot from "@/components/Chatbot";
 
@@ -55,9 +55,8 @@ export default function ChatbotWidget() {
       <Button
         ref={buttonRef}
         onClick={handleToggle}
-        // className="fixed bottom-6 right-6 size-12 rounded-full shadow-lg z-40 md:size-16"
         className={`
-          fixed bottom-6 right-6 size-12 rounded-full z-40 md:size-16
+          cursor-pointer z-40 fixed bottom-0 md:bottom-6 right-4 md:right-6 size-16 md:size-14 rounded-full bg-accent-light text-accent-dark hover:bg-white hover:border hover:scale-110
           ${isOpen ? "shadow-none" : "shadow-lg"}
         `}
         size="icon"
@@ -65,9 +64,9 @@ export default function ChatbotWidget() {
         aria-expanded={isOpen}
       >
         {isOpen ? (
-          <XIcon className="size-4 md:size-6" />
+          <XIcon className="size-7 md:size-6" />
         ) : (
-          <MessageCircleMoreIcon className="size-4 md:size-6" />
+          <MessagesSquareIcon className="size-7 md:size-6" />
         )}
       </Button>
 
