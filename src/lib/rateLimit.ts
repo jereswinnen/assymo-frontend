@@ -1,6 +1,9 @@
-import { neon } from "@neondatabase/serverless";
-
-const sql = neon(process.env.DATABASE_URL!);
+import {
+  getRateLimitStatus,
+  resetRateLimitCounter,
+  incrementRateLimitCounter,
+  cleanupOldRateLimits,
+} from "./rateLimitQueries";
 
 export async function checkRateLimit(
   sessionId: string,
@@ -9,67 +12,29 @@ export async function checkRateLimit(
 ): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
   try {
     // Cleanup: Remove old rate limit entries (older than 7 days)
-    await sql`
-      DELETE FROM rate_limits
-      WHERE window_start < NOW() - INTERVAL '7 days'
-    `;
+    await cleanupOldRateLimits();
 
-    // Get or create rate limit entry
-    const result = await sql`
-      SELECT
-        COALESCE(count, 0) as current_count,
-        COALESCE(window_start, NOW()) as start_time,
-        CASE
-          WHEN window_start IS NULL THEN true
-          WHEN (window_start + INTERVAL '1 second' * ${windowSeconds}) <= NOW() THEN true
-          ELSE false
-        END as expired,
-        COALESCE(
-          EXTRACT(EPOCH FROM (window_start + INTERVAL '1 second' * ${windowSeconds}))::BIGINT,
-          EXTRACT(EPOCH FROM (NOW() + INTERVAL '1 second' * ${windowSeconds}))::BIGINT
-        ) as reset_time,
-        EXTRACT(EPOCH FROM NOW())::BIGINT as current_time
-      FROM rate_limits
-      WHERE key = ${sessionId}
-      UNION ALL
-      SELECT 0 as current_count, NOW() as start_time, true as expired,
-        EXTRACT(EPOCH FROM (NOW() + INTERVAL '1 second' * ${windowSeconds}))::BIGINT as reset_time,
-        EXTRACT(EPOCH FROM NOW())::BIGINT as current_time
-      WHERE NOT EXISTS (SELECT 1 FROM rate_limits WHERE key = ${sessionId})
-      LIMIT 1
-    `;
-
-    const { current_count, expired, reset_time, current_time } = result[0];
+    // Get current rate limit status
+    const { current_count, expired, reset_time, current_time } =
+      await getRateLimitStatus(sessionId, windowSeconds);
 
     // Window expired - reset the window and count this as the first message
     if (expired) {
-      await sql`
-        INSERT INTO rate_limits (key, count, window_start)
-        VALUES (${sessionId}, 1, NOW())
-        ON CONFLICT (key)
-        DO UPDATE SET count = 1, window_start = NOW()
-      `;
-
+      await resetRateLimitCounter(sessionId, 1);
       return {
         allowed: true,
         remaining: maxRequests - 1,
-        resetTime: (current_time + windowSeconds) * 1000, // Use DB time
+        resetTime: (current_time + windowSeconds) * 1000,
       };
     }
 
     // First message in a new session
     if (current_count === 0) {
-      await sql`
-        INSERT INTO rate_limits (key, count, window_start)
-        VALUES (${sessionId}, 1, NOW())
-        ON CONFLICT (key)
-        DO UPDATE SET count = 1, window_start = NOW()
-      `;
-
+      await resetRateLimitCounter(sessionId, 1);
       return {
         allowed: true,
         remaining: maxRequests - 1,
-        resetTime: (current_time + windowSeconds) * 1000, // Use DB time
+        resetTime: (current_time + windowSeconds) * 1000,
       };
     }
 
@@ -83,12 +48,7 @@ export async function checkRateLimit(
     }
 
     // Increment counter (still within limit)
-    await sql`
-      UPDATE rate_limits
-      SET count = count + 1
-      WHERE key = ${sessionId}
-    `;
-
+    await incrementRateLimitCounter(sessionId);
     return {
       allowed: true,
       remaining: maxRequests - current_count - 1,

@@ -55,9 +55,6 @@ Wees professioneel, behulpzaam en bondig in het Nederlands.`,
  * These are automatically calculated - don't modify directly
  */
 export const CHATBOT_COMPUTED = {
-  /** Rate limit window in milliseconds */
-  rateLimitWindowMs: CHATBOT_CONFIG.rateLimitWindowSeconds * 1000,
-
   /** Message retention in milliseconds */
   messageRetentionMs: CHATBOT_CONFIG.messageRetentionDays * 24 * 60 * 60 * 1000,
 } as const;

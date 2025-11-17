@@ -1,6 +1,4 @@
-import { neon } from "@neondatabase/serverless";
-
-const sql = neon(process.env.DATABASE_URL!);
+import { getRateLimitStatus, resetRateLimitCounter } from "./rateLimitQueries";
 
 /**
  * Get current rate limit status WITHOUT incrementing the counter
@@ -18,40 +16,12 @@ export async function getRateLimit(
 }> {
   try {
     // Get rate limit entry without modifying it
-    const result = await sql`
-      SELECT
-        COALESCE(count, 0) as current_count,
-        CASE
-          WHEN window_start IS NULL THEN true
-          WHEN (window_start + INTERVAL '1 second' * ${windowSeconds}) <= NOW() THEN true
-          ELSE false
-        END as expired,
-        COALESCE(
-          EXTRACT(EPOCH FROM (window_start + INTERVAL '1 second' * ${windowSeconds}))::BIGINT,
-          EXTRACT(EPOCH FROM (NOW() + INTERVAL '1 second' * ${windowSeconds}))::BIGINT
-        ) as reset_time,
-        EXTRACT(EPOCH FROM NOW())::BIGINT as current_time
-      FROM rate_limits
-      WHERE key = ${sessionId}
-      UNION ALL
-      SELECT 0 as current_count, true as expired,
-        EXTRACT(EPOCH FROM (NOW() + INTERVAL '1 second' * ${windowSeconds}))::BIGINT as reset_time,
-        EXTRACT(EPOCH FROM NOW())::BIGINT as current_time
-      WHERE NOT EXISTS (SELECT 1 FROM rate_limits WHERE key = ${sessionId})
-      LIMIT 1
-    `;
-
-    const { current_count, expired, reset_time, current_time } = result[0];
+    const { current_count, expired, reset_time, current_time } =
+      await getRateLimitStatus(sessionId, windowSeconds);
 
     // If window expired, reset the counter in the database
     if (expired) {
-      await sql`
-        INSERT INTO rate_limits (key, count, window_start)
-        VALUES (${sessionId}, 0, NOW())
-        ON CONFLICT (key)
-        DO UPDATE SET count = 0, window_start = NOW()
-      `;
-
+      await resetRateLimitCounter(sessionId, 0);
       return {
         allowed: true,
         remaining: maxRequests,

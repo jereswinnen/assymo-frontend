@@ -14,7 +14,9 @@ import {
 import { clearSession, getSessionId } from "@/lib/chatSession";
 import { Separator } from "./ui/separator";
 import { Spinner } from "./ui/spinner";
-import { CHATBOT_CONFIG, CHATBOT_COMPUTED } from "@/config/chatbot";
+import { CHATBOT_CONFIG } from "@/config/chatbot";
+import { usePersistedMessages } from "@/hooks/usePersistedMessages";
+import { useRateLimitCountdown } from "@/hooks/useRateLimitCountdown";
 
 interface ChatbotProps {
   onClose?: () => void;
@@ -27,45 +29,17 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
     remaining: number;
   } | null>(null);
   const [ipAddress, setIpAddress] = useState<string>("Loading...");
-  const [isHydrated, setIsHydrated] = useState(false);
-  const [countdown, setCountdown] = useState<string>("");
   const [backendMessageCount, setBackendMessageCount] = useState<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load persisted messages on mount with expiry check
   const sessionId = getSessionId();
-  const storageKey = `ai-chat-${sessionId}`;
-  const timestampKey = `ai-chat-timestamp-${sessionId}`;
 
-  const [initialMessages, setInitialMessages] = useState(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const stored = localStorage.getItem(storageKey);
-      const timestamp = localStorage.getItem(timestampKey);
+  // Load and persist messages with expiry
+  const { initialMessages, isHydrated, saveMessages, clearMessages } =
+    usePersistedMessages(sessionId);
 
-      if (!stored || !timestamp) return [];
-
-      // Check if messages have expired (7 days)
-      const messageAge = Date.now() - parseInt(timestamp);
-      if (messageAge > CHATBOT_COMPUTED.messageRetentionMs) {
-        // Messages expired, clear them
-        localStorage.removeItem(storageKey);
-        localStorage.removeItem(timestampKey);
-        return [];
-      }
-
-      return JSON.parse(stored);
-    } catch {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
-  const { messages, sendMessage, status, error, clearError } = useChat({
+  const { messages, sendMessage, status, clearError } = useChat({
     id: sessionId,
     messages: initialMessages,
     transport: new DefaultChatTransport({
@@ -108,14 +82,8 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
 
   // Persist messages to localStorage with timestamp
   useEffect(() => {
-    if (isHydrated && messages.length > 0) {
-      localStorage.setItem(storageKey, JSON.stringify(messages));
-      // Update timestamp on every message save
-      if (!localStorage.getItem(timestampKey)) {
-        localStorage.setItem(timestampKey, Date.now().toString());
-      }
-    }
-  }, [messages, storageKey, timestampKey, isHydrated]);
+    saveMessages(messages);
+  }, [messages, saveMessages]);
 
   // Fetch IP address for debugging
   useEffect(() => {
@@ -136,81 +104,19 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
   }, []);
 
   // Auto-clear rate limit error when reset time is reached
-  // Update countdown every second
-  useEffect(() => {
-    if (!rateLimitError) {
-      setCountdown("");
-      return;
-    }
-
-    const updateCountdown = async () => {
-      const now = Date.now();
-      if (now >= rateLimitError.resetTime) {
-        // Timer expired - verify with backend that window has actually expired
-        try {
-          const response = await fetch("/api/rate-limit-check", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ sessionId }),
-          });
-
-          const data = await response.json();
-
-          // If backend confirms window expired (allowed = true), clear the error
-          if (data.allowed) {
-            setRateLimitError(null);
-            setCountdown("");
-            setBackendMessageCount(data.currentCount || 0);
-            clearError(); // Clear the useChat error state so status goes back to "ready"
-          }
-          // If still rate limited, update with backend's timing
-          else {
-            setRateLimitError({
-              resetTime: data.resetTime,
-              remaining: data.remaining,
-            });
-            setBackendMessageCount(
-              data.currentCount || CHATBOT_CONFIG.rateLimitMaxMessages,
-            );
-          }
-        } catch (e) {
-          console.error("Failed to verify rate limit expiry:", e);
-          // On error, optimistically clear the limit
-          setRateLimitError(null);
-          setCountdown("");
-          setBackendMessageCount(0);
-          clearError(); // Clear the useChat error state
-        }
-      } else {
-        const diff = Math.max(0, rateLimitError.resetTime - now);
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-        if (hours > 0) {
-          setCountdown(`${hours}u ${minutes}m ${seconds}s`);
-        } else if (minutes > 0) {
-          setCountdown(`${minutes}m ${seconds}s`);
-        } else {
-          setCountdown(`${seconds}s`);
-        }
-      }
-    };
-
-    // Update immediately
-    updateCountdown();
-
-    // Update every second
-    const interval = setInterval(updateCountdown, 1000);
-
-    return () => clearInterval(interval);
-  }, [rateLimitError]);
+  const countdown = useRateLimitCountdown(
+    rateLimitError,
+    sessionId,
+    () => {
+      setRateLimitError(null);
+      clearError();
+    },
+    setRateLimitError,
+    setBackendMessageCount,
+  );
 
   const handleClearConversation = () => {
-    // Clear localStorage (messages and timestamp)
-    localStorage.removeItem(storageKey);
-    localStorage.removeItem(timestampKey);
-    // Clear session and reload
+    clearMessages();
     clearSession();
     setRateLimitError(null);
     window.location.reload();
