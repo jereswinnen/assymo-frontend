@@ -27,11 +27,12 @@ export const CHATBOT_CONFIG = {
   rateLimitWindowSeconds: 180, // 3 minutes for testing
 
   /**
-   * How long to keep messages in browser localStorage (in days)
+   * How long to keep messages in browser localStorage and database (in days)
    * Messages older than this will be automatically deleted
-   * @default 7
+   * @default 30
+   * @testing 1 (1 day for testing)
    */
-  messageRetentionDays: 7,
+  messageRetentionDays: 1,
 
   /**
    * Maximum character length for user input messages

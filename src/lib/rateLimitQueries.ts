@@ -74,3 +74,16 @@ export async function cleanupOldRateLimits(): Promise<void> {
     WHERE window_start < NOW() - INTERVAL '7 days'
   `;
 }
+
+/**
+ * Cleanup old chat conversations based on retention days
+ * Used by cron job to ensure GDPR compliance
+ */
+export async function cleanupOldConversations(
+  retentionDays: number,
+): Promise<void> {
+  await sql`
+    DELETE FROM chat_conversations
+    WHERE created_at < NOW() - INTERVAL '1 day' * ${retentionDays}
+  `;
+}

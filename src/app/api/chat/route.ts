@@ -9,6 +9,16 @@ export const maxDuration = 30;
 
 const sql = neon(process.env.DATABASE_URL!);
 
+function anonymizeIP(ip: string): string {
+  const parts = ip.split(".");
+  if (parts.length === 4) {
+    // IPv4: 192.168.1.100 → 192.168.1.0
+    return `${parts[0]}.${parts[1]}.${parts[2]}.0`;
+  }
+  // IPv6 or unknown format: truncate to first 20 chars
+  return ip.substring(0, Math.min(ip.length, 20));
+}
+
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
 
@@ -19,11 +29,12 @@ export async function POST(req: NextRequest) {
       return new Response("Missing messages or sessionId", { status: 400 });
     }
 
-    // Get IP address for logging
+    // Get IP address for logging (anonymized for GDPR compliance)
     const ip =
       req.headers.get("x-forwarded-for") ||
       req.headers.get("cf-connecting-ip") ||
       "unknown";
+    const anonymizedIP = anonymizeIP(ip);
 
     // Check rate limit
     const rateLimitResult = await checkRateLimit(
@@ -84,7 +95,7 @@ export async function POST(req: NextRequest) {
             )
             VALUES (
               ${sessionId},
-              ${ip},
+              ${anonymizedIP},
               ${userMessageText},
               ${text},
               ${responseTime}

@@ -28,7 +28,6 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
     resetTime: number;
     remaining: number;
   } | null>(null);
-  const [ipAddress, setIpAddress] = useState<string>("Loading...");
   const [backendMessageCount, setBackendMessageCount] = useState<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -36,12 +35,16 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
   const sessionId = getSessionId();
 
   // Load and persist messages with expiry
-  const { initialMessages, isHydrated, saveMessages, clearMessages } =
-    usePersistedMessages(sessionId);
+  const {
+    initialMessages,
+    isHydrated,
+    isLoading: isLoadingMessages,
+    saveMessages,
+    clearMessages,
+  } = usePersistedMessages(sessionId);
 
-  const { messages, sendMessage, status, clearError } = useChat({
+  const { messages, setMessages, sendMessage, status, clearError } = useChat({
     id: sessionId,
-    messages: initialMessages,
     transport: new DefaultChatTransport({
       api: "/api/chat",
       body: {
@@ -80,18 +83,47 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
     },
   });
 
+  // Load messages from database when they're ready
+  useEffect(() => {
+    if (!isLoadingMessages && initialMessages.length > 0) {
+      setMessages(initialMessages);
+      console.log(
+        `Set ${initialMessages.length} messages from database into useChat`,
+      );
+    }
+  }, [initialMessages, isLoadingMessages, setMessages]);
+
+  // Load rate limit status on mount
+  useEffect(() => {
+    async function loadRateLimitStatus() {
+      try {
+        const response = await fetch("/api/rate-limit-check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const currentCount =
+            CHATBOT_CONFIG.rateLimitMaxMessages - data.remaining;
+          setBackendMessageCount(currentCount);
+          console.log(
+            `Loaded rate limit: ${currentCount}/${CHATBOT_CONFIG.rateLimitMaxMessages}`,
+          );
+        }
+      } catch (error) {
+        console.error("Failed to load rate limit status:", error);
+      }
+    }
+
+    loadRateLimitStatus();
+  }, [sessionId]);
+
   // Persist messages to localStorage with timestamp
   useEffect(() => {
     saveMessages(messages);
   }, [messages, saveMessages]);
-
-  // Fetch IP address for debugging
-  useEffect(() => {
-    fetch("/api/get-ip")
-      .then((res) => res.json())
-      .then((data) => setIpAddress(data.ip))
-      .catch(() => setIpAddress("Unknown"));
-  }, []);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -260,12 +292,10 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
               />
               <InputGroupAddon align="block-end">
                 <InputGroupText className="text-xs text-muted-foreground">
-                  {ipAddress}
-                </InputGroupText>
-                <InputGroupText className="ml-auto text-xs">
                   {backendMessageCount} / {CHATBOT_CONFIG.rateLimitMaxMessages}
                   {countdown && ` (reset: ${countdown})`}
-                  {" • "}
+                </InputGroupText>
+                <InputGroupText className="ml-auto text-xs text-muted-foreground">
                   {CHATBOT_CONFIG.maxInputLength - input.length}
                 </InputGroupText>
                 <Separator orientation="vertical" className="!h-4" />
