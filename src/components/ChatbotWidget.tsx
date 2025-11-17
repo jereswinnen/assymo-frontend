@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MessageCircleMoreIcon, MessagesSquareIcon, XIcon } from "lucide-react";
+import { MessagesSquareIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Chatbot from "@/components/Chatbot";
 
