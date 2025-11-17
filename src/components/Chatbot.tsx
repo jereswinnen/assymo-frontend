@@ -156,11 +156,8 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
 
           const data = await response.json();
 
-          console.log("Rate limit check response:", data);
-
           // If backend confirms window expired (allowed = true), clear the error
           if (data.allowed) {
-            console.log("✅ Clearing rate limit error - window expired");
             setRateLimitError(null);
             setCountdown("");
             setBackendMessageCount(data.currentCount || 0);
@@ -168,7 +165,6 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
           }
           // If still rate limited, update with backend's timing
           else {
-            console.log("⏰ Still rate limited, updating timer");
             setRateLimitError({
               resetTime: data.resetTime,
               remaining: data.remaining,
@@ -222,14 +218,6 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    console.log("handleSubmit called", {
-      hasInput: !!input.trim(),
-      status,
-      rateLimitError,
-      willBlock: !input.trim() || status !== "ready" || !!rateLimitError,
-    });
-
     if (!input.trim() || status !== "ready" || rateLimitError) return;
 
     // Enforce character limit
