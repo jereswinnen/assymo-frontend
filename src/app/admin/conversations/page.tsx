@@ -62,14 +62,12 @@ export default function ConversationsPage() {
   if (loading) return <div className="p-8">Loading...</div>;
 
   return (
-    <div className="min-h-screen p-8 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Conversation Threads</h1>
-
-      <div className="mb-4 text-sm text-gray-600">
+    <section className="col-span-full grid grid-cols-subgrid">
+      <div className="col-span-full">
         Total conversations: {conversations.length}
       </div>
 
-      <div className="space-y-4">
+      <div className="col-span-full">
         {conversations.map((conv) => {
           const isExpanded = expandedSessions.has(conv.session_id);
 
@@ -81,7 +79,7 @@ export default function ConversationsPage() {
               {/* Conversation Header */}
               <button
                 onClick={() => toggleConversation(conv.session_id)}
-                className="w-full p-4 text-left hover:bg-gray-50 transition-colors"
+                className="p-4 text-left hover:bg-gray-50 transition-colors"
               >
                 <div className="flex justify-between items-start">
                   <div>
@@ -142,6 +140,6 @@ export default function ConversationsPage() {
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }
