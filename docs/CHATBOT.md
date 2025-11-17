@@ -760,6 +760,8 @@ export async function GET(req: NextRequest) {
 
 ## PHASE 2: RAG with PDF Embeddings
 
+This phase implements a RAG (Retrieval-Augmented Generation) system using the **AI SDK's built-in embedding functions**. We'll use OpenAI's **`text-embedding-3-small`** model (1536 dimensions) to generate embeddings from PDF documents.
+
 ### Prerequisites
 
 Install additional dependencies:
@@ -857,35 +859,43 @@ export function chunkText(
 }
 ```
 
-### Step 3: Embeddings Generation
+### Step 3: Embeddings Generation with AI SDK
 
 Create `src/lib/embeddings.ts`:
 
 ```typescript
-import OpenAI from 'openai';
+import { embed, embedMany } from 'ai';
+import { openai } from '@ai-sdk/openai';
 import { neon } from '@neondatabase/serverless';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 const sql = neon(process.env.DATABASE_URL!);
 
+// Generate a single embedding using AI SDK
 export async function generateEmbedding(text: string): Promise<number[]> {
-  const response = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: text,
+  const { embedding } = await embed({
+    model: openai.textEmbeddingModel('text-embedding-3-small'),
+    value: text,
   });
 
-  return response.data[0].embedding;
+  return embedding;
 }
 
+// Store multiple chunks with embeddings (uses embedMany for efficiency)
 export async function storeChunksWithEmbeddings(
   chunks: string[],
   metadata: Record<string, any> = {}
 ): Promise<void> {
-  for (const chunk of chunks) {
-    const embedding = await generateEmbedding(chunk);
+  // Generate embeddings for all chunks at once using AI SDK's embedMany
+  const { embeddings } = await embedMany({
+    model: openai.textEmbeddingModel('text-embedding-3-small'),
+    values: chunks,
+    maxParallelCalls: 2, // Limit concurrent API calls
+  });
+
+  // Store each chunk with its embedding
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i];
+    const embedding = embeddings[i];
 
     await sql`
       INSERT INTO document_chunks (content, embedding, metadata)
