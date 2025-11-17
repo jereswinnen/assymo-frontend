@@ -28,6 +28,8 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
   } | null>(null);
   const [ipAddress, setIpAddress] = useState<string>("Loading...");
   const [isHydrated, setIsHydrated] = useState(false);
+  const [countdown, setCountdown] = useState<string>("");
+  const [backendMessageCount, setBackendMessageCount] = useState<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -63,7 +65,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
     setIsHydrated(true);
   }, []);
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, error, clearError } = useChat({
     id: sessionId,
     messages: initialMessages,
     transport: new DefaultChatTransport({
@@ -72,8 +74,35 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
         sessionId,
       },
     }),
-    onError: (error) => {
+    onError: async (error) => {
       console.error("Chat error:", error);
+
+      // When an error occurs, check if it's a rate limit error
+      // Make a lightweight request to get rate limit status
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: [], sessionId }),
+        });
+
+        if (response.status === 429) {
+          const data = await response.json();
+          setRateLimitError({
+            resetTime: data.resetTime,
+            remaining: data.remaining,
+          });
+          setBackendMessageCount(CHATBOT_CONFIG.rateLimitMaxMessages);
+        }
+      } catch (e) {
+        console.error("Failed to check rate limit:", e);
+      }
+    },
+    onFinish: () => {
+      // Update backend count after successful message
+      setBackendMessageCount((prev) =>
+        Math.min(prev + 1, CHATBOT_CONFIG.rateLimitMaxMessages),
+      );
     },
   });
 
@@ -106,6 +135,81 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
     textareaRef.current?.focus();
   }, []);
 
+  // Auto-clear rate limit error when reset time is reached
+  // Update countdown every second
+  useEffect(() => {
+    if (!rateLimitError) {
+      setCountdown("");
+      return;
+    }
+
+    const updateCountdown = async () => {
+      const now = Date.now();
+      if (now >= rateLimitError.resetTime) {
+        // Timer expired - verify with backend that window has actually expired
+        try {
+          const response = await fetch("/api/rate-limit-check", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId }),
+          });
+
+          const data = await response.json();
+
+          console.log("Rate limit check response:", data);
+
+          // If backend confirms window expired (allowed = true), clear the error
+          if (data.allowed) {
+            console.log("✅ Clearing rate limit error - window expired");
+            setRateLimitError(null);
+            setCountdown("");
+            setBackendMessageCount(data.currentCount || 0);
+            clearError(); // Clear the useChat error state so status goes back to "ready"
+          }
+          // If still rate limited, update with backend's timing
+          else {
+            console.log("⏰ Still rate limited, updating timer");
+            setRateLimitError({
+              resetTime: data.resetTime,
+              remaining: data.remaining,
+            });
+            setBackendMessageCount(
+              data.currentCount || CHATBOT_CONFIG.rateLimitMaxMessages,
+            );
+          }
+        } catch (e) {
+          console.error("Failed to verify rate limit expiry:", e);
+          // On error, optimistically clear the limit
+          setRateLimitError(null);
+          setCountdown("");
+          setBackendMessageCount(0);
+          clearError(); // Clear the useChat error state
+        }
+      } else {
+        const diff = Math.max(0, rateLimitError.resetTime - now);
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        if (hours > 0) {
+          setCountdown(`${hours}u ${minutes}m ${seconds}s`);
+        } else if (minutes > 0) {
+          setCountdown(`${minutes}m ${seconds}s`);
+        } else {
+          setCountdown(`${seconds}s`);
+        }
+      }
+    };
+
+    // Update immediately
+    updateCountdown();
+
+    // Update every second
+    const interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, [rateLimitError]);
+
   const handleClearConversation = () => {
     // Clear localStorage (messages and timestamp)
     localStorage.removeItem(storageKey);
@@ -118,14 +222,21 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || status !== "ready") return;
+
+    console.log("handleSubmit called", {
+      hasInput: !!input.trim(),
+      status,
+      rateLimitError,
+      willBlock: !input.trim() || status !== "ready" || !!rateLimitError,
+    });
+
+    if (!input.trim() || status !== "ready" || rateLimitError) return;
 
     // Enforce character limit
     if (input.length > CHATBOT_CONFIG.maxInputLength) return;
 
     sendMessage({ text: input });
     setInput("");
-    setRateLimitError(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -133,16 +244,6 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
       e.preventDefault();
       handleSubmit(e);
     }
-  };
-
-  const getTimeUntilReset = () => {
-    if (!rateLimitError) return "";
-    const now = Date.now();
-    const resetTime = rateLimitError.resetTime;
-    const diff = resetTime - now;
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}u ${minutes}m`;
   };
 
   const isLoading = status === "submitted" || status === "streaming";
@@ -238,9 +339,11 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
         {rateLimitError ? (
           <div className="text-center text-muted-foreground p-4">
             <p className="font-semibold">
-              Rate limit bereikt (10 berichten / 24u)
+              Rate limit bereikt ({CHATBOT_CONFIG.rateLimitMaxMessages}{" "}
+              berichten /{" "}
+              {Math.floor(CHATBOT_CONFIG.rateLimitWindowSeconds / 60)}m)
             </p>
-            <p className="text-sm mt-1">Reset over {getTimeUntilReset()}</p>
+            <p className="text-sm mt-1">Reset over: {countdown}</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
@@ -266,8 +369,8 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                   {ipAddress}
                 </InputGroupText>
                 <InputGroupText className="ml-auto text-xs">
-                  {messages.filter((m) => m.role === "user").length} /{" "}
-                  {CHATBOT_CONFIG.rateLimitMaxMessages}
+                  {backendMessageCount} / {CHATBOT_CONFIG.rateLimitMaxMessages}
+                  {countdown && ` (reset: ${countdown})`}
                   {" • "}
                   {CHATBOT_CONFIG.maxInputLength - input.length}
                 </InputGroupText>

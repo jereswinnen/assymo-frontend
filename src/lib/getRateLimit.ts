@@ -2,23 +2,25 @@ import { neon } from "@neondatabase/serverless";
 
 const sql = neon(process.env.DATABASE_URL!);
 
-export async function checkRateLimit(
+/**
+ * Get current rate limit status WITHOUT incrementing the counter
+ * Used for checking if a window has expired
+ */
+export async function getRateLimit(
   sessionId: string,
   maxRequests: number = 10,
-  windowSeconds: number = 86400, // 24 hours
-): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
+  windowSeconds: number = 86400,
+): Promise<{
+  allowed: boolean;
+  remaining: number;
+  resetTime: number;
+  currentCount: number;
+}> {
   try {
-    // Cleanup: Remove old rate limit entries (older than 7 days)
-    await sql`
-      DELETE FROM rate_limits
-      WHERE window_start < NOW() - INTERVAL '7 days'
-    `;
-
-    // Get or create rate limit entry
+    // Get rate limit entry without modifying it
     const result = await sql`
       SELECT
         COALESCE(count, 0) as current_count,
-        COALESCE(window_start, NOW()) as start_time,
         CASE
           WHEN window_start IS NULL THEN true
           WHEN (window_start + INTERVAL '1 second' * ${windowSeconds}) <= NOW() THEN true
@@ -32,7 +34,7 @@ export async function checkRateLimit(
       FROM rate_limits
       WHERE key = ${sessionId}
       UNION ALL
-      SELECT 0 as current_count, NOW() as start_time, true as expired,
+      SELECT 0 as current_count, true as expired,
         EXTRACT(EPOCH FROM (NOW() + INTERVAL '1 second' * ${windowSeconds}))::BIGINT as reset_time,
         EXTRACT(EPOCH FROM NOW())::BIGINT as current_time
       WHERE NOT EXISTS (SELECT 1 FROM rate_limits WHERE key = ${sessionId})
@@ -41,35 +43,20 @@ export async function checkRateLimit(
 
     const { current_count, expired, reset_time, current_time } = result[0];
 
-    // Window expired - reset the window and count this as the first message
+    // If window expired, reset the counter in the database
     if (expired) {
       await sql`
         INSERT INTO rate_limits (key, count, window_start)
-        VALUES (${sessionId}, 1, NOW())
+        VALUES (${sessionId}, 0, NOW())
         ON CONFLICT (key)
-        DO UPDATE SET count = 1, window_start = NOW()
+        DO UPDATE SET count = 0, window_start = NOW()
       `;
 
       return {
         allowed: true,
-        remaining: maxRequests - 1,
-        resetTime: (current_time + windowSeconds) * 1000, // Use DB time
-      };
-    }
-
-    // First message in a new session
-    if (current_count === 0) {
-      await sql`
-        INSERT INTO rate_limits (key, count, window_start)
-        VALUES (${sessionId}, 1, NOW())
-        ON CONFLICT (key)
-        DO UPDATE SET count = 1, window_start = NOW()
-      `;
-
-      return {
-        allowed: true,
-        remaining: maxRequests - 1,
-        resetTime: (current_time + windowSeconds) * 1000, // Use DB time
+        remaining: maxRequests,
+        resetTime: (current_time + windowSeconds) * 1000,
+        currentCount: 0,
       };
     }
 
@@ -79,28 +66,24 @@ export async function checkRateLimit(
         allowed: false,
         remaining: 0,
         resetTime: reset_time * 1000,
+        currentCount: current_count,
       };
     }
 
-    // Increment counter (still within limit)
-    await sql`
-      UPDATE rate_limits
-      SET count = count + 1
-      WHERE key = ${sessionId}
-    `;
-
     return {
       allowed: true,
-      remaining: maxRequests - current_count - 1,
+      remaining: maxRequests - current_count,
       resetTime: reset_time * 1000,
+      currentCount: current_count,
     };
   } catch (error) {
-    console.error("Rate limit check error:", error);
+    console.error("Rate limit get error:", error);
     // Fail open - allow request on error
     return {
       allowed: true,
       remaining: maxRequests,
       resetTime: Date.now() + windowSeconds * 1000,
+      currentCount: 0,
     };
   }
 }

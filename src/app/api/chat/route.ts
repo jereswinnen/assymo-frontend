@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
       CHATBOT_CONFIG.rateLimitWindowSeconds,
     );
 
+    // Return rate limit headers in 429 response
     if (!rateLimitResult.allowed) {
       return new Response(
         JSON.stringify({
@@ -41,7 +42,14 @@ export async function POST(req: NextRequest) {
         }),
         {
           status: 429,
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "X-RateLimit-Limit": CHATBOT_CONFIG.rateLimitMaxMessages.toString(),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": Math.floor(
+              rateLimitResult.resetTime / 1000,
+            ).toString(),
+          },
         },
       );
     }
@@ -97,7 +105,22 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return result.toUIMessageStreamResponse();
+    // Add rate limit headers to successful responses
+    const response = result.toUIMessageStreamResponse();
+    response.headers.set(
+      "X-RateLimit-Limit",
+      CHATBOT_CONFIG.rateLimitMaxMessages.toString(),
+    );
+    response.headers.set(
+      "X-RateLimit-Remaining",
+      rateLimitResult.remaining.toString(),
+    );
+    response.headers.set(
+      "X-RateLimit-Reset",
+      Math.floor(rateLimitResult.resetTime / 1000).toString(),
+    );
+
+    return response;
   } catch (error) {
     console.error("Chat API error:", error);
     return new Response("Error processing chat", { status: 500 });
