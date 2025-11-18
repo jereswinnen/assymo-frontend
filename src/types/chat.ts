@@ -10,3 +10,17 @@ export type ChatSession = {
   createdAt: Date;
   messageCount: number;
 };
+
+// Phase 2: Document and embedding types
+export type DocumentInfo = {
+  documentName: string;
+  chunkCount: number;
+  totalCharacters: number;
+  uploadedAt: Date;
+  metadata?: Record<string, any>;
+};
+
+export type RetrievalTestResult = {
+  chunks: string[];
+  query: string;
+};

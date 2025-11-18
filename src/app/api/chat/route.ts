@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { neon } from "@neondatabase/serverless";
 import { CHATBOT_CONFIG } from "@/config/chatbot";
+import { retrieveRelevantChunks, hasDocuments } from "@/lib/retrieval";
 
 export const maxDuration = 30;
 
@@ -75,10 +76,45 @@ export async function POST(req: NextRequest) {
       .map((part: any) => part.text)
       .join("");
 
+    // RAG: Retrieve relevant context from vector database (Phase 2)
+    let systemPrompt = CHATBOT_CONFIG.systemPrompt;
+    let retrievedChunks: string[] = [];
+
+    try {
+      const documentsExist = await hasDocuments();
+
+      if (documentsExist) {
+        // Retrieve top 3 relevant chunks for the user's question
+        retrievedChunks = await retrieveRelevantChunks(userMessageText, 3);
+
+        if (retrievedChunks.length > 0) {
+          const context = retrievedChunks.join("\n\n");
+
+          // Enhanced system prompt with RAG context
+          systemPrompt = `${CHATBOT_CONFIG.systemPrompt}
+
+BELANGRIJKE REGELS:
+1. Gebruik ALLEEN de onderstaande bedrijfsinformatie om vragen te beantwoorden
+2. Als een vraag niet gerelateerd is aan ons bedrijf of de verstrekte informatie, wijs dit beleefd af
+3. Als je niet genoeg informatie hebt in de context hieronder, geef dit eerlijk toe
+
+RELEVANTE BEDRIJFSINFORMATIE:
+---
+${context}
+---
+
+Baseer je antwoorden ALLEEN op bovenstaande informatie.`;
+        }
+      }
+    } catch (error) {
+      console.error("RAG retrieval error:", error);
+      // Continue without RAG context on error (graceful degradation)
+    }
+
     // Stream response from OpenAI
     const result = streamText({
       model: openai(CHATBOT_CONFIG.model),
-      system: CHATBOT_CONFIG.systemPrompt,
+      system: systemPrompt,
       messages: modelMessages,
       async onFinish({ text }) {
         // Log conversation after streaming completes

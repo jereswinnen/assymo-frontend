@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { ConversationList } from "@/components/admin/ConversationList";
 import { ConversationDialog } from "@/components/admin/ConversationDialog";
-import { PDFEmbeddings } from "@/components/admin/PDFEmbeddings";
+import { DocumentEmbeddings } from "@/components/admin/DocumentEmbeddings";
 import type { Conversation } from "@/components/admin/ConversationList";
 
 export default function AdminPage() {
@@ -53,7 +53,7 @@ export default function AdminPage() {
           conversations={conversations}
           onConversationClick={handleConversationClick}
         />
-        <PDFEmbeddings />
+        <DocumentEmbeddings />
       </div>
 
       <ConversationDialog
