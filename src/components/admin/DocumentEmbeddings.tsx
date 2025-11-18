@@ -192,6 +192,10 @@ export function DocumentEmbeddings() {
         throw new Error(data.error || "Test mislukt");
       }
 
+      console.log("🔍 Test retrieval response:", data);
+      console.log("📦 Chunks received:", data.chunks);
+      console.log("🔢 Chunk count:", data.chunks?.length);
+
       setTestResults(data.chunks);
 
       if (data.chunks.length === 0) {
