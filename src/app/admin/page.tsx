@@ -48,12 +48,14 @@ export default function AdminPage() {
 
   return (
     <>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-        <ConversationList
-          conversations={conversations}
-          onConversationClick={handleConversationClick}
-        />
-        <DocumentEmbeddings />
+      <div className="p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ConversationList
+            conversations={conversations}
+            onConversationClick={handleConversationClick}
+          />
+          <DocumentEmbeddings />
+        </div>
       </div>
 
       <ConversationDialog
