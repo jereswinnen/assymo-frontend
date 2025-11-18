@@ -47,6 +47,12 @@ export function DocumentEmbeddings() {
     try {
       const response = await fetch("/api/admin/document-info");
 
+      // Silently handle 401 - user will be redirected by admin page
+      if (response.status === 401) {
+        setLoading(false);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error("Failed to load document info");
       }

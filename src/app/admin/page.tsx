@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ConversationList } from "@/components/admin/ConversationList";
 import { ConversationDialog } from "@/components/admin/ConversationDialog";
 import { DocumentEmbeddings } from "@/components/admin/DocumentEmbeddings";
@@ -12,6 +13,7 @@ export default function AdminPage() {
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     loadConversations();
@@ -20,6 +22,13 @@ export default function AdminPage() {
   const loadConversations = async () => {
     try {
       const response = await fetch("/api/admin/conversations");
+
+      // If unauthorized, redirect to login
+      if (response.status === 401) {
+        router.push("/admin/login");
+        return;
+      }
+
       const data = await response.json();
       setConversations(data);
     } catch (error) {

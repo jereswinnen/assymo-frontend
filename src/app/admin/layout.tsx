@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOutIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminLayout({
@@ -39,13 +39,8 @@ export default function AdminLayout({
         <header className="border-b bg-card">
           <div className="container mx-auto px-6 py-4 flex items-center justify-between">
             <h1 className="text-xl font-bold">Assymo Admin</h1>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              className="gap-2"
-            >
-              <LogOut className="h-4 w-4" />
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOutIcon className="size-4" />
               Uitloggen
             </Button>
           </div>
