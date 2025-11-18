@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
       .join("");
 
     // RAG: Retrieve relevant context from vector database (Phase 2)
-    let systemPrompt = CHATBOT_CONFIG.systemPrompt;
+    let systemPrompt: string = CHATBOT_CONFIG.systemPrompt;
     let retrievedChunks: string[] = [];
 
     try {
