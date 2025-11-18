@@ -19,11 +19,7 @@ export default function AdminPage() {
 
   const loadConversations = async () => {
     try {
-      const response = await fetch("/api/admin/conversations", {
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_ADMIN_SECRET}`,
-        },
-      });
+      const response = await fetch("/api/admin/conversations");
       const data = await response.json();
       setConversations(data);
     } catch (error) {

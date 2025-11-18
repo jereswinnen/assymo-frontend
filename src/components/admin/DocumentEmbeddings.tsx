@@ -45,11 +45,7 @@ export function DocumentEmbeddings() {
   const loadDocumentInfo = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/admin/document-info", {
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_ADMIN_SECRET}`,
-        },
-      });
+      const response = await fetch("/api/admin/document-info");
 
       if (!response.ok) {
         throw new Error("Failed to load document info");
@@ -102,9 +98,6 @@ export function DocumentEmbeddings() {
 
       const response = await fetch("/api/admin/document-upload", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_ADMIN_SECRET}`,
-        },
         body: formData,
       });
 
@@ -145,9 +138,6 @@ export function DocumentEmbeddings() {
     try {
       const response = await fetch("/api/admin/document-upload", {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_ADMIN_SECRET}`,
-        },
       });
 
       if (!response.ok) {
@@ -181,7 +171,6 @@ export function DocumentEmbeddings() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_ADMIN_SECRET}`,
         },
         body: JSON.stringify({ query: testQuery.trim() }),
       });
