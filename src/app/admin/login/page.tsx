@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
+import { LogInIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminLoginPage() {
@@ -50,14 +51,11 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/50">
-      <Card className="w-full max-w-md p-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold mb-2">Admin Login</h1>
-          <p className="text-sm text-muted-foreground">
-            Voer je wachtwoord in om toegang te krijgen
-          </p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center">
+      <Card className="w-full max-w-md p-6">
+        <CardHeader className="p-0">
+          <p className="text-2xl font-medium">Assymo</p>
+        </CardHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -67,14 +65,28 @@ export default function AdminLoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Voer wachtwoord in"
+              placeholder="Vul in..."
               disabled={loading}
               autoFocus
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Inloggen..." : "Inloggen"}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loading || !password}
+          >
+            {loading ? (
+              <>
+                <Loader2Icon className="size-4 animate-spin" />
+                Laden...
+              </>
+            ) : (
+              <>
+                <LogInIcon className="size-4" />
+                Inloggen
+              </>
+            )}
           </Button>
         </form>
       </Card>

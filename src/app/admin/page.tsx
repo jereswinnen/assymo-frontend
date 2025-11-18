@@ -6,6 +6,7 @@ import { ConversationList } from "@/components/admin/ConversationList";
 import { ConversationDialog } from "@/components/admin/ConversationDialog";
 import { DocumentEmbeddings } from "@/components/admin/DocumentEmbeddings";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Spinner } from "@/components/ui/spinner";
 import type { Conversation } from "@/components/admin/ConversationList";
 import { MessagesSquareIcon, ScanTextIcon } from "lucide-react";
 
@@ -47,8 +48,8 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center">
-        <div className="text-muted-foreground">Loading...</div>
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Spinner className="size-8" />
       </div>
     );
   }
