@@ -764,7 +764,7 @@ This phase implements a RAG (Retrieval-Augmented Generation) system using the **
 
 ### Prerequisites
 
-Install additional dependencies:
+Install additional dependencies (already done!):
 
 ```bash
 pnpm add pdf-parse
@@ -1098,7 +1098,7 @@ export async function POST(req: NextRequest) {
 }
 ```
 
-### Step 7: Admin PDF Upload Page
+### Step 7: Admin PDF Upload Page (instead, integrate this on the admin dashboard)
 
 Create `app/admin/pdf-upload/page.tsx`:
 
