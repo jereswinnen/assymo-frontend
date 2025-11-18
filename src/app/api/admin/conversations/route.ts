@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { isAuthenticated } from "@/lib/auth";
 
 const sql = neon(process.env.DATABASE_URL!);
 
 export async function GET(req: NextRequest) {
   try {
-    // Check authorization
-    const authHeader = req.headers.get("authorization");
-    const expectedAuth = `Bearer ${process.env.ADMIN_SECRET}`;
+    // Check authentication via session cookie
+    const authenticated = await isAuthenticated();
 
-    if (!authHeader || authHeader !== expectedAuth) {
+    if (!authenticated) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

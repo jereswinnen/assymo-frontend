@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { extractTextFromFile, chunkText } from '@/lib/documentProcessor';
 import { storeChunksWithEmbeddings, clearAllChunks } from '@/lib/embeddings';
+import { isAuthenticated } from '@/lib/auth';
 
 export const maxDuration = 300; // 5 minutes for large documents
 
 export async function DELETE(req: NextRequest) {
   try {
-    // Check authentication
-    const authHeader = req.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.ADMIN_SECRET}`) {
+    // Check authentication via session cookie
+    const authenticated = await isAuthenticated();
+    if (!authenticated) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -34,11 +35,11 @@ export async function DELETE(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('🔵 PDF upload started');
+    console.log('🔵 Document upload started');
 
-    // Check authentication
-    const authHeader = req.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.ADMIN_SECRET}`) {
+    // Check authentication via session cookie
+    const authenticated = await isAuthenticated();
+    if (!authenticated) {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

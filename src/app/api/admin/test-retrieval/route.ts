@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { retrieveRelevantChunks } from '@/lib/retrieval';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
-    // Check authentication
-    const authHeader = req.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.ADMIN_SECRET}`) {
+    // Check authentication via session cookie
+    const authenticated = await isAuthenticated();
+    if (!authenticated) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
