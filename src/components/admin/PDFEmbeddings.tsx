@@ -23,7 +23,7 @@ export function PDFEmbeddings() {
       </CardHeader>
       <CardContent>
         <div className="text-muted-foreground text-center text-sm py-8 border-2 border-dashed rounded-lg">
-          Placeholder...^
+          Placeholder...
         </div>
       </CardContent>
     </Card>
