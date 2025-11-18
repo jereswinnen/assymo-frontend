@@ -17,12 +17,16 @@ export async function retrieveRelevantChunks(
     // Generate embedding for the query
     const queryEmbedding = await generateEmbedding(query);
 
+    // IMPORTANT: Store JSON.stringify result in a variable before using in SQL template
+    // Inline function calls don't work correctly with Neon's SQL template literals
+    const embeddingJson = JSON.stringify(queryEmbedding);
+
     // Search for similar chunks using cosine similarity
     // The <=> operator calculates cosine distance (lower is more similar)
     const results = await sql`
       SELECT content
       FROM document_chunks
-      ORDER BY embedding <=> ${JSON.stringify(queryEmbedding)}::vector
+      ORDER BY embedding <=> ${embeddingJson}::vector
       LIMIT ${limit}
     `;
 
