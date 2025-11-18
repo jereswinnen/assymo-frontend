@@ -23,6 +23,7 @@ import {
   CheckCircleIcon,
   SearchIcon,
   Loader2Icon,
+  ScanTextIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { DocumentInfo } from "@/types/chat";
@@ -114,7 +115,7 @@ export function DocumentEmbeddings() {
       }
 
       toast.success(
-        `Document succesvol verwerkt: ${data.chunkCount} chunks aangemaakt`
+        `Document succesvol verwerkt: ${data.chunkCount} chunks aangemaakt`,
       );
 
       // Reload document info
@@ -122,20 +123,22 @@ export function DocumentEmbeddings() {
 
       // Clear file input
       setFile(null);
-      const fileInput = document.getElementById("document-file") as HTMLInputElement;
+      const fileInput = document.getElementById(
+        "document-file",
+      ) as HTMLInputElement;
       if (fileInput) fileInput.value = "";
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Upload mislukt"
-      );
+      toast.error(error instanceof Error ? error.message : "Upload mislukt");
     } finally {
       setUploading(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm("Weet je zeker dat je het huidige document wilt verwijderen?")) {
+    if (
+      !confirm("Weet je zeker dat je het huidige document wilt verwijderen?")
+    ) {
       return;
     }
 
@@ -160,7 +163,11 @@ export function DocumentEmbeddings() {
     }
   };
 
-  const handleTestRetrieval = async () => {
+  const handleTestRetrieval = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+
     if (!testQuery.trim()) {
       toast.error("Voer een test query in");
       return;
@@ -258,7 +265,7 @@ export function DocumentEmbeddings() {
                             day: "numeric",
                             month: "short",
                             year: "numeric",
-                          }
+                          },
                         )}
                       </Badge>
                     </div>
@@ -279,7 +286,8 @@ export function DocumentEmbeddings() {
           <Alert>
             <AlertCircleIcon className="size-4" />
             <AlertDescription>
-              Geen document geüpload. Upload een Markdown bestand om te beginnen.
+              Geen document geüpload. Upload een Markdown bestand om te
+              beginnen.
             </AlertDescription>
           </Alert>
         )}
@@ -320,12 +328,12 @@ export function DocumentEmbeddings() {
             >
               {uploading ? (
                 <>
-                  <Loader2Icon className="size-4 mr-2 animate-spin" />
+                  <Loader2Icon className="size-4 animate-spin" />
                   Verwerken...
                 </>
               ) : (
                 <>
-                  <UploadIcon className="size-4 mr-2" />
+                  <UploadIcon className="size-4" />
                   Upload en Verwerk Document
                 </>
               )}
@@ -346,7 +354,7 @@ export function DocumentEmbeddings() {
             </p>
           </div>
 
-          <div className="space-y-3">
+          <form onSubmit={handleTestRetrieval} className="space-y-3">
             <Textarea
               id="test-query"
               placeholder="bijv. Wat zijn jullie openingstijden?"
@@ -354,27 +362,33 @@ export function DocumentEmbeddings() {
               onChange={(e) => setTestQuery(e.target.value)}
               disabled={testing || !documentInfo}
               rows={2}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleTestRetrieval();
+                }
+              }}
             />
 
             <Button
-              onClick={handleTestRetrieval}
+              type="submit"
               disabled={!testQuery.trim() || testing || !documentInfo}
               variant="outline"
               className="w-full"
             >
               {testing ? (
                 <>
-                  <Loader2Icon className="size-4 mr-2 animate-spin" />
+                  <Loader2Icon className="size-4 animate-spin" />
                   Zoeken...
                 </>
               ) : (
                 <>
-                  <SearchIcon className="size-4 mr-2" />
+                  <ScanTextIcon className="size-4" />
                   Test Retrieval
                 </>
               )}
             </Button>
-          </div>
+          </form>
 
           {/* Test Results */}
           {testResults && testResults.length > 0 && (
