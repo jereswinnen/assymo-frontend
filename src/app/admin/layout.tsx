@@ -36,17 +36,14 @@ export default function AdminLayout({
   return (
     <div className="bg-background min-h-screen">
       {!isLoginPage && (
-        <header className="border-b bg-card">
-          <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-            <h1 className="text-xl font-bold">Assymo Admin</h1>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOutIcon className="size-4" />
-              Uitloggen
-            </Button>
-          </div>
+        <header className="container mx-auto max-w-5xl py-4 flex justify-end">
+          <Button variant="outline" size="sm" onClick={handleLogout}>
+            <LogOutIcon className="size-4" />
+            Uitloggen
+          </Button>
         </header>
       )}
-      {children}
+      <div className="container mx-auto max-w-5xl">{children}</div>
     </div>
   );
 }

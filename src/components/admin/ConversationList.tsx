@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Item,
   ItemGroup,
@@ -40,16 +40,10 @@ export function ConversationList({
 }: ConversationListProps) {
   return (
     <Card className="flex flex-col">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageSquareIcon className="size-5" />
-          Conversations ({conversations.length})
-        </CardTitle>
-      </CardHeader>
       <CardContent className="flex-1 overflow-hidden">
         {conversations.length === 0 ? (
           <div className="text-muted-foreground text-center text-sm py-8">
-            No conversations yet
+            Nog geen conversaties
           </div>
         ) : (
           <ItemGroup className="max-h-full overflow-y-auto space-y-1">

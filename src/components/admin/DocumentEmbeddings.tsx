@@ -1,29 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Item,
+  ItemMedia,
+  ItemContent,
+  ItemTitle,
+  ItemDescription,
+  ItemActions,
+} from "@/components/ui/item";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  FileTextIcon,
   UploadIcon,
-  TrashIcon,
   AlertCircleIcon,
-  CheckCircleIcon,
-  SearchIcon,
+  FileTextIcon,
   Loader2Icon,
   ScanTextIcon,
+  Trash2Icon,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { DocumentInfo } from "@/types/chat";
@@ -36,6 +44,8 @@ export function DocumentEmbeddings() {
   const [testQuery, setTestQuery] = useState("");
   const [testResults, setTestResults] = useState<string[] | null>(null);
   const [testing, setTesting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Load document info on mount
   useEffect(() => {
@@ -134,13 +144,12 @@ export function DocumentEmbeddings() {
     }
   };
 
-  const handleDelete = async () => {
-    if (
-      !confirm("Weet je zeker dat je het huidige document wilt verwijderen?")
-    ) {
-      return;
-    }
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
+  };
 
+  const handleDeleteConfirm = async () => {
+    setDeleting(true);
     try {
       const response = await fetch("/api/admin/document-upload", {
         method: "DELETE",
@@ -153,9 +162,12 @@ export function DocumentEmbeddings() {
       toast.success("Document verwijderd");
       await loadDocumentInfo();
       setTestResults(null);
+      setDeleteDialogOpen(false);
     } catch (error) {
       console.error("Delete error:", error);
       toast.error("Verwijderen mislukt");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -209,15 +221,6 @@ export function DocumentEmbeddings() {
   if (loading) {
     return (
       <Card className="h-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileTextIcon className="size-5" />
-            PDF Embeddings
-          </CardTitle>
-          <CardDescription>
-            Manage PDF documents and embeddings for the chatbot
-          </CardDescription>
-        </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
@@ -229,58 +232,41 @@ export function DocumentEmbeddings() {
 
   return (
     <Card className="h-full overflow-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileTextIcon className="size-5" />
-          Document Embeddings
-        </CardTitle>
-        <CardDescription>
-          Upload Markdown documenten voor de chatbot kennisbank
-        </CardDescription>
-      </CardHeader>
       <CardContent className="space-y-6">
         {/* Current Document Status */}
         {documentInfo ? (
-          <Alert>
-            <CheckCircleIcon className="size-4" />
-            <AlertDescription>
-              <div className="space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">
-                      {documentInfo.documentName}
-                    </p>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <Badge variant="secondary">
-                        {documentInfo.chunkCount} chunks
-                      </Badge>
-                      <Badge variant="secondary">
-                        {documentInfo.totalCharacters.toLocaleString()} tekens
-                      </Badge>
-                      <Badge variant="outline">
-                        {new Date(documentInfo.uploadedAt).toLocaleDateString(
-                          "nl-NL",
-                          {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          },
-                        )}
-                      </Badge>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleDelete}
-                    className="flex-shrink-0"
-                  >
-                    <TrashIcon className="size-4" />
-                  </Button>
-                </div>
-              </div>
-            </AlertDescription>
-          </Alert>
+          <Item variant="outline">
+            <ItemMedia variant="icon">
+              <FileTextIcon />
+            </ItemMedia>
+            <ItemContent className="flex flex-col gap-2">
+              <ItemTitle>{documentInfo.documentName}</ItemTitle>
+              <ItemDescription className="flex flex-wrap gap-2">
+                <Badge variant="secondary">
+                  {documentInfo.chunkCount} chunks
+                </Badge>
+                <Badge variant="secondary">
+                  {documentInfo.totalCharacters.toLocaleString()} tekens
+                </Badge>
+                <Badge variant="outline">
+                  {new Date(documentInfo.uploadedAt).toLocaleDateString(
+                    "nl-NL",
+                    {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    },
+                  )}
+                </Badge>
+              </ItemDescription>
+            </ItemContent>
+            <ItemActions>
+              <Button variant="destructive" size="sm" onClick={handleDeleteClick}>
+                <Trash2Icon className="size-4" />
+                Verwijder
+              </Button>
+            </ItemActions>
+          </Item>
         ) : (
           <Alert>
             <AlertCircleIcon className="size-4" />
@@ -290,6 +276,43 @@ export function DocumentEmbeddings() {
             </AlertDescription>
           </Alert>
         )}
+
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Document verwijderen</DialogTitle>
+              <DialogDescription>
+                Weet je zeker dat je het huidige document wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setDeleteDialogOpen(false)}
+                disabled={deleting}
+              >
+                Annuleren
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteConfirm}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <>
+                    <Loader2Icon className="size-4 animate-spin" />
+                    Verwijderen...
+                  </>
+                ) : (
+                  <>
+                    <Trash2Icon className="size-4" />
+                    Verwijderen
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <Separator />
 

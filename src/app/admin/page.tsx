@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { ConversationList } from "@/components/admin/ConversationList";
 import { ConversationDialog } from "@/components/admin/ConversationDialog";
 import { DocumentEmbeddings } from "@/components/admin/DocumentEmbeddings";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import type { Conversation } from "@/components/admin/ConversationList";
+import { MessagesSquareIcon, ScanTextIcon } from "lucide-react";
 
 export default function AdminPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -53,15 +55,29 @@ export default function AdminPage() {
 
   return (
     <>
-      <div className="p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Tabs defaultValue="conversations" className="w-full">
+        <TabsList>
+          <TabsTrigger value="conversations">
+            <MessagesSquareIcon />
+            Conversaties
+          </TabsTrigger>
+          <TabsTrigger value="embeddings">
+            <ScanTextIcon />
+            Embeddings
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="conversations">
           <ConversationList
             conversations={conversations}
             onConversationClick={handleConversationClick}
           />
+        </TabsContent>
+
+        <TabsContent value="embeddings">
           <DocumentEmbeddings />
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
 
       <ConversationDialog
         conversation={selectedConversation}
