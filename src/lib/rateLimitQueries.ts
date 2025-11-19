@@ -78,12 +78,20 @@ export async function cleanupOldRateLimits(): Promise<void> {
 /**
  * Cleanup old chat conversations based on retention days
  * Used by cron job to ensure GDPR compliance
+ *
+ * Deletes entire conversations (all messages in a session) where the
+ * first message is older than the retention period.
  */
 export async function cleanupOldConversations(
   retentionDays: number,
 ): Promise<void> {
   await sql`
     DELETE FROM chat_conversations
-    WHERE created_at < NOW() - INTERVAL '1 day' * ${retentionDays}
+    WHERE session_id IN (
+      SELECT session_id
+      FROM chat_conversations
+      GROUP BY session_id
+      HAVING MIN(created_at) < NOW() - INTERVAL '1 day' * ${retentionDays}
+    )
   `;
 }

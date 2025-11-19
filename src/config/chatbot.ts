@@ -28,7 +28,7 @@ export const CHATBOT_CONFIG = {
 
   /**
    * How long to keep messages in browser localStorage and database (in days)
-   * Messages older than this will be automatically deleted
+   * Entire conversations are deleted when their first message exceeds this age
    * @default 30
    * @testing 1 (1 day for testing)
    */
