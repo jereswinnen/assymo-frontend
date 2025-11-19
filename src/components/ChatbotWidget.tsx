@@ -7,6 +7,7 @@ import Chatbot from "@/components/Chatbot";
 
 export default function ChatbotWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -28,25 +29,35 @@ export default function ChatbotWidget() {
     const handleClickOutside = (e: MouseEvent) => {
       if (
         isOpen &&
+        !isClosing &&
         dialogRef.current &&
         !dialogRef.current.contains(e.target as Node) &&
         !buttonRef.current?.contains(e.target as Node)
       ) {
-        setIsOpen(false);
+        handleClose();
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
+  }, [isOpen, isClosing]);
 
   const handleToggle = () => {
-    setIsOpen(!isOpen);
+    if (isOpen) {
+      handleClose();
+    } else {
+      setIsOpen(true);
+      setIsClosing(false);
+    }
   };
 
   const handleClose = () => {
-    setIsOpen(false);
-    buttonRef.current?.focus();
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+      buttonRef.current?.focus();
+    }, 300); // Match animation duration
   };
 
   return (
@@ -79,11 +90,11 @@ export default function ChatbotWidget() {
           aria-modal="false"
           className={`
             fixed z-50 bg-background shadow-lg border rounded-2xl
-            transition-all duration-200 ease-out
+            transition-all duration-300 origin-bottom-right
             ${
-              isOpen
-                ? "opacity-100 scale-100"
-                : "opacity-0 scale-95 pointer-events-none"
+              isClosing
+                ? "animate-out fade-out slide-out-to-right-4 zoom-out-95"
+                : "animate-in fade-in slide-in-from-right-4 zoom-in-95"
             }
             /* Mobile: Full screen */
             inset-4
