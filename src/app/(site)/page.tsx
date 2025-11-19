@@ -8,13 +8,14 @@ import Link from "next/link";
 import SolutionCard from "@/components/SolutionCard";
 import SectionUSPs from "@/components/SectionUSPs";
 import SectionRenderer from "@/components/SectionRenderer";
+import { BookmarkIcon, SquareTerminalIcon } from "lucide-react";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "home"
 ][0]{
-  _id, 
-  title, 
-  body, 
+  _id,
+  title,
+  body,
   headerImage,
   sections[]{
     _type,
@@ -79,51 +80,27 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="hidden relative col-span-full h-[55vh]">
-        {page.headerImage && (
-          <div className="relative h-full">
-            <img
-              src={urlFor(page.headerImage).url()}
-              alt={page.headerImage.alt}
-              className="w-full h-full object-cover"
-            />
-            <div
-              className="absolute inset-0 bg-black/30 z-10"
-              aria-hidden="true"
-            />
-            <div
-              className="absolute inset-0 bg-gradient-to-t from-white to-white/0 z-20"
-              aria-hidden="true"
-            />
-          </div>
-        )}
-        <header className="absolute bottom-0 left-0 right-0 z-30 p-container-sm md:p-container-md w-full lg:w-[50%]">
-          <PortableText value={page.body} />
-        </header>
-      </section>
+      <div className="col-span-full flex items-center justify-end gap-4">
+        <a
+          href="#"
+          className="w-fit px-3.5 py-2 flex items-center gap-1.5 text-sm font-medium text-accent-light bg-accent-dark rounded-full transition-colors duration-250 hover:text-accent-dark hover:bg-accent-light"
+        >
+          <SquareTerminalIcon className="size-4" />
+          Solutions
+        </a>
 
-      <section className="hidden px-conainer-sm md:px-conainer-md col-span-full gid grid-cols-subgrid">
-        <header className="col-span-full mb-6 flex items-center justify-between">
-          <h4>Een greep uit ons aanbod</h4>
-          {/* <Link
-            href="/oplossingen"
-            className="text-blue-600 hover:underline font-medium"
-          >
-            Bekijk alle oplossingen
-          </Link> */}
-        </header>
-        <div className="col-span-full grid grid-cols-1 md:grid-cols-3 gap-10">
-          {solutions.map((solution: any) => (
-            <SolutionCard key={solution._id} solution={solution} />
-          ))}
-        </div>
-      </section>
+        <a
+          href="#"
+          className="w-fit px-3.5 py-2 flex items-center gap-1.5 text-sm font-medium text-stone-700 bg-stone-200 rounded-full transition-colors duration-250 hover:text-stone-800 hover:bg-stone-300"
+        >
+          <BookmarkIcon className="size-4" />
+          Solutions
+        </a>
+      </div>
 
       {page.sections && page.sections.length > 0 && (
         <SectionRenderer sections={page.sections} />
       )}
-
-      {/* <SectionUSPs /> */}
     </>
   );
 }
