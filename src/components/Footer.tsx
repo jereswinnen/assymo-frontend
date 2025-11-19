@@ -1,18 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
+import Logo from "./Logo";
 
 export default async function Footer() {
   return (
     <footer className="c-footer py-6 w-full">
       <div className="o-grid grid-cols-subgrid !gap-y-8 md:gap-y-0">
         <Link href="/" className="col-span-full md:col-span-2">
-          <Image
-            src="/assymoBrandHeader.svg"
-            alt="Assymo Brand"
-            width={1920}
-            height={100}
-            className="w-38"
-          />
+          <Logo className="w-38" />
         </Link>
         <aside className="col-span-full md:col-span-2">
           <ul className="w-full flex flex-col [&>*]:w-full [&>*]:flex [&>*]:flex-col [&>*]:gap-1.5 text-base divide-y divide-(--c-accent-dark)/10">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpIcon, XIcon } from "lucide-react";
+import { ArrowUpIcon, ShieldCheckIcon, XIcon } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import {
@@ -264,6 +264,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                     >
                       {message.role === "assistant" && (
                         <>
+                          {/*<ShieldCheckIcon className="size-3 text-accent-light" />*/}
                           <span className="font-medium text-foreground">
                             Assymo
                           </span>

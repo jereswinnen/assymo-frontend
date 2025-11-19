@@ -1,7 +1,7 @@
 import { client } from "@/sanity/client";
 import Link from "next/link";
 import NavLinks from "./NavLinks";
-import Image from "next/image";
+import Logo from "./Logo";
 
 type NavLink = {
   title: string;
@@ -34,13 +34,7 @@ export default async function Header() {
         <div className="col-span-full flex flex-col md:flex-row md:items-center justify-start md:justify-between gap-8">
           <div className="flex flex-row items-center justify-between gap-4 md:gap-8">
             <Link href="/">
-              <Image
-                src="/assymoBrandHeader.svg"
-                alt="Assymo Brand"
-                width={1920}
-                height={100}
-                className="w-28"
-              />
+              <Logo className="w-28" />
             </Link>
             <nav className="text-base">
               <NavLinks links={nav?.links || []} solutions={solutions} />
