@@ -28,11 +28,13 @@ export async function POST(req: NextRequest) {
         id: `user-${new Date(conv.created_at).getTime()}`,
         role: "user",
         parts: [{ type: "text", text: conv.user_message }],
+        createdAt: new Date(conv.created_at).toISOString(),
       },
       {
         id: `assistant-${new Date(conv.created_at).getTime()}`,
         role: "assistant",
         parts: [{ type: "text", text: conv.bot_response }],
+        createdAt: new Date(conv.created_at).toISOString(),
       },
     ]);
 

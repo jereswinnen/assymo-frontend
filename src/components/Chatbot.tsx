@@ -165,7 +165,10 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
     }
   };
 
-  const isLoading = status === "submitted" || status === "streaming";
+  const isThinking = status === "submitted" || status === "streaming";
+
+  // Show loading spinner only when status is submitted (before streaming starts)
+  const showLoadingSpinner = status === "submitted";
 
   // Calculate remaining messages
   const remainingMessages =
@@ -191,62 +194,78 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {isLoadingMessages ? (
           <div className="flex items-center justify-center h-full">
-            <Spinner className="size-8" />
+            <Spinner className="size-6" />
           </div>
         ) : (
           <>
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`text-base flex ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+            {messages.map((message, index) => {
+              // For assistant messages, check if this is the last one and if we're currently streaming
+              const isLastMessage = index === messages.length - 1;
+              const isStreamingThisMessage = isLastMessage && message.role === "assistant" && status === "streaming";
+
+              // Show timestamp for user messages always, for assistant messages only when not actively streaming
+              const showTimestamp = message.role === "user" || !isStreamingThisMessage;
+
+              return (
                 <div
-                  className={`max-w-[70%] ${
-                    message.role === "user" ? "items-end" : "items-start"
+                  key={message.id}
+                  className={`text-sm flex ${
+                    message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div
-                    className={`rounded-2xl ${
-                      message.role === "user"
-                        ? "p-3 bg-primary text-primary-foreground"
-                        : ""
-                    }`}
-                  >
-                    <p>
-                      {message.parts
-                        .map((part) => (part.type === "text" ? part.text : ""))
-                        .join("")}
-                    </p>
-                  </div>
-                  <div
-                    className={`text-xs text-muted-foreground ${
-                      message.role === "user"
-                        ? "text-right mt-1"
-                        : "text-left mt-2"
-                    }`}
-                  >
-                    {new Date().toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                  <div className="max-w-[80%] flex flex-col gap-2">
+                    <div
+                      className={`rounded-full ${
+                        message.role === "user"
+                          ? "px-3 py-2 bg-primary text-primary-foreground"
+                          : ""
+                      }`}
+                    >
+                      <p>
+                        {message.parts
+                          .map((part) =>
+                            part.type === "text" ? part.text : "",
+                          )
+                          .join("")}
+                      </p>
+                    </div>
+                    {showTimestamp && (
+                      <div
+                        className={`flex gap-1.5 text-xs text-muted-foreground ${
+                          message.role === "user" ? "justify-end" : ""
+                        }`}
+                      >
+                        {message.role === "assistant" && (
+                          <>
+                            <span className="font-medium text-foreground">
+                              Assymo
+                            </span>
+                            <Separator orientation="vertical" className="size-2" />
+                          </>
+                        )}
+                        <time>
+                          {(message as any).createdAt
+                            ? new Date((message as any).createdAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : new Date().toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                        </time>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="flex space-x-2 p-3">
-                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                  <div
-                    className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
+              );
+            })}
+            {showLoadingSpinner && (
+              <div className="text-sm flex justify-start">
+                <div className="max-w-[80%] flex flex-col gap-2">
+                  <div className="flex items-center">
+                    <Spinner className="size-5" />
+                  </div>
                 </div>
               </div>
             )}
@@ -282,7 +301,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                 }}
                 onKeyDown={handleKeyDown}
                 rows={2}
-                disabled={isLoading}
+                disabled={isThinking}
                 maxLength={CHATBOT_CONFIG.maxInputLength}
               />
               <InputGroupAddon align="block-end">
@@ -300,9 +319,13 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                   variant="default"
                   className="rounded-full"
                   size="icon-xs"
-                  disabled={!input.trim() || isLoading}
+                  disabled={!input.trim() || isThinking}
                 >
-                  {isLoading ? <Spinner className="size-4" /> : <ArrowUpIcon />}
+                  {isThinking ? (
+                    <Spinner className="size-4" />
+                  ) : (
+                    <ArrowUpIcon />
+                  )}
                   <span className="sr-only">Verstuur bericht</span>
                 </InputGroupButton>
               </InputGroupAddon>
