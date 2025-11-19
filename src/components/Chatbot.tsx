@@ -17,6 +17,9 @@ import { Spinner } from "./ui/spinner";
 import { CHATBOT_CONFIG } from "@/config/chatbot";
 import { usePersistedMessages } from "@/hooks/usePersistedMessages";
 import { useRateLimitCountdown } from "@/hooks/useRateLimitCountdown";
+import { Card, CardHeader, CardTitle } from "./ui/card";
+import { Exo_2 } from "next/font/google";
+import Logo from "./Logo";
 
 interface ChatbotProps {
   onClose?: () => void;
@@ -177,34 +180,58 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
   return (
     <div className="flex flex-col h-full">
       {/* Header with close button */}
-      <div className="flex items-center justify-between text-foreground p-4 border-b">
-        <p className="!mb-0 text-xl font-semibold">Chat</p>
+      <div className="flex items-center justify-end text-foreground p-4">
         {onClose && (
           <button
             onClick={onClose}
-            className="p-1 bg-muted text-muted-foreground rounded-full transition-colors"
+            className="cursor-pointer p-1 bg-muted text-muted-foreground rounded-full transition-colors"
             aria-label="Sluit chat"
           >
-            <XIcon className="size-5" />
+            <XIcon className="size-4" />
           </button>
         )}
       </div>
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 flex-col gap-6 overflow-y-auto p-4">
         {isLoadingMessages ? (
           <div className="flex items-center justify-center h-full">
             <Spinner className="size-6" />
           </div>
         ) : (
           <>
+            {/* Show suggested questions when no messages */}
+            {messages.length === 0 && (
+              <div className="h-full flex flex-col justify-center gap-4">
+                <header>
+                  <Logo className="w-32 text-accent-dark" />
+                  <p className="text-lg font-medium text-muted-foreground">
+                    Waarmee kunnen we je helpen?
+                  </p>
+                </header>
+                <div className="grid grid-cols-2 gap-3">
+                  {CHATBOT_CONFIG.suggestedQuestions.map((question, index) => (
+                    <a
+                      key={index}
+                      onClick={() => {
+                        sendMessage({ text: question });
+                      }}
+                      className="cursor-pointer text-left flex text-sm font-medium rounded-lg p-2 bg-stone-100 hover:bg-stone-200 transition-colors"
+                      //disabled={status !== "ready"}
+                    >
+                      {question}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
             {messages.map((message, index) => {
               // For assistant messages, check if this is the last one and if we're currently streaming
               const isLastMessage = index === messages.length - 1;
-              const isStreamingThisMessage = isLastMessage && message.role === "assistant" && status === "streaming";
-
-              // Show timestamp for user messages always, for assistant messages only when not actively streaming
-              const showTimestamp = message.role === "user" || !isStreamingThisMessage;
+              const isStreamingThisMessage =
+                isLastMessage &&
+                message.role === "assistant" &&
+                status === "streaming";
 
               return (
                 <div
@@ -229,23 +256,32 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                           .join("")}
                       </p>
                     </div>
-                    {showTimestamp && (
-                      <div
-                        className={`flex gap-1.5 text-xs text-muted-foreground ${
-                          message.role === "user" ? "justify-end" : ""
-                        }`}
-                      >
-                        {message.role === "assistant" && (
-                          <>
-                            <span className="font-medium text-foreground">
-                              Assymo
-                            </span>
-                            <Separator orientation="vertical" className="size-2" />
-                          </>
-                        )}
+                    {/* Always show footer for messages, but change content based on streaming state */}
+                    <div
+                      className={`flex items-center gap-1.5 text-xs text-muted-foreground ${
+                        message.role === "user" ? "justify-end" : ""
+                      }`}
+                    >
+                      {message.role === "assistant" && (
+                        <>
+                          <span className="font-medium text-foreground">
+                            Assymo
+                          </span>
+                          <Separator
+                            orientation="vertical"
+                            className="size-2"
+                          />
+                        </>
+                      )}
+                      {/* Show spinner while streaming, timestamp when done */}
+                      {isStreamingThisMessage ? (
+                        <Spinner className="size-3" />
+                      ) : (
                         <time>
                           {(message as any).createdAt
-                            ? new Date((message as any).createdAt).toLocaleTimeString([], {
+                            ? new Date(
+                                (message as any).createdAt,
+                              ).toLocaleTimeString([], {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })
@@ -254,8 +290,8 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                                 minute: "2-digit",
                               })}
                         </time>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               );
@@ -290,7 +326,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
             <InputGroup>
               <InputGroupTextarea
                 ref={textareaRef}
-                placeholder="Waarmee kunnen we je helpen?"
+                placeholder="Stel je vraag..."
                 value={input}
                 onChange={(e) => {
                   const newValue = e.target.value;
@@ -317,7 +353,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                 <InputGroupButton
                   type="submit"
                   variant="default"
-                  className="rounded-full"
+                  className="cursor-pointer rounded-full"
                   size="icon-xs"
                   disabled={!input.trim() || isThinking}
                 >

@@ -49,6 +49,17 @@ export const CHATBOT_CONFIG = {
 Beantwoord vragen over houten tuingebouwen, zoals tuinhuisjes, overkappingen, pergola's, carports en schuren.
 
 Wees professioneel, behulpzaam en bondig in het Nederlands.`,
+
+  /**
+   * Suggested questions to show to users
+   * These appear when the conversation is empty to help users get started
+   */
+  suggestedQuestions: [
+    "Welke houtsoorten gebruiken jullie?",
+    "Wat zijn jullie openingstijden?",
+    "Waar is jullie showroom gelegen?",
+    "Vraag",
+  ],
 } as const;
 
 /**
