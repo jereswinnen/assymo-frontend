@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LogOutIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 export default function AdminLayout({
   children,
@@ -13,6 +14,10 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const isLoginPage = pathname === "/admin/login";
+
+  useEffect(() => {
+    document.title = "Admin - Assymo";
+  }, []);
 
   const handleLogout = async () => {
     try {
