@@ -45,6 +45,15 @@ const PAGE_QUERY = `*[
         text,
         url
       }
+    },
+    title,
+    subtitle,
+    showButtons,
+    buttons[]{
+      label,
+      url,
+      icon,
+      variant
     }
   }
 }`;

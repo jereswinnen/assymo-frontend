@@ -10,6 +10,7 @@ import TextLeftImageGridRight from "./sections/TextLeftImageGridRight";
 import TextRightImageGridLeft from "./sections/TextRightImageGridLeft";
 import SalonizedBookingSection from "./sections/SalonizedBookingSection";
 import ContactForm from "./sections/ContactForm";
+import PageHeader from "./sections/PageHeader";
 
 interface Section {
   _type: string;
@@ -104,6 +105,9 @@ export default function SectionRenderer({ sections }: SectionRendererProps) {
             return (
               <TextRightImageGridLeft key={key} section={section as any} />
             );
+
+          case "pageHeader":
+            return <PageHeader key={key} section={section as any} />;
 
           default:
             console.warn(`Unknown section type: ${section._type}`);
