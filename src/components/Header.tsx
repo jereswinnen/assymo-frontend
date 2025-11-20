@@ -1,16 +1,7 @@
 import { client } from "@/sanity/client";
 import Link from "next/link";
-import NavLinks from "./NavLinks";
 import Logo from "./Logo";
-
-type NavLink = {
-  title: string;
-  slug: string;
-};
-
-type Navigation = {
-  links: NavLink[];
-};
+import NavLinks from "./NavLinks";
 
 const NAV_QUERY = `*[_type == "navigation"][0]{links}`;
 

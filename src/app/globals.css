@@ -191,22 +191,16 @@ body {
   color: var(--c-accent-dark);
 }
 
-.c-header,
-.c-footer {
-  color: white;
-  background: var(--c-accent-darkest);
-}
-
 p:not(:last-child) {
   margin-bottom: 0.8rem;
 }
 
 h1 {
   margin-bottom: 1.2rem;
-  font-size: 2.5rem;
+  font-size: 3rem;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  font-weight: 400;
+  font-weight: 480 !important;
 }
 
 h2 {
@@ -214,7 +208,7 @@ h2 {
   font-size: 1.75rem;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  font-weight: 500;
+  font-weight: 420 !important;
 }
 
 h3 {
@@ -231,18 +225,4 @@ h4 {
   text-transform: uppercase;
   font-weight: 500;
   opacity: 0.7;
-}
-
-.c-header .c-action,
-.c-footer .c-action {
-  font-size: 1rem;
-  font-weight: 500;
-  color: white;
-  border: 1px solid var(--c-accent-light);
-  padding: 0.5rem 0.75rem;
-  transition: all 0.2s ease-in-out;
-  text-decoration: none;
-}
-.c-action:hover {
-  background: rgba(255, 255, 255, 0.1);
 }

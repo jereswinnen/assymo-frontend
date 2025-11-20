@@ -2,13 +2,9 @@ export const dynamic = "force-dynamic";
 
 import { getPageMetadata } from "@/lib/getPageMetadata";
 import { client } from "@/sanity/client";
-import { urlFor } from "@/sanity/imageUrl";
-import { PortableText } from "@portabletext/react";
-import Link from "next/link";
-import SolutionCard from "@/components/SolutionCard";
-import SectionUSPs from "@/components/SectionUSPs";
 import SectionRenderer from "@/components/SectionRenderer";
-import { BookmarkIcon, SquareTerminalIcon } from "lucide-react";
+import { Calendar1Icon, ListTreeIcon } from "lucide-react";
+import { Action } from "@/components/Action";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "home"
@@ -68,7 +64,6 @@ export async function generateMetadata() {
 
 export default async function HomePage() {
   const page = await client.fetch(PAGE_QUERY);
-  const solutions = await client.fetch(SOLUTIONS_QUERY);
 
   if (!page) {
     return (
@@ -80,23 +75,30 @@ export default async function HomePage() {
 
   return (
     <>
-      <div className="col-span-full flex items-center justify-end gap-4">
-        <a
-          href="#"
-          className="w-fit px-3.5 py-2 flex items-center gap-1.5 text-sm font-medium text-accent-light bg-accent-dark rounded-full transition-colors duration-250 hover:text-accent-dark hover:bg-accent-light"
-        >
-          <SquareTerminalIcon className="size-4" />
-          Solutions
-        </a>
-
-        <a
-          href="#"
-          className="w-fit px-3.5 py-2 flex items-center gap-1.5 text-sm font-medium text-stone-700 bg-stone-200 rounded-full transition-colors duration-250 hover:text-stone-800 hover:bg-stone-300"
-        >
-          <BookmarkIcon className="size-4" />
-          Solutions
-        </a>
-      </div>
+      <header className="col-span-full flex flex-col gap-8">
+        <div className="w-[900px] flex flex-col gap-2">
+          <h1 className="!mb-0">Houten tuingebouwen op maat.</h1>
+          <p className="font-[420] text-xl text-stone-600">
+            Bij Assymo zijn we gespecialiseerd in het creëren van hoogwaardige
+            maatwerkoplossingen voor uw tuin. Onze passie voor tuinconstructies
+            en oog voor detail zorgen ervoor dat elk project perfect aansluit
+            bij uw wensen en de unieke kenmerken van uw woning.
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <Action
+            href="/oplossingen"
+            icon={<ListTreeIcon />}
+            label="Ons aanbod"
+          />
+          <Action
+            href="/contact"
+            icon={<Calendar1Icon />}
+            label="Maak een afspraak"
+            variant="secondary"
+          />
+        </div>
+      </header>
 
       {page.sections && page.sections.length > 0 && (
         <SectionRenderer sections={page.sections} />

@@ -16,7 +16,7 @@ export const CHATBOT_CONFIG = {
    * Maximum number of messages a user can send within the rate limit window
    * @default 10
    */
-  rateLimitMaxMessages: 2,
+  rateLimitMaxMessages: 10,
 
   /**
    * Rate limit time window in seconds (24 hours = 86400 seconds)
@@ -24,7 +24,7 @@ export const CHATBOT_CONFIG = {
    * @default 86400 (24 hours)
    * @testing 180 (3 minutes for testing)
    */
-  rateLimitWindowSeconds: 180, // 3 minutes for testing
+  rateLimitWindowSeconds: 86400,
 
   /**
    * How long to keep messages in browser localStorage and database (in days)
@@ -32,7 +32,7 @@ export const CHATBOT_CONFIG = {
    * @default 30
    * @testing 1 (1 day for testing)
    */
-  messageRetentionDays: 1,
+  messageRetentionDays: 30,
 
   /**
    * Maximum character length for user input messages
