@@ -1,10 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import Logo from "./Logo";
+import { cn } from "@/lib/utils";
 
-export default async function Footer() {
+interface FooterProps {
+  className?: string;
+}
+
+export default async function Footer({ className }: FooterProps) {
   return (
-    <footer className="c-footer py-6 w-full">
+    <footer className={cn("c-footer py-6 w-full", className)}>
       <div className="o-grid grid-cols-subgrid !gap-y-8 md:gap-y-0">
         <Link href="/" className="col-span-full md:col-span-2">
           <Logo className="w-38" />
