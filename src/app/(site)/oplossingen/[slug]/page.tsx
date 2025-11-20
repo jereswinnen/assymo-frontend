@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { client } from "@/sanity/client";
+import { sectionsFragment } from "@/sanity/fragments";
 import { notFound } from "next/navigation";
 import SectionRenderer from "@/components/SectionRenderer";
 
@@ -12,40 +13,7 @@ const SOLUTIONS_QUERY = `*[
   slug,
   headerImage,
   body,
-  sections[]{
-    _type,
-    _key,
-    heading,
-    image{
-      asset,
-      hotspot,
-      alt
-    },
-    images[]{
-      asset,
-      hotspot,
-      alt,
-      caption
-    },
-    products[]->{
-      _id,
-      name,
-      slug,
-      headerImage{
-        asset,
-        hotspot,
-        alt
-      }
-    },
-    content{
-      heading,
-      body,
-      cta{
-        text,
-        url
-      }
-    }
-  }
+  ${sectionsFragment}
 }`;
 
 export async function generateMetadata({ params }: any) {

@@ -7,6 +7,8 @@ import {
   MailIcon,
   InfoIcon,
   LucideIcon,
+  DownloadIcon,
+  MessagesSquareIcon,
 } from "lucide-react";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -16,6 +18,8 @@ const iconMap: Record<string, LucideIcon> = {
   phone: PhoneIcon,
   mail: MailIcon,
   info: InfoIcon,
+  download: DownloadIcon,
+  chat: MessagesSquareIcon,
 };
 
 interface PageHeaderButton {

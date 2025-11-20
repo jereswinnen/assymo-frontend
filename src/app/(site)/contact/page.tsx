@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { getPageMetadata } from "@/lib/getPageMetadata";
 import { client } from "@/sanity/client";
+import { sectionsFragment } from "@/sanity/fragments";
 import { urlFor } from "@/sanity/imageUrl";
 import { PortableText } from "@portabletext/react";
 import Link from "next/link";
@@ -10,44 +11,11 @@ import SectionRenderer from "@/components/SectionRenderer";
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "contact"
 ][0]{
-  _id, 
-  title, 
-  body, 
+  _id,
+  title,
+  body,
   headerImage,
-  sections[]{
-    _type,
-    _key,
-    heading,
-    image{
-      asset,
-      hotspot,
-      alt
-    },
-    images[]{
-      asset,
-      hotspot,
-      alt,
-      caption
-    },
-    products[]->{
-      _id,
-      name,
-      slug,
-      headerImage{
-        asset,
-        hotspot,
-        alt
-      }
-    },
-    content{
-      heading,
-      body,
-      cta{
-        text,
-        url
-      }
-    }
-  }
+  ${sectionsFragment}
 }`;
 
 export async function generateMetadata() {

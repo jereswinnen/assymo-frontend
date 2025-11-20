@@ -2,9 +2,8 @@ export const dynamic = "force-dynamic";
 
 import { getPageMetadata } from "@/lib/getPageMetadata";
 import { client } from "@/sanity/client";
+import { sectionsFragment } from "@/sanity/fragments";
 import SectionRenderer from "@/components/SectionRenderer";
-import { Calendar1Icon, ListTreeIcon } from "lucide-react";
-import { Action } from "@/components/Action";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "home"
@@ -13,49 +12,7 @@ const PAGE_QUERY = `*[
   title,
   body,
   headerImage,
-  sections[]{
-    _type,
-    _key,
-    heading,
-    image{
-      asset,
-      hotspot,
-      alt
-    },
-    images[]{
-      asset,
-      hotspot,
-      alt,
-      caption
-    },
-    products[]->{
-      _id,
-      name,
-      slug,
-      headerImage{
-        asset,
-        hotspot,
-        alt
-      }
-    },
-    content{
-      heading,
-      body,
-      cta{
-        text,
-        url
-      }
-    },
-    title,
-    subtitle,
-    showButtons,
-    buttons[]{
-      label,
-      url,
-      icon,
-      variant
-    }
-  }
+  ${sectionsFragment}
 }`;
 
 const SOLUTIONS_QUERY = `*[
@@ -84,31 +41,6 @@ export default async function HomePage() {
 
   return (
     <>
-      <header className="col-span-full flex flex-col gap-8">
-        <div className="w-[900px] flex flex-col gap-2">
-          <h1 className="!mb-0">Houten tuingebouwen op maat.</h1>
-          <p className="font-[420] text-xl text-stone-600">
-            Bij Assymo zijn we gespecialiseerd in het creëren van hoogwaardige
-            maatwerkoplossingen voor uw tuin. Onze passie voor tuinconstructies
-            en oog voor detail zorgen ervoor dat elk project perfect aansluit
-            bij uw wensen en de unieke kenmerken van uw woning.
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <Action
-            href="/oplossingen"
-            icon={<ListTreeIcon />}
-            label="Ons aanbod"
-          />
-          <Action
-            href="/contact"
-            icon={<Calendar1Icon />}
-            label="Maak een afspraak"
-            variant="secondary"
-          />
-        </div>
-      </header>
-
       {page.sections && page.sections.length > 0 && (
         <SectionRenderer sections={page.sections} />
       )}
