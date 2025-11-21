@@ -116,6 +116,11 @@ Baseer je antwoorden ALLEEN op bovenstaande informatie.`;
       model: openai(CHATBOT_CONFIG.model),
       system: systemPrompt,
       messages: modelMessages,
+      providerOptions: {
+        openai: {
+          reasoningEffort: "minimal",
+        },
+      },
       async onFinish({ text }) {
         // Log conversation after streaming completes
         const responseTime = Date.now() - startTime;

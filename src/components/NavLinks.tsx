@@ -24,7 +24,7 @@ export default function NavLinks({ links, solutions, className }: Props) {
   const pathname = usePathname();
 
   return (
-    <ul className={`flex gap-8 ${className ? ` ${className}` : ""}`}>
+    <ul className={`flex gap-7 group/nav ${className ? ` ${className}` : ""}`}>
       {links.map((link) => {
         const isActive =
           pathname === `/${link.slug}` ||
@@ -33,14 +33,14 @@ export default function NavLinks({ links, solutions, className }: Props) {
           // Check if any solution is active
           const isSolutionActive = pathname.startsWith("/oplossingen/");
           return (
-            <li key={link.slug} className="relative group">
+            <li key={link.slug} className="relative group/item">
               <Link
                 href={`/${link.slug}`}
-                className={`font-medium${isSolutionActive ? " text-white font-bold" : ""}`}
+                className={`font-medium transition-opacity duration-300 group-hover/nav:opacity-60 hover:!opacity-100 ${isSolutionActive ? "!font-bold" : ""}`}
               >
                 {link.title}
               </Link>
-              <ul className="hidden absolute left-0 top-full w-56 bg-white shadow-lg rounded invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-300 z-10 border border-gray-200">
+              <ul className="hidden absolute left-0 top-full w-56 bg-white shadow-lg rounded invisible opacity-0 group-hover/item:visible group-hover/item:opacity-100 transition-opacity duration-300 z-10 border border-gray-200">
                 {solutions.map((solution) => {
                   const solutionActive =
                     pathname === `/oplossingen/${solution.slug.current}`;
@@ -48,7 +48,7 @@ export default function NavLinks({ links, solutions, className }: Props) {
                     <li key={solution._id}>
                       <Link
                         href={`/oplossingen/${solution.slug.current}`}
-                        className={`block px-4 py-2 hover:bg-gray-100 whitespace-nowrap${solutionActive ? " text-white font-bold" : ""}`}
+                        className={`block px-4 py-2 hover:bg-gray-100 whitespace-nowrap${solutionActive ? "!font-medium" : ""}`}
                       >
                         {solution.name}
                       </Link>
@@ -63,7 +63,7 @@ export default function NavLinks({ links, solutions, className }: Props) {
           <li key={link.slug}>
             <Link
               href={`/${link.slug}`}
-              className={`font-medium${isActive ? " !font-semibold" : ""}`}
+              className={`font-medium transition-opacity duration-200 group-hover/nav:opacity-60 hover:!opacity-100 ${isActive ? " !font-medium" : ""}`}
             >
               {link.title}
             </Link>
