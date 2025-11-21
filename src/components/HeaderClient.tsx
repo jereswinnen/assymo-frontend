@@ -14,6 +14,7 @@ import { Separator } from "./ui/separator";
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { urlFor } from "@/sanity/imageUrl";
 
 // Animation tokens
 const easing = "circInOut";
@@ -22,35 +23,93 @@ const portalDuration = 0.4;
 const subMenuHeightDuration = 0.5;
 const subMenuOpacityDuration = 0.4;
 const subMenuInnerElementDuration = 0.4;
+const carouselInterval = 1900;
+const carouselTransitionDuration = 0.4;
+
+type SubItem = {
+  name: string;
+  slug: { current: string };
+  headerImage?: {
+    _type: "image";
+    asset: { _ref: string; _type: "reference" };
+    hotspot?: { x: number; y: number };
+    alt?: string;
+  };
+};
 
 type NavLink = {
   title: string;
   slug: string;
+  submenuHeading?: string;
+  subItems?: SubItem[];
 };
 
-type Solution = {
-  _id: string;
-  name: string;
-  slug: { current: string };
+type SiteSettings = {
+  address?: string;
+  phone?: string;
+  instagram?: string;
+  facebook?: string;
 };
 
 interface HeaderClientProps {
   links: NavLink[];
-  solutions: Solution[];
+  settings?: SiteSettings;
   className?: string;
 }
 
 export default function HeaderClient({
   links,
-  solutions,
+  settings,
   className,
 }: HeaderClientProps) {
-  const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
+  const [activeLink, setActiveLink] = useState<NavLink | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isHoveringItem, setIsHoveringItem] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  const isSubmenuOpen = activeLink !== null;
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Auto-cycle through images when not hovering a specific item
+  useEffect(() => {
+    if (!isSubmenuOpen || isHoveringItem || !activeLink?.subItems?.length) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % activeLink.subItems!.length);
+    }, carouselInterval);
+
+    return () => clearInterval(interval);
+  }, [isSubmenuOpen, isHoveringItem, activeLink]);
+
+  const handleLinkHover = (link: NavLink) => {
+    if (link.subItems && link.subItems.length > 0) {
+      setActiveLink(link);
+      setCurrentIndex(0);
+      setIsHoveringItem(false);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setActiveLink(null);
+    setCurrentIndex(0);
+    setIsHoveringItem(false);
+  };
+
+  const handleItemHover = (index: number) => {
+    setCurrentIndex(index);
+    setIsHoveringItem(true);
+  };
+
+  const handleItemsLeave = () => {
+    setIsHoveringItem(false);
+  };
+
+  const currentImage = activeLink?.subItems?.[currentIndex]?.headerImage;
 
   return (
     <>
@@ -78,7 +137,7 @@ export default function HeaderClient({
         animate={{
           height: isSubmenuOpen ? "auto" : "auto",
         }}
-        onMouseLeave={() => setIsSubmenuOpen(false)}
+        onMouseLeave={handleMouseLeave}
       >
         <div className="mx-auto w-full max-w-site flex flex-col md:flex-row md:items-center justify-start md:justify-between gap-8">
           <Link href="/">
@@ -87,23 +146,16 @@ export default function HeaderClient({
 
           <nav className="text-sm bg-ambr-200">
             <ul className="flex gap-6 group/nav">
-              {links.map((link) => {
-                const hasSubmenu = link.title === "Exterieur";
-
-                return (
-                  <li
-                    key={link.slug}
-                    onMouseEnter={() => hasSubmenu && setIsSubmenuOpen(true)}
+              {links.map((link) => (
+                <li key={link.slug} onMouseEnter={() => handleLinkHover(link)}>
+                  <Link
+                    href={`/${link.slug}`}
+                    className="font-medium transition-opacity duration-200 group-hover/nav:opacity-60 hover:!opacity-100"
                   >
-                    <Link
-                      href={`/${link.slug}`}
-                      className="font-medium transition-opacity duration-200 group-hover/nav:opacity-60 hover:!opacity-100"
-                    >
-                      {link.title}
-                    </Link>
-                  </li>
-                );
-              })}
+                    {link.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
 
@@ -128,7 +180,7 @@ export default function HeaderClient({
             >
               <div className="mx-auto w-full max-w-site flex gap-8 py-8">
                 <motion.figure
-                  className="w-2xs"
+                  className="w-2xs h-96 relative overflow-hidden"
                   initial={{ opacity: 0, y: translateVertical }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: translateVertical }}
@@ -137,13 +189,26 @@ export default function HeaderClient({
                     ease: easing,
                   }}
                 >
-                  <img
-                    src="https://images.unsplash.com/photo-1599696848652-f0ff23bc911f?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                    alt=""
-                  />
+                  <AnimatePresence>
+                    {currentImage && (
+                      <motion.img
+                        key={currentIndex}
+                        src={urlFor(currentImage).url()}
+                        alt={currentImage.alt || ""}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{
+                          duration: carouselTransitionDuration,
+                          ease: "easeInOut",
+                        }}
+                      />
+                    )}
+                  </AnimatePresence>
                 </motion.figure>
                 <motion.div
-                  className="flex flex-col gap-3 bg-geen-200"
+                  className="flex flex-col gap-3"
                   initial={{ opacity: 0, y: translateVertical }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: translateVertical }}
@@ -152,25 +217,29 @@ export default function HeaderClient({
                     ease: easing,
                   }}
                 >
-                  <span className="text-xs font-medium text-stone-600">
-                    Ontdek
-                  </span>
-                  <ul className="flex flex-col gap-1.5 text-2xl font-semibold [&>*>*]:block [&>*>*]:transition-all [&>*>*]:duration-300 [&>*>*]:hover:translate-x-1.5">
-                    {[
-                      "Trappen",
-                      "Badkamer",
-                      "Keuken",
-                      "Bureau",
-                      "Meubilair",
-                    ].map((item) => (
-                      <li key={item}>
-                        <a href="#">{item}</a>
+                  {activeLink?.submenuHeading && (
+                    <span className="text-xs font-medium text-stone-600">
+                      {activeLink.submenuHeading}
+                    </span>
+                  )}
+                  <ul
+                    className="flex flex-col gap-1.5 text-2xl font-semibold [&>*>*]:block [&>*>*]:transition-all [&>*>*]:duration-300 [&>*>*]:hover:translate-x-1.5"
+                    onMouseLeave={handleItemsLeave}
+                  >
+                    {activeLink?.subItems?.map((item, index) => (
+                      <li
+                        key={item.slug.current}
+                        onMouseEnter={() => handleItemHover(index)}
+                      >
+                        <Link href={`/oplossingen/${item.slug.current}`}>
+                          {item.name}
+                        </Link>
                       </li>
                     ))}
                   </ul>
                 </motion.div>
                 <motion.div
-                  className="ml-auto w-3xs flex flex-col gap-3 bg-inigo-200"
+                  className="ml-auto w-3xs flex flex-col gap-3"
                   initial={{ opacity: 0, y: translateVertical }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: translateVertical }}
@@ -184,40 +253,56 @@ export default function HeaderClient({
                   </span>
                   <div className="flex flex-col gap-6">
                     <ul className="flex flex-col gap-3 text-base font-medium">
-                      <li>
-                        Eikenlei 159,<br></br>2960 Sint-Job-in-&apos;t-Goor
-                      </li>
-                      <li>
-                        <a
-                          href="#"
-                          className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
-                        >
-                          <PhoneIcon className="size-4" />
-                          <span>+32 (0) 3 434 74 98</span>
-                        </a>
-                      </li>
+                      {settings?.address && (
+                        <li className="whitespace-pre-line">
+                          {settings.address}
+                        </li>
+                      )}
+                      {settings?.phone && (
+                        <li>
+                          <a
+                            href={`tel:${settings.phone}`}
+                            className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                          >
+                            <PhoneIcon className="size-4" />
+                            <span>{settings.phone}</span>
+                          </a>
+                        </li>
+                      )}
                     </ul>
-                    <Separator />
-                    <ul className="flex flex-col gap-3 text-sm font-medium">
-                      <li>
-                        <a
-                          className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
-                          href="#"
-                        >
-                          <InstagramIcon className="size-4" />
-                          Instagram
-                        </a>
-                      </li>
-                      <li>
-                        <a
-                          className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
-                          href="#"
-                        >
-                          <FacebookIcon className="size-4" />
-                          Facebook
-                        </a>
-                      </li>
-                    </ul>
+                    {(settings?.instagram || settings?.facebook) && (
+                      <>
+                        <Separator />
+                        <ul className="flex flex-col gap-3 text-sm font-medium">
+                          {settings?.instagram && (
+                            <li>
+                              <a
+                                className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                href={settings.instagram}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <InstagramIcon className="size-4" />
+                                Instagram
+                              </a>
+                            </li>
+                          )}
+                          {settings?.facebook && (
+                            <li>
+                              <a
+                                className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                href={settings.facebook}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <FacebookIcon className="size-4" />
+                                Facebook
+                              </a>
+                            </li>
+                          )}
+                        </ul>
+                      </>
+                    )}
                   </div>
                 </motion.div>
               </div>
