@@ -9,7 +9,7 @@ interface FooterProps {
 
 export default async function Footer({ className }: FooterProps) {
   return (
-    <footer className={cn("c-footer py-6 w-full", className)}>
+    <footer className={cn("py-6", className)}>
       <div className="o-grid grid-cols-subgrid !gap-y-8 md:gap-y-0">
         <Link href="/" className="col-span-full md:col-span-2">
           <Logo className="w-38" />

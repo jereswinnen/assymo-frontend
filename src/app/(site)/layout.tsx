@@ -8,12 +8,10 @@ export default function SiteLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="o-grid !gap-y-24">
-      <Header className="col-span-full" />
-      <main className="col-span-full o-grid grid-cols-subgrid !gap-y-24">
-        {children}
-      </main>
-      <Footer className="col-span-full" />
+    <div className="flex flex-col gap-y-24">
+      <Header />
+      <main className="o-grid grid-cols-subgrid !gap-y-24">{children}</main>
+      <Footer />
       <ChatbotWidget />
     </div>
   );

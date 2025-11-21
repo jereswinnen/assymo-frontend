@@ -34,7 +34,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <div className="col-span-full flex gap-8">
+      <div className="col-span-full flex gap-8 bg-amber-200">
         <figure className="w-3xs">
           <img
             src="https://images.unsplash.com/photo-1599696848652-f0ff23bc911f?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"

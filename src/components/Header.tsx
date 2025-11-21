@@ -28,7 +28,7 @@ export default async function Header({ className }: HeaderProps) {
 
   return (
     <header className={cn("md:sticky md:top-0 z-50 py-8", className)}>
-      <div className="col-span-full flex flex-col md:flex-row md:items-center justify-start md:justify-between gap-8">
+      <div className="mx-auto max-w-site flex flex-col md:flex-row md:items-center justify-start md:justify-between gap-8">
         <Link href="/">
           <Logo className="w-28" />
         </Link>
