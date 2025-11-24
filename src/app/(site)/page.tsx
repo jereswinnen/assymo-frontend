@@ -5,6 +5,7 @@ import { client } from "@/sanity/client";
 import { sectionsFragment } from "@/sanity/fragments";
 import SectionRenderer from "@/components/SectionRenderer";
 import { SplitSection } from "@/components/SplitSection";
+import { EyeIcon } from "lucide-react";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "home"
@@ -38,6 +39,8 @@ export default async function HomePage() {
       href: string;
       title?: string;
       subtitle?: string;
+      actionLabel?: string;
+      actionIcon?: React.ReactNode;
     },
     {
       image: string;
@@ -45,6 +48,8 @@ export default async function HomePage() {
       href: string;
       title?: string;
       subtitle?: string;
+      actionLabel?: string;
+      actionIcon?: React.ReactNode;
     },
   ] = [
     {
@@ -54,6 +59,8 @@ export default async function HomePage() {
       href: "/oplossingen",
       title: "Exterieur",
       subtitle: "Ontdek onze collectie",
+      actionLabel: "Bekijk oplossingen",
+      actionIcon: <EyeIcon />,
     },
     {
       image:
@@ -62,6 +69,8 @@ export default async function HomePage() {
       href: "/oplossingen",
       title: "Interieur",
       subtitle: "Persoonlijk advies",
+      actionLabel: "Bekijk oplossingen",
+      actionIcon: <EyeIcon />,
     },
   ];
 
