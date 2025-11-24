@@ -48,7 +48,22 @@ export const pageHeaderFields = `
   }
 `;
 
-// Combined sections fragment with all section type fields
+// Add a new fragment for split section items
+export const splitItemFields = `
+  image{
+    ${imageFields}
+  },
+  title,
+  subtitle,
+  href,
+  action{
+    label,
+    icon,
+    variant
+  }
+`;
+
+// Update sectionsFragment to include items for splitSection
 export const sectionsFragment = `
   sections[]{
     _type,
@@ -65,6 +80,9 @@ export const sectionsFragment = `
     },
     content{
       ${contentFields}
+    },
+    items[]{
+      ${splitItemFields}
     },
     ${pageHeaderFields}
   }
