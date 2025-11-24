@@ -1,8 +1,14 @@
 "use client";
 
 import { urlFor } from "@/sanity/imageUrl";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "motion/react";
+
+// Animation tokens (matching HeaderClient)
+const easing = "easeInOut";
+const carouselInterval = 5000;
+const carouselTransitionDuration = 0.4;
 
 interface SlideshowImage {
   _type: "image";
@@ -15,49 +21,37 @@ interface SlideshowImage {
 interface SlideshowProps {
   images: SlideshowImage[];
   className?: string;
+  variant?: "default" | "fullwidth";
 }
 
-export default function Slideshow({ images, className = "" }: SlideshowProps) {
+export default function Slideshow({ images, className = "", variant = "default" }: SlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const goToPrevious = useCallback(() => {
-    if (isTransitioning || !images) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-      setIsTransitioning(false);
-    }, 250);
-  }, [isTransitioning, images]);
+  const goToPrevious = () => {
+    if (!images) return;
+    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
 
-  const goToNext = useCallback(() => {
-    if (isTransitioning || !images) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-      setIsTransitioning(false);
-    }, 250);
-  }, [isTransitioning, images]);
+  const goToNext = () => {
+    if (!images) return;
+    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
 
-  const goToSlide = useCallback((index: number) => {
-    if (isTransitioning || index === currentIndex || !images) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentIndex(index);
-      setIsTransitioning(false);
-    }, 250);
-  }, [isTransitioning, currentIndex, images]);
+  const goToSlide = (index: number) => {
+    if (index === currentIndex || !images) return;
+    setCurrentIndex(index);
+  };
 
-  // Auto-advance slideshow every 5 seconds
+  // Auto-advance slideshow (resets on manual navigation via currentIndex dependency)
   useEffect(() => {
     if (!images || images.length <= 1) return;
-    
+
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-    }, 5000);
+    }, carouselInterval);
 
     return () => clearInterval(interval);
-  }, [images]);
+  }, [images, currentIndex]);
 
   if (!images || images.length === 0) {
     return null;
@@ -67,36 +61,46 @@ export default function Slideshow({ images, className = "" }: SlideshowProps) {
 
   return (
     <div className={`relative ${className}`}>
-      <div className={`relative overflow-hidden rounded-2xl bg-gray-100 ${
-        className === "slideshow-fullwidth" ? "h-[60vh]" : "h-96"
+      <div className={`relative overflow-hidden rounded-2xl bg-stone-100 ${
+        variant === "fullwidth" ? "h-[60vh]" : "h-96"
       }`}>
-        <div className={`absolute inset-0 transition-opacity duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-          <Image
-            src={urlFor(currentImage).url()}
-            alt={currentImage.alt || "Slideshow image"}
-            fill
-            className={className === "slideshow-fullwidth" ? "object-cover" : "object-contain"}
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
-        </div>
-        
+        <AnimatePresence>
+          <motion.div
+            key={currentIndex}
+            className="absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: carouselTransitionDuration,
+              ease: easing,
+            }}
+          >
+            <Image
+              src={urlFor(currentImage).url()}
+              alt={currentImage.alt || "Slideshow image"}
+              fill
+              className={variant === "fullwidth" ? "object-cover" : "object-contain"}
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </motion.div>
+        </AnimatePresence>
+
         {images.length > 1 && (
           <>
             <button
               onClick={goToPrevious}
-              disabled={isTransitioning}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all disabled:opacity-50 z-10"
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-stone-900 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all z-10"
               aria-label="Previous image"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            
+
             <button
               onClick={goToNext}
-              disabled={isTransitioning}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all disabled:opacity-50 z-10"
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-stone-900 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all z-10"
               aria-label="Next image"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,9 +111,21 @@ export default function Slideshow({ images, className = "" }: SlideshowProps) {
         )}
       </div>
 
-      {currentImage.caption && (
-        <p className="mt-2 text-sm text-gray-600 text-center">{currentImage.caption}</p>
-      )}
+      <AnimatePresence>
+        <motion.p
+          key={currentIndex}
+          className="mt-2 text-sm text-stone-600 text-center min-h-[1.25rem]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{
+            duration: carouselTransitionDuration,
+            ease: easing,
+          }}
+        >
+          {currentImage.caption || "\u00A0"}
+        </motion.p>
+      </AnimatePresence>
 
       {images.length > 1 && (
         <div className="flex justify-center mt-4 space-x-2">
@@ -117,9 +133,9 @@ export default function Slideshow({ images, className = "" }: SlideshowProps) {
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              disabled={isTransitioning}
-              className={`w-2 h-2 rounded-full transition-all disabled:opacity-50 ${
-                index === currentIndex ? "bg-gray-900" : "bg-gray-300 hover:bg-gray-500"
+              aria-current={index === currentIndex ? "true" : undefined}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === currentIndex ? "bg-stone-900" : "bg-stone-300 hover:bg-stone-500"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
