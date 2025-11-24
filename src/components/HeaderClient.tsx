@@ -167,12 +167,12 @@ export default function HeaderClient({
         }}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="mx-auto w-full max-w-site flex flex-col md:flex-row md:items-center justify-start md:justify-between gap-8">
-          <Link href="/">
+        <div className="mx-auto w-full max-w-site flex items-center">
+          <Link href="/" className="relative">
             <Logo className="w-28" />
           </Link>
 
-          <nav className="text-sm">
+          <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm">
             <ul className="flex gap-6 group/nav">
               {links.map((link, index) => (
                 <li
@@ -191,6 +191,7 @@ export default function HeaderClient({
           </nav>
 
           <Action
+            className="ml-auto relative"
             href="/contact"
             icon={<Calendar1Icon />}
             label="Maak een afspraak"
