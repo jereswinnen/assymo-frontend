@@ -13,6 +13,7 @@ import ContactForm from "./sections/ContactForm";
 import PageHeader from "./sections/PageHeader";
 import { SplitSection } from "./sections/SplitSection";
 import UspSection from "./sections/UspSection";
+import SolutionsScroller from "./sections/SolutionsScroller";
 
 interface Section {
   _type: string;
@@ -116,6 +117,9 @@ export default function SectionRenderer({ sections }: SectionRendererProps) {
 
           case "uspSection":
             return <UspSection key={key} section={section as any} />;
+
+          case "solutionsScroller":
+            return <SolutionsScroller key={key} section={section as any} />;
 
           default:
             console.warn(`Unknown section type: ${section._type}`);

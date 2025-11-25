@@ -21,7 +21,7 @@
   --c-accent-dark: #1f3632;
   --c-accent-darkest: #1a2322;
   @media (min-width: 46em) {
-    --u-grid-columns: 8;
+    --u-grid-columns: 9;
   }
   --radius: 0.625rem;
   --card: oklch(1 0 0);

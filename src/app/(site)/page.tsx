@@ -4,6 +4,7 @@ import { getPageMetadata } from "@/lib/getPageMetadata";
 import { client } from "@/sanity/client";
 import { sectionsFragment } from "@/sanity/fragments";
 import SectionRenderer from "@/components/SectionRenderer";
+import SolutionsScroller from "@/components/sections/SolutionsScroller";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "home"
@@ -32,6 +33,9 @@ export default async function HomePage() {
 
   return (
     <>
+      <SolutionsScroller
+        section={{ _type: "solutionsScroller", heading: "Onze oplossingen" }}
+      />
       {page.sections && page.sections.length > 0 && (
         <SectionRenderer sections={page.sections} />
       )}
