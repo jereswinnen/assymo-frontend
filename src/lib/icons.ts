@@ -14,7 +14,7 @@ import {
   MailIcon,
   MessagesSquareIcon,
   PhoneIcon,
-  RulerIcon,
+  RulerDimensionLineIcon,
   WarehouseIcon,
 } from "lucide-react";
 
@@ -30,6 +30,6 @@ export const iconMap: Record<string, LucideIcon> = {
   list: ListTreeIcon,
   mail: MailIcon,
   phone: PhoneIcon,
-  ruler: RulerIcon,
+  ruler: RulerDimensionLineIcon,
   warehouse: WarehouseIcon,
 };
