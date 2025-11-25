@@ -1,26 +1,5 @@
 import { Action } from "@/components/Action";
-import {
-  ListTreeIcon,
-  Calendar1Icon,
-  ArrowRightIcon,
-  PhoneIcon,
-  MailIcon,
-  InfoIcon,
-  LucideIcon,
-  DownloadIcon,
-  MessagesSquareIcon,
-} from "lucide-react";
-
-const iconMap: Record<string, LucideIcon> = {
-  list: ListTreeIcon,
-  calendar: Calendar1Icon,
-  arrow: ArrowRightIcon,
-  phone: PhoneIcon,
-  mail: MailIcon,
-  info: InfoIcon,
-  download: DownloadIcon,
-  chat: MessagesSquareIcon,
-};
+import { iconMap } from "@/lib/icons";
 
 interface PageHeaderButton {
   label: string;

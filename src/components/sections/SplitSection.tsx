@@ -5,30 +5,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { urlFor } from "@/sanity/imageUrl";
 import { Action } from "../Action";
-import {
-  ListTreeIcon,
-  Calendar1Icon,
-  ArrowRightIcon,
-  PhoneIcon,
-  MailIcon,
-  InfoIcon,
-  LucideIcon,
-  DownloadIcon,
-  MessagesSquareIcon,
-  EyeIcon,
-} from "lucide-react";
-
-const iconMap: Record<string, LucideIcon> = {
-  list: ListTreeIcon,
-  calendar: Calendar1Icon,
-  arrow: ArrowRightIcon,
-  phone: PhoneIcon,
-  mail: MailIcon,
-  info: InfoIcon,
-  download: DownloadIcon,
-  chat: MessagesSquareIcon,
-  eye: EyeIcon,
-};
+import { iconMap } from "@/lib/icons";
 
 interface SanityImage {
   _type: "image";

@@ -48,6 +48,14 @@ export const pageHeaderFields = `
   }
 `;
 
+// USP section fields
+export const uspFields = `
+  icon,
+  title,
+  text,
+  link
+`;
+
 // Add a new fragment for split section items
 export const splitItemFields = `
   image{
@@ -83,6 +91,9 @@ export const sectionsFragment = `
     },
     items[]{
       ${splitItemFields}
+    },
+    usps[]{
+      ${uspFields}
     },
     ${pageHeaderFields}
   }
