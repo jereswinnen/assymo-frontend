@@ -1,81 +1,173 @@
-import Image from "next/image";
 import Link from "next/link";
 import Logo from "./Logo";
 import { cn } from "@/lib/utils";
+import { client } from "@/sanity/client";
+import { PhoneIcon, InstagramIcon, FacebookIcon } from "lucide-react";
+import { Separator } from "./ui/separator";
+
+const NAV_QUERY = `*[_type == "navigation"][0]{
+  links[]{
+    title,
+    slug,
+    subItems[]->{
+      name,
+      slug
+    }
+  }
+}`;
+
+const PARAMETERS_QUERY = `*[_type == "siteParameters"][0]{
+  address,
+  phone,
+  vatNumber,
+  instagram,
+  facebook
+}`;
+
+type SubItem = {
+  name: string;
+  slug: { current: string };
+};
+
+type NavLink = {
+  title: string;
+  slug: string;
+  subItems?: SubItem[];
+};
+
+type SiteSettings = {
+  address?: string;
+  phone?: string;
+  vatNumber?: string;
+  instagram?: string;
+  facebook?: string;
+};
 
 interface FooterProps {
   className?: string;
 }
 
 export default async function Footer({ className }: FooterProps) {
+  const [nav, settings] = await Promise.all([
+    client.fetch<{ links: NavLink[] }>(NAV_QUERY),
+    client.fetch<SiteSettings>(PARAMETERS_QUERY),
+  ]);
+
+  const links = nav?.links || [];
+
   return (
-    <footer className={cn("py-6", className)}>
-      <div className="o-grid grid-cols-subgrid !gap-y-8 md:gap-y-0">
-        <Link href="/" className="col-span-full md:col-span-2">
-          <Logo className="w-38" />
-        </Link>
-        <aside className="col-span-full md:col-span-2">
-          <ul className="w-full flex flex-col [&>*]:w-full [&>*]:flex [&>*]:flex-col [&>*]:gap-1.5 text-base divide-y divide-(--c-accent-dark)/10">
-            <ul className="pb-2 mb-2">
-              <li>Eikenlei 159</li>
-              <li>2960 Brecht</li>
-            </ul>
-            <ul className="pb-2 mb-2">
-              <li>
-                <Link href="mailto:info@assymo.be" className="hover:underline">
-                  info@assymo.be
-                </Link>
-              </li>
-              <li>
-                <Link href="tel:+32123456789" className="hover:underline">
-                  +32 3 434 74 98
-                </Link>
-              </li>
-            </ul>
-          </ul>
-        </aside>
-
-        <div className="col-span-full md:col-span-2 grid items-center">
-          <Link href="/contact" className="c-action w-fit h-fit">
-            Maak een afspraak
-          </Link>
+    <footer className={cn("py-14 bg-stone-100", className)}>
+      <div className="o-grid gap-y-8! *:col-span-full">
+        <div className="flex justify-end">
+          <div className="basis-[65%] *:mb-0!">
+            <p className="text-lg font-medium text-stone-800">
+              Abonneer je op onze nieuwsbrief
+            </p>
+            <p className="text-sm text-stone-600">
+              Ontvang handige weetjes en blijf op de hoogte van promoties.
+            </p>
+          </div>
         </div>
 
-        <div className="col-span-full md:col-span-2 grid">
-          <ul className="flex items-center gap-4">
-            <li>
-              <Link
-                href="https://instagram.com/assymo_tuinconstructies/"
-                className="block"
-              >
-                <Image
-                  src="/socialIconInstagram.svg"
-                  alt="Instagram"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8"
-                />
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="https://facebook.com/Assymo.Tuinconstructies.Op.Maat"
-                className="block"
-              >
-                <Image
-                  src="/socialIconFacebook.svg"
-                  alt="Facebook"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8"
-                />
-              </Link>
-            </li>
-          </ul>
+        <Separator className="bg-stone-200" />
+
+        <div className="flex justify-between">
+          <div className="flex flex-col gap-6 basis-[35%]">
+            <Link href="/">
+              <Logo className="w-28 text-stone-900" />
+            </Link>
+
+            <ul className="flex flex-col gap-3 text-base font-medium">
+              {settings?.address && (
+                <li className="whitespace-pre-line">{settings.address}</li>
+              )}
+              {settings?.phone && (
+                <li>
+                  <a
+                    href={`tel:${settings.phone}`}
+                    className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                  >
+                    <PhoneIcon className="size-4" />
+                    <span>{settings.phone}</span>
+                  </a>
+                </li>
+              )}
+            </ul>
+
+            {(settings?.instagram || settings?.facebook) && (
+              <>
+                <Separator className="max-w-[60%]!" />
+                <ul className="flex gap-3 *:text-stone-500 *:transition-colors *:duration-300 *:hover:text-stone-700">
+                  {settings?.instagram && (
+                    <li>
+                      <Link
+                        href={settings.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <InstagramIcon className="size-5" />
+                      </Link>
+                    </li>
+                  )}
+                  {settings?.facebook && (
+                    <li>
+                      <Link
+                        href={settings.facebook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <FacebookIcon className="size-5" />
+                      </Link>
+                    </li>
+                  )}
+                </ul>
+              </>
+            )}
+          </div>
+
+          <nav className="flex gap-8 justify-between basis-[65%]">
+            {links.map((link) => (
+              <div key={link.slug} className="flex flex-col gap-3">
+                <Link
+                  href={`/${link.slug}`}
+                  className="text-sm font-medium text-stone-600 hover:text-stone-800 transition-colors duration-300"
+                >
+                  {link.title}
+                </Link>
+                {link.subItems && link.subItems.length > 0 && (
+                  <ul className="flex flex-col gap-0.5">
+                    {link.subItems.map((item) => (
+                      <li key={item.slug.current}>
+                        <Link
+                          href={`/oplossingen/${item.slug.current}`}
+                          className="text-lg font-medium text-stone-800 hover:text-stone-600 transition-colors duration-300"
+                        >
+                          {item.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </nav>
         </div>
 
-        <div className="hidden col-span-full md:col-span-full text-sm">
-          &copy; {new Date().getFullYear()} Assymo. Alle rechten voorbehouden.
+        <div className="flex justify-end">
+          <nav className="basis-[65%] text-xs font-medium text-stone-500">
+            <ul className="flex items-center gap-3">
+              <Link
+                href="#"
+                className="transition-all duration-200 hover:text-stone-700"
+              >
+                Privacy Policy
+              </Link>
+              {settings?.vatNumber && (
+                <p className="mb-0!">{settings.vatNumber}</p>
+              )}
+              <p>&copy; {new Date().getFullYear()} Assymo</p>
+            </ul>
+          </nav>
         </div>
       </div>
     </footer>
