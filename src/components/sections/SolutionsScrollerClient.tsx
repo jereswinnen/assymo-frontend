@@ -147,7 +147,7 @@ export default function SolutionsScrollerClient({
               aria-label="Vorige oplossingen"
             >
               <ChevronLeftIcon
-                className="size-6 transition-all duration-400 ease-circ group-hover:-translate-x-0.5"
+                className="size-6 transition-all duration-400 ease-circ group-hover:-translate-x-1"
                 strokeWidth={1.5}
               />
             </button>
@@ -158,7 +158,7 @@ export default function SolutionsScrollerClient({
               aria-label="Volgende oplossingen"
             >
               <ChevronRightIcon
-                className="size-6 transition-all duration-400 ease-circ group-hover:translate-x-0.5"
+                className="size-6 transition-all duration-400 ease-circ group-hover:translate-x-1"
                 strokeWidth={1.5}
               />
             </button>

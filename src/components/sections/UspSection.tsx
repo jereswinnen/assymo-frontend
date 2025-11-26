@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { iconMap } from "@/lib/icons";
+import { ArrowBigDownDashIcon, ArrowUpRightIcon } from "lucide-react";
 
 interface Usp {
   icon?: string;
@@ -27,7 +28,7 @@ function UspCard({
   const variantClasses = {
     primary: "bg-white justify-between",
     secondary: "bg-whie",
-    cta: "bg-accent-dark text-white ease-circ duration-400 transition-all hover:bg-accent-dark/90 hover:-translate-y-1.5",
+    cta: "group bg-accent-dark text-white ease-circ duration-400 transition-all hover:-translate-y-1.5",
   };
 
   const baseClasses = "p-5 flex flex-col gap-3 h-full text-stone-600";
@@ -59,9 +60,10 @@ function UspCard({
   if (variant === "cta" && usp.link) {
     return (
       <Link href={usp.link} className={`${baseClasses} ${variantClasses.cta}`}>
-        {IconComponent && (
-          <IconComponent className="size-6 text-accent-light" />
-        )}
+        <header className="flex items-center justify-between text-accent-light">
+          {IconComponent && <IconComponent className="size-6" />}
+          <ArrowUpRightIcon className="size-6 opacity-0 -translate-x-1.5 translate-y-1.5 ease-circ duration-400 transition-all group-hover:opacity-100 group-hover:translate-0" />
+        </header>
         <div className="flex flex-col gap-1">
           <p className="text-lg font-medium mb-0!">{usp.title}</p>
           {usp.text && <p className="text-sm opacity-70 mb-0!">{usp.text}</p>}
