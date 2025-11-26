@@ -23,7 +23,7 @@ export default function PageHeader({ section }: PageHeaderProps) {
   return (
     <header className="col-span-full flex flex-col gap-8">
       <div className="w-[900px] flex flex-col gap-2">
-        <h1 className="!mb-0">{title}</h1>
+        <h1 className="mb-0!">{title}</h1>
         {subtitle && (
           <p className="font-[420] text-xl text-stone-600">{subtitle}</p>
         )}

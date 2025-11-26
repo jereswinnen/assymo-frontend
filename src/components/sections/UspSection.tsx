@@ -37,10 +37,10 @@ function UspCard({
       <div className={`${baseClasses} ${variantClasses.primary}`}>
         {IconComponent && <IconComponent className="size-6 text-stone-600" />}
         <div className="flex flex-col gap-1">
-          <p className="text-lg font-medium text-stone-800 !mb-0">
+          <p className="text-lg font-medium text-stone-800 mb-0!">
             {usp.title}
           </p>
-          {usp.text && <p className="text-base !mb-0">{usp.text}</p>}
+          {usp.text && <p className="text-base mb-0!">{usp.text}</p>}
         </div>
       </div>
     );
@@ -50,8 +50,8 @@ function UspCard({
     <>
       {IconComponent && <IconComponent className="size-6 text-stone-600" />}
       <div className="flex flex-col gap-1">
-        <p className="text-lg font-medium text-stone-800 !mb-0">{usp.title}</p>
-        {usp.text && <p className="text-sm !mb-0">{usp.text}</p>}
+        <p className="text-lg font-medium text-stone-800 mb-0!">{usp.title}</p>
+        {usp.text && <p className="text-sm mb-0!">{usp.text}</p>}
       </div>
     </>
   );
@@ -63,8 +63,8 @@ function UspCard({
           <IconComponent className="size-6 text-accent-light" />
         )}
         <div className="flex flex-col gap-1">
-          <p className="text-lg font-medium !mb-0">{usp.title}</p>
-          {usp.text && <p className="text-sm opacity-70 !mb-0">{usp.text}</p>}
+          <p className="text-lg font-medium mb-0!">{usp.title}</p>
+          {usp.text && <p className="text-sm opacity-70 mb-0!">{usp.text}</p>}
         </div>
       </Link>
     );
@@ -83,7 +83,7 @@ export default function UspSection({ section }: UspSectionProps) {
   const [firstUsp, ...remainingUsps] = usps;
 
   return (
-    <section className="o-grid--bleed col-span-full grid grid-cols-subgrid gap-y-8 py-12 bg-emerald-50">
+    <section className="o-grid--bleed col-span-full grid grid-cols-subgrid gap-y-8 py-14 bg-accent-lightest">
       {heading && <h2 className="col-span-full">{heading}</h2>}
       <div className="col-span-full flex flex-col lg:flex-row gap-2.5">
         {/* Left column: 40% */}

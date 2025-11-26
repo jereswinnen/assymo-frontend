@@ -22,6 +22,7 @@ export const ctaFields = `
 export const productReferenceFields = `
   _id,
   name,
+  subtitle,
   slug,
   headerImage{
     ${imageFields}

@@ -1,314 +1,62 @@
-"use client";
+import { client } from "@/sanity/client";
+import { urlFor } from "@/sanity/imageUrl";
+import SolutionsScrollerClient from "./SolutionsScrollerClient";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { motion, useInView } from "motion/react";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  InfoIcon,
-  LineSquiggleIcon,
-} from "lucide-react";
-import { Action } from "../Action";
+// Query to fetch all solutions
+const SOLUTIONS_QUERY = `*[_type == "solution"] | order(name asc) {
+  _id,
+  name,
+  subtitle,
+  slug,
+  headerImage {
+    asset,
+    hotspot,
+    alt
+  }
+}`;
 
-// Animation tokens
-const SCROLL_INTERVAL = 4500;
-const SCROLL_DURATION = 700;
-const IN_VIEW_AMOUNT = 0.1; // Percentage of section visible to trigger auto-advance
-const VISIBLE_CARDS = 3; // Number of cards visible at once on desktop
-
-// Easing function matching --ease-circ: cubic-bezier(0.645, 0, 0.045, 1)
-function easeCirc(t: number): number {
-  return t < 0.5
-    ? (1 - Math.sqrt(1 - Math.pow(2 * t, 2))) / 2
-    : (Math.sqrt(1 - Math.pow(-2 * t + 2, 2)) + 1) / 2;
+export interface Solution {
+  _id: string;
+  name: string;
+  subtitle?: string;
+  slug: { current: string };
+  headerImage?: {
+    asset: { _ref: string; _type: "reference" };
+    hotspot?: { x: number; y: number };
+    alt?: string;
+  };
 }
-
-// Dummy solution data for initial implementation
-// TODO: Replace with Sanity data via section.solutions
-const DUMMY_SOLUTIONS = [
-  {
-    _id: "1",
-    title: "Tuinkamer",
-    subtitle: "Geniet het hele jaar van uw tuin",
-    slug: { current: "tuinkamer" },
-    imageUrl:
-      "https://images.unsplash.com/photo-1763368230845-150be8503232?q=80&w=1964&auto=format&fit=crop",
-  },
-  {
-    _id: "2",
-    title: "Veranda",
-    subtitle: "Overdekt terras met stijl",
-    slug: { current: "veranda" },
-    imageUrl:
-      "https://images.unsplash.com/photo-1758941853341-4e431b9693b7?q=80&w=1585&auto=format&fit=crop",
-  },
-  {
-    _id: "3",
-    title: "Carport",
-    subtitle: "Bescherm uw auto met elegantie",
-    slug: { current: "carport" },
-    imageUrl:
-      "https://images.unsplash.com/photo-1762543787011-186cfe6f1019?q=80&w=3540&auto=format&fit=crop",
-  },
-  {
-    _id: "4",
-    title: "Terrasoverkapping",
-    subtitle: "Verleng uw buitenseizoen",
-    slug: { current: "terrasoverkapping" },
-    imageUrl:
-      "https://images.unsplash.com/photo-1763453010420-d126e3171b1c?q=80&w=3540&auto=format&fit=crop",
-  },
-  {
-    _id: "5",
-    title: "Schuur",
-    subtitle: "Praktische opbergruimte",
-    slug: { current: "schuur" },
-    imageUrl:
-      "https://images.unsplash.com/photo-1763415364262-1ec086926326?q=80&w=1587&auto=format&fit=crop",
-  },
-  {
-    _id: "6",
-    title: "Poolhouse",
-    subtitle: "Luxe bij het zwembad",
-    slug: { current: "poolhouse" },
-    imageUrl:
-      "https://images.unsplash.com/photo-1730451306804-f7d3b0a3c4d5?q=80&w=2360&auto=format&fit=crop",
-  },
-  {
-    _id: "7",
-    title: "Tuinhuis",
-    subtitle: "Uw eigen plek in de tuin",
-    slug: { current: "tuinhuis" },
-    imageUrl:
-      "https://images.unsplash.com/photo-1738165170747-ecc6e3a4d97c?q=80&w=3538&auto=format&fit=crop",
-  },
-  {
-    _id: "8",
-    title: "Pergola",
-    subtitle: "Sfeervolle schaduw",
-    slug: { current: "pergola" },
-    imageUrl:
-      "https://images.unsplash.com/photo-1760292343776-e8e35bb469c6?q=80&w=1945&auto=format&fit=crop",
-  },
-  {
-    _id: "9",
-    title: "Overkapping",
-    subtitle: "Beschut genieten",
-    slug: { current: "overkapping" },
-    imageUrl:
-      "https://images.unsplash.com/photo-1758032538352-84357479d496?q=80&w=1587&auto=format&fit=crop",
-  },
-  {
-    _id: "10",
-    title: "Garage",
-    subtitle: "Veilige stalling",
-    slug: { current: "garage" },
-    imageUrl:
-      "https://images.unsplash.com/photo-1758213755328-c4b3912bf5cb?q=80&w=1935&auto=format&fit=crop",
-  },
-  {
-    _id: "11",
-    title: "Atelier",
-    subtitle: "Creatieve werkruimte",
-    slug: { current: "atelier" },
-    imageUrl:
-      "https://images.unsplash.com/photo-1680457405591-5b20bbf782dd?q=80&w=3540&auto=format&fit=crop",
-  },
-];
 
 interface SolutionsScrollerProps {
   section: {
     _type: "solutionsScroller";
     heading?: string;
+    subtitle?: string;
   };
 }
 
-export default function SolutionsScroller({ section }: SolutionsScrollerProps) {
-  // TODO: Use section.solutions when Sanity integration is added
-  const solutions = DUMMY_SOLUTIONS;
-  const router = useRouter();
+export default async function SolutionsScroller({
+  section,
+}: SolutionsScrollerProps) {
+  const solutions: Solution[] = await client.fetch(SOLUTIONS_QUERY);
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, {
-    once: false,
-    amount: IN_VIEW_AMOUNT,
-  });
-
-  const maxIndex = Math.max(0, solutions.length - VISIBLE_CARDS);
-  const canGoPrevious = currentIndex > 0;
-  const canGoNext = currentIndex < maxIndex;
-
-  // Scroll the container to show a specific card index at the left edge
-  const scrollToCard = useCallback((index: number) => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const cards = container.querySelectorAll("[data-card]");
-    if (cards.length === 0) return;
-
-    const targetCard = cards[Math.min(index, cards.length - 1)] as HTMLElement;
-    if (!targetCard) return;
-
-    // Calculate scroll position: card's left edge minus the left padding (bleed)
-    const containerStyle = getComputedStyle(container);
-    const paddingLeft = parseFloat(containerStyle.paddingLeft);
-    const targetScrollLeft = targetCard.offsetLeft - paddingLeft;
-
-    // Animate scroll with ease-circ easing
-    const startScrollLeft = container.scrollLeft;
-    const distance = targetScrollLeft - startScrollLeft;
-    const startTime = performance.now();
-
-    const animateScroll = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / SCROLL_DURATION, 1);
-      const easedProgress = easeCirc(progress);
-
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollLeft =
-          startScrollLeft + distance * easedProgress;
-      }
-
-      if (progress < 1) {
-        requestAnimationFrame(animateScroll);
-      }
-    };
-
-    requestAnimationFrame(animateScroll);
-  }, []);
-
-  const goToPrevious = useCallback(() => {
-    if (!canGoPrevious) return;
-    const newIndex = currentIndex - 1;
-    setCurrentIndex(newIndex);
-    scrollToCard(newIndex);
-  }, [canGoPrevious, currentIndex, scrollToCard]);
-
-  const goToNext = useCallback(() => {
-    if (!canGoNext) return;
-    const newIndex = currentIndex + 1;
-    setCurrentIndex(newIndex);
-    scrollToCard(newIndex);
-  }, [canGoNext, currentIndex, scrollToCard]);
-
-  // Auto-advance one card at a time (only when in view, stops at end)
-  useEffect(() => {
-    if (!isInView || isPaused || !canGoNext) return;
-
-    const interval = setInterval(() => {
-      const newIndex = currentIndex + 1;
-      setCurrentIndex(newIndex);
-      scrollToCard(newIndex);
-    }, SCROLL_INTERVAL);
-
-    return () => clearInterval(interval);
-  }, [isInView, isPaused, currentIndex, canGoNext, scrollToCard]);
-
-  if (solutions.length === 0) {
-    return null;
-  }
+  // Transform solutions to include image URLs
+  const solutionsWithUrls = solutions.map((solution) => ({
+    _id: solution._id,
+    name: solution.name,
+    subtitle: solution.subtitle,
+    slug: solution.slug,
+    imageUrl: solution.headerImage
+      ? urlFor(solution.headerImage as any).url()
+      : undefined,
+    imageAlt: solution.headerImage?.alt,
+  }));
 
   return (
-    <section ref={sectionRef} className="col-span-full flex flex-col gap-14">
-      {/* Header with title and navigation */}
-      <div className="flex items-center justify-between">
-        {section.heading && <h2 className="!mb-0">{section.heading}</h2>}
-
-        {solutions.length > VISIBLE_CARDS && (
-          <div className="flex gap-2 p-1.25 rounded-full bg-stone-200">
-            <button
-              onClick={goToPrevious}
-              disabled={!canGoPrevious}
-              className="group cursor-pointer bg-white text-stone-800 rounded-full p-1.25 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:*:translate-0"
-              aria-label="Vorige oplossingen"
-            >
-              <ChevronLeftIcon
-                className="size-6 transition-all duration-400 ease-circ group-hover:-translate-x-0.5"
-                strokeWidth={1.5}
-              />
-            </button>
-            <button
-              onClick={goToNext}
-              disabled={!canGoNext}
-              className="group cursor-pointer bg-white text-stone-800 rounded-full p-1.25 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:*:translate-0"
-              aria-label="Volgende oplossingen"
-            >
-              <ChevronRightIcon
-                className="size-6 transition-all duration-400 ease-circ group-hover:translate-x-0.5"
-                strokeWidth={1.5}
-              />
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Scroll container - uses o-grid--bleed for full viewport width with aligned padding */}
-      <div
-        ref={scrollContainerRef}
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-        style={{
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
-        className="o-grid--bleed flex gap-[calc(var(--u-grid-gap)/4)] overflow-x-auto [&::-webkit-scrollbar]:hidden"
-      >
-        {solutions.map((solution) => (
-          <motion.div
-            key={solution._id}
-            onClick={() => router.push(`/oplossingen/${solution.slug.current}`)}
-            data-card
-            initial="idle"
-            whileHover="hover"
-            className="group relative shrink-0 w-[80vw] sm:w-[calc((var(--u-site-w)-var(--u-grid-gap))/3)] min-w-[280px] flex flex-col gap-4 p-4 pt-0 border-l border-stone-200 hover:border-stone-300 transition-all ease-circ duration-300 cursor-pointer"
-          >
-            {/* Animated background layer */}
-            <motion.div
-              className="absolute inset-0 bg-stone-100 -z-10"
-              variants={{
-                idle: { clipPath: "inset(0 100% 0 0)" },
-                hover: { clipPath: "inset(0 0% 0 0)" },
-              }}
-              transition={{ duration: 0.5, ease: [0.645, 0, 0.045, 1] }}
-            />
-
-            {/* Image */}
-            <div className="relative max-w-[90%] aspect-5/3 overflow-hidden bg-stone-100">
-              <Image
-                src={solution.imageUrl || ""}
-                alt={solution.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-700"
-                sizes="(max-width: 640px) 80vw, (max-width: 1024px) 50vw, 33vw"
-              />
-            </div>
-
-            {/* Content */}
-            <div className="flex flex-col gap-1">
-              <h3 className="!mb-0 text-lg font-medium">{solution.title}</h3>
-              {solution.subtitle && (
-                <p className="text-sm text-stone-600 !mb-0">
-                  {solution.subtitle}
-                </p>
-              )}
-            </div>
-
-            {/* Action */}
-            <Action
-              className="mt-10 opacity-0 translate-y-1.5 blur-xs transition-all duration-600 ease-circ group-hover:opacity-100 group-hover:translate-y-0 group-hover:blur-none"
-              href="/contact"
-              icon={<InfoIcon />}
-              label="Meer informatie"
-              variant="secondary"
-            />
-          </motion.div>
-        ))}
-      </div>
-    </section>
+    <SolutionsScrollerClient
+      heading={section.heading}
+      subtitle={section.subtitle}
+      solutions={solutionsWithUrls}
+    />
   );
 }

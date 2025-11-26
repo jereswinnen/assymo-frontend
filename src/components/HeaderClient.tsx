@@ -172,7 +172,7 @@ export default function HeaderClient({
             <Logo className="w-28" />
           </Link>
 
-          <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm">
+          <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm p-2 px-4 rounded-full text-stone-700 bg-stone-100">
             <ul className="flex gap-6 group/nav">
               {links.map((link, index) => (
                 <li
@@ -181,7 +181,7 @@ export default function HeaderClient({
                 >
                   <Link
                     href={`/${link.slug}`}
-                    className="font-medium transition-opacity duration-200 group-hover/nav:opacity-60 hover:!opacity-100"
+                    className="font-medium transition-opacity duration-200 group-hover/nav:opacity-60 hover:opacity-100!"
                   >
                     {link.title}
                   </Link>

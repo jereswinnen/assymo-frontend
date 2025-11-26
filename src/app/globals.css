@@ -17,6 +17,7 @@
   --u-site-w: 80vw;
   --u-grid-columns: 2;
   --u-grid-gap: 4rem;
+  --c-accent-lightest: #ebf4f3;
   --c-accent-light: #22df90;
   --c-accent-dark: #1f3632;
   --c-accent-darkest: #1a2322;
@@ -128,8 +129,10 @@
 }
 
 @theme inline {
+  --color-accent-lightest: #ebf4f3;
   --color-accent-light: #22df90;
   --color-accent-dark: #1f3632;
+  --color-accent-darkest: #1a2322;
   --font-sans: var(--font-instrument-sans);
   --ease-circ: cubic-bezier(0.645, 0, 0.045, 1);
   --spacing-container-sm: 1.4rem;
@@ -205,7 +208,7 @@ h1 {
   font-size: 3rem;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  font-weight: 480 !important;
+  font-weight: 520 !important;
 }
 
 h2 {
