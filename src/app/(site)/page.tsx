@@ -34,7 +34,7 @@ export default async function HomePage() {
   return (
     <>
       <SolutionsScroller
-        section={{ _type: "solutionsScroller", heading: "Onze oplossingen" }}
+        section={{ _type: "solutionsScroller", heading: "Ons aanbod" }}
       />
       {page.sections && page.sections.length > 0 && (
         <SectionRenderer sections={page.sections} />

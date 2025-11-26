@@ -75,9 +75,9 @@ export function SplitSection({ section, className }: SplitSectionProps) {
                 </div>
               )}
             </div>
-            <div className="flex flex-col [&>*]:!mb-0">
+            <div className="flex flex-col gap-1 [&>*]:!mb-0">
               {item.title && (
-                <p className="text-base font-medium">{item.title}</p>
+                <h3 className="text-lg font-medium">{item.title}</h3>
               )}
               {item.subtitle && (
                 <p className="text-sm text-stone-600">{item.subtitle}</p>

@@ -2,8 +2,15 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { useInView } from "motion/react";
+import { useRouter } from "next/navigation";
+import { motion, useInView } from "motion/react";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  InfoIcon,
+  LineSquiggleIcon,
+} from "lucide-react";
+import { Action } from "../Action";
 
 // Animation tokens
 const SCROLL_INTERVAL = 4500;
@@ -121,6 +128,7 @@ interface SolutionsScrollerProps {
 export default function SolutionsScroller({ section }: SolutionsScrollerProps) {
   // TODO: Use section.solutions when Sanity integration is added
   const solutions = DUMMY_SOLUTIONS;
+  const router = useRouter();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -206,52 +214,34 @@ export default function SolutionsScroller({ section }: SolutionsScrollerProps) {
   }
 
   return (
-    <section ref={sectionRef} className="col-span-full bg-amber-200">
+    <section ref={sectionRef} className="col-span-full flex flex-col gap-14">
       {/* Header with title and navigation */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between">
         {section.heading && <h2 className="!mb-0">{section.heading}</h2>}
 
         {solutions.length > VISIBLE_CARDS && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 p-1.25 rounded-full bg-stone-200">
             <button
               onClick={goToPrevious}
               disabled={!canGoPrevious}
-              className="bg-white hover:bg-stone-50 text-stone-900 rounded-full w-10 h-10 flex items-center justify-center shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="group cursor-pointer bg-white text-stone-800 rounded-full p-1.25 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:*:translate-0"
               aria-label="Vorige oplossingen"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
+              <ChevronLeftIcon
+                className="size-6 transition-all duration-400 ease-circ group-hover:-translate-x-0.5"
+                strokeWidth={1.5}
+              />
             </button>
             <button
               onClick={goToNext}
               disabled={!canGoNext}
-              className="bg-white hover:bg-stone-50 text-stone-900 rounded-full w-10 h-10 flex items-center justify-center shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="group cursor-pointer bg-white text-stone-800 rounded-full p-1.25 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:*:translate-0"
               aria-label="Volgende oplossingen"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+              <ChevronRightIcon
+                className="size-6 transition-all duration-400 ease-circ group-hover:translate-x-0.5"
+                strokeWidth={1.5}
+              />
             </button>
           </div>
         )}
@@ -266,17 +256,29 @@ export default function SolutionsScroller({ section }: SolutionsScrollerProps) {
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}
-        className="o-grid--bleed flex gap-[calc(var(--u-grid-gap)/2)] overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden bg-orange-300"
+        className="o-grid--bleed flex gap-[calc(var(--u-grid-gap)/4)] overflow-x-auto [&::-webkit-scrollbar]:hidden"
       >
         {solutions.map((solution) => (
-          <Link
+          <motion.div
             key={solution._id}
-            href={`/oplossingen/${solution.slug.current}`}
+            onClick={() => router.push(`/oplossingen/${solution.slug.current}`)}
             data-card
-            className="group flex-shrink-0 w-[80vw] sm:w-[calc((var(--u-site-w)-var(--u-grid-gap))/3)] min-w-[280px] flex flex-col gap-3 bg-white p-3 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300"
+            initial="idle"
+            whileHover="hover"
+            className="group relative shrink-0 w-[80vw] sm:w-[calc((var(--u-site-w)-var(--u-grid-gap))/3)] min-w-[280px] flex flex-col gap-4 p-4 pt-0 border-l border-stone-200 hover:border-stone-300 transition-all ease-circ duration-300 cursor-pointer"
           >
+            {/* Animated background layer */}
+            <motion.div
+              className="absolute inset-0 bg-stone-100 -z-10"
+              variants={{
+                idle: { clipPath: "inset(0 100% 0 0)" },
+                hover: { clipPath: "inset(0 0% 0 0)" },
+              }}
+              transition={{ duration: 0.5, ease: [0.645, 0, 0.045, 1] }}
+            />
+
             {/* Image */}
-            <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-stone-100">
+            <div className="relative max-w-[90%] aspect-5/3 overflow-hidden bg-stone-100">
               <Image
                 src={solution.imageUrl || ""}
                 alt={solution.title}
@@ -287,7 +289,7 @@ export default function SolutionsScroller({ section }: SolutionsScrollerProps) {
             </div>
 
             {/* Content */}
-            <div className="flex flex-col gap-1 px-1">
+            <div className="flex flex-col gap-1">
               <h3 className="!mb-0 text-lg font-medium">{solution.title}</h3>
               {solution.subtitle && (
                 <p className="text-sm text-stone-600 !mb-0">
@@ -297,25 +299,14 @@ export default function SolutionsScroller({ section }: SolutionsScrollerProps) {
             </div>
 
             {/* Action */}
-            <div className="mt-auto px-1">
-              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--c-accent-dark)] group-hover:gap-2.5 transition-all">
-                Bekijk meer
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </span>
-            </div>
-          </Link>
+            <Action
+              className="mt-10 opacity-0 translate-y-1.5 blur-xs transition-all duration-600 ease-circ group-hover:opacity-100 group-hover:translate-y-0 group-hover:blur-none"
+              href="/contact"
+              icon={<InfoIcon />}
+              label="Meer informatie"
+              variant="secondary"
+            />
+          </motion.div>
         ))}
       </div>
     </section>
