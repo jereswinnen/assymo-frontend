@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { ConversationList } from "@/components/admin/ConversationList";
 import { ConversationDialog } from "@/components/admin/ConversationDialog";
 import { DocumentEmbeddings } from "@/components/admin/DocumentEmbeddings";
+import { EmailDashboard } from "@/components/admin/EmailDashboard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Spinner } from "@/components/ui/spinner";
 import type { Conversation } from "@/components/admin/ConversationList";
-import { MessagesSquareIcon, ScanTextIcon } from "lucide-react";
+import { MessagesSquareIcon, ScanTextIcon, MailIcon } from "lucide-react";
 
 export default function AdminPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -66,6 +67,10 @@ export default function AdminPage() {
             <ScanTextIcon />
             Embeddings
           </TabsTrigger>
+          <TabsTrigger value="emails">
+            <MailIcon />
+            E-mails
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="conversations">
@@ -77,6 +82,10 @@ export default function AdminPage() {
 
         <TabsContent value="embeddings">
           <DocumentEmbeddings />
+        </TabsContent>
+
+        <TabsContent value="emails">
+          <EmailDashboard />
         </TabsContent>
       </Tabs>
 
