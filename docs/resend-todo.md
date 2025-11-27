@@ -110,64 +110,47 @@ Changes:
 
 ---
 
-## Phase 3: Contact Form Integration
+## Phase 3: Contact Form Integration ✅ COMPLETE
 
-### 3.1 Refactor Contact Form Component
+### 3.1 Refactor Contact Form Component ✅
 
 **File**: `src/components/sections/ContactForm.tsx`
 
-Refactoring goals:
-- Use shadcn UI components (Input, Textarea, Button, Select)
-- Use Field system from `@/components/ui/field`
-- Make form fields configurable/easy to modify
-- Improve type safety
+Implemented:
+- Refactored with shadcn UI components (Input, Textarea, Button, Select, Checkbox)
+- Uses Field system from `@/components/ui/field` for consistent layout
+- Centralized form state with typed `FormData` interface
+- Generic `updateField` helper for type-safe state updates
+- Loading/success states with spinner and icons
 
-New structure:
-```typescript
-// Define form fields as configuration
-const FORM_FIELDS = {
-  algemeen: [...],
-  tuinhuizen: [...],
-};
-
-// Render fields dynamically
-```
-
-### 3.2 Add shadcn Select Component
+### 3.2 Add shadcn Select & Checkbox Components ✅
 
 ```bash
 pnpm dlx shadcn@latest add select
+pnpm dlx shadcn@latest add checkbox
 ```
 
-### 3.3 Update Contact API Route
+### 3.3 Update Contact API Route ✅
 
 **File**: `src/app/api/contact/route.ts`
 
-Changes:
-- Import Resend client and email templates
-- On valid submission:
-  1. Send notification email to info@assymo.be
-  2. Set reply-to as customer's email
-  3. Include all form data in email body
-- Handle file uploads for Tuinhuizen (attach to email or upload separately)
-- Return appropriate responses
+Implemented:
+- Imports Resend client and email templates
+- Sends notification email to info@assymo.be via Resend
+- Sets reply-to as customer's email (so you can reply directly)
+- File attachments for Tuinhuizen (grondplan attached to email)
+- Newsletter opt-in adds contact to Resend audience
+- Dutch error messages
 
-### 3.4 Create Contact Form Email Templates
+### 3.4 Contact Form Email Templates ✅
 
 **File**: `src/emails/ContactFormEmail.tsx`
 
-For "Algemeen" submissions:
-- Customer details (name, email, phone, address)
-- Message content
-- Clean, readable layout
+(Created in Phase 1) - For "Algemeen" submissions
 
 **File**: `src/emails/ContactFormTuinhuizenEmail.tsx`
 
-For "Tuinhuizen" submissions:
-- Customer details
-- Tuinhuizen-specific fields (bouwType, houtsoort, profiel)
-- Extra info
-- Note about grondplan attachment
+(Created in Phase 1) - For "Tuinhuizen" submissions with all specific fields
 
 ---
 
