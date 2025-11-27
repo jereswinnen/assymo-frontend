@@ -4,12 +4,7 @@ import { cn } from "@/lib/utils";
 import { client } from "@/sanity/client";
 import { PhoneIcon, InstagramIcon, FacebookIcon } from "lucide-react";
 import { Separator } from "./ui/separator";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "./ui/input-group";
+import { NewsletterForm } from "./NewsletterForm";
 
 const NAV_QUERY = `*[_type == "navigation"][0]{
   links[]{
@@ -65,22 +60,7 @@ export default async function Footer({ className }: FooterProps) {
     <footer className={cn("py-14 bg-stone-100", className)}>
       <div className="o-grid gap-y-8! *:col-span-full">
         <div className="flex justify-end">
-          <div className="basis-[65%] flex flex-col gap-4">
-            <div className="*:mb-0!">
-              <p className="text-lg font-medium text-stone-800">
-                Abonneer je op onze nieuwsbrief
-              </p>
-              <p className="text-sm text-stone-600">
-                Ontvang handige weetjes en blijf op de hoogte van promoties.
-              </p>
-            </div>
-            <InputGroup className="w-[60%] bg-white">
-              <InputGroupInput placeholder="Vul je e-mailadres in..."></InputGroupInput>
-              <InputGroupAddon align="inline-end">
-                <InputGroupButton variant="default">Abonneren</InputGroupButton>
-              </InputGroupAddon>
-            </InputGroup>
-          </div>
+          <NewsletterForm className="basis-[65%]" />
         </div>
 
         <Separator className="bg-stone-200" />

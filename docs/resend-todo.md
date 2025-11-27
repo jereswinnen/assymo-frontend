@@ -68,53 +68,45 @@ Created templates:
 
 ---
 
-## Phase 2: Newsletter Integration
+## Phase 2: Newsletter Integration ✅ COMPLETE
 
-### 2.1 Create Newsletter API Route
+### 2.1 Create Newsletter API Route ✅
 
 **File**: `src/app/api/newsletter/subscribe/route.ts`
 
-Functionality:
-- Accept POST with email
-- Validate email format
-- Add contact to Resend audience via `resend.contacts.create()`
-- Send welcome email (optional)
-- Return success/error response
+Implemented:
+- POST endpoint accepting JSON `{ email: string }`
+- Email validation (format check)
+- Adds contact to Resend audience via `resend.contacts.create()`
+- Sends welcome email on successful subscription
+- Handles "already subscribed" case gracefully
+- Dutch error messages
 
-```typescript
-// API: POST /api/newsletter/subscribe
-// Body: { email: string }
-// Response: { success: true } | { error: string }
-```
-
-### 2.2 Create Newsletter Subscription Component
+### 2.2 Create Newsletter Subscription Component ✅
 
 **File**: `src/components/NewsletterForm.tsx`
 
-Features:
+Implemented:
 - Client component with form state
 - Email input validation
 - Loading state during submission
-- Success/error feedback (toast or inline message)
-- Reusable across Footer and potentially other locations
+- Success/error/already-subscribed feedback (inline)
+- Reusable via className prop
 
-### 2.3 Update Footer Component
+### 2.3 Update Footer Component ✅
 
 **File**: `src/components/Footer.tsx`
 
 Changes:
-- Extract newsletter form to separate client component
-- Import and use `NewsletterForm` component
-- Keep Footer as server component for Sanity data fetching
+- Removed InputGroup imports (no longer needed)
+- Imported and used `NewsletterForm` component
+- Footer remains a server component for Sanity data fetching
 
-### 2.4 Create Welcome Email Template
+### 2.4 Welcome Email Template ✅
 
 **File**: `src/emails/NewsletterWelcome.tsx`
 
-Content (Dutch):
-- Welcome message
-- What to expect
-- Assymo branding
+(Created in Phase 1)
 
 ---
 
