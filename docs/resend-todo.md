@@ -154,74 +154,154 @@ Implemented:
 
 ---
 
-## Phase 4: Admin Panel Integration
+## Phase 4: Setup & Types
 
-### 4.1 Add Email Tab to Admin Dashboard
+### 4.1 Database Setup
+
+Run this SQL in Neon console:
+
+```sql
+CREATE TABLE IF NOT EXISTS newsletters (
+  id SERIAL PRIMARY KEY,
+  subject VARCHAR(255),
+  preheader VARCHAR(255),
+  sections JSONB NOT NULL DEFAULT '[]',
+  status VARCHAR(20) DEFAULT 'draft',
+  subscriber_count INT,
+  resend_email_id VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW(),
+  sent_at TIMESTAMP
+);
+```
+
+### 4.2 Newsletter Types
+
+**File**: `src/config/newsletter.ts`
+
+```typescript
+export interface NewsletterSection {
+  id: string;
+  imageUrl?: string;
+  title: string;
+  text: string;
+  ctaText?: string;
+  ctaUrl?: string;
+}
+
+export interface Newsletter {
+  id: number;
+  subject: string;
+  preheader?: string;
+  sections: NewsletterSection[];
+  status: "draft" | "sent";
+  subscriberCount?: number;
+  resendEmailId?: string;
+  createdAt: Date;
+  sentAt?: Date;
+}
+```
+
+### 4.3 Newsletter Email Template
+
+**File**: `src/emails/NewsletterBroadcast.tsx`
+
+React Email template rendering dynamic sections:
+- Uses existing `EmailLayout` for header/footer/branding
+- Maps over sections array
+- Each section: optional image, title, text, optional CTA button
+
+---
+
+## Phase 5: Newsletter Composer
+
+### 5.1 Add Email Tab to Admin Dashboard
 
 **File**: `src/app/admin/page.tsx`
 
 Add third tab: "E-mails" alongside Conversations and Embeddings
 
-### 4.2 Create Admin Email Components
+### 5.2 EmailDashboard Component
 
-**Directory**: `src/components/admin/`
+**File**: `src/components/admin/EmailDashboard.tsx`
 
-#### EmailDashboard.tsx
-Main container with sub-sections:
-- Email logs
-- Test email sender
-- Newsletter broadcast composer
+Main container with two areas:
+- Drafts list (left/top)
+- Composer (right/bottom)
 
-#### EmailLogs.tsx
-Features:
-- Fetch recent emails via Resend API (`resend.emails.list()`)
-- Display: recipient, subject, status, timestamp
-- Status badges (delivered, bounced, opened, clicked)
-- Pagination or "load more"
+### 5.3 NewsletterComposer Component
 
-#### TestEmailSender.tsx
-Features:
-- Input for recipient email
-- Select template from Resend dashboard templates
-- Send button
-- Result feedback
+**File**: `src/components/admin/NewsletterComposer.tsx`
 
-#### NewsletterComposer.tsx
-Features:
-- **Template selector**: Dropdown of templates from Resend (`resend.templates.list()`)
-- **Dynamic variable form**: Fetches template details (`resend.templates.get()`) to show required variables
-- **Variable inputs**: Text fields for each template variable (e.g., `HEADLINE`, `CONTENT`, `CTA_URL`)
-- **Subject input**: Override or use template default
-- **Preview**: Show how the email will look with filled-in variables
-- **Test send**: Send to your own email first
-- **Confirmation dialog**: "Send to X subscribers?" before broadcasting
-- **Send broadcast**: `resend.broadcasts.create()` to all newsletter subscribers
+Section-based composer:
 
-Example workflow:
-1. Create "Monthly Newsletter" template in Resend with variables: `{{{HEADLINE}}}`, `{{{INTRO}}}`, `{{{CTA_TEXT}}}`, `{{{CTA_URL}}}`
-2. In admin, select "Monthly Newsletter" template
-3. Fill in: Headline = "Winterkorting!", Intro = "...", CTA = "Bekijk aanbiedingen"
-4. Preview → Test send → Confirm → Broadcast to all subscribers
+**Inputs:**
+- Subject
+- Preheader (optional)
+- Sections (add/remove)
+  - Image URL (optional)
+  - Title
+  - Text
+  - CTA text + URL (optional)
 
-### 4.3 Create Admin Email API Routes
+**Actions:**
+- [Save Draft] → creates/updates newsletter row
+- [Send Test] → sends to admin email
 
-**File**: `src/app/api/admin/emails/route.ts`
-- GET: List recent emails from Resend
+### 5.4 Drafts API Routes
 
-**File**: `src/app/api/admin/emails/test/route.ts`
+**File**: `src/app/api/admin/newsletters/route.ts`
+- GET: List drafts (`status = 'draft'`)
+- POST: Create new draft
+
+**File**: `src/app/api/admin/newsletters/[id]/route.ts`
+- GET: Get single newsletter
+- PUT: Update draft
+- DELETE: Delete draft
+
+**File**: `src/app/api/admin/newsletters/[id]/test/route.ts`
 - POST: Send test email to single recipient
 
-**File**: `src/app/api/admin/templates/route.ts`
-- GET: List available templates from Resend (`resend.templates.list()`)
+---
 
-**File**: `src/app/api/admin/templates/[id]/route.ts`
-- GET: Get template details including variables (`resend.templates.get()`)
+## Phase 6: Broadcasts & Stats
 
-**File**: `src/app/api/admin/broadcast/route.ts`
-- POST: Send broadcast to all subscribers (`resend.broadcasts.create()`)
+### 6.1 Subscriber Count Display
+
+**File**: `src/components/admin/EmailDashboard.tsx`
+
+Add subscriber count at top of dashboard:
+- Fetches from Resend audience API
+- Shows: "142 subscribers"
+
+### 6.2 Send Broadcast
+
+**File**: `src/app/api/admin/newsletters/[id]/send/route.ts`
+
+POST: Send newsletter to all subscribers
+1. Fetch newsletter from database
+2. Fetch contacts from Resend audience
+3. Send emails (batch)
+4. Update newsletter: `status = 'sent'`, `subscriber_count`, `sent_at`, `resend_email_id`
+
+**UI**: Add [Send to X subscribers] button in composer with confirmation dialog
+
+### 6.3 Broadcast History
+
+**File**: `src/components/admin/BroadcastHistory.tsx`
+
+Table displaying sent newsletters:
+
+| Subject | Date | Subscribers | |
+|---------|------|-------------|---|
+| Winterkorting! | 27 nov 2025 | 142 | [View in Resend ↗] |
+
+- Fetches newsletters where `status = 'sent'`
+- Link opens Resend dashboard for that email ID
+
+### 6.4 Stats API Route
 
 **File**: `src/app/api/admin/contacts/route.ts`
-- GET: List newsletter contacts (for subscriber count and debugging)
+- GET: Returns subscriber count from Resend audience
 
 ---
 
@@ -230,53 +310,72 @@ Example workflow:
 ```
 src/
 ├── config/
-│   └── resend.ts              # Resend configuration
+│   ├── resend.ts              # Resend configuration
+│   ├── contactForm.ts         # Contact form field definitions
+│   └── newsletter.ts          # Newsletter types
 ├── lib/
-│   └── resend.ts              # Resend client instance
-├── emails/                     # React Email templates
+│   ├── resend.ts              # Resend client instance
+│   └── db.ts                  # Neon DB connection (existing)
+├── emails/
+│   ├── components/
+│   │   └── EmailLayout.tsx    # Base layout with Assymo branding
 │   ├── ContactFormEmail.tsx
 │   ├── ContactFormTuinhuizenEmail.tsx
 │   ├── NewsletterWelcome.tsx
-│   └── NewsletterBroadcast.tsx
+│   ├── NewsletterBroadcast.tsx  # Dynamic sections template
+│   └── index.ts
 ├── components/
 │   ├── NewsletterForm.tsx     # Newsletter subscription form
-│   ├── Footer.tsx             # Updated to use NewsletterForm
+│   ├── Footer.tsx             # Uses NewsletterForm
 │   ├── sections/
-│   │   └── ContactForm.tsx    # Refactored contact form
-│   ├── admin/
-│   │   ├── EmailDashboard.tsx
-│   │   ├── EmailLogs.tsx
-│   │   ├── TestEmailSender.tsx
-│   │   └── NewsletterComposer.tsx  # Template selector + variable form
-│   └── ui/
-│       └── select.tsx         # New shadcn Select component
+│   │   └── ContactForm.tsx    # Config-driven contact form
+│   └── admin/
+│       ├── EmailDashboard.tsx     # Main container
+│       ├── NewsletterComposer.tsx # Section editor
+│       └── BroadcastHistory.tsx   # Sent newsletters table
 ├── app/
 │   ├── api/
 │   │   ├── newsletter/
 │   │   │   └── subscribe/route.ts
 │   │   ├── contact/
-│   │   │   └── route.ts       # Updated
+│   │   │   └── route.ts
 │   │   └── admin/
-│   │       ├── emails/
-│   │       │   ├── route.ts
-│   │       │   └── test/route.ts
-│   │       ├── templates/
-│   │       │   ├── route.ts        # List templates
-│   │       │   └── [id]/route.ts   # Get template details
-│   │       ├── broadcast/route.ts
-│   │       └── contacts/route.ts
+│   │       ├── contacts/route.ts          # GET subscriber count
+│   │       └── newsletters/
+│   │           ├── route.ts               # GET list, POST create
+│   │           └── [id]/
+│   │               ├── route.ts           # GET, PUT, DELETE
+│   │               ├── test/route.ts      # POST send test
+│   │               └── send/route.ts      # POST send broadcast
 │   └── admin/
-│       └── page.tsx           # Updated with Email tab
+│       └── page.tsx           # With Email tab
+```
+
+### Database Table
+
+```
+newsletters
+├── id (SERIAL PRIMARY KEY)
+├── subject (VARCHAR 255)
+├── preheader (VARCHAR 255)
+├── sections (JSONB)
+├── status (VARCHAR 20)        -- 'draft' or 'sent'
+├── subscriber_count (INT)
+├── resend_email_id (VARCHAR 255)
+├── created_at (TIMESTAMP)
+└── sent_at (TIMESTAMP)
 ```
 
 ---
 
 ## Implementation Order
 
-1. **Phase 1**: Setup (config, client, install react-email)
-2. **Phase 2**: Newsletter (API route, form component, Footer update)
-3. **Phase 3**: Contact form (refactor, Select component, API update, templates)
-4. **Phase 4**: Admin panel (tabs, email logs, test sender, broadcast)
+1. **Phase 1**: Setup (config, client, install react-email) ✅
+2. **Phase 2**: Newsletter subscription (API route, form component, Footer) ✅
+3. **Phase 3**: Contact form (refactor, API update, templates) ✅
+4. **Phase 4**: Setup & types (database table, newsletter config, email template)
+5. **Phase 5**: Newsletter composer (admin tab, drafts, test send)
+6. **Phase 6**: Broadcasts & stats (send to all, history, subscriber count)
 
 ---
 
@@ -307,57 +406,13 @@ const { data, error } = await resend.contacts.create({
 const { data, error } = await resend.emails.list();
 ```
 
-### Send Email with Dashboard Template
-```typescript
-const { data, error } = await resend.emails.send({
-  from: "Assymo <info@assymo.be>",
-  to: [email],
-  template: {
-    id: "tmpl_xxxxxx", // Template ID from Resend dashboard
-    variables: {
-      PRODUCT_NAME: "Tuinhuis",
-      PRICE: 1500,
-    },
-  },
-});
-```
-
----
-
-## Resend Dashboard Templates
-
-An alternative to React Email code templates - create and edit emails visually in the Resend dashboard.
-
-### Creating Templates
-1. Go to [resend.com/templates](https://resend.com/templates)
-2. Click "Create template"
-3. Use the visual drag-and-drop editor
-4. Add images (upload to Resend or use external URLs)
-5. Add variables with `{{{VARIABLE_NAME}}}` syntax (max 20)
-6. **Publish** the template (drafts cannot be sent)
-
-### Using Variables
-- Define variables in the template: `{{{PRODUCT_NAME}}}`
-- Pass values when sending via `template.variables`
-- Reserved names (auto-populated): `FIRST_NAME`, `LAST_NAME`, `EMAIL`, `UNSUBSCRIBE_URL`
-
-### Benefits
-- Edit emails without code deployments
-- Visual editor with drag-and-drop
-- Non-developers can update content
-- Built-in image hosting
-- Mobile/desktop preview
-
-### When to Use
-- **Dashboard templates**: Marketing emails, newsletters, welcome emails (content changes frequently)
-- **React Email templates**: Transactional emails like contact form notifications (structured, rarely changes)
-
 ---
 
 ## Notes
 
-- Emails can use either React Email templates (code) or Resend Dashboard templates (visual editor)
+- All emails use React Email templates (Resend only for sending/tracking)
+- Single `newsletters` table handles both drafts and sent emails
+- Broadcast stats viewed in Resend dashboard (linked from admin)
+- Newsletter images should be hosted externally (Sanity CDN, Cloudinary, etc.)
 - Dutch language throughout all user-facing content
 - Admin features require authentication (existing auth system)
-- File attachments (grondplan) will be handled via Resend attachments API
-- Consider rate limiting on newsletter subscribe endpoint
