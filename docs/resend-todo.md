@@ -187,7 +187,7 @@ Add third tab: "E-mails" alongside Conversations and Embeddings
 Main container with sub-sections:
 - Email logs
 - Test email sender
-- Broadcast sender
+- Newsletter broadcast composer
 
 #### EmailLogs.tsx
 Features:
@@ -199,17 +199,26 @@ Features:
 #### TestEmailSender.tsx
 Features:
 - Input for recipient email
-- Select template type
+- Select template from Resend dashboard templates
 - Send button
 - Result feedback
 
-#### BroadcastSender.tsx
+#### NewsletterComposer.tsx
 Features:
-- Subject input
-- Rich text or markdown content editor
-- Preview functionality
-- Confirmation dialog before sending
-- Send to all newsletter subscribers
+- **Template selector**: Dropdown of templates from Resend (`resend.templates.list()`)
+- **Dynamic variable form**: Fetches template details (`resend.templates.get()`) to show required variables
+- **Variable inputs**: Text fields for each template variable (e.g., `HEADLINE`, `CONTENT`, `CTA_URL`)
+- **Subject input**: Override or use template default
+- **Preview**: Show how the email will look with filled-in variables
+- **Test send**: Send to your own email first
+- **Confirmation dialog**: "Send to X subscribers?" before broadcasting
+- **Send broadcast**: `resend.broadcasts.create()` to all newsletter subscribers
+
+Example workflow:
+1. Create "Monthly Newsletter" template in Resend with variables: `{{{HEADLINE}}}`, `{{{INTRO}}}`, `{{{CTA_TEXT}}}`, `{{{CTA_URL}}}`
+2. In admin, select "Monthly Newsletter" template
+3. Fill in: Headline = "Winterkorting!", Intro = "...", CTA = "Bekijk aanbiedingen"
+4. Preview → Test send → Confirm → Broadcast to all subscribers
 
 ### 4.3 Create Admin Email API Routes
 
@@ -217,13 +226,19 @@ Features:
 - GET: List recent emails from Resend
 
 **File**: `src/app/api/admin/emails/test/route.ts`
-- POST: Send test email
+- POST: Send test email to single recipient
+
+**File**: `src/app/api/admin/templates/route.ts`
+- GET: List available templates from Resend (`resend.templates.list()`)
+
+**File**: `src/app/api/admin/templates/[id]/route.ts`
+- GET: Get template details including variables (`resend.templates.get()`)
 
 **File**: `src/app/api/admin/broadcast/route.ts`
-- POST: Send broadcast to all subscribers
+- POST: Send broadcast to all subscribers (`resend.broadcasts.create()`)
 
 **File**: `src/app/api/admin/contacts/route.ts`
-- GET: List newsletter contacts (for reference/debugging)
+- GET: List newsletter contacts (for subscriber count and debugging)
 
 ---
 
@@ -249,7 +264,7 @@ src/
 │   │   ├── EmailDashboard.tsx
 │   │   ├── EmailLogs.tsx
 │   │   ├── TestEmailSender.tsx
-│   │   └── BroadcastSender.tsx
+│   │   └── NewsletterComposer.tsx  # Template selector + variable form
 │   └── ui/
 │       └── select.tsx         # New shadcn Select component
 ├── app/
@@ -262,6 +277,9 @@ src/
 │   │       ├── emails/
 │   │       │   ├── route.ts
 │   │       │   └── test/route.ts
+│   │       ├── templates/
+│   │       │   ├── route.ts        # List templates
+│   │       │   └── [id]/route.ts   # Get template details
 │   │       ├── broadcast/route.ts
 │   │       └── contacts/route.ts
 │   └── admin/
@@ -306,11 +324,56 @@ const { data, error } = await resend.contacts.create({
 const { data, error } = await resend.emails.list();
 ```
 
+### Send Email with Dashboard Template
+```typescript
+const { data, error } = await resend.emails.send({
+  from: "Assymo <info@assymo.be>",
+  to: [email],
+  template: {
+    id: "tmpl_xxxxxx", // Template ID from Resend dashboard
+    variables: {
+      PRODUCT_NAME: "Tuinhuis",
+      PRICE: 1500,
+    },
+  },
+});
+```
+
+---
+
+## Resend Dashboard Templates
+
+An alternative to React Email code templates - create and edit emails visually in the Resend dashboard.
+
+### Creating Templates
+1. Go to [resend.com/templates](https://resend.com/templates)
+2. Click "Create template"
+3. Use the visual drag-and-drop editor
+4. Add images (upload to Resend or use external URLs)
+5. Add variables with `{{{VARIABLE_NAME}}}` syntax (max 20)
+6. **Publish** the template (drafts cannot be sent)
+
+### Using Variables
+- Define variables in the template: `{{{PRODUCT_NAME}}}`
+- Pass values when sending via `template.variables`
+- Reserved names (auto-populated): `FIRST_NAME`, `LAST_NAME`, `EMAIL`, `UNSUBSCRIBE_URL`
+
+### Benefits
+- Edit emails without code deployments
+- Visual editor with drag-and-drop
+- Non-developers can update content
+- Built-in image hosting
+- Mobile/desktop preview
+
+### When to Use
+- **Dashboard templates**: Marketing emails, newsletters, welcome emails (content changes frequently)
+- **React Email templates**: Transactional emails like contact form notifications (structured, rarely changes)
+
 ---
 
 ## Notes
 
-- All emails use React Email templates for maintainability
+- Emails can use either React Email templates (code) or Resend Dashboard templates (visual editor)
 - Dutch language throughout all user-facing content
 - Admin features require authentication (existing auth system)
 - File attachments (grondplan) will be handled via Resend attachments API
