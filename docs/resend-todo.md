@@ -29,6 +29,7 @@ export const RESEND_CONFIG = {
   fromAddressContact: "Assymo Contact <info@assymo.be>",
   fromAddressNewsletter: "Assymo Nieuwsbrief <info@assymo.be>",
   contactRecipient: "info@assymo.be",
+  testEmail: "info@assymo.be",  // Default recipient for test newsletters
   audienceId: process.env.RESEND_AUDIENCE_ID || "",
   subjects: {
     contactAlgemeen: "Nieuw contactformulier: Algemeen",
@@ -302,6 +303,13 @@ Table displaying sent newsletters:
 
 **File**: `src/app/api/admin/contacts/route.ts`
 - GET: Returns subscriber count from Resend audience
+
+### 6.5 Custom Test Email (TODO)
+
+Allow changing test email recipient in the admin UI:
+- Show dialog when clicking "Test versturen" button
+- Input field for email address (defaults to `RESEND_CONFIG.testEmail`)
+- Remember last used email in localStorage
 
 ---
 

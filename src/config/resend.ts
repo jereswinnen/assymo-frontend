@@ -28,6 +28,11 @@ export const RESEND_CONFIG = {
   contactRecipient: "info@assymo.be",
 
   /**
+   * Default recipient for test newsletters
+   */
+  testEmail: "info@assymo.be",
+
+  /**
    * Resend Audience ID for newsletter subscribers
    * Create an audience in Resend dashboard and add the ID here
    */

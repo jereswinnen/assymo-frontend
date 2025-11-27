@@ -49,7 +49,7 @@ export async function POST(
     // Send test email to admin
     const { error: emailError } = await resend.emails.send({
       from: RESEND_CONFIG.fromAddressNewsletter,
-      to: [RESEND_CONFIG.contactRecipient],
+      to: [RESEND_CONFIG.testEmail],
       subject: `[TEST] ${subject}`,
       react: NewsletterBroadcast({
         preheader: preheader || undefined,
