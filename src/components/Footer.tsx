@@ -176,9 +176,11 @@ export default async function Footer({ className }: FooterProps) {
               >
                 Privacy Policy
               </Link>
+              <Separator orientation="vertical" className="h-3! bg-stone-300" />
               {settings?.vatNumber && (
                 <p className="mb-0!">{settings.vatNumber}</p>
               )}
+              <Separator orientation="vertical" className="h-3! bg-stone-300" />
               <p>&copy; {new Date().getFullYear()} Assymo</p>
             </ul>
           </nav>
