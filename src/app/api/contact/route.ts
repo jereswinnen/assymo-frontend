@@ -29,15 +29,15 @@ export async function POST(req: NextRequest) {
     const email = (form.get("email") as string) || "";
     const phone = (form.get("phone") as string) || "";
     const address = (form.get("address") as string) || "";
+    const newsletterOptIn = form.get("newsletterOptIn") === "true";
 
+    // Send email based on subject
     if (subject === "Tuinhuizen") {
       const extraInfo = (form.get("extraInfo") as string) || "";
       const bouwType = (form.get("bouwType") as string) || "Bouwpakket";
       const bekledingHoutsoort =
         (form.get("bekledingHoutsoort") as string) || "";
       const bekledingProfiel = (form.get("bekledingProfiel") as string) || "";
-      const newsletterOptIn =
-        (form.get("newsletterOptIn") as string) === "true";
       const grondplan = form.get("grondplan") as File | null;
 
       // Prepare attachments if grondplan is provided
@@ -50,7 +50,6 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Send email via Resend
       const { error: emailError } = await resend.emails.send({
         from: RESEND_CONFIG.fromAddressContact,
         to: [RESEND_CONFIG.contactRecipient],
@@ -78,27 +77,9 @@ export async function POST(req: NextRequest) {
           { status: 500 }
         );
       }
-
-      // Add to newsletter if opted in
-      if (newsletterOptIn && RESEND_CONFIG.audienceId) {
-        try {
-          await resend.contacts.create({
-            email,
-            firstName: name.split(" ")[0],
-            lastName: name.split(" ").slice(1).join(" ") || undefined,
-            unsubscribed: false,
-            audienceId: RESEND_CONFIG.audienceId,
-          });
-        } catch (err) {
-          // Don't fail the request if newsletter signup fails
-          console.error("Failed to add contact to newsletter:", err);
-        }
-      }
     } else {
-      // Algemeen
       const message = (form.get("message") as string) || "";
 
-      // Send email via Resend
       const { error: emailError } = await resend.emails.send({
         from: RESEND_CONFIG.fromAddressContact,
         to: [RESEND_CONFIG.contactRecipient],
@@ -119,6 +100,22 @@ export async function POST(req: NextRequest) {
           { error: "Kon e-mail niet verzenden. Probeer later opnieuw." },
           { status: 500 }
         );
+      }
+    }
+
+    // Add to newsletter if opted in (for all subjects)
+    if (newsletterOptIn && RESEND_CONFIG.audienceId) {
+      try {
+        await resend.contacts.create({
+          email,
+          firstName: name.split(" ")[0],
+          lastName: name.split(" ").slice(1).join(" ") || undefined,
+          unsubscribed: false,
+          audienceId: RESEND_CONFIG.audienceId,
+        });
+      } catch (err) {
+        // Don't fail the request if newsletter signup fails
+        console.error("Failed to add contact to newsletter:", err);
       }
     }
 

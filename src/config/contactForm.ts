@@ -120,7 +120,6 @@ export const FORM_FIELDS: FieldConfig[] = [
     name: "newsletterOptIn",
     label: "Ja, ik ontvang graag nieuws over aanbiedingen",
     type: "checkbox",
-    subject: "Tuinhuizen",
   },
 ];
 
