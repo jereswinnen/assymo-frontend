@@ -145,7 +145,6 @@ export default function HeaderClient({
     <>
       {mounted &&
         createPortal(
-          // @ts-expect-error Needs motion/react update
           <AnimatePresence>
             {isSubmenuOpen && (
               <motion.div
