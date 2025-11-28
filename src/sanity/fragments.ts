@@ -19,7 +19,7 @@ export const ctaFields = `
   url
 `;
 
-export const productReferenceFields = `
+export const projectReferenceFields = `
   _id,
   name,
   subtitle,
@@ -84,8 +84,8 @@ export const sectionsFragment = `
     images[]{
       ${imageWithCaptionFields}
     },
-    products[]->{
-      ${productReferenceFields}
+    projects[]->{
+      ${projectReferenceFields}
     },
     content{
       ${contentFields}

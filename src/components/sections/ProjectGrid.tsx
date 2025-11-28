@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { urlFor } from "@/sanity/imageUrl";
 
-interface Product {
+interface Project {
   _id: string;
   name: string;
   slug: { current: string };
@@ -14,27 +14,27 @@ interface Product {
   };
 }
 
-interface ProductGridProps {
+interface ProjectGridProps {
   section: {
-    _type: "productGrid";
+    _type: "projectGrid";
     heading?: string;
-    products: Product[];
+    projects: Project[];
   };
 }
 
-export default function ProductGrid({ section }: ProductGridProps) {
+export default function ProjectGrid({ section }: ProjectGridProps) {
   // Helper function to remove the "XX_" prefix pattern
   const cleanTitle = (title: string) => {
     // Remove pattern: numbers followed by underscore at the start
     return title.replace(/^\d+_/, "");
   };
 
-  if (!section.products || section.products.length === 0) {
+  if (!section.projects || section.projects.length === 0) {
     return (
       <section className="col-span-full">
         <div className="p-4 bg-yellow-100 text-center rounded-lg">
-          <h3 className="font-semibold mb-2">Product Grid</h3>
-          <p>No products found or products need to be added in Sanity CMS</p>
+          <h3 className="font-semibold mb-2">Project Grid</h3>
+          <p>No projects found or projects need to be added in Sanity CMS</p>
         </div>
       </section>
     );
@@ -49,17 +49,17 @@ export default function ProductGrid({ section }: ProductGridProps) {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {section.products.map((product) => (
+        {section.projects.map((project) => (
           <Link
-            key={product._id}
-            href={`/oplossingen/${product.slug.current}`}
+            key={project._id}
+            href={`/oplossingen/${project.slug.current}`}
             className="group bg-white p-4 rounded-2xl shadow-sm flex flex-col gap-4 overflow-hidden transition-all duration-300 hover:scale-[1.025] hover:shadow-md border border-gray-100"
           >
-            {product.headerImage ? (
+            {project.headerImage ? (
               <div className="w-full overflow-hidden rounded-xl aspect-[4/3] relative bg-gray-50">
                 <Image
-                  src={urlFor(product.headerImage).url()}
-                  alt={product.headerImage.alt || product.name}
+                  src={urlFor(project.headerImage).url()}
+                  alt={project.headerImage.alt || project.name}
                   fill
                   className="group-hover:scale-105 object-cover transition-all duration-700"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
@@ -72,7 +72,7 @@ export default function ProductGrid({ section }: ProductGridProps) {
             )}
             <div className="text-center mt-auto">
               <span className="text-base font-medium px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-full inline-block transition-colors">
-                {cleanTitle(product.name)}
+                {cleanTitle(project.name)}
               </span>
             </div>
           </Link>

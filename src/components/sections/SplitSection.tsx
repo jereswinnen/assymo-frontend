@@ -42,7 +42,10 @@ export function SplitSection({ section, className }: SplitSectionProps) {
 
   return (
     <section
-      className={cn("group/split flex col-span-full w-full gap-2.5", className)}
+      className={cn(
+        "group/split flex flex-col md:flex-row col-span-full w-full gap-2.5",
+        className,
+      )}
     >
       {items.map((item, index) => {
         const IconComponent = item.action?.icon

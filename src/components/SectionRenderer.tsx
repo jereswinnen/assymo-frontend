@@ -5,7 +5,7 @@ import TextCentered from "./sections/TextCentered";
 import Slideshow from "./sections/Slideshow";
 import SlideshowLeftTextRight from "./sections/SlideshowLeftTextRight";
 import SlideshowRightTextLeft from "./sections/SlideshowRightTextLeft";
-import ProductGrid from "./sections/ProductGrid";
+import ProjectGrid from "./sections/ProjectGrid";
 import TextLeftImageGridRight from "./sections/TextLeftImageGridRight";
 import TextRightImageGridLeft from "./sections/TextRightImageGridLeft";
 import SalonizedBookingSection from "./sections/SalonizedBookingSection";
@@ -32,7 +32,7 @@ interface Section {
     alt: string;
     caption?: string;
   }[];
-  products?: {
+  projects?: {
     _id: string;
     name: string;
     slug: { current: string };
@@ -89,8 +89,8 @@ export default function SectionRenderer({ sections }: SectionRendererProps) {
               <SlideshowRightTextLeft key={key} section={section as any} />
             );
 
-          case "productGrid":
-            return <ProductGrid key={key} section={section as any} />;
+          case "projectGrid":
+            return <ProjectGrid key={key} section={section as any} />;
           case "kalender":
             return (
               <SalonizedBookingSection
