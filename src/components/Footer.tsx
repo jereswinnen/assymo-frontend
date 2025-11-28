@@ -133,7 +133,7 @@ export default async function Footer({ className }: FooterProps) {
                     {link.subItems.map((item) => (
                       <li key={item.slug.current}>
                         <Link
-                          href={`/oplossingen/${item.slug.current}`}
+                          href={`/realisaties/${item.slug.current}`}
                           className="text-lg font-medium text-stone-800 hover:text-stone-600 transition-colors duration-300"
                         >
                           {item.name}

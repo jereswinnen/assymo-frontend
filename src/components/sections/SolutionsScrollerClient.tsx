@@ -180,7 +180,7 @@ export default function SolutionsScrollerClient({
         {solutions.map((solution) => (
           <motion.div
             key={solution._id}
-            onClick={() => router.push(`/oplossingen/${solution.slug.current}`)}
+            onClick={() => router.push(`/realisaties/${solution.slug.current}`)}
             data-card
             initial="idle"
             whileHover="hover"

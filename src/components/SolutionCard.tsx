@@ -19,7 +19,7 @@ export default function SolutionCard({ solution }: SolutionCardProps) {
 
   return (
     <Link
-      href={`/oplossingen/${solution.slug.current}`}
+      href={`/realisaties/${solution.slug.current}`}
       key={solution._id}
       className="group bg-white p-3 rounded-2xl shadow-sm flex flex-col items-center gap-3 overflow-hidden transition-all duration-300 hover:scale-[1.025] hover:shadow-md"
     >

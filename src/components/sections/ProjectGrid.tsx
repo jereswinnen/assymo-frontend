@@ -52,7 +52,7 @@ export default function ProjectGrid({ section }: ProjectGridProps) {
         {section.projects.map((project) => (
           <Link
             key={project._id}
-            href={`/oplossingen/${project.slug.current}`}
+            href={`/realisaties/${project.slug.current}`}
             className="group bg-white p-4 rounded-2xl shadow-sm flex flex-col gap-4 overflow-hidden transition-all duration-300 hover:scale-[1.025] hover:shadow-md border border-gray-100"
           >
             {project.headerImage ? (

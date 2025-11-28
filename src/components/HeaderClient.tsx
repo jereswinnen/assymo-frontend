@@ -312,7 +312,7 @@ export default function HeaderClient({
                             key={item.slug.current}
                             onMouseEnter={() => handleItemHover(index)}
                           >
-                            <Link href={`/oplossingen/${item.slug.current}`}>
+                            <Link href={`/realisaties/${item.slug.current}`}>
                               {item.name}
                             </Link>
                           </li>
