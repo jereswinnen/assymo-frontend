@@ -311,12 +311,22 @@ Implemented:
 - GET endpoint returns subscriber count from Resend audience
 - Filters out unsubscribed contacts
 
-### 6.5 Custom Test Email (TODO)
+### 6.5 Custom Test Email ✅
 
-Allow changing test email recipient in the admin UI:
-- Show dialog when clicking "Test versturen" button
-- Input field for email address (defaults to `RESEND_CONFIG.testEmail`)
-- If the user changes the test email in the admin, make sure the RESEND_CONFIG.testEmail is also changed
+**File**: `src/app/api/admin/newsletters/[id]/test/route.ts`
+
+Implemented:
+- API route accepts optional `email` in request body
+- Falls back to `RESEND_CONFIG.testEmail` if not provided
+- Validates email format before sending
+
+**File**: `src/components/admin/NewsletterComposer.tsx`
+
+Implemented:
+- Dialog appears when clicking "Test versturen" button
+- Input field for email address
+- Email is saved to localStorage for persistence
+- Defaults to last used email or `RESEND_CONFIG.testEmail`
 
 ---
 

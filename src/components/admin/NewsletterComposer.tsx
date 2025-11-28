@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { RESEND_CONFIG } from "@/config/resend";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +48,16 @@ export function NewsletterComposer({
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
   const [sectionToDelete, setSectionToDelete] = useState<number | null>(null);
   const [showBroadcastConfirm, setShowBroadcastConfirm] = useState(false);
+  const [showTestDialog, setShowTestDialog] = useState(false);
+  const [testEmail, setTestEmail] = useState<string>(RESEND_CONFIG.testEmail);
+
+  // Load saved test email from localStorage
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("newsletterTestEmail");
+    if (savedEmail) {
+      setTestEmail(savedEmail);
+    }
+  }, []);
 
   const updateField = <K extends keyof Newsletter>(
     field: K,
@@ -105,7 +116,7 @@ export function NewsletterComposer({
     }
   };
 
-  const handleSendTest = async () => {
+  const handleSendTestClick = () => {
     if (!newsletter.subject.trim()) {
       toast.error("Vul een onderwerp in");
       return;
@@ -116,7 +127,22 @@ export function NewsletterComposer({
       return;
     }
 
+    setShowTestDialog(true);
+  };
+
+  const handleConfirmTest = async () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(testEmail)) {
+      toast.error("Vul een geldig e-mailadres in");
+      return;
+    }
+
+    // Save email to localStorage for next time
+    localStorage.setItem("newsletterTestEmail", testEmail);
+
+    setShowTestDialog(false);
     setSendingTest(true);
+
     try {
       // First save the newsletter
       await onSave(newsletter);
@@ -125,6 +151,8 @@ export function NewsletterComposer({
         `/api/admin/newsletters/${newsletter.id}/test`,
         {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: testEmail }),
         },
       );
 
@@ -133,7 +161,7 @@ export function NewsletterComposer({
         throw new Error(data.error || "Test verzenden mislukt");
       }
 
-      toast.success("Test e-mail verzonden naar je inbox");
+      toast.success(`Test e-mail verzonden naar ${testEmail}`);
     } catch (error) {
       console.error("Failed to send test:", error);
       toast.error(
@@ -356,7 +384,7 @@ export function NewsletterComposer({
 
         <Button
           variant="outline"
-          onClick={handleSendTest}
+          onClick={handleSendTestClick}
           disabled={sendingTest || saving || sendingBroadcast}
         >
           {sendingTest ? (
@@ -436,6 +464,39 @@ export function NewsletterComposer({
             </Button>
             <Button onClick={handleConfirmBroadcast}>
               <SendIcon className="size-4" />
+              Versturen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Test Email Dialog */}
+      <Dialog open={showTestDialog} onOpenChange={setShowTestDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Test e-mail versturen</DialogTitle>
+            <DialogDescription>
+              Verstuur een test e-mail om te controleren hoe de nieuwsbrief
+              eruitziet.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="test-email">E-mailadres</Label>
+            <Input
+              id="test-email"
+              type="email"
+              placeholder="test@voorbeeld.be"
+              value={testEmail}
+              onChange={(e) => setTestEmail(e.target.value)}
+              className="mt-2"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTestDialog(false)}>
+              Annuleren
+            </Button>
+            <Button onClick={handleConfirmTest}>
+              <ForwardIcon className="size-4" />
               Versturen
             </Button>
           </DialogFooter>

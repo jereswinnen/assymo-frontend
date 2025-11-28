@@ -8,7 +8,7 @@ import type { NewsletterSection } from "@/config/newsletter";
 
 const sql = neon(process.env.DATABASE_URL!);
 
-// POST: Send test email to admin
+// POST: Send test email to specified address (or default)
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -24,6 +24,19 @@ export async function POST(
 
     if (isNaN(newsletterId)) {
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    }
+
+    // Get custom email from request body (optional)
+    const body = await req.json().catch(() => ({}));
+    const testEmail = body.email?.trim() || RESEND_CONFIG.testEmail;
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(testEmail)) {
+      return NextResponse.json(
+        { error: "Ongeldig e-mailadres" },
+        { status: 400 }
+      );
     }
 
     // Fetch the newsletter
@@ -46,10 +59,10 @@ export async function POST(
       );
     }
 
-    // Send test email to admin
+    // Send test email
     const { error: emailError } = await resend.emails.send({
       from: RESEND_CONFIG.fromAddressNewsletter,
-      to: [RESEND_CONFIG.testEmail],
+      to: [testEmail],
       subject: `[TEST] ${subject}`,
       react: NewsletterBroadcast({
         preheader: preheader || undefined,
@@ -65,7 +78,7 @@ export async function POST(
       );
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, sentTo: testEmail });
   } catch (error) {
     console.error("Failed to send test email:", error);
     return NextResponse.json(
