@@ -54,7 +54,7 @@ export function CategoryFilter({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="rounded-full gap-1.5 pr-2.5 bg-violet-400"
+          className="cursor-pointer rounded-full gap-1.5"
           aria-expanded={open}
         >
           {category.name}

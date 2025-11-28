@@ -5,7 +5,6 @@ import TextCentered from "./sections/TextCentered";
 import Slideshow from "./sections/Slideshow";
 import SlideshowLeftTextRight from "./sections/SlideshowLeftTextRight";
 import SlideshowRightTextLeft from "./sections/SlideshowRightTextLeft";
-import ProjectGrid from "./sections/ProjectGrid";
 import TextLeftImageGridRight from "./sections/TextLeftImageGridRight";
 import TextRightImageGridLeft from "./sections/TextRightImageGridLeft";
 import SalonizedBookingSection from "./sections/SalonizedBookingSection";
@@ -89,8 +88,6 @@ export default function SectionRenderer({ sections }: SectionRendererProps) {
               <SlideshowRightTextLeft key={key} section={section as any} />
             );
 
-          case "projectGrid":
-            return <ProjectGrid key={key} section={section as any} />;
           case "kalender":
             return (
               <SalonizedBookingSection

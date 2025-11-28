@@ -54,16 +54,19 @@ export function FilterBar({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2 bg-amber-200">
-      {visibleCategories.map((category) => (
-        <CategoryFilter
-          key={category._id}
-          category={category}
-          options={category.options}
-          selectedOptions={selectedFilters[category.slug.current] || []}
-          onSelectionChange={handleCategoryChange}
-        />
-      ))}
+    <div className="flex flex-wrap items-center gap-4">
+      <p className="mb-0! text-sm font-medium text-stone-600">Filter op:</p>
+      <div className="flex flex-wrap items-center gap-3">
+        {visibleCategories.map((category) => (
+          <CategoryFilter
+            key={category._id}
+            category={category}
+            options={category.options}
+            selectedOptions={selectedFilters[category.slug.current] || []}
+            onSelectionChange={handleCategoryChange}
+          />
+        ))}
+      </div>
       {hasActiveFilters && (
         <Button
           variant="ghost"

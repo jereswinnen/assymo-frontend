@@ -177,7 +177,8 @@
 
 .o-grid {
   margin: 0 auto;
-  max-width: var(--u-site-w);
+  width: var(--u-site-w);
+  max-width: 100%;
   display: grid;
   grid-template-columns: repeat(var(--u-grid-columns), 1fr);
   column-gap: var(--u-grid-gap);

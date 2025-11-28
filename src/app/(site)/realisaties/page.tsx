@@ -21,6 +21,7 @@ const SOLUTIONS_QUERY = `*[
 ] | order(name asc) {
   _id,
   name,
+  subtitle,
   slug,
   headerImage{
     ${imageFields}
@@ -63,18 +64,14 @@ export default async function RealisatiesPage() {
   ]);
 
   return (
-    <>
+    <section className="col-span-full grid grid-cols-subgrid gap-y-14">
       {page?.sections && page.sections.length > 0 && (
         <SectionRenderer sections={page.sections} />
       )}
 
-      <section className="col-span-full grid grid-cols-subgrid">
-        <div className="col-span-full grid grid-cols-subgrid">
-          <Suspense fallback={<div>Laden...</div>}>
-            <ProjectsGrid solutions={solutions} categories={categories} />
-          </Suspense>
-        </div>
-      </section>
-    </>
+      <Suspense fallback={<div className="col-span-full">Laden...</div>}>
+        <ProjectsGrid solutions={solutions} categories={categories} />
+      </Suspense>
+    </section>
   );
 }
