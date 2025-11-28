@@ -101,7 +101,7 @@ export function NewsletterForm({ className }: NewsletterFormProps) {
             {isSubmitting && (
               <>
                 <Spinner className="size-3" />
-                <span>Laden</span>
+                <span>Laden...</span>
               </>
             )}
             {isSuccess && (

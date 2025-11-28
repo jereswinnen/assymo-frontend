@@ -19,7 +19,7 @@ import {
   FieldError,
 } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
-import { CheckIcon, SendIcon } from "lucide-react";
+import { CheckIcon, MailCheckIcon, SendIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   getVisibleFields,
@@ -273,14 +273,17 @@ export default function ContactForm({ section }: ContactFormProps) {
               type="submit"
               disabled={isSubmitting || (!isSuccess && !isFormValid)}
               className={cn(
-                "w-fit",
-                isSuccess && "bg-green-600 hover:bg-green-600 text-white",
+                "w-fit text-accent-light bg-accent-dark transition-colors duration-250 hover:text-accent-dark hover:bg-accent-light",
+                isSubmitting &&
+                  "text-stone-600 bg-stone-200 hover:text-stone-600 hover:bg-stone-200",
+                isSuccess &&
+                  "text-stone-600 bg-stone-200 hover:text-stone-600 hover:bg-stone-200",
               )}
             >
               {isSubmitting && (
                 <>
                   <Spinner className="size-4" />
-                  <span>Laden</span>
+                  <span>Laden...</span>
                 </>
               )}
               {isSuccess && (
@@ -291,7 +294,7 @@ export default function ContactForm({ section }: ContactFormProps) {
               )}
               {!isSubmitting && !isSuccess && (
                 <>
-                  <SendIcon className="size-4" />
+                  <MailCheckIcon className="size-4" />
                   <span>Versturen</span>
                 </>
               )}
