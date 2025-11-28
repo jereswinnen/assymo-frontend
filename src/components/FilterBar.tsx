@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { CircleXIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CategoryFilter } from "@/components/CategoryFilter";
 
@@ -69,12 +69,12 @@ export function FilterBar({
       </div>
       {hasActiveFilters && (
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
-          className="text-muted-foreground gap-1"
+          className="cursor-pointer ml-auto text-muted-foreground rounded-full"
           onClick={handleClearAll}
         >
-          <X className="size-4" />
+          <CircleXIcon className="size-4" />
           Wis filters
         </Button>
       )}

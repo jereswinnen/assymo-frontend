@@ -49,6 +49,11 @@ export function CategoryFilter({
 
   const selectedCount = selectedOptions.length;
 
+  // Get the names of selected options
+  const selectedNames = options
+    .filter((opt) => selectedOptions.includes(opt.slug.current))
+    .map((opt) => opt.name);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -57,11 +62,9 @@ export function CategoryFilter({
           className="cursor-pointer rounded-full gap-1.5"
           aria-expanded={open}
         >
-          {category.name}
+          {category.name}{selectedCount > 0 && ":"}
           {selectedCount > 0 && (
-            <span className="bg-primary text-primary-foreground text-xs rounded-full px-1.5 py-0.5 min-w-5 text-center">
-              {selectedCount}
-            </span>
+            <span className="opacity-70">{selectedNames.join(", ")}</span>
           )}
           <ChevronDown className="size-4 opacity-50" />
         </Button>
