@@ -289,7 +289,6 @@ export default function HeaderClient({
                     }}
                   >
                     <figure className="w-2xs h-96 relative overflow-hidden">
-                      {/* @ts-expect-error Needs motion/react update */}
                       <AnimatePresence>
                         {currentImage && (
                           <motion.img
