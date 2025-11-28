@@ -161,7 +161,7 @@ export default function HeaderClient({
         )}
       <motion.header
         className={cn(
-          "relative md:flex md:flex-col md:sticky md:top-0 z-50 py-8 bg-white",
+          "relative md:flex md:flex-col md:sticky md:top-0 z-50 py-8 bg-orange-200 md:bg-amber-200",
           className,
         )}
         initial={false}
