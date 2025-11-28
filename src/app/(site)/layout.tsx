@@ -8,9 +8,11 @@ export default function SiteLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex flex-col gap-y-24">
+    <div className="flex flex-col gap-y-10 md:gap-y-24">
       <Header />
-      <main className="o-grid grid-cols-subgrid gap-y-24!">{children}</main>
+      <main className="o-grid grid-cols-subgrid gap-y-18! md:gap-y-24!">
+        {children}
+      </main>
       <Footer />
       <ChatbotWidget />
     </div>

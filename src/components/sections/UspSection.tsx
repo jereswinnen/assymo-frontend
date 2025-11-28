@@ -85,23 +85,20 @@ export default function UspSection({ section }: UspSectionProps) {
   const [firstUsp, ...remainingUsps] = usps;
 
   return (
-    <section className="o-grid--bleed col-span-full grid grid-cols-subgrid gap-y-8 py-14 bg-accent-lightest">
-      {heading && <h2 className="col-span-full">{heading}</h2>}
-      <div className="col-span-full flex flex-col lg:flex-row gap-2.5">
+    <section className="o-grid--bleed col-span-full grid grid-cols-subgrid gap-y-8 py-10 md:py-14 bg-stone-100">
+      {heading && <h2 className="col-span-full text-stone-700">{heading}</h2>}
+      <div className="col-span-full flex flex-col lg:flex-row gap-8 md:gap-2.5">
         {/* Left column: 40% */}
-        <div className="lg:basis-2/5 lg:shrink-0">
+        <div className="md:basis-2/5 md:shrink-0">
           <UspCard usp={firstUsp} variant="primary" />
         </div>
 
         {/* Right column: 60% with flex wrap */}
-        <div className="lg:basis-3/5 flex flex-wrap gap-2.5">
+        <div className="md:basis-3/5 flex flex-wrap gap-4 md:gap-2.5">
           {remainingUsps.map((usp, index) => {
             const isLast = index === remainingUsps.length - 1;
             return (
-              <div
-                key={index}
-                className="basis-full sm:basis-[calc(50%-0.5rem)] lg:basis-[calc(50%-0.5rem)]"
-              >
+              <div key={index} className="basis-[calc(50%-0.5rem)]">
                 <UspCard usp={usp} variant={isLast ? "cta" : "secondary"} />
               </div>
             );

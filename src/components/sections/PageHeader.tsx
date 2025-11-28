@@ -22,10 +22,12 @@ export default function PageHeader({ section }: PageHeaderProps) {
 
   return (
     <header className="col-span-full flex flex-col gap-8">
-      <div className="w-[900px] flex flex-col gap-2">
+      <div className="md:w-[900px] flex flex-col gap-4 md:gap-2">
         <h1 className="mb-0!">{title}</h1>
         {subtitle && (
-          <p className="font-[420] text-xl text-stone-600">{subtitle}</p>
+          <p className="font-[420] text-lg md:text-xl text-stone-600">
+            {subtitle}
+          </p>
         )}
       </div>
       {showButtons && buttons && buttons.length > 0 && (

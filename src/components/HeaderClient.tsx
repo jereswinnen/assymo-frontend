@@ -145,6 +145,7 @@ export default function HeaderClient({
     <>
       {mounted &&
         createPortal(
+          // @ts-expect-error Needs motion/react update
           <AnimatePresence>
             {isSubmenuOpen && (
               <motion.div
@@ -208,6 +209,7 @@ export default function HeaderClient({
           />
         </div>
 
+        {/* @ts-expect-error Needs motion/react update */}
         <AnimatePresence>
           {isSubmenuOpen && (
             <motion.div
@@ -231,6 +233,7 @@ export default function HeaderClient({
                   ease: easing,
                 }}
               >
+                {/* @ts-expect-error Needs motion/react update */}
                 <AnimatePresence
                   mode="wait"
                   custom={{ animationMode, direction }}
@@ -289,6 +292,7 @@ export default function HeaderClient({
                     }}
                   >
                     <figure className="w-2xs h-96 relative overflow-hidden">
+                      {/* @ts-expect-error Needs motion/react update */}
                       <AnimatePresence>
                         {currentImage && (
                           <motion.img

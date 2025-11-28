@@ -57,16 +57,16 @@ export default async function Footer({ className }: FooterProps) {
   const links = nav?.links || [];
 
   return (
-    <footer className={cn("py-14 bg-stone-100", className)}>
+    <footer className={cn("py-10 md:py-14 bg-stone-100", className)}>
       <div className="o-grid gap-y-8! *:col-span-full">
         <div className="flex justify-end">
-          <NewsletterForm className="basis-[65%]" />
+          <NewsletterForm className="basis-full md:basis-[65%]" />
         </div>
 
         <Separator className="bg-stone-200" />
 
-        <div className="flex justify-between">
-          <div className="flex flex-col gap-6 basis-[35%]">
+        <div className="flex flex-col gap-12 md:gap-0 md:flex-row md:justify-between">
+          <div className="flex flex-col gap-6 order-2 md:order-1 basis-full md:basis-[35%]">
             <Link href="/">
               <Logo className="w-28 text-stone-900" />
             </Link>
@@ -90,7 +90,7 @@ export default async function Footer({ className }: FooterProps) {
 
             {(settings?.instagram || settings?.facebook) && (
               <>
-                <Separator className="max-w-[60%]!" />
+                <Separator className="md:max-w-[60%]!" />
                 <ul className="flex gap-3 *:text-stone-500 *:transition-colors *:duration-300 *:hover:text-stone-700">
                   {settings?.instagram && (
                     <li>
@@ -119,7 +119,7 @@ export default async function Footer({ className }: FooterProps) {
             )}
           </div>
 
-          <nav className="flex gap-8 justify-between basis-[65%]">
+          <nav className="flex flex-col md:flex-row gap-8 justify-between basis-full md:basis-[65%]">
             {links.map((link) => (
               <div key={link.slug} className="flex flex-col gap-3">
                 <Link
@@ -148,7 +148,7 @@ export default async function Footer({ className }: FooterProps) {
         </div>
 
         <div className="flex justify-end">
-          <nav className="basis-[65%] text-xs font-medium text-stone-500">
+          <nav className="basis-full md:basis-[65%] text-xs font-medium text-stone-500">
             <ul className="flex items-center gap-3">
               <Link
                 href="#"

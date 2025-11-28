@@ -43,7 +43,7 @@ export function SplitSection({ section, className }: SplitSectionProps) {
   return (
     <section
       className={cn(
-        "group/split flex flex-col md:flex-row col-span-full w-full gap-2.5",
+        "group/split flex flex-col md:flex-row col-span-full w-full gap-8 md:gap-2.5",
         className,
       )}
     >
@@ -56,9 +56,9 @@ export function SplitSection({ section, className }: SplitSectionProps) {
           <div
             key={index}
             onClick={() => router.push(item.href)}
-            className="group flex flex-col gap-3 basis-1/2 overflow-hidden transition-[flex-basis] duration-700 ease-circ group-hover/split:hover:basis-[54%] group-hover/split:not-[&:hover]:basis-[46%] cursor-pointer"
+            className="group flex flex-col gap-3 md:basis-1/2 overflow-hidden md:transition-[flex-basis] duration-700 ease-circ md:group-hover/split:hover:basis-[54%] md:group-hover/split:not-[&:hover]:basis-[46%] cursor-pointer"
           >
-            <div className="relative h-[400px] overflow-hidden">
+            <div className="relative h-[220px] md:h-[400px] overflow-hidden">
               <Image
                 src={urlFor(item.image).width(1200).quality(80).url()}
                 alt={item.title}

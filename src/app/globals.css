@@ -14,7 +14,7 @@
 }
 
 :root {
-  --u-site-w: 80vw;
+  --u-site-w: 90vw;
   --u-grid-columns: 2;
   --u-grid-gap: 4rem;
   --c-accent-lightest: #ebf4f3;
@@ -22,6 +22,7 @@
   --c-accent-dark: #1f3632;
   --c-accent-darkest: #1a2322;
   @media (min-width: 46em) {
+    --u-site-w: 80vw;
     --u-grid-columns: 9;
   }
   --radius: 0.625rem;
@@ -198,6 +199,7 @@ body {
   line-height: 1.5;
   background: white;
   color: var(--c-accent-dark);
+  text-wrap: pretty;
 }
 
 p:not(:last-child) {
@@ -206,18 +208,30 @@ p:not(:last-child) {
 
 h1 {
   margin-bottom: 1.2rem;
-  font-size: 3rem;
+  font-size: 2.4rem;
   line-height: 1.2;
   letter-spacing: -0.02em;
   font-weight: 520 !important;
 }
 
+@media (min-width: 46em) {
+  h1 {
+    font-size: 3rem;
+  }
+}
+
 h2 {
   margin-bottom: 1.2rem;
-  font-size: 2.35rem;
+  font-size: 2rem;
   line-height: 1.2;
   letter-spacing: -0.02em;
   font-weight: 480 !important;
+}
+
+@media (min-width: 46em) {
+  h2 {
+    font-size: 2.35rem;
+  }
 }
 
 h3 {

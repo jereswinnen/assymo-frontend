@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, useInView } from "motion/react";
 import { ChevronLeftIcon, ChevronRightIcon, InfoIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Action } from "../Action";
 
 // Animation tokens
@@ -27,6 +28,51 @@ export interface SolutionCard {
   slug: { current: string };
   imageUrl?: string;
   imageAlt?: string;
+}
+
+interface ScrollerNavigationProps {
+  onPrevious: () => void;
+  onNext: () => void;
+  canGoPrevious: boolean;
+  canGoNext: boolean;
+  className?: string;
+}
+
+function ScrollerNavigation({
+  onPrevious,
+  onNext,
+  canGoPrevious,
+  canGoNext,
+  className,
+}: ScrollerNavigationProps) {
+  return (
+    <div
+      className={cn("flex gap-2 p-1.25 rounded-full bg-stone-200", className)}
+    >
+      <button
+        onClick={onPrevious}
+        disabled={!canGoPrevious}
+        className="group cursor-pointer bg-white text-stone-800 rounded-full p-1.25 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:*:translate-0"
+        aria-label="Vorige oplossingen"
+      >
+        <ChevronLeftIcon
+          className="size-6 transition-all duration-400 ease-circ group-hover:-translate-x-1"
+          strokeWidth={1.5}
+        />
+      </button>
+      <button
+        onClick={onNext}
+        disabled={!canGoNext}
+        className="group cursor-pointer bg-white text-stone-800 rounded-full p-1.25 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:*:translate-0"
+        aria-label="Volgende oplossingen"
+      >
+        <ChevronRightIcon
+          className="size-6 transition-all duration-400 ease-circ group-hover:translate-x-1"
+          strokeWidth={1.5}
+        />
+      </button>
+    </div>
+  );
 }
 
 interface SolutionsScrollerClientProps {
@@ -129,44 +175,26 @@ export default function SolutionsScrollerClient({
     <section ref={sectionRef} className="col-span-full flex flex-col gap-14">
       {/* Header with title and navigation */}
       <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
+        <div className="basis-full md:basis-auto flex flex-col gap-2">
           {heading && <h2 className="mb-0!">{heading}</h2>}
           {subtitle && (
-            <p className="max-w-[60%] text-lg text-stone-600 mb-0!">
+            <p className="md:max-w-[60%] text-lg text-stone-600 mb-0!">
               {subtitle}
             </p>
           )}
         </div>
 
         {solutions.length > VISIBLE_CARDS && (
-          <div className="flex gap-2 p-1.25 rounded-full bg-stone-200">
-            <button
-              onClick={goToPrevious}
-              disabled={!canGoPrevious}
-              className="group cursor-pointer bg-white text-stone-800 rounded-full p-1.25 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:*:translate-0"
-              aria-label="Vorige oplossingen"
-            >
-              <ChevronLeftIcon
-                className="size-6 transition-all duration-400 ease-circ group-hover:-translate-x-1"
-                strokeWidth={1.5}
-              />
-            </button>
-            <button
-              onClick={goToNext}
-              disabled={!canGoNext}
-              className="group cursor-pointer bg-white text-stone-800 rounded-full p-1.25 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:*:translate-0"
-              aria-label="Volgende oplossingen"
-            >
-              <ChevronRightIcon
-                className="size-6 transition-all duration-400 ease-circ group-hover:translate-x-1"
-                strokeWidth={1.5}
-              />
-            </button>
-          </div>
+          <ScrollerNavigation
+            onPrevious={goToPrevious}
+            onNext={goToNext}
+            canGoPrevious={canGoPrevious}
+            canGoNext={canGoNext}
+            className="hidden md:flex"
+          />
         )}
       </div>
 
-      {/* Scroll container - uses o-grid--bleed for full viewport width with aligned padding */}
       <div
         ref={scrollContainerRef}
         onMouseEnter={() => setIsPaused(true)}
@@ -230,6 +258,16 @@ export default function SolutionsScrollerClient({
           </motion.div>
         ))}
       </div>
+
+      {solutions.length > VISIBLE_CARDS && (
+        <ScrollerNavigation
+          onPrevious={goToPrevious}
+          onNext={goToNext}
+          canGoPrevious={canGoPrevious}
+          canGoNext={canGoNext}
+          className="flex w-fit md:hidden"
+        />
+      )}
     </section>
   );
 }

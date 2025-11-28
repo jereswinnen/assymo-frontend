@@ -74,7 +74,7 @@ export function NewsletterForm({ className }: NewsletterFormProps) {
           Ontvang handige weetjes en blijf op de hoogte van promoties.
         </p>
       </div>
-      <InputGroup className="w-[60%] bg-white">
+      <InputGroup className="md:w-[60%] bg-white">
         <InputGroupInput
           type="email"
           placeholder="Vul je e-mailadres in..."
