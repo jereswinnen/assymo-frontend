@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Logo from "./Logo";
 import { cn } from "@/lib/utils";
 import { Action } from "./Action";
@@ -65,6 +66,7 @@ export default function HeaderClient({
   settings,
   className,
 }: HeaderClientProps) {
+  const pathname = usePathname();
   const [activeLink, setActiveLink] = useState<NavLink | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [direction, setDirection] = useState(1);
@@ -174,19 +176,27 @@ export default function HeaderClient({
 
           <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm p-2 px-4 rounded-full text-stone-700 bg-stone-100">
             <ul className="flex gap-6 group/nav">
-              {links.map((link, index) => (
-                <li
-                  key={link.slug}
-                  onMouseEnter={() => handleLinkHover(link, index)}
-                >
-                  <Link
-                    href={`/${link.slug}`}
-                    className="font-medium transition-opacity duration-200 group-hover/nav:opacity-60 hover:opacity-100!"
+              {links.map((link, index) => {
+                const isActive =
+                  pathname === `/${link.slug}` ||
+                  pathname.startsWith(`/${link.slug}/`);
+                return (
+                  <li
+                    key={link.slug}
+                    onMouseEnter={() => handleLinkHover(link, index)}
                   >
-                    {link.title}
-                  </Link>
-                </li>
-              ))}
+                    <Link
+                      href={`/${link.slug}`}
+                      className={cn(
+                        "font-medium transition-opacity duration-200 group-hover/nav:opacity-60 hover:opacity-100!",
+                        isActive && "font-semibold text-stone-900 opacity-100!",
+                      )}
+                    >
+                      {link.title}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 

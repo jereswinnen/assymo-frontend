@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleXIcon, X } from "lucide-react";
+import { CircleXIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CategoryFilter } from "@/components/CategoryFilter";
 
