@@ -208,7 +208,6 @@ export default function HeaderClient({
           />
         </div>
 
-        {/* @ts-expect-error Needs motion/react update */}
         <AnimatePresence>
           {isSubmenuOpen && (
             <motion.div
@@ -232,7 +231,6 @@ export default function HeaderClient({
                   ease: easing,
                 }}
               >
-                {/* @ts-expect-error Needs motion/react update */}
                 <AnimatePresence
                   mode="wait"
                   custom={{ animationMode, direction }}
