@@ -264,52 +264,59 @@ Section-based composer:
 
 ---
 
-## Phase 6: Broadcasts & Stats
+## Phase 6: Broadcasts & Stats ✅ COMPLETE
 
-### 6.1 Subscriber Count Display
+### 6.1 Subscriber Count Display ✅
 
 **File**: `src/components/admin/EmailDashboard.tsx`
 
-Add subscriber count at top of dashboard:
-- Fetches from Resend audience API
-- Shows: "142 subscribers"
+Implemented:
+- Fetches subscriber count from Resend audience API
+- Displays count at top of dashboard with icon
+- Shows singular/plural form ("1 abonnee" / "X abonnees")
 
-### 6.2 Send Broadcast
+### 6.2 Send Broadcast ✅
 
 **File**: `src/app/api/admin/newsletters/[id]/send/route.ts`
 
-POST: Send newsletter to all subscribers
-1. Fetch newsletter from database
-2. Fetch contacts from Resend audience
-3. Send emails (batch)
-4. Update newsletter: `status = 'sent'`, `subscriber_count`, `sent_at`, `resend_email_id`
+Implemented:
+- POST endpoint to send newsletter to all subscribers
+- Fetches newsletter from database
+- Fetches contacts from Resend audience (filters out unsubscribed)
+- Sends emails in batches of 100 (Resend limit)
+- Updates newsletter: `status = 'sent'`, `subscriber_count`, `sent_at`, `resend_email_id`
 
-**UI**: Add [Send to X subscribers] button in composer with confirmation dialog
+**File**: `src/components/admin/NewsletterComposer.tsx`
 
-### 6.3 Broadcast History
+- Added "Verstuur naar X abonnees" button
+- Confirmation dialog before sending
+- Saves draft before sending
+- Success/error toast notifications
+
+### 6.3 Broadcast History ✅
 
 **File**: `src/components/admin/BroadcastHistory.tsx`
 
-Table displaying sent newsletters:
+Implemented:
+- Table displaying sent newsletters
+- Shows: subject, sent date/time, subscriber count
+- Link to view email in Resend dashboard
+- Dutch formatting for dates
 
-| Subject | Date | Subscribers | |
-|---------|------|-------------|---|
-| Winterkorting! | 27 nov 2025 | 142 | [View in Resend ↗] |
-
-- Fetches newsletters where `status = 'sent'`
-- Link opens Resend dashboard for that email ID
-
-### 6.4 Stats API Route
+### 6.4 Stats API Route ✅
 
 **File**: `src/app/api/admin/contacts/route.ts`
-- GET: Returns subscriber count from Resend audience
+
+Implemented:
+- GET endpoint returns subscriber count from Resend audience
+- Filters out unsubscribed contacts
 
 ### 6.5 Custom Test Email (TODO)
 
 Allow changing test email recipient in the admin UI:
 - Show dialog when clicking "Test versturen" button
 - Input field for email address (defaults to `RESEND_CONFIG.testEmail`)
-- Remember last used email in localStorage
+- If the user changes the test email in the admin, make sure the RESEND_CONFIG.testEmail is also changed
 
 ---
 
@@ -383,7 +390,7 @@ newsletters
 3. **Phase 3**: Contact form (refactor, API update, templates) ✅
 4. **Phase 4**: Setup & types (database table, newsletter config, email template) ✅
 5. **Phase 5**: Newsletter composer (admin tab, drafts, test send) ✅
-6. **Phase 6**: Broadcasts & stats (send to all, history, subscriber count)
+6. **Phase 6**: Broadcasts & stats (send to all, history, subscriber count) ✅
 
 ---
 

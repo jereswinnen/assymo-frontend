@@ -30,7 +30,7 @@ export const RESEND_CONFIG = {
   /**
    * Default recipient for test newsletters
    */
-  testEmail: "info@assymo.be",
+  testEmail: "assymo@jeremys.be",
 
   /**
    * Resend Audience ID for newsletter subscribers

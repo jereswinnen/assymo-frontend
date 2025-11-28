@@ -5,13 +5,16 @@ import type { Newsletter, NewsletterSection } from "@/config/newsletter";
 
 const sql = neon(process.env.DATABASE_URL!);
 
-// GET: List all draft newsletters
+// GET: List newsletters (default: drafts, or sent if ?status=sent)
 export async function GET(req: NextRequest) {
   try {
     const authenticated = await isAuthenticated();
     if (!authenticated) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const { searchParams } = new URL(req.url);
+    const status = searchParams.get("status") || "draft";
 
     const rows = await sql`
       SELECT
@@ -25,8 +28,8 @@ export async function GET(req: NextRequest) {
         created_at,
         sent_at
       FROM newsletters
-      WHERE status = 'draft'
-      ORDER BY created_at DESC
+      WHERE status = ${status}
+      ORDER BY ${status === "sent" ? sql`sent_at` : sql`created_at`} DESC
     `;
 
     const newsletters: Newsletter[] = rows.map((row) => ({

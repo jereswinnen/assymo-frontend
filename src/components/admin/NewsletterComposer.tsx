@@ -21,25 +21,32 @@ import {
   XIcon,
   CheckIcon,
   ForwardIcon,
+  SendIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Newsletter, NewsletterSection } from "@/config/newsletter";
 
 interface NewsletterComposerProps {
   newsletter: Newsletter;
+  subscriberCount: number | null;
   onSave: (newsletter: Newsletter) => Promise<void>;
   onClose: () => void;
+  onBroadcastSent: () => void;
 }
 
 export function NewsletterComposer({
   newsletter: initialNewsletter,
+  subscriberCount,
   onSave,
   onClose,
+  onBroadcastSent,
 }: NewsletterComposerProps) {
   const [newsletter, setNewsletter] = useState<Newsletter>(initialNewsletter);
   const [saving, setSaving] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
+  const [sendingBroadcast, setSendingBroadcast] = useState(false);
   const [sectionToDelete, setSectionToDelete] = useState<number | null>(null);
+  const [showBroadcastConfirm, setShowBroadcastConfirm] = useState(false);
 
   const updateField = <K extends keyof Newsletter>(
     field: K,
@@ -134,6 +141,60 @@ export function NewsletterComposer({
       );
     } finally {
       setSendingTest(false);
+    }
+  };
+
+  const handleSendBroadcast = async () => {
+    if (!newsletter.subject.trim()) {
+      toast.error("Vul een onderwerp in");
+      return;
+    }
+
+    if (newsletter.sections.every((s) => !s.title.trim() && !s.text.trim())) {
+      toast.error("Voeg content toe aan minimaal één sectie");
+      return;
+    }
+
+    if (!subscriberCount || subscriberCount === 0) {
+      toast.error("Er zijn geen abonnees om naar te verzenden");
+      return;
+    }
+
+    setShowBroadcastConfirm(true);
+  };
+
+  const handleConfirmBroadcast = async () => {
+    setShowBroadcastConfirm(false);
+    setSendingBroadcast(true);
+
+    try {
+      // First save the newsletter
+      await onSave(newsletter);
+
+      const response = await fetch(
+        `/api/admin/newsletters/${newsletter.id}/send`,
+        {
+          method: "POST",
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Verzenden mislukt");
+      }
+
+      toast.success(
+        `Nieuwsbrief verzonden naar ${data.sent} ${data.sent === 1 ? "abonnee" : "abonnees"}`,
+      );
+      onBroadcastSent();
+    } catch (error) {
+      console.error("Failed to send broadcast:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Verzenden mislukt",
+      );
+    } finally {
+      setSendingBroadcast(false);
     }
   };
 
@@ -284,7 +345,7 @@ export function NewsletterComposer({
 
       {/* Actions */}
       <div className="flex gap-3">
-        <Button onClick={handleSave} disabled={saving}>
+        <Button onClick={handleSave} disabled={saving || sendingBroadcast}>
           {saving ? (
             <Loader2Icon className="size-4 animate-spin" />
           ) : (
@@ -296,7 +357,7 @@ export function NewsletterComposer({
         <Button
           variant="outline"
           onClick={handleSendTest}
-          disabled={sendingTest || saving}
+          disabled={sendingTest || saving || sendingBroadcast}
         >
           {sendingTest ? (
             <Loader2Icon className="size-4 animate-spin" />
@@ -304,6 +365,27 @@ export function NewsletterComposer({
             <ForwardIcon className="size-4" />
           )}
           Test versturen
+        </Button>
+
+        <Button
+          variant="default"
+          onClick={handleSendBroadcast}
+          disabled={
+            sendingBroadcast ||
+            saving ||
+            sendingTest ||
+            !subscriberCount ||
+            subscriberCount === 0
+          }
+        >
+          {sendingBroadcast ? (
+            <Loader2Icon className="size-4 animate-spin" />
+          ) : (
+            <SendIcon className="size-4" />
+          )}
+          {subscriberCount && subscriberCount > 0
+            ? `Verstuur naar ${subscriberCount} ${subscriberCount === 1 ? "abonnee" : "abonnees"}`
+            : "Verstuur"}
         </Button>
       </div>
 
@@ -327,6 +409,34 @@ export function NewsletterComposer({
             <Button variant="destructive" onClick={handleRemoveSectionConfirm}>
               <Trash2Icon className="size-4" />
               Verwijderen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Broadcast Confirmation Dialog */}
+      <Dialog open={showBroadcastConfirm} onOpenChange={setShowBroadcastConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nieuwsbrief versturen</DialogTitle>
+            <DialogDescription>
+              Je staat op het punt om deze nieuwsbrief te versturen naar{" "}
+              <strong>
+                {subscriberCount} {subscriberCount === 1 ? "abonnee" : "abonnees"}
+              </strong>
+              . Deze actie kan niet ongedaan worden gemaakt.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowBroadcastConfirm(false)}
+            >
+              Annuleren
+            </Button>
+            <Button onClick={handleConfirmBroadcast}>
+              <SendIcon className="size-4" />
+              Versturen
             </Button>
           </DialogFooter>
         </DialogContent>
