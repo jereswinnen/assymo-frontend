@@ -110,6 +110,14 @@ export function ProjectsGrid({ solutions, categories }: ProjectsGridProps) {
     (options) => options.length > 0,
   );
 
+  // Create a key that changes when filters change to trigger re-animation
+  const filterKey = useMemo(() => {
+    return Object.entries(selectedFilters)
+      .map(([k, v]) => `${k}:${v.sort().join(",")}`)
+      .sort()
+      .join("|");
+  }, [selectedFilters]);
+
   // Helper function to remove the "XX_" prefix pattern
   const cleanTitle = (title: string) => {
     return title.replace(/^\d+_/, "");
@@ -127,10 +135,14 @@ export function ProjectsGrid({ solutions, categories }: ProjectsGridProps) {
 
       <section className="col-span-full w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">
         {filteredSolutions.length > 0 ? (
-          filteredSolutions.map((solution) => (
+          filteredSolutions.map((solution, index) => (
             <div
-              key={solution._id}
-              className="group relative w-full flex flex-col gap-4 p-4 transition-all ease-circ duration-300"
+              key={`${solution._id}-${filterKey}`}
+              className="group relative w-full flex flex-col gap-4 p-4 transition-all ease-circ duration-400 animate-in fade-in slide-in-from-bottom-4"
+              style={{
+                animationDelay: `${index * 60}ms`,
+                animationFillMode: "backwards",
+              }}
             >
               {/* Image */}
               <div className="relative aspect-5/3 overflow-hidden bg-stone-100">
