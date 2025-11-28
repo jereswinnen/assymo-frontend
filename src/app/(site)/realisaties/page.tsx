@@ -1,7 +1,8 @@
 export const dynamic = "force-dynamic";
 
+import { Suspense } from "react";
 import { client } from "@/sanity/client";
-import SolutionCard from "@/components/SolutionCard";
+import { SolutionsGrid } from "@/components/SolutionsGrid";
 
 const SOLUTIONS_QUERY = `*[
   _type == "solution"
@@ -9,7 +10,30 @@ const SOLUTIONS_QUERY = `*[
   _id,
   name,
   slug,
-  headerImage
+  headerImage,
+  "filters": filters[]-> {
+    _id,
+    name,
+    slug,
+    "category": category-> {
+      _id,
+      name,
+      slug
+    }
+  }
+}`;
+
+const CATEGORIES_QUERY = `*[
+  _type == "filterCategory"
+] | order(order asc) {
+  _id,
+  name,
+  slug,
+  "options": *[_type == "filterOption" && references(^._id)] | order(order asc) {
+    _id,
+    name,
+    slug
+  }
 }`;
 
 export const metadata = {
@@ -18,7 +42,10 @@ export const metadata = {
 };
 
 export default async function SolutionsPage() {
-  const solutions = await client.fetch(SOLUTIONS_QUERY);
+  const [solutions, categories] = await Promise.all([
+    client.fetch(SOLUTIONS_QUERY),
+    client.fetch(CATEGORIES_QUERY),
+  ]);
 
   return (
     <section className="col-span-full grid grid-cols-subgrid">
@@ -28,11 +55,9 @@ export default async function SolutionsPage() {
         </h1>
       </header>
       <div className="col-span-full grid grid-cols-subgrid">
-        <section className="col-span-full grid grid-cols-1 md:grid-cols-3 gap-10">
-          {solutions.map((solution: any) => (
-            <SolutionCard key={solution._id} solution={solution} />
-          ))}
-        </section>
+        <Suspense fallback={<div>Laden...</div>}>
+          <SolutionsGrid solutions={solutions} categories={categories} />
+        </Suspense>
       </div>
     </section>
   );
