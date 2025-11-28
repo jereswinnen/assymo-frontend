@@ -71,7 +71,7 @@ export function FilterBar({
         <Button
           variant="outline"
           size="sm"
-          className="cursor-pointer ml-auto text-muted-foreground rounded-full"
+          className="cursor-pointer ml-auto text-stone-500 rounded-full"
           onClick={handleClearAll}
         >
           <CircleXIcon className="size-4" />

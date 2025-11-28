@@ -59,10 +59,11 @@ export function CategoryFilter({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="cursor-pointer rounded-full gap-1.5"
+          className="cursor-pointer rounded-full gap-1.5 text-stone-700"
           aria-expanded={open}
         >
-          {category.name}{selectedCount > 0 && ":"}
+          {category.name}
+          {selectedCount > 0 && ":"}
           {selectedCount > 0 && (
             <span className="opacity-70">{selectedNames.join(", ")}</span>
           )}
