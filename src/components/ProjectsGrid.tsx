@@ -2,7 +2,8 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import SolutionCard from "@/components/SolutionCard";
+import Link from "next/link";
+import { urlFor } from "@/sanity/imageUrl";
 import { FilterBar } from "@/components/FilterBar";
 
 interface SolutionFilter {
@@ -37,12 +38,38 @@ interface CategoryWithOptions {
   options: FilterOption[];
 }
 
-interface SolutionsGridProps {
+interface ProjectsGridProps {
   solutions: Solution[];
   categories: CategoryWithOptions[];
 }
 
-export function SolutionsGrid({ solutions, categories }: SolutionsGridProps) {
+function ProjectCard({ solution }: { solution: Solution }) {
+  const cleanTitle = (title: string) => {
+    return title.replace(/^\d+_/, "");
+  };
+
+  return (
+    <Link
+      href={`/realisaties/${solution.slug.current}`}
+      className="group bg-white p-3 rounded-2xl shadow-sm flex flex-col items-center gap-3 overflow-hidden transition-all duration-300 hover:scale-[1.025] hover:shadow-md"
+    >
+      {solution.headerImage && (
+        <div className="w-full overflow-hidden rounded-lg">
+          <img
+            src={urlFor(solution.headerImage).url()}
+            alt={solution.headerImage.alt || solution.name}
+            className="group-hover:scale-105 rounded-lg object-cover max-h-[280px] w-full transition-all duration-700"
+          />
+        </div>
+      )}
+      <span className="text-base font-medium px-3 p-1 bg-(--c-accent-dark)/15 rounded-full">
+        {cleanTitle(solution.name)}
+      </span>
+    </Link>
+  );
+}
+
+export function ProjectsGrid({ solutions, categories }: ProjectsGridProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -119,7 +146,7 @@ export function SolutionsGrid({ solutions, categories }: SolutionsGridProps) {
       <section className="col-span-full grid grid-cols-1 md:grid-cols-3 gap-10">
         {filteredSolutions.length > 0 ? (
           filteredSolutions.map((solution) => (
-            <SolutionCard key={solution._id} solution={solution} />
+            <ProjectCard key={solution._id} solution={solution} />
           ))
         ) : (
           <div className="col-span-full text-center py-12 text-muted-foreground">

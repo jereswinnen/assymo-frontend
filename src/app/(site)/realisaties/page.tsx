@@ -2,7 +2,19 @@ export const dynamic = "force-dynamic";
 
 import { Suspense } from "react";
 import { client } from "@/sanity/client";
-import { SolutionsGrid } from "@/components/SolutionsGrid";
+import { sectionsFragment, imageFields } from "@/sanity/fragments";
+import SectionRenderer from "@/components/SectionRenderer";
+import { ProjectsGrid } from "@/components/ProjectsGrid";
+
+const PAGE_QUERY = `*[
+  _type == "page" && slug.current == "realisaties"
+][0]{
+  _id,
+  title,
+  body,
+  headerImage,
+  ${sectionsFragment}
+}`;
 
 const SOLUTIONS_QUERY = `*[
   _type == "solution"
@@ -10,7 +22,9 @@ const SOLUTIONS_QUERY = `*[
   _id,
   name,
   slug,
-  headerImage,
+  headerImage{
+    ${imageFields}
+  },
   "filters": filters[]-> {
     _id,
     name,
@@ -37,28 +51,30 @@ const CATEGORIES_QUERY = `*[
 }`;
 
 export const metadata = {
-  title: "Oplossingen",
-  description: "Bekijk onze oplossingen",
+  title: "Realisaties",
+  description: "Bekijk onze realisaties",
 };
 
-export default async function SolutionsPage() {
-  const [solutions, categories] = await Promise.all([
+export default async function RealisatiesPage() {
+  const [page, solutions, categories] = await Promise.all([
+    client.fetch(PAGE_QUERY),
     client.fetch(SOLUTIONS_QUERY),
     client.fetch(CATEGORIES_QUERY),
   ]);
 
   return (
-    <section className="col-span-full grid grid-cols-subgrid">
-      <header className="col-span-full">
-        <h1>
-          Onze <b>oplossingen</b>
-        </h1>
-      </header>
-      <div className="col-span-full grid grid-cols-subgrid">
-        <Suspense fallback={<div>Laden...</div>}>
-          <SolutionsGrid solutions={solutions} categories={categories} />
-        </Suspense>
-      </div>
-    </section>
+    <>
+      {page?.sections && page.sections.length > 0 && (
+        <SectionRenderer sections={page.sections} />
+      )}
+
+      <section className="col-span-full grid grid-cols-subgrid">
+        <div className="col-span-full grid grid-cols-subgrid">
+          <Suspense fallback={<div>Laden...</div>}>
+            <ProjectsGrid solutions={solutions} categories={categories} />
+          </Suspense>
+        </div>
+      </section>
+    </>
   );
 }
