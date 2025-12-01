@@ -66,7 +66,7 @@ export default async function Footer({ className }: FooterProps) {
         <Separator className="bg-stone-200" />
 
         <div className="flex flex-col gap-12 md:gap-0 md:flex-row md:justify-between">
-          <div className="flex flex-col gap-6 order-2 md:order-1 basis-full md:basis-[35%]">
+          <div className="flex flex-col gap-6 order-last md:order-first basis-full md:basis-[35%]">
             <Link href="/">
               <Logo className="w-28 text-stone-900" />
             </Link>
