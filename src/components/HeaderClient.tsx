@@ -85,6 +85,17 @@ export default function HeaderClient({
     setMounted(true);
   }, []);
 
+  // Close desktop submenu on route change
+  useEffect(() => {
+    if (isSubmenuOpen) {
+      setActiveLink(null);
+      setActiveIndex(-1);
+      setCurrentIndex(0);
+      setIsHoveringItem(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
   // Auto-cycle through images when not hovering a specific item
   useEffect(() => {
     if (!isSubmenuOpen || isHoveringItem || !activeLink?.subItems?.length) {
