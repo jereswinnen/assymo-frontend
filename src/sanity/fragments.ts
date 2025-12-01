@@ -40,6 +40,7 @@ export const contentFields = `
 export const pageHeaderFields = `
   title,
   subtitle,
+  background,
   showButtons,
   buttons[]{
     label,
