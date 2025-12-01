@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
 import { createPortal, flushSync } from "react-dom";
 import { urlFor } from "@/sanity/imageUrl";
+import MobileMenu, { HamburgerIcon } from "./MobileMenu";
 
 // Animation tokens
 const easing = "circInOut";
@@ -76,6 +77,7 @@ export default function HeaderClient({
   const [animationMode, setAnimationMode] = useState<
     "open" | "switch" | "close"
   >("open");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isSubmenuOpen = activeLink !== null;
 
@@ -143,12 +145,13 @@ export default function HeaderClient({
 
   return (
     <>
+      {/* Desktop backdrop overlay */}
       {mounted &&
         createPortal(
           <AnimatePresence>
             {isSubmenuOpen && (
               <motion.div
-                className="fixed inset-0 bg-stone-50/80 backdrop-blur-[20px] z-40"
+                className="hidden md:block fixed inset-0 bg-stone-50/80 backdrop-blur-[20px] z-40"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -158,9 +161,18 @@ export default function HeaderClient({
           </AnimatePresence>,
           document.body,
         )}
+
+      {/* Mobile menu */}
+      <MobileMenu
+        links={links}
+        settings={settings}
+        isOpen={mobileMenuOpen}
+        onToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
+      />
+
       <motion.header
         className={cn(
-          "relative md:flex md:flex-col md:sticky md:top-0 z-50 py-8 bg-orange-200 md:bg-amber-200",
+          "relative flex flex-col sticky top-0 z-50 py-8",
           className,
         )}
         initial={false}
@@ -174,7 +186,8 @@ export default function HeaderClient({
             <Logo className="w-28" />
           </Link>
 
-          <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm p-2 px-4 rounded-full text-stone-700 bg-stone-100">
+          {/* Desktop navigation */}
+          <nav className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm p-2 px-4 rounded-full text-stone-700 bg-stone-100">
             <ul className="flex gap-6 group/nav">
               {links.map((link, index) => {
                 const isActive =
@@ -200,18 +213,29 @@ export default function HeaderClient({
             </ul>
           </nav>
 
-          <Action
-            className="ml-auto relative"
-            href="/contact"
-            icon={<Calendar1Icon />}
-            label="Maak een afspraak"
-          />
+          {/* Right section: CTA + Mobile hamburger */}
+          <div className="ml-auto flex items-center gap-3">
+            <Action
+              className="relative"
+              href="/contact"
+              icon={<Calendar1Icon />}
+              label="Maak een afspraak"
+            />
+
+            {/* Mobile hamburger */}
+            <HamburgerIcon
+              isOpen={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden"
+            />
+          </div>
         </div>
 
+        {/* Desktop submenu - hidden on mobile */}
         <AnimatePresence>
           {isSubmenuOpen && (
             <motion.div
-              className="absolute top-full left-0 right-0 flex gap-8 bg-white shdow-lg overflow-hidden"
+              className="hidden md:flex absolute top-full left-0 right-0 gap-8 bg-white overflow-hidden"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
