@@ -66,7 +66,7 @@ export default async function RealisatiesPage() {
   return (
     <section className="col-span-full grid grid-cols-subgrid gap-y-14">
       {page?.sections && page.sections.length > 0 && (
-        <SectionRenderer sections={page.sections} />
+        <SectionRenderer sections={page.sections} headerImage={page.headerImage} />
       )}
 
       <Suspense fallback={<div className="col-span-full">Laden...</div>}>

@@ -13,34 +13,19 @@ import PageHeader from "./sections/PageHeader";
 import { SplitSection } from "./sections/SplitSection";
 import UspSection from "./sections/UspSection";
 import SolutionsScroller from "./sections/SolutionsScroller";
+import type { SanityImage, SanityImageWithCaption } from "@/types/sanity";
 
 interface Section {
   _type: string;
   _key?: string;
   heading?: string;
-  image?: {
-    _type: "image";
-    asset: { _ref: string };
-    hotspot?: { x: number; y: number };
-    alt: string;
-  };
-  images?: {
-    _type: "image";
-    asset: { _ref: string; _type: "reference" };
-    hotspot?: { x: number; y: number };
-    alt: string;
-    caption?: string;
-  }[];
+  image?: SanityImage;
+  images?: SanityImageWithCaption[];
   projects?: {
     _id: string;
     name: string;
     slug: { current: string };
-    headerImage?: {
-      _type: "image";
-      asset: { _ref: string; _type: "reference" };
-      hotspot?: { x: number; y: number };
-      alt?: string;
-    };
+    headerImage?: SanityImage;
   }[];
   content?: {
     heading: string;
@@ -54,9 +39,13 @@ interface Section {
 
 interface SectionRendererProps {
   sections: Section[];
+  headerImage?: SanityImage;
 }
 
-export default function SectionRenderer({ sections }: SectionRendererProps) {
+export default function SectionRenderer({
+  sections,
+  headerImage,
+}: SectionRendererProps) {
   return (
     <>
       {sections.map((section, index) => {
@@ -107,7 +96,13 @@ export default function SectionRenderer({ sections }: SectionRendererProps) {
             );
 
           case "pageHeader":
-            return <PageHeader key={key} section={section as any} />;
+            return (
+              <PageHeader
+                key={key}
+                section={section as any}
+                headerImage={headerImage}
+              />
+            );
 
           case "splitSection":
             return <SplitSection key={key} section={section as any} />;

@@ -47,7 +47,7 @@ export default async function AboutPage() {
 
       {/* Modular Sections */}
       {page.sections && page.sections.length > 0 && (
-        <SectionRenderer sections={page.sections} />
+        <SectionRenderer sections={page.sections} headerImage={page.headerImage} />
       )}
     </section>
   );

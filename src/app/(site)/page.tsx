@@ -33,7 +33,7 @@ export default async function HomePage() {
   return (
     <>
       {page.sections && page.sections.length > 0 && (
-        <SectionRenderer sections={page.sections} />
+        <SectionRenderer sections={page.sections} headerImage={page.headerImage} />
       )}
     </>
   );
