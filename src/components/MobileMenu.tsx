@@ -12,6 +12,7 @@ import {
   FacebookIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Separator } from "./ui/separator";
 
 // Animation tokens (matching HeaderClient)
 const easing: [number, number, number, number] = [0.645, 0, 0.045, 1];
@@ -19,6 +20,9 @@ const menuDuration = 0.5;
 const pageSlideDuration = 0.4;
 const translateHorizontal = 8; // Same as desktop submenu
 const pageSlideBlur = "2px";
+const staggerDelay = 0.075;
+const itemAnimationDuration = 0.4;
+const translateVertical = 8;
 
 type SubItem = {
   name: string;
@@ -124,7 +128,7 @@ export default function MobileMenu({
           transition={{ duration: menuDuration, ease: easing }}
         >
           {/* Content area below header */}
-          <div className="h-full pt-[calc(theme(spacing.8)*2+theme(spacing.7))] overflow-y-auto">
+          <div className="h-full pt-[calc(--spacing(8)*2+(--spacing(7)))] overflow-y-auto">
             <div className="min-h-full flex flex-col px-6 py-8">
               <AnimatePresence mode="wait" custom={direction} initial={false}>
                 {isMainPage ? (
@@ -156,7 +160,25 @@ export default function MobileMenu({
                   >
                     {/* Main navigation */}
                     <nav className="flex-1">
-                      <ul className="flex flex-col gap-1">
+                      <motion.ul
+                        className="flex flex-col gap-5"
+                        initial="hidden"
+                        animate="visible"
+                        exit="hidden"
+                        variants={{
+                          visible: {
+                            transition: {
+                              staggerChildren: staggerDelay,
+                            },
+                          },
+                          hidden: {
+                            transition: {
+                              staggerChildren: staggerDelay,
+                              staggerDirection: -1,
+                            },
+                          },
+                        }}
+                      >
                         {links.map((link) => {
                           const isActive =
                             pathname === `/${link.slug}` ||
@@ -165,13 +187,31 @@ export default function MobileMenu({
                             link.subItems && link.subItems.length > 0;
 
                           return (
-                            <li key={link.slug}>
+                            <motion.li
+                              key={link.slug}
+                              variants={{
+                                hidden: {
+                                  opacity: 0,
+                                  y: translateVertical,
+                                  filter: `blur(${pageSlideBlur})`,
+                                },
+                                visible: {
+                                  opacity: 1,
+                                  y: 0,
+                                  filter: "blur(0px)",
+                                },
+                              }}
+                              transition={{
+                                duration: itemAnimationDuration,
+                                ease: easing,
+                              }}
+                            >
                               {hasSubItems ? (
                                 <button
                                   onClick={() => handleLinkClick(link)}
                                   className={cn(
-                                    "w-full flex items-center justify-between py-3 text-2xl font-medium text-stone-700 transition-colors hover:text-stone-900",
-                                    isActive && "text-stone-900"
+                                    "cursor-pointer w-full flex items-center justify-between text-2xl font-[560] text-stone-600 transition-colors hover:text-stone-900",
+                                    isActive && "text-stone-900",
                                   )}
                                 >
                                   <span>{link.title}</span>
@@ -184,63 +224,81 @@ export default function MobileMenu({
                                 <Link
                                   href={`/${link.slug}`}
                                   className={cn(
-                                    "block py-3 text-2xl font-medium text-stone-700 transition-colors hover:text-stone-900",
-                                    isActive && "text-stone-900"
+                                    "cursor-pointer block text-2xl font-[560] text-stone-600 transition-colors hover:text-stone-900",
+                                    isActive && "text-stone-900",
                                   )}
                                 >
                                   {link.title}
                                 </Link>
                               )}
-                            </li>
+                            </motion.li>
                           );
                         })}
-                      </ul>
+                      </motion.ul>
                     </nav>
 
-                    {/* Footer with social links */}
-                    {(settings?.phone ||
+                    {/* Footer with contact info */}
+                    {(settings?.address ||
+                      settings?.phone ||
                       settings?.instagram ||
                       settings?.facebook) && (
-                      <div className="mt-auto pt-8 border-t border-stone-200">
-                        <ul className="flex gap-6">
-                          {settings?.phone && (
-                            <li>
-                              <a
-                                href={`tel:${settings.phone}`}
-                                className="flex items-center gap-2 text-sm text-stone-500 hover:text-stone-700 transition-colors"
-                              >
-                                <PhoneIcon className="size-4" />
-                                <span className="sr-only">Bel ons</span>
-                              </a>
-                            </li>
+                      <div className="mt-auto pt-8 border-t border-stone-200 flex flex-col gap-3">
+                        <span className="text-xs font-medium text-stone-600">
+                          Contacteer
+                        </span>
+                        <div className="flex flex-col gap-6">
+                          <ul className="flex flex-col gap-3 text-base font-medium">
+                            {settings?.address && (
+                              <li className="whitespace-pre-line">
+                                {settings.address}
+                              </li>
+                            )}
+                            {settings?.phone && (
+                              <li>
+                                <a
+                                  href={`tel:${settings.phone}`}
+                                  className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                >
+                                  <PhoneIcon className="size-4" />
+                                  <span>{settings.phone}</span>
+                                </a>
+                              </li>
+                            )}
+                          </ul>
+                          {(settings?.instagram || settings?.facebook) && (
+                            <>
+                              <Separator />
+                              <ul className="flex flex-col gap-3 text-sm font-medium">
+                                {settings?.instagram && (
+                                  <li>
+                                    <a
+                                      className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                      href={settings.instagram}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <InstagramIcon className="size-4" />
+                                      Instagram
+                                    </a>
+                                  </li>
+                                )}
+                                {settings?.facebook && (
+                                  <li>
+                                    <a
+                                      className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                      href={settings.facebook}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <FacebookIcon className="size-4" />
+                                      Facebook
+                                    </a>
+                                  </li>
+                                )}
+                              </ul>
+                            </>
                           )}
-                          {settings?.instagram && (
-                            <li>
-                              <a
-                                href={settings.instagram}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-sm text-stone-500 hover:text-stone-700 transition-colors"
-                              >
-                                <InstagramIcon className="size-4" />
-                                <span className="sr-only">Instagram</span>
-                              </a>
-                            </li>
-                          )}
-                          {settings?.facebook && (
-                            <li>
-                              <a
-                                href={settings.facebook}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-sm text-stone-500 hover:text-stone-700 transition-colors"
-                              >
-                                <FacebookIcon className="size-4" />
-                                <span className="sr-only">Facebook</span>
-                              </a>
-                            </li>
-                          )}
-                        </ul>
+                        </div>
                       </div>
                     )}
                   </motion.div>
@@ -269,25 +327,26 @@ export default function MobileMenu({
                       },
                     }}
                     transition={{ duration: pageSlideDuration, ease: easing }}
-                    className="flex-1 flex flex-col"
+                    className="flex-1 flex flex-col gap-5"
                   >
                     {/* Back button */}
                     <button
                       onClick={handleBack}
-                      className="flex items-center gap-1 text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors mb-6"
+                      className="cursor-pointer size-9 flex items-center justify-center rounded-full text-stone-800 bg-stone-200 hover:text-stone-700 transition-colors"
                     >
-                      <ChevronLeftIcon className="size-4" strokeWidth={2} />
-                      <span>Terug</span>
+                      <ChevronLeftIcon className="size-6" strokeWidth={1.5} />
                     </button>
+
+                    <Separator className="hidden text-stone-200" />
 
                     {/* Sub-items list */}
                     <nav className="flex-1">
-                      <ul className="flex flex-col gap-1">
+                      <ul className="flex flex-col gap-4">
                         {currentPage.subItems?.map((item) => (
                           <li key={item.slug.current}>
                             <Link
                               href={`/realisaties/${item.slug.current}`}
-                              className="block py-3 text-xl font-medium text-stone-700 transition-colors hover:text-stone-900"
+                              className="cursor-pointer block text-xl font-medium text-stone-600 transition-colors hover:text-stone-900"
                             >
                               {item.name}
                             </Link>
@@ -313,13 +372,17 @@ interface HamburgerIconProps {
   className?: string;
 }
 
-export function HamburgerIcon({ isOpen, onClick, className }: HamburgerIconProps) {
+export function HamburgerIcon({
+  isOpen,
+  onClick,
+  className,
+}: HamburgerIconProps) {
   return (
     <button
       onClick={onClick}
       className={cn(
         "relative flex items-center justify-center size-10 rounded-full bg-stone-100 hover:bg-stone-200 transition-colors",
-        className
+        className,
       )}
       aria-label={isOpen ? "Sluit menu" : "Open menu"}
       aria-expanded={isOpen}
