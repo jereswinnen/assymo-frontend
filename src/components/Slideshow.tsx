@@ -3,11 +3,12 @@
 import { urlFor } from "@/sanity/imageUrl";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, type PanInfo } from "motion/react";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 
 const CAROUSEL_INTERVAL = 4000;
-const TRANSITION_DURATION = 0.5;
+const TRANSITION_DURATION = 0.4;
+const SWIPE_THRESHOLD = 50;
 
 interface SlideshowImage {
   _type: "image";
@@ -29,13 +30,24 @@ export default function Slideshow({
   variant = "default",
 }: SlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
 
   const goToPrevious = () => {
+    setDirection(-1);
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
   const goToNext = () => {
+    setDirection(1);
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleDragEnd = (_: unknown, info: PanInfo) => {
+    if (info.offset.x > SWIPE_THRESHOLD) {
+      goToPrevious();
+    } else if (info.offset.x < -SWIPE_THRESHOLD) {
+      goToNext();
+    }
   };
 
   useEffect(() => {
@@ -49,37 +61,48 @@ export default function Slideshow({
   const currentImage = images[currentIndex];
   const hasMultiple = images.length > 1;
 
+  const variants = {
+    enter: (dir: number) => ({ x: dir > 0 ? "100%" : "-100%" }),
+    center: { x: 0 },
+    exit: (dir: number) => ({ x: dir > 0 ? "-100%" : "100%" }),
+  };
+
   return (
     <div className={`relative ${className}`}>
       <div
-        className={`relative overflow-hidden bg-stone-100 ${variant === "fullwidth" ? "aspect-[16/9]" : "aspect-[4/3]"}`}
+        className={`relative overflow-hidden bg-transparent ${variant === "fullwidth" ? "aspect-[16/9]" : "aspect-[4/3]"}`}
       >
-        <AnimatePresence>
-          {images.map(
-            (image, index) =>
-              index === currentIndex && (
-                <motion.div
-                  key={index}
-                  className="absolute inset-0"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{
-                    duration: TRANSITION_DURATION,
-                    ease: "easeInOut",
-                  }}
-                >
-                  <Image
-                    src={urlFor(image).url()}
-                    alt={image.alt || "Slideshow image"}
-                    fill
-                    className="object-cover"
-                    sizes="100vw"
-                  />
-                </motion.div>
-              ),
-          )}
+        <AnimatePresence initial={false} custom={direction} mode="popLayout">
+          <motion.div
+            key={currentIndex}
+            custom={direction}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: TRANSITION_DURATION, ease: "easeInOut" }}
+            className="absolute inset-0"
+          >
+            <Image
+              src={urlFor(currentImage).url()}
+              alt={currentImage.alt || "Slideshow image"}
+              fill
+              className="object-cover pointer-events-none select-none"
+              sizes="100vw"
+              draggable={false}
+            />
+          </motion.div>
         </AnimatePresence>
+
+        {hasMultiple && (
+          <motion.div
+            className="absolute inset-0 z-[5] touch-pan-y"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0}
+            onDragEnd={handleDragEnd}
+          />
+        )}
 
         {hasMultiple && (
           <div className="absolute bottom-0 left-0 z-10 flex items-center gap-4 bg-stone-200 px-3 p-2.5">
