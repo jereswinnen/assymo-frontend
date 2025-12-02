@@ -41,6 +41,7 @@ export const pageHeaderFields = `
   title,
   subtitle,
   background,
+  showImage,
   showButtons,
   buttons[]{
     label,

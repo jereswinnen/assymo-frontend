@@ -24,7 +24,11 @@ interface SlideshowProps {
   variant?: "default" | "fullwidth";
 }
 
-export default function Slideshow({ images, className = "", variant = "default" }: SlideshowProps) {
+export default function Slideshow({
+  images,
+  className = "",
+  variant = "default",
+}: SlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const goToPrevious = () => {
@@ -61,9 +65,11 @@ export default function Slideshow({ images, className = "", variant = "default" 
 
   return (
     <div className={`relative ${className}`}>
-      <div className={`relative overflow-hidden rounded-2xl bg-stone-100 ${
-        variant === "fullwidth" ? "h-[60vh]" : "h-96"
-      }`}>
+      <div
+        className={`relative overflow-hidden bg-stone-100 ${
+          variant === "fullwidth" ? "h-[60vh]" : "h-96"
+        }`}
+      >
         <AnimatePresence>
           <motion.div
             key={currentIndex}
@@ -80,7 +86,9 @@ export default function Slideshow({ images, className = "", variant = "default" 
               src={urlFor(currentImage).url()}
               alt={currentImage.alt || "Slideshow image"}
               fill
-              className={variant === "fullwidth" ? "object-cover" : "object-contain"}
+              className={
+                variant === "fullwidth" ? "object-cover" : "object-contain"
+              }
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </motion.div>
@@ -93,8 +101,18 @@ export default function Slideshow({ images, className = "", variant = "default" 
               className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-stone-900 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all z-10"
               aria-label="Previous image"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </button>
 
@@ -103,8 +121,18 @@ export default function Slideshow({ images, className = "", variant = "default" 
               className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-stone-900 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all z-10"
               aria-label="Next image"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </button>
           </>
@@ -135,7 +163,9 @@ export default function Slideshow({ images, className = "", variant = "default" 
               onClick={() => goToSlide(index)}
               aria-current={index === currentIndex ? "true" : undefined}
               className={`w-2 h-2 rounded-full transition-all ${
-                index === currentIndex ? "bg-stone-900" : "bg-stone-300 hover:bg-stone-500"
+                index === currentIndex
+                  ? "bg-stone-900"
+                  : "bg-stone-300 hover:bg-stone-500"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
