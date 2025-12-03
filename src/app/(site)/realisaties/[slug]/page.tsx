@@ -39,9 +39,12 @@ export default async function SolutionPage({ params }: any) {
   }
 
   return (
-    <section className="px-conainer-sm md:px-conainer-md col-span-full grid grid-cols-subgrid gap-y-14">
+    <section className="col-span-full grid grid-cols-subgrid gap-y-14! md:gap-y-24!">
       {solution.sections && solution.sections.length > 0 && (
-        <SectionRenderer sections={solution.sections} headerImage={solution.headerImage} />
+        <SectionRenderer
+          sections={solution.sections}
+          headerImage={solution.headerImage}
+        />
       )}
     </section>
   );

@@ -34,9 +34,12 @@ export default async function ContactPage() {
   }
 
   return (
-    <section className="px-conainer-sm md:px-conainer-md col-span-full grid grid-cols-subgrid gap-y-14">
+    <section className="col-span-full grid grid-cols-subgrid gap-y-14">
       {page.sections && page.sections.length > 0 && (
-        <SectionRenderer sections={page.sections} headerImage={page.headerImage} />
+        <SectionRenderer
+          sections={page.sections}
+          headerImage={page.headerImage}
+        />
       )}
     </section>
   );

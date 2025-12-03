@@ -10,7 +10,7 @@ export default function SiteLayout({
   return (
     <div className="flex flex-col gap-y-10 md:gap-y-24">
       <Header />
-      <main className="o-grid grid-cols-subgrid gap-y-18! md:gap-y-24!">
+      <main className="o-grid grid-cols-subgrid gap-y-18! md:gap-y-30!">
         {children}
       </main>
       <Footer />

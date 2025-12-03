@@ -74,6 +74,37 @@ export const splitItemFields = `
   }
 `;
 
+// Flexible section block fields
+export const flexibleBlockFields = `
+  _key,
+  _type,
+  heading,
+  headingLevel,
+  content,
+  showButton,
+  button{
+    label,
+    url,
+    icon,
+    variant
+  },
+  image{
+    ${imageFields}
+  },
+  title,
+  subtitle
+`;
+
+export const flexibleSectionFields = `
+  internalName,
+  layout,
+  background,
+  verticalAlign,
+  blockMain[]{${flexibleBlockFields}},
+  blockLeft[]{${flexibleBlockFields}},
+  blockRight[]{${flexibleBlockFields}}
+`;
+
 // Update sectionsFragment to include items for splitSection
 export const sectionsFragment = `
   sections[]{
@@ -98,6 +129,7 @@ export const sectionsFragment = `
     usps[]{
       ${uspFields}
     },
-    ${pageHeaderFields}
+    ${pageHeaderFields},
+    ${flexibleSectionFields}
   }
 `;

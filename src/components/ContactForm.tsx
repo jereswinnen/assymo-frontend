@@ -248,7 +248,7 @@ export default function ContactForm({ className }: ContactFormProps) {
           type="submit"
           disabled={isSubmitting || (!isSuccess && !isFormValid)}
           className={cn(
-            "w-fit text-accent-light bg-accent-dark transition-colors duration-250 hover:text-accent-dark hover:bg-accent-light",
+            "w-fit px-3.5 py-2 flex items-center gap-1.5 text-accent-light bg-accent-dark transition-colors duration-250 hover:text-accent-dark hover:bg-accent-light rounded-full",
             isSubmitting &&
               "text-stone-600 bg-stone-200 hover:text-stone-600 hover:bg-stone-200",
             isSuccess &&
