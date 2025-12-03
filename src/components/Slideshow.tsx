@@ -1,7 +1,7 @@
 "use client";
 
 import { urlFor } from "@/sanity/imageUrl";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, type PanInfo } from "motion/react";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
@@ -30,17 +30,14 @@ export default function Slideshow({
   variant = "default",
 }: SlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
 
-  const goToPrevious = () => {
-    setDirection(-1);
+  const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
+  }, [images.length]);
 
-  const goToNext = () => {
-    setDirection(1);
+  const goToNext = useCallback(() => {
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
+  }, [images.length]);
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.x > SWIPE_THRESHOLD) {
@@ -54,32 +51,24 @@ export default function Slideshow({
     if (images.length <= 1) return;
     const interval = setInterval(goToNext, CAROUSEL_INTERVAL);
     return () => clearInterval(interval);
-  }, [images.length, currentIndex]);
+  }, [images.length, goToNext]);
 
   if (!images?.length) return null;
 
   const currentImage = images[currentIndex];
   const hasMultiple = images.length > 1;
 
-  const variants = {
-    enter: (dir: number) => ({ x: dir > 0 ? "100%" : "-100%" }),
-    center: { x: 0 },
-    exit: (dir: number) => ({ x: dir > 0 ? "-100%" : "100%" }),
-  };
-
   return (
     <div className={`relative ${className}`}>
       <div
-        className={`relative overflow-hidden bg-transparent ${variant === "fullwidth" ? "aspect-[16/9]" : "aspect-[4/3]"}`}
+        className={`relative overflow-hidden bg-transparent ${variant === "fullwidth" ? "aspect-video" : "aspect-4/3"}`}
       >
-        <AnimatePresence initial={false} custom={direction} mode="popLayout">
+        <AnimatePresence>
           <motion.div
             key={currentIndex}
-            custom={direction}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: TRANSITION_DURATION, ease: "easeInOut" }}
             className="absolute inset-0"
           >
@@ -96,7 +85,7 @@ export default function Slideshow({
 
         {hasMultiple && (
           <motion.div
-            className="absolute inset-0 z-[5] touch-pan-y"
+            className="absolute inset-0 z-5 touch-pan-y"
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0}
