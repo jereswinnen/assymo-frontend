@@ -19,7 +19,7 @@ import {
   FieldError,
 } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
-import { CheckIcon, MailCheckIcon, SendIcon } from "lucide-react";
+import { CheckIcon, MailCheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   getVisibleFields,
@@ -29,10 +29,6 @@ import {
   type Subject,
   type FormDataState,
 } from "@/config/contactForm";
-
-// ============================================================================
-// HELPER COMPONENTS
-// ============================================================================
 
 function RequiredLabel({
   children,
@@ -49,20 +45,13 @@ function RequiredLabel({
   );
 }
 
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
-
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
 interface ContactFormProps {
-  section: {
-    _type: "contactForm";
-    heading?: string;
-  };
+  className?: string;
 }
 
-export default function ContactForm({ section }: ContactFormProps) {
+export default function ContactForm({ className }: ContactFormProps) {
   const [formData, setFormData] = useState<FormDataState>(getInitialFormData);
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -71,10 +60,8 @@ export default function ContactForm({ section }: ContactFormProps) {
   const isSuccess = status === "success";
   const currentSubject = formData.subject as Subject;
 
-  // Get visible fields for current subject
   const visibleFields = getVisibleFields(currentSubject);
 
-  // Check if all required visible fields are filled
   const isFormValid = visibleFields
     .filter((field) => field.required)
     .every((field) => {
@@ -98,7 +85,6 @@ export default function ContactForm({ section }: ContactFormProps) {
     try {
       const data = new FormData();
 
-      // Add all visible fields to form data
       visibleFields.forEach((field) => {
         const value = formData[field.name];
         if (field.type === "file" && value instanceof File) {
@@ -136,7 +122,6 @@ export default function ContactForm({ section }: ContactFormProps) {
     }
   }
 
-  // Render a single field based on its config
   function renderField(field: FieldConfig) {
     const isDisabled = isSubmitting || isSuccess;
     const value = formData[field.name];
@@ -253,55 +238,43 @@ export default function ContactForm({ section }: ContactFormProps) {
   }
 
   return (
-    <section className="col-span-full grid grid-cols-subgrid gap-y-6">
-      {section.heading && (
-        <header className="hidden col-span-full">
-          <h2>{section.heading}</h2>
-        </header>
-      )}
+    <form onSubmit={handleSubmit} className={className}>
+      <FieldGroup>
+        {visibleFields.map(renderField)}
 
-      <div className="col-span-full max-w-3xl mx-auto w-full">
-        {section.heading && <h2 className="mb-6">{section.heading}</h2>}
+        {status === "error" && <FieldError>{errorMessage}</FieldError>}
 
-        <form onSubmit={handleSubmit}>
-          <FieldGroup>
-            {visibleFields.map(renderField)}
-
-            {status === "error" && <FieldError>{errorMessage}</FieldError>}
-
-            <Button
-              type="submit"
-              disabled={isSubmitting || (!isSuccess && !isFormValid)}
-              className={cn(
-                "w-fit text-accent-light bg-accent-dark transition-colors duration-250 hover:text-accent-dark hover:bg-accent-light",
-                isSubmitting &&
-                  "text-stone-600 bg-stone-200 hover:text-stone-600 hover:bg-stone-200",
-                isSuccess &&
-                  "text-stone-600 bg-stone-200 hover:text-stone-600 hover:bg-stone-200",
-              )}
-            >
-              {isSubmitting && (
-                <>
-                  <Spinner className="size-4" />
-                  <span>Laden...</span>
-                </>
-              )}
-              {isSuccess && (
-                <>
-                  <CheckIcon className="size-4" />
-                  <span>Gelukt!</span>
-                </>
-              )}
-              {!isSubmitting && !isSuccess && (
-                <>
-                  <MailCheckIcon className="size-4" />
-                  <span>Versturen</span>
-                </>
-              )}
-            </Button>
-          </FieldGroup>
-        </form>
-      </div>
-    </section>
+        <Button
+          type="submit"
+          disabled={isSubmitting || (!isSuccess && !isFormValid)}
+          className={cn(
+            "w-fit text-accent-light bg-accent-dark transition-colors duration-250 hover:text-accent-dark hover:bg-accent-light",
+            isSubmitting &&
+              "text-stone-600 bg-stone-200 hover:text-stone-600 hover:bg-stone-200",
+            isSuccess &&
+              "text-stone-600 bg-stone-200 hover:text-stone-600 hover:bg-stone-200",
+          )}
+        >
+          {isSubmitting && (
+            <>
+              <Spinner className="size-4" />
+              <span>Laden...</span>
+            </>
+          )}
+          {isSuccess && (
+            <>
+              <CheckIcon className="size-4" />
+              <span>Gelukt!</span>
+            </>
+          )}
+          {!isSubmitting && !isSuccess && (
+            <>
+              <MailCheckIcon className="size-4" />
+              <span>Versturen</span>
+            </>
+          )}
+        </Button>
+      </FieldGroup>
+    </form>
   );
 }

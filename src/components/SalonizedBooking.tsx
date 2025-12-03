@@ -2,9 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
-type Props = { heading?: string };
+interface SalonizedBookingProps {
+  className?: string;
+}
 
-export default function SalonizedBookingSection({ heading }: Props) {
+export default function SalonizedBooking({ className }: SalonizedBookingProps) {
   const scriptAddedRef = useRef(false);
 
   useEffect(() => {
@@ -12,7 +14,7 @@ export default function SalonizedBookingSection({ heading }: Props) {
     if (typeof window === "undefined") return;
 
     const existing = document.querySelector(
-      'script[src="https://static-widget.salonized.com/loader.js"]'
+      'script[src="https://static-widget.salonized.com/loader.js"]',
     );
     if (existing) {
       scriptAddedRef.current = true;
@@ -31,19 +33,14 @@ export default function SalonizedBookingSection({ heading }: Props) {
   }, []);
 
   return (
-    <section className="col-span-full grid grid-cols-subgrid">
-      <div className="col-span-full max-w-5xl mx-auto">
-        {heading ? <h2 className="mb-6">{heading}</h2> : null}
-        <div
-          className="salonized-booking"
-          data-company="aC9yWcyyPkE3ZwF1D8m8pyzG"
-          data-color="#6966ff"
-          data-language="nl"
-          data-height="700"
-          data-inline="true"
-          data-outline="shadow"
-        />
-      </div>
-    </section>
+    <div
+      className={className}
+      data-company="aC9yWcyyPkE3ZwF1D8m8pyzG"
+      data-color="#6966ff"
+      data-language="nl"
+      data-height="700"
+      data-inline="true"
+      data-outline="shadow"
+    />
   );
 }
