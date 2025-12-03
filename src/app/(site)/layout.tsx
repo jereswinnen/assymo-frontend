@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ChatbotWidget from "@/components/ChatbotWidget";
+import ChatbotWrapper from "@/components/ChatbotWrapper";
 
 export default function SiteLayout({
   children,
@@ -14,7 +14,7 @@ export default function SiteLayout({
         {children}
       </main>
       <Footer />
-      <ChatbotWidget />
+      <ChatbotWrapper />
     </div>
   );
 }

@@ -30,6 +30,7 @@ export default function Slideshow({
   variant = "default",
 }: SlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -48,10 +49,10 @@ export default function Slideshow({
   };
 
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (images.length <= 1 || isPaused) return;
     const interval = setInterval(goToNext, CAROUSEL_INTERVAL);
     return () => clearInterval(interval);
-  }, [images.length, goToNext]);
+  }, [images.length, goToNext, isPaused]);
 
   if (!images?.length) return null;
 
@@ -59,7 +60,11 @@ export default function Slideshow({
   const hasMultiple = images.length > 1;
 
   return (
-    <div className={`relative ${className}`}>
+    <div
+      className={`relative ${className}`}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       <div
         className={`relative overflow-hidden bg-transparent ${variant === "fullwidth" ? "aspect-video" : "aspect-4/3"}`}
       >

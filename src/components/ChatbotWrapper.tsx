@@ -5,7 +5,7 @@ import { MessagesSquareIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Chatbot from "@/components/Chatbot";
 
-export default function ChatbotWidget() {
+export default function ChatbotWrapper() {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
