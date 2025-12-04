@@ -159,16 +159,19 @@ export default async function Footer({ className }: FooterProps) {
                   Privacy Policy
                 </Link>
               </li>
-              <Separator orientation="vertical" className="h-3! bg-stone-300" />
+              {/*<Separator orientation="vertical" className="h-3! bg-stone-300" />
               <li>
                 <CookieSettingsButton />
-              </li>
+              </li>*/}
               <Separator orientation="vertical" className="h-3! bg-stone-300" />
               {settings?.vatNumber && (
                 <li className="mb-0!">{settings.vatNumber}</li>
               )}
               {settings?.vatNumber && (
-                <Separator orientation="vertical" className="h-3! bg-stone-300" />
+                <Separator
+                  orientation="vertical"
+                  className="h-3! bg-stone-300"
+                />
               )}
               <li>&copy; {new Date().getFullYear()} Assymo</li>
             </ul>

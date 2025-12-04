@@ -32,7 +32,7 @@ export default function PageHeader({ section, headerImage }: PageHeaderProps) {
 
   return (
     <header
-      className={`col-span-full grid grid-cols-subgrid items-start ${background ? "o-grid--bleed py-8 md:py-14 bg-stone-300" : ""}`}
+      className={`col-span-full grid grid-cols-subgrid gap-y-8 items-start ${background ? "o-grid--bleed py-8 md:py-14 bg-stone-300" : ""}`}
     >
       <div
         className={`col-span-full ${hasImage ? "md:col-span-4" : ""} flex flex-col justify-center gap-4 md:gap-6`}
