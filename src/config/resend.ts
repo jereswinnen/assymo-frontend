@@ -23,9 +23,19 @@ export const RESEND_CONFIG = {
   fromAddressNewsletter: "Assymo Nieuwsbrief <info@assymo.be>",
 
   /**
+   * Sender address for appointment emails
+   */
+  fromAddressAppointments: "Assymo Afspraken <info@assymo.be>",
+
+  /**
    * Recipient address for contact form submissions
    */
   contactRecipient: "info@assymo.be",
+
+  /**
+   * Recipient address for appointment notifications
+   */
+  appointmentRecipient: "info@assymo.be",
 
   /**
    * Default recipient for test newsletters
@@ -45,5 +55,9 @@ export const RESEND_CONFIG = {
     contactAlgemeen: "Nieuw contactformulier: Algemeen",
     contactTuinhuizen: "Nieuw contactformulier: Tuinhuizen",
     newsletterWelcome: "Welkom bij de Assymo nieuwsbrief!",
+    appointmentConfirmation: "Bevestiging afspraak bij Assymo",
+    appointmentCancellation: "Uw afspraak bij Assymo is geannuleerd",
+    appointmentUpdated: "Uw afspraak bij Assymo is gewijzigd",
+    appointmentAdmin: "Nieuwe afspraak ingepland",
   },
 } as const;

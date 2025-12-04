@@ -3,3 +3,9 @@ export { ContactFormTuinhuizenEmail } from "./ContactFormTuinhuizenEmail";
 export { NewsletterWelcome } from "./NewsletterWelcome";
 export { NewsletterBroadcast } from "./NewsletterBroadcast";
 export { EmailLayout } from "./components/EmailLayout";
+
+// Appointment emails
+export { AppointmentConfirmation } from "./AppointmentConfirmation";
+export { AppointmentAdminNotification } from "./AppointmentAdminNotification";
+export { AppointmentCancellation } from "./AppointmentCancellation";
+export { AppointmentUpdated } from "./AppointmentUpdated";

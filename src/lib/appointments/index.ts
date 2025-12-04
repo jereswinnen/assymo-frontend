@@ -61,3 +61,15 @@ export {
   isValidPostalCode,
   normalizePostalCode,
 } from "./utils";
+
+// ICS generation
+export { generateICS, generateCancellationICS, generateICSFilename } from "./ics";
+
+// Email services
+export {
+  sendConfirmationEmail,
+  sendAdminNotification,
+  sendCancellationEmail,
+  sendUpdateEmail,
+  sendNewAppointmentEmails,
+} from "./email";
