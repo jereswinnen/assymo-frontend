@@ -38,9 +38,9 @@ export default function CookieBanner() {
             <div className="flex flex-col gap-1 *:mb-0!">
               <h3 className="text-stone-800">Fijn dat je er bent!</h3>
               <p className="text-sm text-stone-600">
-                Wij maken op onze website gebruik van cookies voor het bijhouden
-                van statistieken en het gebruik van onze chat-functie. Door op
-                'Alles accepteren' te klikken, ga je akkoord met ons
+                Op onze website maken we gebruik van cookies voor statistieken
+                en om de chatfunctie goed te laten werken. Door op 'Alles
+                accepteren' te klikken, ga je akkoord met ons{" "}
                 <Link href="/privacy" className="font-medium text-stone-800">
                   privacybeleid
                 </Link>
