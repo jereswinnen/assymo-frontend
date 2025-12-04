@@ -67,17 +67,17 @@ Complete appointment booking system for Assymo store visits with:
 ---
 
 ## Phase 4: Admin API Routes
-**Status: NOT STARTED**
+**Status: COMPLETED** (2025-12-04)
 
 ### 4.1 Admin Appointments API
-- [ ] `src/app/api/admin/appointments/route.ts`
-- [ ] `src/app/api/admin/appointments/[id]/route.ts`
+- [x] `src/app/api/admin/appointments/route.ts` - GET list/search, POST create
+- [x] `src/app/api/admin/appointments/[id]/route.ts` - GET/PUT/DELETE single appointment
 
 ### 4.2 Admin Settings API
-- [ ] `src/app/api/admin/appointments/settings/route.ts`
+- [x] `src/app/api/admin/appointments/settings/route.ts` - GET/PUT/PATCH weekly schedule
 
 ### 4.3 Admin Date Overrides API
-- [ ] `src/app/api/admin/appointments/overrides/route.ts`
+- [x] `src/app/api/admin/appointments/overrides/route.ts` - GET/POST/DELETE date overrides
 
 ---
 
