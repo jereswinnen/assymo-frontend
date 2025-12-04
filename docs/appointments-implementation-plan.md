@@ -82,24 +82,24 @@ Complete appointment booking system for Assymo store visits with:
 ---
 
 ## Phase 5: Admin UI Components
-**Status: NOT STARTED**
+**Status: COMPLETED** (2025-12-04)
 
 ### 5.1 Appointments Tab
-- [ ] Update `src/app/admin/page.tsx` - Add "Afspraken" tab
-- [ ] `src/components/admin/AppointmentsDashboard.tsx`
+- [x] Update `src/app/admin/page.tsx` - Add "Afspraken" tab
+- [x] `src/components/admin/AppointmentsDashboard.tsx`
 
 ### 5.2 Appointments List
-- [ ] `src/components/admin/AppointmentsList.tsx`
-- [ ] `src/components/admin/AppointmentDialog.tsx`
+- [x] `src/components/admin/AppointmentsList.tsx`
+- [x] `src/components/admin/AppointmentDialog.tsx`
 
 ### 5.3 Settings Management
-- [ ] `src/components/admin/AppointmentSettings.tsx`
+- [x] `src/components/admin/AppointmentSettings.tsx`
 
 ### 5.4 Date Overrides
-- [ ] `src/components/admin/DateOverrides.tsx`
+- [x] `src/components/admin/DateOverrides.tsx`
 
 ### 5.5 Manual Appointment Creation
-- [ ] `src/components/admin/CreateAppointmentForm.tsx`
+- [x] `src/components/admin/CreateAppointmentForm.tsx`
 
 ---
 

@@ -6,10 +6,11 @@ import { ConversationList } from "@/components/admin/ConversationList";
 import { ConversationDialog } from "@/components/admin/ConversationDialog";
 import { DocumentEmbeddings } from "@/components/admin/DocumentEmbeddings";
 import { EmailDashboard } from "@/components/admin/EmailDashboard";
+import { AppointmentsDashboard } from "@/components/admin/AppointmentsDashboard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Spinner } from "@/components/ui/spinner";
 import type { Conversation } from "@/components/admin/ConversationList";
-import { MessagesSquareIcon, ScanTextIcon, MailIcon } from "lucide-react";
+import { MessagesSquareIcon, ScanTextIcon, MailIcon, CalendarDaysIcon } from "lucide-react";
 
 export default function AdminPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -71,6 +72,10 @@ export default function AdminPage() {
             <MailIcon />
             E-mails
           </TabsTrigger>
+          <TabsTrigger value="appointments">
+            <CalendarDaysIcon />
+            Afspraken
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="conversations">
@@ -86,6 +91,10 @@ export default function AdminPage() {
 
         <TabsContent value="emails">
           <EmailDashboard />
+        </TabsContent>
+
+        <TabsContent value="appointments">
+          <AppointmentsDashboard />
         </TabsContent>
       </Tabs>
 
