@@ -1,0 +1,249 @@
+/**
+ * Appointment booking system types
+ */
+
+// =============================================================================
+// Database Models
+// =============================================================================
+
+/**
+ * Weekly schedule settings for a day of the week
+ */
+export interface AppointmentSettings {
+  id: number;
+  day_of_week: number; // 0=Sunday, 1=Monday, ..., 6=Saturday
+  is_open: boolean;
+  open_time: string | null; // "HH:MM" format
+  close_time: string | null; // "HH:MM" format
+  slot_duration_minutes: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
+/**
+ * Date-specific override (holiday, special closure, or custom hours)
+ */
+export interface DateOverride {
+  id: number;
+  date: string; // "YYYY-MM-DD" format
+  is_closed: boolean;
+  open_time: string | null; // Override hours if not fully closed
+  close_time: string | null;
+  reason: string | null; // e.g., "Feestdag", "Vakantie"
+  created_at: Date;
+}
+
+/**
+ * Appointment record
+ */
+export interface Appointment {
+  id: number;
+  appointment_date: string; // "YYYY-MM-DD" format
+  appointment_time: string; // "HH:MM" format
+  duration_minutes: number;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  customer_street: string;
+  customer_postal_code: string;
+  customer_city: string;
+  remarks: string | null;
+  status: AppointmentStatus;
+  edit_token: string;
+  admin_notes: string | null;
+  ip_address: string | null;
+  created_at: Date;
+  updated_at: Date;
+  cancelled_at: Date | null;
+}
+
+export type AppointmentStatus = "confirmed" | "cancelled" | "completed";
+
+// =============================================================================
+// API Input Types
+// =============================================================================
+
+/**
+ * Input for creating a new appointment (public booking)
+ */
+export interface CreateAppointmentInput {
+  appointment_date: string; // "YYYY-MM-DD"
+  appointment_time: string; // "HH:MM"
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  customer_street: string;
+  customer_postal_code: string;
+  customer_city: string;
+  remarks?: string;
+}
+
+/**
+ * Input for updating an appointment
+ */
+export interface UpdateAppointmentInput {
+  appointment_date?: string;
+  appointment_time?: string;
+  customer_name?: string;
+  customer_email?: string;
+  customer_phone?: string;
+  customer_street?: string;
+  customer_postal_code?: string;
+  customer_city?: string;
+  remarks?: string;
+  status?: AppointmentStatus;
+  admin_notes?: string;
+}
+
+/**
+ * Input for updating weekly settings
+ */
+export interface UpdateSettingsInput {
+  day_of_week: number;
+  is_open: boolean;
+  open_time?: string | null;
+  close_time?: string | null;
+  slot_duration_minutes?: number;
+}
+
+/**
+ * Input for creating a date override
+ */
+export interface CreateDateOverrideInput {
+  date: string; // "YYYY-MM-DD"
+  is_closed: boolean;
+  open_time?: string | null;
+  close_time?: string | null;
+  reason?: string;
+}
+
+// =============================================================================
+// Availability Types
+// =============================================================================
+
+/**
+ * A single time slot
+ */
+export interface TimeSlot {
+  time: string; // "HH:MM" format
+  available: boolean;
+}
+
+/**
+ * Availability for a single date
+ */
+export interface DateAvailability {
+  date: string; // "YYYY-MM-DD"
+  is_open: boolean;
+  slots: TimeSlot[];
+}
+
+/**
+ * Response from availability API
+ */
+export interface AvailabilityResponse {
+  dates: DateAvailability[];
+}
+
+/**
+ * Day schedule info (computed from settings + overrides)
+ */
+export interface DaySchedule {
+  date: string;
+  is_open: boolean;
+  open_time: string | null;
+  close_time: string | null;
+  slot_duration_minutes: number;
+  override_reason?: string | null;
+}
+
+// =============================================================================
+// API Response Types
+// =============================================================================
+
+/**
+ * Successful appointment creation response
+ */
+export interface AppointmentCreatedResponse {
+  success: true;
+  appointment: Appointment;
+  edit_url: string;
+}
+
+/**
+ * Public appointment view (for customer via token)
+ */
+export interface PublicAppointmentView {
+  id: number;
+  appointment_date: string;
+  appointment_time: string;
+  duration_minutes: number;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  customer_street: string;
+  customer_postal_code: string;
+  customer_city: string;
+  remarks: string | null;
+  status: AppointmentStatus;
+  created_at: Date;
+}
+
+/**
+ * Admin appointment list item
+ */
+export interface AppointmentListItem {
+  id: number;
+  appointment_date: string;
+  appointment_time: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  status: AppointmentStatus;
+  created_at: Date;
+}
+
+/**
+ * Admin appointments filter options
+ */
+export interface AppointmentsFilter {
+  start_date?: string;
+  end_date?: string;
+  status?: AppointmentStatus | "all";
+  search?: string; // Search in name, email, phone
+}
+
+// =============================================================================
+// UI Helper Types
+// =============================================================================
+
+/**
+ * Day of week with Dutch name
+ */
+export interface DayOfWeek {
+  value: number;
+  name: string; // Dutch name
+  shortName: string; // Abbreviated
+}
+
+/**
+ * Days of week constant (Dutch)
+ */
+export const DAYS_OF_WEEK: DayOfWeek[] = [
+  { value: 0, name: "Zondag", shortName: "Zo" },
+  { value: 1, name: "Maandag", shortName: "Ma" },
+  { value: 2, name: "Dinsdag", shortName: "Di" },
+  { value: 3, name: "Woensdag", shortName: "Wo" },
+  { value: 4, name: "Donderdag", shortName: "Do" },
+  { value: 5, name: "Vrijdag", shortName: "Vr" },
+  { value: 6, name: "Zaterdag", shortName: "Za" },
+];
+
+/**
+ * Status labels (Dutch)
+ */
+export const STATUS_LABELS: Record<AppointmentStatus, string> = {
+  confirmed: "Bevestigd",
+  cancelled: "Geannuleerd",
+  completed: "Afgerond",
+};
