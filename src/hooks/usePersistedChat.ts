@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Message } from "@/types/chat";
 import { updateMessageCount } from "@/lib/chatSession";
+import { hasFullStorageConsent } from "@/hooks/useCookieConsent";
 
 const MESSAGES_STORAGE_KEY = "chatbot_messages";
 const EXPIRY_DAYS = 7;
@@ -16,6 +17,9 @@ function isExpired(timestamp: Date): boolean {
 
 function loadMessages(): Message[] {
   if (typeof window === "undefined") return [];
+
+  // Don't load persisted messages if user hasn't given full consent
+  if (!hasFullStorageConsent()) return [];
 
   try {
     const stored = localStorage.getItem(MESSAGES_STORAGE_KEY);
@@ -47,6 +51,9 @@ function loadMessages(): Message[] {
 
 function saveMessages(messages: Message[]): void {
   if (typeof window === "undefined") return;
+
+  // Don't persist messages if user hasn't given full consent
+  if (!hasFullStorageConsent()) return;
 
   try {
     localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(messages));

@@ -5,6 +5,7 @@ import { client } from "@/sanity/client";
 import { PhoneIcon, InstagramIcon, FacebookIcon } from "lucide-react";
 import { Separator } from "./ui/separator";
 import { NewsletterForm } from "./NewsletterForm";
+import { CookieSettingsButton } from "./CookieSettingsButton";
 
 const NAV_QUERY = `*[_type == "navigation"][0]{
   links[]{
@@ -149,19 +150,27 @@ export default async function Footer({ className }: FooterProps) {
 
         <div className="flex justify-end">
           <nav className="basis-full md:basis-[65%] text-xs font-medium text-stone-500">
-            <ul className="flex items-center gap-3">
-              <Link
-                href="#"
-                className="transition-all duration-200 hover:text-stone-700"
-              >
-                Privacy Policy
-              </Link>
+            <ul className="flex items-center gap-3 flex-wrap">
+              <li>
+                <Link
+                  href="/privacy"
+                  className="transition-all duration-200 hover:text-stone-700"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <Separator orientation="vertical" className="h-3! bg-stone-300" />
+              <li>
+                <CookieSettingsButton />
+              </li>
               <Separator orientation="vertical" className="h-3! bg-stone-300" />
               {settings?.vatNumber && (
-                <p className="mb-0!">{settings.vatNumber}</p>
+                <li className="mb-0!">{settings.vatNumber}</li>
               )}
-              <Separator orientation="vertical" className="h-3! bg-stone-300" />
-              <p>&copy; {new Date().getFullYear()} Assymo</p>
+              {settings?.vatNumber && (
+                <Separator orientation="vertical" className="h-3! bg-stone-300" />
+              )}
+              <li>&copy; {new Date().getFullYear()} Assymo</li>
             </ul>
           </nav>
         </div>
