@@ -193,8 +193,11 @@ export default function HeaderClient({
         onMouseLeave={handleMouseLeave}
       >
         <div className="mx-auto w-full max-w-site flex items-center">
-          <Link href="/" className="relative">
+          <Link href="/" className="relative flex flex-col gap-0.5">
             <Logo className="w-28" />
+            <p className="text-xs md:text-sm font-medium text-stone-600">
+              Maatwerk voor binnen en buiten
+            </p>
           </Link>
 
           {/* Desktop navigation */}
