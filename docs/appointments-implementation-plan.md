@@ -53,16 +53,16 @@ Complete appointment booking system for Assymo store visits with:
 ---
 
 ## Phase 3: Public API Routes
-**Status: NOT STARTED**
+**Status: COMPLETED** (2025-12-04)
 
 ### 3.1 Availability API
-- [ ] `src/app/api/appointments/availability/route.ts`
+- [x] `src/app/api/appointments/availability/route.ts` - GET available slots for date range
 
 ### 3.2 Booking API
-- [ ] `src/app/api/appointments/route.ts`
+- [x] `src/app/api/appointments/route.ts` - POST to create new appointment
 
 ### 3.3 Appointment Management (Token-based)
-- [ ] `src/app/api/appointments/[token]/route.ts`
+- [x] `src/app/api/appointments/[token]/route.ts` - GET/PUT/DELETE for customer self-service
 
 ---
 
