@@ -1,60 +1,73 @@
 "use client";
 
-import { useCookieConsent } from "@/hooks/useCookieConsent";
+import { useState } from "react";
+import { useCookieConsent, type ConsentLevel } from "@/hooks/useCookieConsent";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { motion, AnimatePresence } from "motion/react";
 
 export default function CookieBanner() {
   const { showBanner, updateConsent } = useCookieConsent();
+  const [isExiting, setIsExiting] = useState(false);
 
-  if (!showBanner) return null;
+  const handleConsent = (level: ConsentLevel) => {
+    setIsExiting(true);
+    // Wait for exit animation to complete before updating consent
+    setTimeout(() => {
+      updateConsent(level);
+    }, 300);
+  };
 
   return (
-    <div
-      className={cn(
-        "fixed bottom-4 left-4 z-50",
-        "max-w-sm w-full",
-        "bg-white border border-stone-200 rounded-2xl shadow-2xl",
-        "p-5",
-        "animate-in slide-in-from-bottom duration-300"
-      )}
-    >
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h3 className="text-base font-semibold text-stone-900">
-            Wij gebruiken cookies
-          </h3>
-          <p className="text-sm text-stone-600">
-            We gebruiken cookies en lokale opslag om uw ervaring te verbeteren
-            en de chatbot te laten werken.{" "}
-            <Link
-              href="/privacy"
-              className="text-primary underline underline-offset-2 hover:text-primary/80 transition-colors"
-            >
-              Privacybeleid
-            </Link>
-          </p>
-        </div>
+    <AnimatePresence>
+      {showBanner && !isExiting && (
+        <motion.div
+          initial={{ y: 16, opacity: 0, filter: "blur(10px)" }}
+          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+          exit={{ y: 16, opacity: 0, filter: "blur(10px)" }}
+          transition={{ duration: 0.4, ease: "easeInOut", delay: 0.5 }}
+          className={cn(
+            "fixed bottom-4 left-4 z-50",
+            "max-w-sm w-full",
+            "bg-white rounded-xl border border-black/5 shadow-lg",
+            "p-4",
+          )}
+        >
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1 *:mb-0!">
+              <h3 className="text-stone-800">Fijn dat je er bent!</h3>
+              <p className="text-sm text-stone-600">
+                Wij maken op onze website gebruik van cookies voor het bijhouden
+                van statistieken en het gebruik van onze chat-functie. Door op
+                'Alles accepteren' te klikken, ga je akkoord met ons
+                <Link href="/privacy" className="font-medium text-stone-800">
+                  privacybeleid
+                </Link>
+                .
+              </p>
+            </div>
 
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => updateConsent("essential")}
-            className="flex-1"
-          >
-            Alleen essentieel
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => updateConsent("all")}
-            className="flex-1"
-          >
-            Alles accepteren
-          </Button>
-        </div>
-      </div>
-    </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleConsent("essential")}
+                className="flex-1"
+              >
+                Alleen essentieel
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => handleConsent("all")}
+                className="flex-1"
+              >
+                Alles accepteren
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
