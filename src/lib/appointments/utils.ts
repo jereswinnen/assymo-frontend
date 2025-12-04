@@ -153,9 +153,12 @@ export function isTimeInPast(timeStr: string): boolean {
 
 /**
  * Get the day of week (0-6) from a date string
+ * Uses Monday=0 through Sunday=6 convention (not JavaScript's Sunday=0)
  */
 export function getDayOfWeek(dateStr: string): number {
-  return new Date(dateStr).getDay();
+  const jsDay = new Date(dateStr).getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+  // Convert to Monday=0, Tuesday=1, ..., Sunday=6
+  return jsDay === 0 ? 6 : jsDay - 1;
 }
 
 /**

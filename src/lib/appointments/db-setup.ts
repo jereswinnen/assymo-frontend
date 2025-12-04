@@ -90,14 +90,15 @@ export async function setupAppointmentTables() {
 
     // Insert default Dutch opening hours (Tuesday-Saturday 10:00-17:00)
     // Using ON CONFLICT to avoid duplicate errors on re-run
+    // Week starts on Monday: 0=Monday, 1=Tuesday, ..., 6=Sunday
     const defaultSettings = [
-      { day: 0, isOpen: false, open: null, close: null }, // Sunday - closed
-      { day: 1, isOpen: false, open: null, close: null }, // Monday - closed
-      { day: 2, isOpen: true, open: "10:00", close: "17:00" }, // Tuesday
-      { day: 3, isOpen: true, open: "10:00", close: "17:00" }, // Wednesday
-      { day: 4, isOpen: true, open: "10:00", close: "17:00" }, // Thursday
-      { day: 5, isOpen: true, open: "10:00", close: "17:00" }, // Friday
-      { day: 6, isOpen: true, open: "10:00", close: "17:00" }, // Saturday
+      { day: 0, isOpen: false, open: null, close: null }, // Monday - closed
+      { day: 1, isOpen: true, open: "10:00", close: "17:00" }, // Tuesday
+      { day: 2, isOpen: true, open: "10:00", close: "17:00" }, // Wednesday
+      { day: 3, isOpen: true, open: "10:00", close: "17:00" }, // Thursday
+      { day: 4, isOpen: true, open: "10:00", close: "17:00" }, // Friday
+      { day: 5, isOpen: true, open: "10:00", close: "17:00" }, // Saturday
+      { day: 6, isOpen: false, open: null, close: null }, // Sunday - closed
     ];
 
     for (const setting of defaultSettings) {
@@ -176,15 +177,16 @@ CREATE INDEX IF NOT EXISTS appointments_email_idx ON appointments(customer_email
 CREATE INDEX IF NOT EXISTS appointments_edit_token_idx ON appointments(edit_token);
 
 -- Insert default Dutch opening hours (Tuesday-Saturday 10:00-17:00)
+-- Week starts on Monday: 0=Monday, 1=Tuesday, ..., 6=Sunday
 INSERT INTO appointment_settings (day_of_week, is_open, open_time, close_time, slot_duration_minutes)
 VALUES
-  (0, false, NULL, NULL, 60),
-  (1, false, NULL, NULL, 60),
-  (2, true, '10:00', '17:00', 60),
-  (3, true, '10:00', '17:00', 60),
-  (4, true, '10:00', '17:00', 60),
-  (5, true, '10:00', '17:00', 60),
-  (6, true, '10:00', '17:00', 60)
+  (0, false, NULL, NULL, 60),  -- Monday - closed
+  (1, true, '10:00', '17:00', 60),  -- Tuesday
+  (2, true, '10:00', '17:00', 60),  -- Wednesday
+  (3, true, '10:00', '17:00', 60),  -- Thursday
+  (4, true, '10:00', '17:00', 60),  -- Friday
+  (5, true, '10:00', '17:00', 60),  -- Saturday
+  (6, false, NULL, NULL, 60)   -- Sunday - closed
 ON CONFLICT (day_of_week) DO NOTHING;
   `.trim();
 }

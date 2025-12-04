@@ -11,7 +11,7 @@
  */
 export interface AppointmentSettings {
   id: number;
-  day_of_week: number; // 0=Sunday, 1=Monday, ..., 6=Saturday
+  day_of_week: number; // 0=Monday, 1=Tuesday, ..., 6=Sunday
   is_open: boolean;
   open_time: string | null; // "HH:MM" format
   close_time: string | null; // "HH:MM" format
@@ -228,15 +228,18 @@ export interface DayOfWeek {
 
 /**
  * Days of week constant (Dutch)
+ * Note: Week starts on Monday (value 0) through Sunday (value 6)
+ * This differs from JavaScript's Date.getDay() which uses Sunday=0
+ * Use getDayOfWeek() from utils.ts to convert correctly
  */
 export const DAYS_OF_WEEK: DayOfWeek[] = [
-  { value: 0, name: "Zondag", shortName: "Zo" },
-  { value: 1, name: "Maandag", shortName: "Ma" },
-  { value: 2, name: "Dinsdag", shortName: "Di" },
-  { value: 3, name: "Woensdag", shortName: "Wo" },
-  { value: 4, name: "Donderdag", shortName: "Do" },
-  { value: 5, name: "Vrijdag", shortName: "Vr" },
-  { value: 6, name: "Zaterdag", shortName: "Za" },
+  { value: 0, name: "Maandag", shortName: "Ma" },
+  { value: 1, name: "Dinsdag", shortName: "Di" },
+  { value: 2, name: "Woensdag", shortName: "Wo" },
+  { value: 3, name: "Donderdag", shortName: "Do" },
+  { value: 4, name: "Vrijdag", shortName: "Vr" },
+  { value: 5, name: "Zaterdag", shortName: "Za" },
+  { value: 6, name: "Zondag", shortName: "Zo" },
 ];
 
 /**

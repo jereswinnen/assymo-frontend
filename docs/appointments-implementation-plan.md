@@ -133,11 +133,13 @@ Complete appointment booking system for Assymo store visits with:
 
 ## Database Schema
 
+**Note:** Week starts on Monday (day_of_week: 0=Monday, 6=Sunday). The frontend calendar should also display Monday as the first day of the week.
+
 ```sql
 -- Appointment settings table (store availability configuration)
 CREATE TABLE IF NOT EXISTS appointment_settings (
   id SERIAL PRIMARY KEY,
-  day_of_week INTEGER NOT NULL, -- 0=Sunday, 1=Monday, etc.
+  day_of_week INTEGER NOT NULL, -- 0=Monday, 1=Tuesday, ..., 6=Sunday
   is_open BOOLEAN NOT NULL DEFAULT false,
   open_time TIME,
   close_time TIME,
