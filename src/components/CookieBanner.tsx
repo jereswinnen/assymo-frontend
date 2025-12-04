@@ -39,8 +39,8 @@ export default function CookieBanner() {
               <h3 className="text-stone-800">Fijn dat je er bent!</h3>
               <p className="text-sm text-stone-600">
                 Op onze website maken we gebruik van cookies voor statistieken
-                en om de chatfunctie goed te laten werken. Door op 'Alles
-                accepteren' te klikken, ga je akkoord met ons{" "}
+                en om de chatfunctie goed te laten werken. Door op &apos;Alles
+                accepteren&apos; te klikken, ga je akkoord met ons{" "}
                 <Link href="/privacy" className="font-medium text-stone-800">
                   privacybeleid
                 </Link>
