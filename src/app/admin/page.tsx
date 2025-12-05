@@ -10,7 +10,8 @@ import { AppointmentsDashboard } from "@/components/admin/AppointmentsDashboard"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Spinner } from "@/components/ui/spinner";
 import type { Conversation } from "@/components/admin/ConversationList";
-import { MessagesSquareIcon, ScanTextIcon, MailIcon, CalendarDaysIcon } from "lucide-react";
+import { SettingsPanel } from "@/components/admin/SettingsPanel";
+import { MessagesSquareIcon, ScanTextIcon, MailIcon, CalendarDaysIcon, SettingsIcon } from "lucide-react";
 
 export default function AdminPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -76,6 +77,10 @@ export default function AdminPage() {
             <CalendarDaysIcon />
             Afspraken
           </TabsTrigger>
+          <TabsTrigger value="settings">
+            <SettingsIcon />
+            Instellingen
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="conversations">
@@ -95,6 +100,10 @@ export default function AdminPage() {
 
         <TabsContent value="appointments">
           <AppointmentsDashboard />
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <SettingsPanel />
         </TabsContent>
       </Tabs>
 

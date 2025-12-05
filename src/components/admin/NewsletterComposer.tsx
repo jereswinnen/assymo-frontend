@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { RESEND_CONFIG } from "@/config/resend";
+import { getTestEmail } from "@/lib/adminSettings";
 import {
   Dialog,
   DialogContent,
@@ -49,14 +49,11 @@ export function NewsletterComposer({
   const [sectionToDelete, setSectionToDelete] = useState<number | null>(null);
   const [showBroadcastConfirm, setShowBroadcastConfirm] = useState(false);
   const [showTestDialog, setShowTestDialog] = useState(false);
-  const [testEmail, setTestEmail] = useState<string>(RESEND_CONFIG.testEmail);
+  const [testEmail, setTestEmailState] = useState<string>("");
 
-  // Load saved test email from localStorage
+  // Load test email from centralized admin settings
   useEffect(() => {
-    const savedEmail = localStorage.getItem("newsletterTestEmail");
-    if (savedEmail) {
-      setTestEmail(savedEmail);
-    }
+    setTestEmailState(getTestEmail());
   }, []);
 
   const updateField = <K extends keyof Newsletter>(
@@ -136,9 +133,6 @@ export function NewsletterComposer({
       toast.error("Vul een geldig e-mailadres in");
       return;
     }
-
-    // Save email to localStorage for next time
-    localStorage.setItem("newsletterTestEmail", testEmail);
 
     setShowTestDialog(false);
     setSendingTest(true);
@@ -487,7 +481,7 @@ export function NewsletterComposer({
               type="email"
               placeholder="test@voorbeeld.be"
               value={testEmail}
-              onChange={(e) => setTestEmail(e.target.value)}
+              onChange={(e) => setTestEmailState(e.target.value)}
               className="mt-2"
             />
           </div>

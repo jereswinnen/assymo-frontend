@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { isAuthenticated } from "@/lib/auth";
 import { resend } from "@/lib/resend";
-import { RESEND_CONFIG } from "@/config/resend";
+import { RESEND_CONFIG, DEFAULT_TEST_EMAIL } from "@/config/resend";
 import { NewsletterBroadcast } from "@/emails";
 import type { NewsletterSection } from "@/config/newsletter";
 
@@ -26,9 +26,9 @@ export async function POST(
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
     }
 
-    // Get custom email from request body (optional)
+    // Get email from request body (frontend passes from Settings)
     const body = await req.json().catch(() => ({}));
-    const testEmail = body.email?.trim() || RESEND_CONFIG.testEmail;
+    const testEmail = body.email?.trim() || DEFAULT_TEST_EMAIL;
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -2,8 +2,31 @@
  * Resend Email Configuration
  *
  * Centralized configuration for email services via Resend.
- * Modify these values to adjust email behavior.
+ *
+ * Email routing overview:
+ * ┌─────────────────────────────────┬─────────────────────────────────┬─────────────────────────────────┐
+ * │ Feature                         │ Dev (localhost)                 │ Production                      │
+ * ├─────────────────────────────────┼─────────────────────────────────┼─────────────────────────────────┤
+ * │ Newsletter                      │ Admin Settings (default below)  │ Actual subscribers              │
+ * │ Contact form                    │ DEFAULT_TEST_EMAIL (automatic)  │ info@assymo.be                  │
+ * │ Appointment - admin notification│ DEFAULT_TEST_EMAIL (automatic)  │ info@assymo.be                  │
+ * │ Appointment - customer email    │ DEFAULT_TEST_EMAIL (automatic)  │ Actual customer email           │
+ * └─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┘
+ *
+ * Admin Settings (localStorage) only affects newsletter "Test versturen".
+ * Other emails use automatic dev/prod switching via isTestMode.
  */
+
+/**
+ * Test mode: when true, server-side emails go to serverTestEmail
+ */
+const TEST_MODE = process.env.NODE_ENV === "development";
+
+/**
+ * Default test email address - single source of truth
+ * Used by: server-side email routing (dev mode), admin Settings default, API fallbacks
+ */
+export const DEFAULT_TEST_EMAIL = "assymo@jeremys.be";
 
 export const RESEND_CONFIG = {
   /**
@@ -30,17 +53,17 @@ export const RESEND_CONFIG = {
   /**
    * Recipient address for contact form submissions
    */
-  contactRecipient: "info@assymo.be",
+  contactRecipient: TEST_MODE ? DEFAULT_TEST_EMAIL : "info@assymo.be",
 
   /**
    * Recipient address for appointment notifications
    */
-  appointmentRecipient: "info@assymo.be",
+  appointmentRecipient: TEST_MODE ? DEFAULT_TEST_EMAIL : "info@assymo.be",
 
   /**
-   * Default recipient for test newsletters
+   * Whether test mode is enabled (development environment)
    */
-  testEmail: "assymo@jeremys.be",
+  isTestMode: TEST_MODE,
 
   /**
    * Resend Audience ID for newsletter subscribers

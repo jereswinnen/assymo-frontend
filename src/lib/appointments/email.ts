@@ -1,5 +1,5 @@
 import { resend } from "@/lib/resend";
-import { RESEND_CONFIG } from "@/config/resend";
+import { RESEND_CONFIG, DEFAULT_TEST_EMAIL } from "@/config/resend";
 import { APPOINTMENTS_CONFIG } from "@/config/appointments";
 import {
   AppointmentConfirmation,
@@ -10,6 +10,13 @@ import {
 import { generateICS, generateICSFilename } from "./ics";
 import { formatDateNL, formatTimeNL } from "./utils";
 import type { Appointment } from "@/types/appointments";
+
+/**
+ * Get the recipient email - in test mode, all emails go to test email
+ */
+function getRecipient(email: string): string {
+  return RESEND_CONFIG.isTestMode ? DEFAULT_TEST_EMAIL : email;
+}
 
 /**
  * Base URL for appointment management links
@@ -41,7 +48,7 @@ export async function sendConfirmationEmail(
   try {
     const { error } = await resend.emails.send({
       from: RESEND_CONFIG.fromAddressAppointments,
-      to: [appointment.customer_email],
+      to: [getRecipient(appointment.customer_email)],
       subject: RESEND_CONFIG.subjects.appointmentConfirmation,
       react: AppointmentConfirmation({
         customerName: appointment.customer_name,
@@ -125,7 +132,7 @@ export async function sendCancellationEmail(
   try {
     const { error } = await resend.emails.send({
       from: RESEND_CONFIG.fromAddressAppointments,
-      to: [appointment.customer_email],
+      to: [getRecipient(appointment.customer_email)],
       subject: RESEND_CONFIG.subjects.appointmentCancellation,
       react: AppointmentCancellation({
         customerName: appointment.customer_name,
@@ -161,7 +168,7 @@ export async function sendUpdateEmail(
   try {
     const { error } = await resend.emails.send({
       from: RESEND_CONFIG.fromAddressAppointments,
-      to: [appointment.customer_email],
+      to: [getRecipient(appointment.customer_email)],
       subject: RESEND_CONFIG.subjects.appointmentUpdated,
       react: AppointmentUpdated({
         customerName: appointment.customer_name,
