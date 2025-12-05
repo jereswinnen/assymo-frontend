@@ -104,18 +104,19 @@ Complete appointment booking system for Assymo store visits with:
 ---
 
 ## Phase 6: Public Frontend Components
-**Status: NOT STARTED**
+**Status: COMPLETED** (2025-12-05)
 
 ### 6.1 Appointment Booking Form
-- [ ] `src/components/appointments/AppointmentBookingForm.tsx`
-- [ ] `src/components/appointments/DatePicker.tsx`
-- [ ] `src/components/appointments/TimeSlotPicker.tsx`
+- [x] `src/components/appointments/AppointmentBookingForm.tsx`
+- [x] `src/components/appointments/DatePicker.tsx`
+- [x] `src/components/appointments/TimeSlotPicker.tsx`
 
 ### 6.2 Pages
-- [ ] `src/app/(site)/afspraak/page.tsx` - Booking page
-- [ ] `src/app/(site)/afspraak/[token]/page.tsx` - View/edit page
-- [ ] `src/app/(site)/afspraak/bevestigd/page.tsx` - Confirmation
-- [ ] `src/app/(site)/afspraak/geannuleerd/page.tsx` - Cancellation
+- [x] `src/app/(site)/afspraak/page.tsx` - Booking page
+- [x] `src/app/(site)/afspraak/[token]/page.tsx` - View/edit page
+- [x] `src/app/(site)/afspraak/[token]/AppointmentView.tsx` - Client component for view/edit
+- [x] `src/app/(site)/afspraak/bevestigd/page.tsx` - Confirmation
+- [x] `src/app/(site)/afspraak/geannuleerd/page.tsx` - Cancellation
 
 ---
 
