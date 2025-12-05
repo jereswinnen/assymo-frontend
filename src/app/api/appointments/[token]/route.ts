@@ -61,7 +61,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       created_at: appointment.created_at,
     };
 
-    return NextResponse.json(publicView);
+    return NextResponse.json({ appointment: publicView });
   } catch (error) {
     console.error("Error fetching appointment:", error);
     return NextResponse.json(

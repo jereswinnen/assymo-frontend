@@ -78,9 +78,9 @@ export const RESEND_CONFIG = {
     contactAlgemeen: "Nieuw contactformulier: Algemeen",
     contactTuinhuizen: "Nieuw contactformulier: Tuinhuizen",
     newsletterWelcome: "Welkom bij de Assymo nieuwsbrief!",
-    appointmentConfirmation: "Bevestiging afspraak bij Assymo",
-    appointmentCancellation: "Uw afspraak bij Assymo is geannuleerd",
-    appointmentUpdated: "Uw afspraak bij Assymo is gewijzigd",
-    appointmentAdmin: "Nieuwe afspraak ingepland",
+    appointmentConfirmation: "[USER] Bevestiging afspraak bij Assymo",
+    appointmentCancellation: "[USER] Uw afspraak bij Assymo is geannuleerd",
+    appointmentUpdated: "[USER] Uw afspraak bij Assymo is gewijzigd",
+    appointmentAdmin: "[ADMIN] Nieuwe afspraak ingepland",
   },
 } as const;
