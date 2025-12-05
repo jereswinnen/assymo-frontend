@@ -35,6 +35,7 @@ export function DateOverrides() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -104,10 +105,6 @@ export function DateOverrides() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Weet je zeker dat je deze override wilt verwijderen?")) {
-      return;
-    }
-
     setDeleting(id);
     try {
       const response = await fetch(
@@ -131,7 +128,12 @@ export function DateOverrides() {
       );
     } finally {
       setDeleting(null);
+      setDeleteConfirmId(null);
     }
+  };
+
+  const confirmDelete = (id: number) => {
+    setDeleteConfirmId(id);
   };
 
   const resetForm = () => {
@@ -232,7 +234,7 @@ export function DateOverrides() {
                       variant="ghost"
                       size="sm"
                       className="opacity-0 group-hover:opacity-100"
-                      onClick={() => handleDelete(override.id)}
+                      onClick={() => confirmDelete(override.id)}
                       disabled={deleting === override.id}
                     >
                       {deleting === override.id ? (
@@ -281,7 +283,7 @@ export function DateOverrides() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CalendarOffIcon className="size-5" />
-              Datum blokkeren
+              Uitzondering toevoegen
             </DialogTitle>
           </DialogHeader>
 
@@ -295,6 +297,7 @@ export function DateOverrides() {
                   setFormData({ ...formData, date: e.target.value })
                 }
                 min={new Date().toISOString().split("T")[0]}
+                className="[&::-webkit-calendar-picker-indicator]:hidden"
               />
             </div>
 
@@ -319,6 +322,7 @@ export function DateOverrides() {
                     onChange={(e) =>
                       setFormData({ ...formData, open_time: e.target.value })
                     }
+                    className="[&::-webkit-calendar-picker-indicator]:hidden"
                   />
                 </div>
                 <div className="space-y-2 flex-1">
@@ -329,6 +333,7 @@ export function DateOverrides() {
                     onChange={(e) =>
                       setFormData({ ...formData, close_time: e.target.value })
                     }
+                    className="[&::-webkit-calendar-picker-indicator]:hidden"
                   />
                 </div>
               </div>
@@ -353,6 +358,37 @@ export function DateOverrides() {
             <Button onClick={handleCreate} disabled={saving}>
               {saving && <Loader2Icon className="size-4 animate-spin" />}
               Toevoegen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirmId !== null}
+        onOpenChange={(open) => !open && setDeleteConfirmId(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Uitzondering verwijderen</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Weet je zeker dat je deze uitzondering wilt verwijderen? Dit kan niet
+            ongedaan worden gemaakt.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
+              Annuleren
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+              disabled={deleting !== null}
+            >
+              {deleting !== null && (
+                <Loader2Icon className="size-4 animate-spin" />
+              )}
+              Verwijderen
             </Button>
           </DialogFooter>
         </DialogContent>

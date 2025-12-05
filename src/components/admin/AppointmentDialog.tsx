@@ -51,6 +51,7 @@ export function AppointmentDialog({
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   // Edit form state
   const [editData, setEditData] = useState({
@@ -122,10 +123,6 @@ export function AppointmentDialog({
   const handleCancel = async () => {
     if (!appointment) return;
 
-    if (!confirm("Weet je zeker dat je deze afspraak wilt annuleren?")) {
-      return;
-    }
-
     setCancelling(true);
     try {
       const response = await fetch(
@@ -148,6 +145,7 @@ export function AppointmentDialog({
       );
     } finally {
       setCancelling(false);
+      setShowCancelConfirm(false);
     }
   };
 
@@ -430,14 +428,10 @@ export function AppointmentDialog({
               {appointment.status !== "cancelled" && (
                 <Button
                   variant="destructive"
-                  onClick={handleCancel}
+                  onClick={() => setShowCancelConfirm(true)}
                   disabled={cancelling}
                 >
-                  {cancelling ? (
-                    <Loader2Icon className="size-4 animate-spin" />
-                  ) : (
-                    <TrashIcon className="size-4" />
-                  )}
+                  <TrashIcon className="size-4" />
                   Annuleren
                 </Button>
               )}
@@ -445,6 +439,40 @@ export function AppointmentDialog({
                 Bewerken
               </Button>
             </DialogFooter>
+
+            {/* Cancel Confirmation Dialog */}
+            <Dialog
+              open={showCancelConfirm}
+              onOpenChange={(open) => !open && setShowCancelConfirm(false)}
+            >
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Afspraak annuleren</DialogTitle>
+                </DialogHeader>
+                <p className="text-sm text-muted-foreground">
+                  Weet je zeker dat je deze afspraak wilt annuleren? De klant
+                  ontvangt hiervan een e-mailnotificatie.
+                </p>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowCancelConfirm(false)}
+                  >
+                    Terug
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleCancel}
+                    disabled={cancelling}
+                  >
+                    {cancelling && (
+                      <Loader2Icon className="size-4 animate-spin" />
+                    )}
+                    Ja, annuleren
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         )}
       </DialogContent>

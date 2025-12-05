@@ -166,6 +166,7 @@ export function AppointmentsList() {
                   onClick={handleSearch}
                   type="submit"
                   variant="default"
+                  disabled={!searchQuery.trim()}
                 >
                   Zoeken
                 </InputGroupButton>

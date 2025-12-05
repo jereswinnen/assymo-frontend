@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckIcon, Loader2Icon, SaveIcon } from "lucide-react";
+import { CheckIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import type { AppointmentSettings as SettingsType } from "@/types/appointments";
 import { DAYS_OF_WEEK } from "@/types/appointments";
@@ -22,6 +22,8 @@ export function AppointmentSettings() {
   const [settings, setSettings] = useState<DaySettingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const originalSettings = useRef<DaySettingRow[]>([]);
 
   useEffect(() => {
     loadSettings();
@@ -49,6 +51,8 @@ export function AppointmentSettings() {
       });
 
       setSettings(rows);
+      originalSettings.current = JSON.parse(JSON.stringify(rows));
+      setHasChanges(false);
     } catch (error) {
       console.error("Failed to load settings:", error);
       toast.error("Kon instellingen niet laden");
@@ -62,11 +66,16 @@ export function AppointmentSettings() {
     field: keyof DaySettingRow,
     value: boolean | string | number,
   ) => {
-    setSettings((prev) =>
-      prev.map((s) =>
+    setSettings((prev) => {
+      const updated = prev.map((s) =>
         s.day_of_week === dayOfWeek ? { ...s, [field]: value } : s,
-      ),
-    );
+      );
+      // Check if settings differ from original
+      setHasChanges(
+        JSON.stringify(updated) !== JSON.stringify(originalSettings.current)
+      );
+      return updated;
+    });
   };
 
   const handleSave = async () => {
@@ -92,6 +101,8 @@ export function AppointmentSettings() {
       }
 
       toast.success("Instellingen opgeslagen");
+      originalSettings.current = JSON.parse(JSON.stringify(settings));
+      setHasChanges(false);
     } catch (error) {
       console.error("Failed to save settings:", error);
       toast.error(
@@ -162,7 +173,7 @@ export function AppointmentSettings() {
                           e.target.value,
                         )
                       }
-                      className="w-28"
+                      className="w-28 [&::-webkit-calendar-picker-indicator]:hidden"
                     />
                   </div>
 
@@ -178,7 +189,7 @@ export function AppointmentSettings() {
                           e.target.value,
                         )
                       }
-                      className="w-28"
+                      className="w-28 [&::-webkit-calendar-picker-indicator]:hidden"
                     />
                   </div>
 
@@ -211,7 +222,7 @@ export function AppointmentSettings() {
         })}
       </div>
 
-      <Button onClick={handleSave} disabled={saving}>
+      <Button onClick={handleSave} disabled={saving || !hasChanges}>
         {saving ? (
           <Loader2Icon className="size-4 animate-spin" />
         ) : (
