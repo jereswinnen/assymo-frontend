@@ -231,7 +231,7 @@ export default function HeaderClient({
           <div className="ml-auto flex items-center gap-3">
             <Action
               className="relative"
-              href="/contact"
+              href="/afspraak"
               icon={<Calendar1Icon />}
               label="Maak een afspraak"
             />
