@@ -1,4 +1,4 @@
-import { Section, Text, Hr } from "@react-email/components";
+import { Section, Text, Hr, Link } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./components/EmailLayout";
 import {
@@ -13,7 +13,7 @@ interface AppointmentUpdatedProps {
   customerName: string;
   appointmentDate: string;
   appointmentTime: string;
-  storeLocation: string;
+  storeAddress: string;
   previousDate?: string;
   previousTime?: string;
   editUrl: string;
@@ -23,7 +23,7 @@ export function AppointmentUpdated({
   customerName,
   appointmentDate,
   appointmentTime,
-  storeLocation,
+  storeAddress,
   previousDate,
   previousTime,
   editUrl,
@@ -31,6 +31,7 @@ export function AppointmentUpdated({
   const dateChanged = previousDate && previousDate !== appointmentDate;
   const timeChanged = previousTime && previousTime !== appointmentTime;
   const hasChanges = dateChanged || timeChanged;
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(storeAddress)}`;
 
   return (
     <EmailLayout preview={`Uw afspraak bij Assymo is gewijzigd`}>
@@ -76,13 +77,17 @@ export function AppointmentUpdated({
           <Text style={typography.label}>Tijdstip</Text>
           <Text style={typography.value}>{appointmentTime}</Text>
           <Text style={typography.label}>Locatie</Text>
-          <Text style={typography.value}>{storeLocation}</Text>
+          <Text style={typography.value}>
+            <Link href={mapsUrl} style={addressLink}>
+              {storeAddress}
+            </Link>
+          </Text>
         </InfoBox>
 
         <Hr style={layout.divider} />
 
         <Text style={typography.paragraph}>
-          Moet u uw afspraak nogmaals wijzigen of annuleren?
+          Wilt u uw afspraak nogmaals wijzigen? Klik dan op onderstaande knop:
         </Text>
 
         <EmailButton href={editUrl}>Afspraak beheren</EmailButton>
@@ -90,7 +95,11 @@ export function AppointmentUpdated({
         <Hr style={layout.divider} />
 
         <Text style={typography.paragraph}>
-          Heeft u vragen? Neem gerust contact met ons op via info@assymo.be.
+          Heeft u vragen? Stuur gerust een mailtje naar:{" "}
+          <Link href="mailto:info@assymo.be" style={emailLink}>
+            info@assymo.be
+          </Link>
+          .
         </Text>
 
         <Text style={typography.signature}>
@@ -149,4 +158,16 @@ const infoBoxTitle = {
   margin: "0 0 16px 0",
   paddingBottom: "12px",
   borderBottom: `1px solid ${colors.border}`,
+};
+
+const addressLink = {
+  color: colors.primary,
+  fontWeight: "500" as const,
+  textDecoration: "underline",
+};
+
+const emailLink = {
+  color: colors.primary,
+  fontWeight: "500" as const,
+  textDecoration: "underline",
 };

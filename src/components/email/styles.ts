@@ -7,10 +7,10 @@
 export const colors = {
   primary: "#1f3632",
   accent: "#22df90",
-  muted: "#8898aa",
-  text: "#525f7f",
-  background: "#f6f9fc",
-  border: "#e6ebf1",
+  muted: "#78716c", //stone500
+  text: "#292524", //stone800
+  background: "#f5f5f4", //stone200
+  border: "#e7e5e4", //stone200
   white: "#ffffff",
 } as const;
 
@@ -18,9 +18,9 @@ export const colors = {
 export const typography = {
   heading: {
     fontSize: "24px",
-    fontWeight: "bold" as const,
-    color: colors.primary,
-    margin: "0 0 8px 0",
+    fontWeight: "semibold" as const,
+    color: colors.text,
+    margin: "0 0 4px 0",
   },
   subheading: {
     fontSize: "14px",
@@ -29,7 +29,7 @@ export const typography = {
   },
   paragraph: {
     fontSize: "16px",
-    color: colors.primary,
+    color: colors.text,
     margin: "0 0 16px 0",
     lineHeight: "1.5",
   },
@@ -43,7 +43,7 @@ export const typography = {
   },
   value: {
     fontSize: "16px",
-    color: colors.primary,
+    color: colors.text,
     margin: "0 0 16px 0",
   },
   small: {
@@ -53,7 +53,7 @@ export const typography = {
   },
   signature: {
     fontSize: "16px",
-    color: colors.primary,
+    color: colors.text,
     margin: "24px 0 0 0",
     lineHeight: "1.5",
   },
@@ -69,7 +69,7 @@ export const layout = {
     margin: "24px 0",
   },
   buttonContainer: {
-    textAlign: "center" as const,
+    //textAlign: "center" as const,
     margin: "24px 0",
   },
 } as const;
@@ -82,26 +82,26 @@ export const components = {
     borderRadius: "9999px", // rounded-full (pill shape)
     color: colors.accent, // text-accent-light
     fontSize: "14px", // text-sm
-    fontWeight: "500" as const, // font-medium
+    fontWeight: "400" as const, // font-medium
     textDecoration: "none",
     textAlign: "center" as const,
-    padding: "8px 14px", // py-2 px-3.5
+    padding: "10px 16px",
   },
   infoBox: {
     backgroundColor: colors.background,
-    padding: "24px",
-    borderRadius: "8px",
+    padding: "20px",
+    borderRadius: "12px",
     margin: "16px 0",
   },
   highlightBox: {
-    backgroundColor: colors.accent,
-    padding: "24px",
-    borderRadius: "8px",
+    backgroundColor: colors.background,
+    padding: "20px",
+    borderRadius: "12px",
     margin: "0",
   },
   messageBox: {
     fontSize: "16px",
-    color: colors.primary,
+    color: colors.text,
     margin: "0",
     whiteSpace: "pre-wrap" as const,
     backgroundColor: colors.background,

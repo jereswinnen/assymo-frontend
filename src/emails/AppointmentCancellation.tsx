@@ -1,4 +1,4 @@
-import { Section, Text, Hr } from "@react-email/components";
+import { Section, Text, Hr, Link } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./components/EmailLayout";
 import { EmailButton, typography, layout, colors } from "@/components/email";
@@ -51,7 +51,11 @@ export function AppointmentCancellation({
         <Hr style={layout.divider} />
 
         <Text style={typography.paragraph}>
-          Heeft u vragen? Neem gerust contact met ons op via info@assymo.be.
+          Heeft u vragen? Stuur gerust een mailtje naar:{" "}
+          <Link href="mailto:info@assymo.be" style={emailLink}>
+            info@assymo.be
+          </Link>
+          .
         </Text>
 
         <Text style={typography.signature}>
@@ -95,4 +99,10 @@ const cancelledValue = {
   margin: "0",
   fontWeight: "500" as const,
   textDecoration: "line-through" as const,
+};
+
+const emailLink = {
+  color: colors.primary,
+  fontWeight: "500" as const,
+  textDecoration: "underline",
 };

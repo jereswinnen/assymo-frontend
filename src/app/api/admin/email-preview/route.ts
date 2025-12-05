@@ -18,7 +18,7 @@ const sampleData = {
     customerName: "Jan Janssen",
     appointmentDate: "dinsdag 15 januari 2025",
     appointmentTime: "14:00 uur",
-    storeLocation: "Assymo Showroom, Hoofdstraat 123, 2000 Antwerpen",
+    storeAddress: "Eikenlei 159, 2960 Brecht",
     editUrl: "https://assymo.be/afspraak/abc123",
   },
   "appointment-admin": {
@@ -42,7 +42,7 @@ const sampleData = {
     customerName: "Jan Janssen",
     appointmentDate: "woensdag 16 januari 2025",
     appointmentTime: "10:00 uur",
-    storeLocation: "Assymo Showroom, Hoofdstraat 123, 2000 Antwerpen",
+    storeAddress: "Eikenlei 159, 2960 Brecht",
     previousDate: "dinsdag 15 januari 2025",
     previousTime: "14:00 uur",
     editUrl: "https://assymo.be/afspraak/abc123",

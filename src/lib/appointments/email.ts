@@ -54,7 +54,7 @@ export async function sendConfirmationEmail(
         customerName: appointment.customer_name,
         appointmentDate: formatDateNL(appointment.appointment_date),
         appointmentTime: formatTimeNL(appointment.appointment_time),
-        storeLocation: APPOINTMENTS_CONFIG.storeLocation,
+        storeAddress: APPOINTMENTS_CONFIG.storeAddress,
         editUrl: getEditUrl(appointment.edit_token),
       }),
     });
@@ -174,7 +174,7 @@ export async function sendUpdateEmail(
         customerName: appointment.customer_name,
         appointmentDate: formatDateNL(appointment.appointment_date),
         appointmentTime: formatTimeNL(appointment.appointment_time),
-        storeLocation: APPOINTMENTS_CONFIG.storeLocation,
+        storeAddress: APPOINTMENTS_CONFIG.storeAddress,
         previousDate: previousDate ? formatDateNL(previousDate) : undefined,
         previousTime: previousTime ? formatTimeNL(previousTime) : undefined,
         editUrl: getEditUrl(appointment.edit_token),

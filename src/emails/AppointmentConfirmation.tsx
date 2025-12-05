@@ -1,4 +1,4 @@
-import { Section, Text, Hr } from "@react-email/components";
+import { Section, Text, Hr, Link } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./components/EmailLayout";
 import {
@@ -14,7 +14,7 @@ interface AppointmentConfirmationProps {
   customerName: string;
   appointmentDate: string;
   appointmentTime: string;
-  storeLocation: string;
+  storeAddress: string;
   editUrl: string;
 }
 
@@ -22,14 +22,16 @@ export function AppointmentConfirmation({
   customerName,
   appointmentDate,
   appointmentTime,
-  storeLocation,
+  storeAddress,
   editUrl,
 }: AppointmentConfirmationProps) {
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(storeAddress)}`;
+
   return (
     <EmailLayout preview={`Uw afspraak bij Assymo op ${appointmentDate}`}>
       <Section style={layout.content}>
         <Text style={typography.heading}>Afspraak bevestigd</Text>
-        <Text style={typography.subheading}>Bedankt voor uw reservering</Text>
+        <Text style={typography.subheading}>Bedankt voor uw interesse</Text>
 
         <Hr style={layout.divider} />
 
@@ -43,13 +45,20 @@ export function AppointmentConfirmation({
         <InfoBox>
           <InfoRow label="Datum" value={appointmentDate} />
           <InfoRow label="Tijdstip" value={appointmentTime} />
-          <InfoRow label="Locatie" value={storeLocation} />
+          <InfoRow
+            label="Locatie"
+            value={
+              <Link href={mapsUrl} style={addressLink}>
+                {storeAddress}
+              </Link>
+            }
+          />
         </InfoBox>
 
         <Hr style={layout.divider} />
 
         <Text style={typography.paragraph}>
-          Moet u uw afspraak wijzigen of annuleren? Gebruik onderstaande knop:
+          Gebruik onderstaande knop om uw afspraak te bekijken of wijzigen:
         </Text>
 
         <EmailButton href={editUrl}>Afspraak beheren</EmailButton>
@@ -62,7 +71,11 @@ export function AppointmentConfirmation({
         <Hr style={layout.divider} />
 
         <Text style={typography.paragraph}>
-          Heeft u vragen? Neem gerust contact met ons op via info@assymo.be.
+          Heeft u vragen? Stuur gerust een mailtje naar:{" "}
+          <Link href="mailto:info@assymo.be" style={emailLink}>
+            info@assymo.be
+          </Link>
+          .
         </Text>
 
         <Text style={typography.signature}>
@@ -93,4 +106,16 @@ const smallText = {
 
 const linkText = {
   color: colors.primary,
+};
+
+const emailLink = {
+  color: colors.primary,
+  fontWeight: "500" as const,
+  textDecoration: "underline",
+};
+
+const addressLink = {
+  color: colors.primary,
+  fontWeight: "500" as const,
+  textDecoration: "underline",
 };

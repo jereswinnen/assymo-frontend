@@ -3,6 +3,7 @@ import {
   Container,
   Head,
   Html,
+  Link,
   Preview,
   Section,
   Text,
@@ -23,11 +24,15 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
-            <EmailLogo />
+            <Link href="https://assymo.be">
+              <EmailLogo />
+            </Link>
           </Section>
           {children}
           <Section style={footer}>
-            <Text style={footerText}>Assymo - Houten tuingebouwen op maat</Text>
+            <Text style={footerText}>
+              Assymo - Maatwerk voor binnen en buiten.
+            </Text>
           </Section>
         </Container>
       </Body>
