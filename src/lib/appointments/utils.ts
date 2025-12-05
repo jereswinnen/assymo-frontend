@@ -210,20 +210,27 @@ export function isValidPhone(phone: string): boolean {
 }
 
 /**
- * Validate Dutch postal code
- * Format: 1234 AB or 1234AB
+ * Validate postal code
+ * Accepts: 4 digits (Belgian) or 4 digits + 2 letters (Dutch)
+ * Format: 1234 or 1234 AB or 1234AB
  */
 export function isValidPostalCode(postalCode: string): boolean {
-  return /^\d{4}\s?[A-Za-z]{2}$/.test(postalCode.trim());
+  const trimmed = postalCode.trim();
+  // Belgian format: 4 digits
+  // Dutch format: 4 digits + optional space + 2 letters
+  return /^\d{4}(\s?[A-Za-z]{2})?$/.test(trimmed);
 }
 
 /**
- * Normalize postal code to standard format (1234 AB)
+ * Normalize postal code
+ * If 6 chars (Dutch format), adds space: 1234AB -> 1234 AB
+ * Otherwise returns trimmed input
  */
 export function normalizePostalCode(postalCode: string): string {
   const cleaned = postalCode.replace(/\s/g, "").toUpperCase();
-  if (cleaned.length === 6) {
+  // Dutch format with letters
+  if (cleaned.length === 6 && /^\d{4}[A-Z]{2}$/.test(cleaned)) {
     return `${cleaned.slice(0, 4)} ${cleaned.slice(4)}`;
   }
-  return postalCode;
+  return postalCode.trim();
 }

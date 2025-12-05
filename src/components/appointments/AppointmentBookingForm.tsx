@@ -332,7 +332,7 @@ export function AppointmentBookingForm() {
                       type="email"
                       value={formData.customer_email}
                       onChange={(e) => updateField("customer_email", e.target.value)}
-                      placeholder="email@voorbeeld.nl"
+                      placeholder="email@voorbeeld.be"
                       required
                       autoComplete="email"
                     />
@@ -347,7 +347,7 @@ export function AppointmentBookingForm() {
                       type="tel"
                       value={formData.customer_phone}
                       onChange={(e) => updateField("customer_phone", e.target.value)}
-                      placeholder="06 12345678"
+                      placeholder="0412 34 56 78"
                       required
                       autoComplete="tel"
                     />
@@ -384,7 +384,7 @@ export function AppointmentBookingForm() {
                       id="customer_postal_code"
                       value={formData.customer_postal_code}
                       onChange={(e) => updateField("customer_postal_code", e.target.value)}
-                      placeholder="1234 AB"
+                      placeholder="1234"
                       required
                       autoComplete="postal-code"
                     />

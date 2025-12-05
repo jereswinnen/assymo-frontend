@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Loader2Icon, CalendarPlusIcon } from "lucide-react";
+import { Loader2Icon, CalendarPlusIcon, CheckIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface CreateAppointmentFormProps {
@@ -69,12 +69,20 @@ export function CreateAppointmentForm({
       return;
     }
 
-    if (!formData.customer_name || !formData.customer_email || !formData.customer_phone) {
+    if (
+      !formData.customer_name ||
+      !formData.customer_email ||
+      !formData.customer_phone
+    ) {
       toast.error("Vul alle verplichte klantgegevens in");
       return;
     }
 
-    if (!formData.customer_street || !formData.customer_postal_code || !formData.customer_city) {
+    if (
+      !formData.customer_street ||
+      !formData.customer_postal_code ||
+      !formData.customer_city
+    ) {
       toast.error("Vul het volledige adres in");
       return;
     }
@@ -101,7 +109,7 @@ export function CreateAppointmentForm({
     } catch (error) {
       console.error("Failed to create appointment:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon afspraak niet aanmaken"
+        error instanceof Error ? error.message : "Kon afspraak niet aanmaken",
       );
     } finally {
       setSaving(false);
@@ -120,12 +128,23 @@ export function CreateAppointmentForm({
   tomorrow.setDate(tomorrow.getDate() + 1);
   const minDate = tomorrow.toISOString().split("T")[0];
 
+  // Check if required fields are filled
+  const isFormValid =
+    formData.appointment_date &&
+    formData.appointment_time &&
+    formData.customer_name.trim() &&
+    formData.customer_email.trim() &&
+    formData.customer_phone.trim() &&
+    formData.customer_street.trim() &&
+    formData.customer_postal_code.trim() &&
+    formData.customer_city.trim();
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <CalendarPlusIcon className="size-5" />
+            <CalendarPlusIcon className="size-4" />
             Nieuwe afspraak
           </DialogTitle>
         </DialogHeader>
@@ -144,6 +163,7 @@ export function CreateAppointmentForm({
                 }
                 min={minDate}
                 required
+                className="[&::-webkit-calendar-picker-indicator]:hidden"
               />
             </div>
             <div className="space-y-2">
@@ -156,6 +176,7 @@ export function CreateAppointmentForm({
                   setFormData({ ...formData, appointment_time: e.target.value })
                 }
                 required
+                className="[&::-webkit-calendar-picker-indicator]:hidden"
               />
             </div>
           </div>
@@ -186,7 +207,7 @@ export function CreateAppointmentForm({
                 onChange={(e) =>
                   setFormData({ ...formData, customer_email: e.target.value })
                 }
-                placeholder="email@voorbeeld.nl"
+                placeholder="email@voorbeeld.be"
                 required
               />
             </div>
@@ -199,7 +220,7 @@ export function CreateAppointmentForm({
                 onChange={(e) =>
                   setFormData({ ...formData, customer_phone: e.target.value })
                 }
-                placeholder="06 12345678"
+                placeholder="0412 34 56 78"
                 required
               />
             </div>
@@ -225,9 +246,12 @@ export function CreateAppointmentForm({
                 id="postal"
                 value={formData.customer_postal_code}
                 onChange={(e) =>
-                  setFormData({ ...formData, customer_postal_code: e.target.value })
+                  setFormData({
+                    ...formData,
+                    customer_postal_code: e.target.value,
+                  })
                 }
-                placeholder="1234 AB"
+                placeholder="1234"
                 required
               />
             </div>
@@ -296,8 +320,12 @@ export function CreateAppointmentForm({
             >
               Annuleren
             </Button>
-            <Button type="submit" disabled={saving}>
-              {saving && <Loader2Icon className="size-4 animate-spin" />}
+            <Button type="submit" disabled={saving || !isFormValid}>
+              {saving ? (
+                <Loader2Icon className="size-4 animate-spin" />
+              ) : (
+                <CheckIcon className="size-4" />
+              )}
               Afspraak aanmaken
             </Button>
           </DialogFooter>

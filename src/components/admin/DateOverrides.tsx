@@ -24,6 +24,7 @@ import {
   CalendarOffIcon,
   ClockPlusIcon,
   Loader2Icon,
+  Trash2Icon,
   TrashIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -231,16 +232,16 @@ export function DateOverrides() {
                       )}
                     </ItemContent>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
-                      className="opacity-0 group-hover:opacity-100"
+                      className="opacity-0 group-hover:opacity-100 text-destructive"
                       onClick={() => confirmDelete(override.id)}
                       disabled={deleting === override.id}
                     >
                       {deleting === override.id ? (
                         <Loader2Icon className="size-4 animate-spin" />
                       ) : (
-                        <TrashIcon className="size-4" />
+                        <Trash2Icon className="size-4" />
                       )}
                     </Button>
                   </Item>
@@ -282,7 +283,7 @@ export function DateOverrides() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <CalendarOffIcon className="size-5" />
+              <CalendarOffIcon className="size-4" />
               Uitzondering toevoegen
             </DialogTitle>
           </DialogHeader>
@@ -370,11 +371,14 @@ export function DateOverrides() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Uitzondering verwijderen</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2Icon className="size-4" />
+              Uitzondering verwijderen
+            </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Weet je zeker dat je deze uitzondering wilt verwijderen? Dit kan niet
-            ongedaan worden gemaakt.
+            Weet je zeker dat je deze uitzondering wilt verwijderen? Dit kan
+            niet ongedaan worden gemaakt.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>

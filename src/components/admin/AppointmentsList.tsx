@@ -23,7 +23,6 @@ import {
   CalendarIcon,
   CalendarPlusIcon,
   Loader2Icon,
-  PlusIcon,
   SearchIcon,
   UserIcon,
 } from "lucide-react";
