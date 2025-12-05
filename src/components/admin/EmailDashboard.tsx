@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { NewsletterComposer } from "./NewsletterComposer";
 import { DraftsList } from "./DraftsList";
 import { BroadcastHistory } from "./BroadcastHistory";
+import { EmailTemplatePreview } from "./EmailTemplatePreview";
 import type { Newsletter } from "@/config/newsletter";
 
 export function EmailDashboard() {
@@ -216,6 +217,9 @@ export function EmailDashboard() {
             <BroadcastHistory newsletters={sentNewsletters} />
           </>
         )}
+
+        <Separator />
+        <EmailTemplatePreview />
       </CardContent>
     </Card>
   );

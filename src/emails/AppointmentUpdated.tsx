@@ -1,14 +1,21 @@
-import { Section, Text, Hr, Button } from "@react-email/components";
+import { Section, Text, Hr } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./components/EmailLayout";
+import {
+  InfoBox,
+  EmailButton,
+  typography,
+  layout,
+  colors,
+} from "@/components/email";
 
 interface AppointmentUpdatedProps {
   customerName: string;
-  appointmentDate: string; // New formatted Dutch date
-  appointmentTime: string; // New time, e.g., "14:00 uur"
+  appointmentDate: string;
+  appointmentTime: string;
   storeLocation: string;
-  previousDate?: string; // Old date (if changed)
-  previousTime?: string; // Old time (if changed)
+  previousDate?: string;
+  previousTime?: string;
   editUrl: string;
 }
 
@@ -27,15 +34,17 @@ export function AppointmentUpdated({
 
   return (
     <EmailLayout preview={`Uw afspraak bij Assymo is gewijzigd`}>
-      <Section style={content}>
-        <Text style={heading}>Afspraak gewijzigd</Text>
-        <Text style={subheading}>Uw afspraak is succesvol aangepast</Text>
+      <Section style={layout.content}>
+        <Text style={typography.heading}>Afspraak gewijzigd</Text>
+        <Text style={typography.subheading}>
+          Uw afspraak is succesvol aangepast
+        </Text>
 
-        <Hr style={divider} />
+        <Hr style={layout.divider} />
 
         <Text style={greeting}>Beste {customerName},</Text>
 
-        <Text style={paragraph}>
+        <Text style={typography.paragraph}>
           Uw afspraak bij Assymo is gewijzigd. Hieronder vindt u de nieuwe
           details.
         </Text>
@@ -60,38 +69,31 @@ export function AppointmentUpdated({
           </Section>
         )}
 
-        <Section style={appointmentBox}>
-          <Text style={appointmentLabel}>Nieuwe afspraak</Text>
+        <InfoBox>
+          <Text style={infoBoxTitle}>Nieuwe afspraak</Text>
+          <Text style={typography.label}>Datum</Text>
+          <Text style={typography.value}>{appointmentDate}</Text>
+          <Text style={typography.label}>Tijdstip</Text>
+          <Text style={typography.value}>{appointmentTime}</Text>
+          <Text style={typography.label}>Locatie</Text>
+          <Text style={typography.value}>{storeLocation}</Text>
+        </InfoBox>
 
-          <Text style={detailLabel}>Datum</Text>
-          <Text style={appointmentValue}>{appointmentDate}</Text>
+        <Hr style={layout.divider} />
 
-          <Text style={detailLabel}>Tijdstip</Text>
-          <Text style={appointmentValue}>{appointmentTime}</Text>
-
-          <Text style={detailLabel}>Locatie</Text>
-          <Text style={appointmentValue}>{storeLocation}</Text>
-        </Section>
-
-        <Hr style={divider} />
-
-        <Text style={paragraph}>
+        <Text style={typography.paragraph}>
           Moet u uw afspraak nogmaals wijzigen of annuleren?
         </Text>
 
-        <Section style={buttonContainer}>
-          <Button style={button} href={editUrl}>
-            Afspraak beheren
-          </Button>
-        </Section>
+        <EmailButton href={editUrl}>Afspraak beheren</EmailButton>
 
-        <Hr style={divider} />
+        <Hr style={layout.divider} />
 
-        <Text style={paragraph}>
+        <Text style={typography.paragraph}>
           Heeft u vragen? Neem gerust contact met ons op via info@assymo.be.
         </Text>
 
-        <Text style={signature}>
+        <Text style={typography.signature}>
           Met vriendelijke groeten,
           <br />
           Het Assymo team
@@ -103,40 +105,11 @@ export function AppointmentUpdated({
 
 export default AppointmentUpdated;
 
-const content = {
-  padding: "32px 48px",
-};
-
-const heading = {
-  fontSize: "24px",
-  fontWeight: "bold" as const,
-  color: "#1f3632",
-  margin: "0 0 8px 0",
-};
-
-const subheading = {
-  fontSize: "14px",
-  color: "#8898aa",
-  margin: "0 0 24px 0",
-};
-
-const divider = {
-  borderColor: "#e6ebf1",
-  margin: "24px 0",
-};
-
 const greeting = {
   fontSize: "16px",
-  color: "#1f3632",
+  color: colors.primary,
   margin: "0 0 16px 0",
   fontWeight: "600" as const,
-};
-
-const paragraph = {
-  fontSize: "16px",
-  color: "#1f3632",
-  margin: "0 0 16px 0",
-  lineHeight: "1.5",
 };
 
 const changesBox = {
@@ -155,71 +128,25 @@ const changesTitle = {
 
 const changeItem = {
   fontSize: "14px",
-  color: "#1f3632",
+  color: colors.primary,
   margin: "4px 0",
 };
 
 const oldValue = {
   textDecoration: "line-through" as const,
-  color: "#8898aa",
+  color: colors.muted,
 };
 
 const newValue = {
   fontWeight: "600" as const,
-  color: "#1f3632",
+  color: colors.primary,
 };
 
-const appointmentBox = {
-  backgroundColor: "#f6f9fc",
-  padding: "24px",
-  borderRadius: "8px",
-  margin: "16px 0",
-};
-
-const appointmentLabel = {
+const infoBoxTitle = {
   fontSize: "14px",
   fontWeight: "600" as const,
-  color: "#1f3632",
+  color: colors.primary,
   margin: "0 0 16px 0",
   paddingBottom: "12px",
-  borderBottom: "1px solid #e6ebf1",
-};
-
-const detailLabel = {
-  fontSize: "12px",
-  fontWeight: "600" as const,
-  color: "#8898aa",
-  textTransform: "uppercase" as const,
-  letterSpacing: "0.5px",
-  margin: "0 0 4px 0",
-};
-
-const appointmentValue = {
-  fontSize: "16px",
-  color: "#1f3632",
-  margin: "0 0 16px 0",
-  fontWeight: "500" as const,
-};
-
-const buttonContainer = {
-  textAlign: "center" as const,
-  margin: "24px 0",
-};
-
-const button = {
-  backgroundColor: "#1f3632",
-  borderRadius: "6px",
-  color: "#ffffff",
-  fontSize: "16px",
-  fontWeight: "600" as const,
-  textDecoration: "none",
-  textAlign: "center" as const,
-  padding: "12px 24px",
-};
-
-const signature = {
-  fontSize: "16px",
-  color: "#1f3632",
-  margin: "24px 0 0 0",
-  lineHeight: "1.5",
+  borderBottom: `1px solid ${colors.border}`,
 };

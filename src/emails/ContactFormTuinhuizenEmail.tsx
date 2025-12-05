@@ -1,6 +1,7 @@
 import { Section, Text, Hr } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./components/EmailLayout";
+import { MessageBox, typography, layout, colors } from "@/components/email";
 
 interface ContactFormTuinhuizenEmailProps {
   name: string;
@@ -29,60 +30,60 @@ export function ContactFormTuinhuizenEmail({
 }: ContactFormTuinhuizenEmailProps) {
   return (
     <EmailLayout preview={`Tuinhuizen aanvraag van ${name}`}>
-      <Section style={content}>
-        <Text style={heading}>Nieuw contactformulier</Text>
-        <Text style={subheading}>Tuinhuizen</Text>
+      <Section style={layout.content}>
+        <Text style={typography.heading}>Nieuw contactformulier</Text>
+        <Text style={typography.subheading}>Tuinhuizen</Text>
 
-        <Hr style={divider} />
+        <Hr style={layout.divider} />
 
         <Text style={sectionTitle}>Contactgegevens</Text>
 
-        <Text style={label}>Naam</Text>
-        <Text style={value}>{name}</Text>
+        <Text style={typography.label}>Naam</Text>
+        <Text style={typography.value}>{name}</Text>
 
-        <Text style={label}>E-mail</Text>
-        <Text style={value}>{email}</Text>
+        <Text style={typography.label}>E-mail</Text>
+        <Text style={typography.value}>{email}</Text>
 
-        <Text style={label}>Telefoon</Text>
-        <Text style={value}>{phone}</Text>
+        <Text style={typography.label}>Telefoon</Text>
+        <Text style={typography.value}>{phone}</Text>
 
-        <Text style={label}>Adres</Text>
-        <Text style={value}>{address}</Text>
+        <Text style={typography.label}>Adres</Text>
+        <Text style={typography.value}>{address}</Text>
 
-        <Hr style={divider} />
+        <Hr style={layout.divider} />
 
         <Text style={sectionTitle}>Tuinhuis specificaties</Text>
 
-        <Text style={label}>Bouwpakket of geplaatst</Text>
-        <Text style={value}>{bouwType}</Text>
+        <Text style={typography.label}>Bouwpakket of geplaatst</Text>
+        <Text style={typography.value}>{bouwType}</Text>
 
         {bekledingHoutsoort && (
           <>
-            <Text style={label}>Bekledingen: houtsoort</Text>
-            <Text style={value}>{bekledingHoutsoort}</Text>
+            <Text style={typography.label}>Bekledingen: houtsoort</Text>
+            <Text style={typography.value}>{bekledingHoutsoort}</Text>
           </>
         )}
 
         {bekledingProfiel && (
           <>
-            <Text style={label}>Bekledingen: profiel</Text>
-            <Text style={value}>{bekledingProfiel}</Text>
+            <Text style={typography.label}>Bekledingen: profiel</Text>
+            <Text style={typography.value}>{bekledingProfiel}</Text>
           </>
         )}
 
-        <Hr style={divider} />
+        <Hr style={layout.divider} />
 
-        <Text style={label}>Extra informatie</Text>
-        <Text style={messageStyle}>{extraInfo}</Text>
+        <Text style={typography.label}>Extra informatie</Text>
+        <MessageBox>{extraInfo}</MessageBox>
 
-        <Hr style={divider} />
+        <Hr style={layout.divider} />
 
         <Text style={sectionTitle}>Extra opties</Text>
 
-        <Text style={value}>
+        <Text style={typography.value}>
           Grondplan bijgevoegd: {hasGrondplan ? "Ja" : "Nee"}
         </Text>
-        <Text style={value}>
+        <Text style={typography.value}>
           Nieuwsbrief: {newsletterOptIn ? "Ja, graag" : "Nee"}
         </Text>
       </Section>
@@ -92,56 +93,9 @@ export function ContactFormTuinhuizenEmail({
 
 export default ContactFormTuinhuizenEmail;
 
-const content = {
-  padding: "32px 48px",
-};
-
-const heading = {
-  fontSize: "24px",
-  fontWeight: "bold" as const,
-  color: "#1f3632",
-  margin: "0 0 8px 0",
-};
-
-const subheading = {
-  fontSize: "14px",
-  color: "#8898aa",
-  margin: "0 0 24px 0",
-};
-
 const sectionTitle = {
   fontSize: "14px",
   fontWeight: "600" as const,
-  color: "#1f3632",
+  color: colors.primary,
   margin: "0 0 16px 0",
-};
-
-const divider = {
-  borderColor: "#e6ebf1",
-  margin: "24px 0",
-};
-
-const label = {
-  fontSize: "12px",
-  fontWeight: "600" as const,
-  color: "#8898aa",
-  textTransform: "uppercase" as const,
-  letterSpacing: "0.5px",
-  margin: "0 0 4px 0",
-};
-
-const value = {
-  fontSize: "16px",
-  color: "#1f3632",
-  margin: "0 0 16px 0",
-};
-
-const messageStyle = {
-  fontSize: "16px",
-  color: "#1f3632",
-  margin: "0",
-  whiteSpace: "pre-wrap" as const,
-  backgroundColor: "#f6f9fc",
-  padding: "16px",
-  borderRadius: "4px",
 };

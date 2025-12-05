@@ -8,6 +8,7 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
+import { colors } from "@/components/email";
 
 interface EmailLayoutProps {
   preview: string;
@@ -37,13 +38,13 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
 }
 
 const main = {
-  backgroundColor: "#f6f9fc",
+  backgroundColor: colors.background,
   fontFamily:
     '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
 };
 
 const container = {
-  backgroundColor: "#ffffff",
+  backgroundColor: colors.white,
   margin: "0 auto",
   padding: "20px 0 48px",
   marginBottom: "64px",
@@ -51,23 +52,23 @@ const container = {
 
 const header = {
   padding: "32px 48px",
-  borderBottom: "1px solid #e6ebf1",
+  borderBottom: `1px solid ${colors.border}`,
 };
 
 const logo = {
   fontSize: "24px",
   fontWeight: "bold" as const,
-  color: "#1f3632",
+  color: colors.primary,
   margin: "0",
 };
 
 const footer = {
   padding: "32px 48px",
-  borderTop: "1px solid #e6ebf1",
+  borderTop: `1px solid ${colors.border}`,
 };
 
 const footerText = {
   fontSize: "12px",
-  color: "#8898aa",
+  color: colors.muted,
   margin: "0",
 };

@@ -1,12 +1,13 @@
-import { Section, Text, Hr, Button } from "@react-email/components";
+import { Section, Text, Hr } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./components/EmailLayout";
+import { EmailButton, typography, layout, colors } from "@/components/email";
 
 interface AppointmentCancellationProps {
   customerName: string;
-  appointmentDate: string; // Formatted Dutch date
-  appointmentTime: string; // e.g., "14:00 uur"
-  bookingUrl: string; // URL to book a new appointment
+  appointmentDate: string;
+  appointmentTime: string;
+  bookingUrl: string;
 }
 
 export function AppointmentCancellation({
@@ -17,45 +18,43 @@ export function AppointmentCancellation({
 }: AppointmentCancellationProps) {
   return (
     <EmailLayout preview={`Uw afspraak op ${appointmentDate} is geannuleerd`}>
-      <Section style={content}>
-        <Text style={heading}>Afspraak geannuleerd</Text>
-        <Text style={subheading}>Uw afspraak is succesvol geannuleerd</Text>
+      <Section style={layout.content}>
+        <Text style={typography.heading}>Afspraak geannuleerd</Text>
+        <Text style={typography.subheading}>
+          Uw afspraak is succesvol geannuleerd
+        </Text>
 
-        <Hr style={divider} />
+        <Hr style={layout.divider} />
 
         <Text style={greeting}>Beste {customerName},</Text>
 
-        <Text style={paragraph}>
+        <Text style={typography.paragraph}>
           Uw afspraak bij Assymo is geannuleerd. Hieronder vindt u de details
           van de geannuleerde afspraak.
         </Text>
 
-        <Section style={appointmentBox}>
-          <Text style={appointmentLabel}>Geannuleerde afspraak</Text>
-          <Text style={appointmentValue}>
+        <Section style={cancelledBox}>
+          <Text style={cancelledLabel}>Geannuleerde afspraak</Text>
+          <Text style={cancelledValue}>
             {appointmentDate} om {appointmentTime}
           </Text>
         </Section>
 
-        <Hr style={divider} />
+        <Hr style={layout.divider} />
 
-        <Text style={paragraph}>
+        <Text style={typography.paragraph}>
           Wilt u een nieuwe afspraak maken? Klik op onderstaande knop:
         </Text>
 
-        <Section style={buttonContainer}>
-          <Button style={button} href={bookingUrl}>
-            Nieuwe afspraak maken
-          </Button>
-        </Section>
+        <EmailButton href={bookingUrl}>Nieuwe afspraak maken</EmailButton>
 
-        <Hr style={divider} />
+        <Hr style={layout.divider} />
 
-        <Text style={paragraph}>
+        <Text style={typography.paragraph}>
           Heeft u vragen? Neem gerust contact met ons op via info@assymo.be.
         </Text>
 
-        <Text style={signature}>
+        <Text style={typography.signature}>
           Met vriendelijke groeten,
           <br />
           Het Assymo team
@@ -67,50 +66,21 @@ export function AppointmentCancellation({
 
 export default AppointmentCancellation;
 
-const content = {
-  padding: "32px 48px",
-};
-
-const heading = {
-  fontSize: "24px",
-  fontWeight: "bold" as const,
-  color: "#1f3632",
-  margin: "0 0 8px 0",
-};
-
-const subheading = {
-  fontSize: "14px",
-  color: "#8898aa",
-  margin: "0 0 24px 0",
-};
-
-const divider = {
-  borderColor: "#e6ebf1",
-  margin: "24px 0",
-};
-
 const greeting = {
   fontSize: "16px",
-  color: "#1f3632",
+  color: colors.primary,
   margin: "0 0 16px 0",
   fontWeight: "600" as const,
 };
 
-const paragraph = {
-  fontSize: "16px",
-  color: "#1f3632",
-  margin: "0 0 16px 0",
-  lineHeight: "1.5",
-};
-
-const appointmentBox = {
+const cancelledBox = {
   backgroundColor: "#fee2e2",
   padding: "24px",
   borderRadius: "8px",
   margin: "16px 0",
 };
 
-const appointmentLabel = {
+const cancelledLabel = {
   fontSize: "12px",
   fontWeight: "600" as const,
   color: "#991b1b",
@@ -119,33 +89,10 @@ const appointmentLabel = {
   margin: "0 0 4px 0",
 };
 
-const appointmentValue = {
+const cancelledValue = {
   fontSize: "18px",
-  color: "#1f3632",
+  color: colors.primary,
   margin: "0",
   fontWeight: "500" as const,
   textDecoration: "line-through" as const,
-};
-
-const buttonContainer = {
-  textAlign: "center" as const,
-  margin: "24px 0",
-};
-
-const button = {
-  backgroundColor: "#1f3632",
-  borderRadius: "6px",
-  color: "#ffffff",
-  fontSize: "16px",
-  fontWeight: "600" as const,
-  textDecoration: "none",
-  textAlign: "center" as const,
-  padding: "12px 24px",
-};
-
-const signature = {
-  fontSize: "16px",
-  color: "#1f3632",
-  margin: "24px 0 0 0",
-  lineHeight: "1.5",
 };

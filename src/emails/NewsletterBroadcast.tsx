@@ -8,6 +8,7 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./components/EmailLayout";
+import { layout, colors, components } from "@/components/email";
 import type { NewsletterSection } from "@/config/newsletter";
 
 interface NewsletterBroadcastProps {
@@ -39,7 +40,7 @@ export function NewsletterBroadcast({
             <Text style={textStyle}>{section.text}</Text>
 
             {section.ctaUrl && section.ctaText && (
-              <Button href={section.ctaUrl} style={buttonStyle}>
+              <Button href={section.ctaUrl} style={components.button}>
                 {section.ctaText}
               </Button>
             )}
@@ -64,7 +65,7 @@ export function NewsletterBroadcast({
 export default NewsletterBroadcast;
 
 const sectionStyle = {
-  padding: "32px 48px",
+  padding: layout.content.padding,
 };
 
 const imageStyle = {
@@ -77,29 +78,19 @@ const imageStyle = {
 const headingStyle = {
   fontSize: "22px",
   fontWeight: "bold" as const,
-  color: "#1f3632",
+  color: colors.primary,
   margin: "0 0 16px 0",
 };
 
 const textStyle = {
   fontSize: "16px",
   lineHeight: "26px",
-  color: "#525f7f",
+  color: colors.text,
   margin: "0 0 24px 0",
 };
 
-const buttonStyle = {
-  backgroundColor: "#1f3632",
-  color: "#ffffff",
-  padding: "12px 24px",
-  borderRadius: "6px",
-  fontWeight: "600" as const,
-  fontSize: "14px",
-  textDecoration: "none",
-};
-
 const dividerStyle = {
-  borderColor: "#e6ebf1",
+  borderColor: colors.border,
   margin: "0",
 };
 
@@ -109,6 +100,6 @@ const footerSection = {
 
 const footerText = {
   fontSize: "12px",
-  color: "#8898aa",
+  color: colors.muted,
   margin: "0",
 };
