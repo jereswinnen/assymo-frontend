@@ -108,4 +108,9 @@ export const components = {
     padding: "16px",
     borderRadius: "4px",
   },
+  link: {
+    color: colors.primary,
+    fontWeight: "500" as const,
+    textDecoration: "underline",
+  },
 } as const;

@@ -1,7 +1,7 @@
-import { Section, Text, Hr } from "@react-email/components";
+import { Section, Text, Hr, Link } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./components/EmailLayout";
-import { MessageBox, typography, layout, colors } from "@/components/email";
+import { MessageBox, typography, layout, colors, components } from "@/components/email";
 
 interface ContactFormTuinhuizenEmailProps {
   name: string;
@@ -42,13 +42,28 @@ export function ContactFormTuinhuizenEmail({
         <Text style={typography.value}>{name}</Text>
 
         <Text style={typography.label}>E-mail</Text>
-        <Text style={typography.value}>{email}</Text>
+        <Text style={typography.value}>
+          <Link href={`mailto:${email}`} style={components.link}>
+            {email}
+          </Link>
+        </Text>
 
         <Text style={typography.label}>Telefoon</Text>
-        <Text style={typography.value}>{phone}</Text>
+        <Text style={typography.value}>
+          <Link href={`tel:${phone}`} style={components.link}>
+            {phone}
+          </Link>
+        </Text>
 
         <Text style={typography.label}>Adres</Text>
-        <Text style={typography.value}>{address}</Text>
+        <Text style={typography.value}>
+          <Link
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
+            style={components.link}
+          >
+            {address}
+          </Link>
+        </Text>
 
         <Hr style={layout.divider} />
 

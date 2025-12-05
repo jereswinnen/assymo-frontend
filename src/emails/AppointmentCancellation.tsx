@@ -1,7 +1,7 @@
 import { Section, Text, Hr, Link } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./components/EmailLayout";
-import { EmailButton, typography, layout, colors } from "@/components/email";
+import { EmailButton, typography, layout, colors, components } from "@/components/email";
 
 interface AppointmentCancellationProps {
   customerName: string;
@@ -52,7 +52,7 @@ export function AppointmentCancellation({
 
         <Text style={typography.paragraph}>
           Heeft u vragen? Stuur gerust een mailtje naar:{" "}
-          <Link href="mailto:info@assymo.be" style={emailLink}>
+          <Link href="mailto:info@assymo.be" style={components.link}>
             info@assymo.be
           </Link>
           .
@@ -101,8 +101,3 @@ const cancelledValue = {
   textDecoration: "line-through" as const,
 };
 
-const emailLink = {
-  color: colors.primary,
-  fontWeight: "500" as const,
-  textDecoration: "underline",
-};

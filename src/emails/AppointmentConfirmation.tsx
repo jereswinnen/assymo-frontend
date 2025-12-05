@@ -8,6 +8,7 @@ import {
   typography,
   layout,
   colors,
+  components,
 } from "@/components/email";
 
 interface AppointmentConfirmationProps {
@@ -48,7 +49,7 @@ export function AppointmentConfirmation({
           <InfoRow
             label="Locatie"
             value={
-              <Link href={mapsUrl} style={addressLink}>
+              <Link href={mapsUrl} style={components.link}>
                 {storeAddress}
               </Link>
             }
@@ -72,7 +73,7 @@ export function AppointmentConfirmation({
 
         <Text style={typography.paragraph}>
           Heeft u vragen? Stuur gerust een mailtje naar:{" "}
-          <Link href="mailto:info@assymo.be" style={emailLink}>
+          <Link href="mailto:info@assymo.be" style={components.link}>
             info@assymo.be
           </Link>
           .
@@ -106,16 +107,4 @@ const smallText = {
 
 const linkText = {
   color: colors.primary,
-};
-
-const emailLink = {
-  color: colors.primary,
-  fontWeight: "500" as const,
-  textDecoration: "underline",
-};
-
-const addressLink = {
-  color: colors.primary,
-  fontWeight: "500" as const,
-  textDecoration: "underline",
 };

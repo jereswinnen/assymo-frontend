@@ -7,6 +7,7 @@ import {
   typography,
   layout,
   colors,
+  components,
 } from "@/components/email";
 
 interface AppointmentUpdatedProps {
@@ -78,7 +79,7 @@ export function AppointmentUpdated({
           <Text style={typography.value}>{appointmentTime}</Text>
           <Text style={typography.label}>Locatie</Text>
           <Text style={typography.value}>
-            <Link href={mapsUrl} style={addressLink}>
+            <Link href={mapsUrl} style={components.link}>
               {storeAddress}
             </Link>
           </Text>
@@ -96,7 +97,7 @@ export function AppointmentUpdated({
 
         <Text style={typography.paragraph}>
           Heeft u vragen? Stuur gerust een mailtje naar:{" "}
-          <Link href="mailto:info@assymo.be" style={emailLink}>
+          <Link href="mailto:info@assymo.be" style={components.link}>
             info@assymo.be
           </Link>
           .
@@ -160,14 +161,3 @@ const infoBoxTitle = {
   borderBottom: `1px solid ${colors.border}`,
 };
 
-const addressLink = {
-  color: colors.primary,
-  fontWeight: "500" as const,
-  textDecoration: "underline",
-};
-
-const emailLink = {
-  color: colors.primary,
-  fontWeight: "500" as const,
-  textDecoration: "underline",
-};

@@ -1,4 +1,4 @@
-import { Section, Text, Hr } from "@react-email/components";
+import { Section, Text, Hr, Link } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./components/EmailLayout";
 import {
@@ -7,6 +7,7 @@ import {
   typography,
   layout,
   colors,
+  components,
 } from "@/components/email";
 
 interface AppointmentAdminNotificationProps {
@@ -59,16 +60,29 @@ export function AppointmentAdminNotification({
         <Text style={typography.value}>{customerName}</Text>
 
         <Text style={typography.label}>E-mail</Text>
-        <Text style={typography.value}>{customerEmail}</Text>
+        <Text style={typography.value}>
+          <Link href={`mailto:${customerEmail}`} style={components.link}>
+            {customerEmail}
+          </Link>
+        </Text>
 
         <Text style={typography.label}>Telefoon</Text>
-        <Text style={typography.value}>{customerPhone}</Text>
+        <Text style={typography.value}>
+          <Link href={`tel:${customerPhone}`} style={components.link}>
+            {customerPhone}
+          </Link>
+        </Text>
 
         <Text style={typography.label}>Adres</Text>
         <Text style={typography.value}>
-          {customerStreet}
-          <br />
-          {customerPostalCode} {customerCity}
+          <Link
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${customerStreet}, ${customerPostalCode} ${customerCity}`)}`}
+            style={components.link}
+          >
+            {customerStreet}
+            <br />
+            {customerPostalCode} {customerCity}
+          </Link>
         </Text>
 
         {remarks && (
