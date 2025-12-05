@@ -14,7 +14,6 @@ import {
   FieldLabel,
   FieldError,
 } from "@/components/ui/field";
-import { Spinner } from "@/components/ui/spinner";
 import {
   CalendarIcon,
   ClockIcon,
@@ -95,7 +94,7 @@ export function AppointmentBookingForm() {
       const endStr = endDate.toISOString().split("T")[0];
 
       const response = await fetch(
-        `/api/appointments/availability?start_date=${startStr}&end_date=${endStr}`
+        `/api/appointments/availability?start_date=${startStr}&end_date=${endStr}`,
       );
 
       if (!response.ok) {
@@ -119,7 +118,11 @@ export function AppointmentBookingForm() {
   }, [fetchAvailability]);
 
   const handleDateSelect = (date: string) => {
-    setFormData((prev) => ({ ...prev, appointment_date: date, appointment_time: "" }));
+    setFormData((prev) => ({
+      ...prev,
+      appointment_date: date,
+      appointment_time: "",
+    }));
     setCurrentStep("time");
   };
 
@@ -176,10 +179,12 @@ export function AppointmentBookingForm() {
     } catch (err) {
       console.error("Failed to create appointment:", err);
       setError(
-        err instanceof Error ? err.message : "Er is iets misgegaan. Probeer opnieuw."
+        err instanceof Error
+          ? err.message
+          : "Er is iets misgegaan. Probeer opnieuw.",
       );
       toast.error(
-        err instanceof Error ? err.message : "Kon afspraak niet aanmaken"
+        err instanceof Error ? err.message : "Kon afspraak niet aanmaken",
       );
     } finally {
       setSubmitting(false);
@@ -218,15 +223,17 @@ export function AppointmentBookingForm() {
                     "flex items-center gap-2",
                     isActive && "text-accent-dark font-medium",
                     isCompleted && "text-accent-dark",
-                    !isActive && !isCompleted && "text-muted-foreground"
+                    !isActive && !isCompleted && "text-muted-foreground",
                   )}
                 >
                   <div
                     className={cn(
                       "size-8 rounded-full flex items-center justify-center border-2 transition-colors",
-                      isActive && "border-accent-dark bg-accent-dark text-accent-light",
-                      isCompleted && "border-accent-dark bg-accent-dark text-accent-light",
-                      !isActive && !isCompleted && "border-muted-foreground/30"
+                      isActive &&
+                        "border-accent-dark bg-accent-dark text-accent-light",
+                      isCompleted &&
+                        "border-accent-dark bg-accent-dark text-accent-light",
+                      !isActive && !isCompleted && "border-muted-foreground/30",
                     )}
                   >
                     {isCompleted ? (
@@ -241,7 +248,7 @@ export function AppointmentBookingForm() {
                   <div
                     className={cn(
                       "w-8 sm:w-16 h-0.5 mx-2",
-                      index < currentStepIndex ? "bg-accent-dark" : "bg-muted"
+                      index < currentStepIndex ? "bg-accent-dark" : "bg-muted",
                     )}
                   />
                 )}
@@ -315,7 +322,9 @@ export function AppointmentBookingForm() {
                   <Input
                     id="customer_name"
                     value={formData.customer_name}
-                    onChange={(e) => updateField("customer_name", e.target.value)}
+                    onChange={(e) =>
+                      updateField("customer_name", e.target.value)
+                    }
                     placeholder="Volledige naam"
                     required
                     autoComplete="name"
@@ -331,7 +340,9 @@ export function AppointmentBookingForm() {
                       id="customer_email"
                       type="email"
                       value={formData.customer_email}
-                      onChange={(e) => updateField("customer_email", e.target.value)}
+                      onChange={(e) =>
+                        updateField("customer_email", e.target.value)
+                      }
                       placeholder="email@voorbeeld.be"
                       required
                       autoComplete="email"
@@ -346,7 +357,9 @@ export function AppointmentBookingForm() {
                       id="customer_phone"
                       type="tel"
                       value={formData.customer_phone}
-                      onChange={(e) => updateField("customer_phone", e.target.value)}
+                      onChange={(e) =>
+                        updateField("customer_phone", e.target.value)
+                      }
                       placeholder="0412 34 56 78"
                       required
                       autoComplete="tel"
@@ -368,7 +381,9 @@ export function AppointmentBookingForm() {
                   <Input
                     id="customer_street"
                     value={formData.customer_street}
-                    onChange={(e) => updateField("customer_street", e.target.value)}
+                    onChange={(e) =>
+                      updateField("customer_street", e.target.value)
+                    }
                     placeholder="Straatnaam 123"
                     required
                     autoComplete="street-address"
@@ -383,7 +398,9 @@ export function AppointmentBookingForm() {
                     <Input
                       id="customer_postal_code"
                       value={formData.customer_postal_code}
-                      onChange={(e) => updateField("customer_postal_code", e.target.value)}
+                      onChange={(e) =>
+                        updateField("customer_postal_code", e.target.value)
+                      }
                       placeholder="1234"
                       required
                       autoComplete="postal-code"
@@ -397,7 +414,9 @@ export function AppointmentBookingForm() {
                     <Input
                       id="customer_city"
                       value={formData.customer_city}
-                      onChange={(e) => updateField("customer_city", e.target.value)}
+                      onChange={(e) =>
+                        updateField("customer_city", e.target.value)
+                      }
                       placeholder="Plaatsnaam"
                       required
                       autoComplete="address-level2"
@@ -408,7 +427,9 @@ export function AppointmentBookingForm() {
                 <Separator />
 
                 <Field>
-                  <FieldLabel htmlFor="remarks">Opmerkingen (optioneel)</FieldLabel>
+                  <FieldLabel htmlFor="remarks">
+                    Opmerkingen (optioneel)
+                  </FieldLabel>
                   <Textarea
                     id="remarks"
                     value={formData.remarks}
@@ -446,7 +467,9 @@ export function AppointmentBookingForm() {
                 <div className="flex items-start gap-3">
                   <CalendarIcon className="size-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="font-medium">{formatDateNL(formData.appointment_date)}</p>
+                    <p className="font-medium">
+                      {formatDateNL(formData.appointment_date)}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {formData.appointment_time} uur
                     </p>
@@ -458,15 +481,30 @@ export function AppointmentBookingForm() {
               <div className="space-y-3">
                 <h3 className="font-medium">Uw gegevens</h3>
                 <div className="text-sm space-y-1">
-                  <p><span className="text-muted-foreground">Naam:</span> {formData.customer_name}</p>
-                  <p><span className="text-muted-foreground">E-mail:</span> {formData.customer_email}</p>
-                  <p><span className="text-muted-foreground">Telefoon:</span> {formData.customer_phone}</p>
+                  <p>
+                    <span className="text-muted-foreground">Naam:</span>{" "}
+                    {formData.customer_name}
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">E-mail:</span>{" "}
+                    {formData.customer_email}
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">Telefoon:</span>{" "}
+                    {formData.customer_phone}
+                  </p>
                   <p>
                     <span className="text-muted-foreground">Adres:</span>{" "}
-                    {formData.customer_street}, {formData.customer_postal_code} {formData.customer_city}
+                    {formData.customer_street}, {formData.customer_postal_code}{" "}
+                    {formData.customer_city}
                   </p>
                   {formData.remarks && (
-                    <p><span className="text-muted-foreground">Opmerkingen:</span> {formData.remarks}</p>
+                    <p>
+                      <span className="text-muted-foreground">
+                        Opmerkingen:
+                      </span>{" "}
+                      {formData.remarks}
+                    </p>
                   )}
                 </div>
               </div>
@@ -501,8 +539,8 @@ export function AppointmentBookingForm() {
               </div>
 
               <p className="text-xs text-muted-foreground">
-                Na het bevestigen ontvangt u een e-mail met de details van uw afspraak
-                en een link om deze te wijzigen of te annuleren.
+                Na het bevestigen ontvangt u een e-mail met de details van uw
+                afspraak en een link om deze te wijzigen of te annuleren.
               </p>
             </div>
           </div>
