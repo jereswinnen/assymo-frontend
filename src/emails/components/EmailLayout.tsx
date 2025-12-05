@@ -8,7 +8,7 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
-import { colors } from "@/components/email";
+import { colors, EmailLogo } from "@/components/email";
 
 interface EmailLayoutProps {
   preview: string;
@@ -23,13 +23,11 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
-            <Text style={logo}>Assymo</Text>
+            <EmailLogo />
           </Section>
           {children}
           <Section style={footer}>
-            <Text style={footerText}>
-              Assymo - Houten tuingebouwen op maat
-            </Text>
+            <Text style={footerText}>Assymo - Houten tuingebouwen op maat</Text>
           </Section>
         </Container>
       </Body>
@@ -53,13 +51,6 @@ const container = {
 const header = {
   padding: "32px 48px",
   borderBottom: `1px solid ${colors.border}`,
-};
-
-const logo = {
-  fontSize: "24px",
-  fontWeight: "bold" as const,
-  color: colors.primary,
-  margin: "0",
 };
 
 const footer = {

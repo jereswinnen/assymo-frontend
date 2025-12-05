@@ -76,15 +76,16 @@ export const layout = {
 
 // Components
 export const components = {
+  // Matches the primary Action button style from src/components/Action.tsx
   button: {
     backgroundColor: colors.primary,
-    borderRadius: "6px",
-    color: colors.white,
-    fontSize: "16px",
-    fontWeight: "600" as const,
+    borderRadius: "9999px", // rounded-full (pill shape)
+    color: colors.accent, // text-accent-light
+    fontSize: "14px", // text-sm
+    fontWeight: "500" as const, // font-medium
     textDecoration: "none",
     textAlign: "center" as const,
-    padding: "12px 24px",
+    padding: "8px 14px", // py-2 px-3.5
   },
   infoBox: {
     backgroundColor: colors.background,
