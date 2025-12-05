@@ -49,6 +49,7 @@ const sampleData = {
   },
   "newsletter-welcome": {
     email: "voorbeeld@email.be",
+    contactId: "preview-contact-id",
   },
   "newsletter-broadcast": {
     preheader: "Ontdek onze nieuwe collectie tuinhuizen",
@@ -66,6 +67,7 @@ const sampleData = {
         text: "Profiteer nu van 10% korting op alle tuinhuizen. Actie geldig tot eind januari.",
       },
     ],
+    contactId: "preview-contact-id",
   },
   "contact-form": {
     name: "Jan Janssen",

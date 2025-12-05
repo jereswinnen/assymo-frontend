@@ -1,4 +1,17 @@
 // ============================================================================
+// NEWSLETTER CONFIGURATION
+// ============================================================================
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be";
+
+/**
+ * Generate an unsubscribe URL for a given Resend contact ID
+ */
+export function getUnsubscribeUrl(contactId: string): string {
+  return `${BASE_URL}/nieuwsbrief/uitschrijven?id=${contactId}`;
+}
+
+// ============================================================================
 // NEWSLETTER TYPES
 // Used by the email template, admin composer, and API routes
 // ============================================================================

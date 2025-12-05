@@ -5,20 +5,23 @@ import {
   Img,
   Button,
   Heading,
+  Link,
 } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./components/EmailLayout";
 import { layout, colors, components } from "@/components/email";
-import type { NewsletterSection } from "@/config/newsletter";
+import { getUnsubscribeUrl, type NewsletterSection } from "@/config/newsletter";
 
 interface NewsletterBroadcastProps {
   preheader?: string;
   sections: NewsletterSection[];
+  contactId: string;
 }
 
 export function NewsletterBroadcast({
   preheader,
   sections,
+  contactId,
 }: NewsletterBroadcastProps) {
   return (
     <EmailLayout preview={preheader || "Nieuwsbrief van Assymo"}>
@@ -55,7 +58,10 @@ export function NewsletterBroadcast({
       <Section style={footerSection}>
         <Text style={footerText}>
           Je ontvangt deze e-mail omdat je je hebt ingeschreven voor de Assymo
-          nieuwsbrief.
+          nieuwsbrief.{" "}
+          <Link href={getUnsubscribeUrl(contactId)} style={components.link}>
+            Uitschrijven
+          </Link>
         </Text>
       </Section>
     </EmailLayout>

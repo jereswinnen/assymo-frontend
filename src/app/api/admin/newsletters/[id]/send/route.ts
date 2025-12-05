@@ -4,7 +4,7 @@ import { isAuthenticated } from "@/lib/auth";
 import { resend } from "@/lib/resend";
 import { RESEND_CONFIG } from "@/config/resend";
 import { NewsletterBroadcast } from "@/emails";
-import type { NewsletterSection } from "@/config/newsletter";
+import { getUnsubscribeUrl, type NewsletterSection } from "@/config/newsletter";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -96,9 +96,14 @@ export async function POST(
         from: RESEND_CONFIG.fromAddressNewsletter,
         to: [contact.email],
         subject: newsletter.subject,
+        headers: {
+          "List-Unsubscribe": `<${getUnsubscribeUrl(contact.id)}>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
         react: NewsletterBroadcast({
           preheader: newsletter.preheader || undefined,
           sections: newsletter.sections as NewsletterSection[],
+          contactId: contact.id,
         }),
       }));
 

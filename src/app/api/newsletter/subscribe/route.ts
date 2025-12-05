@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resend } from "@/lib/resend";
 import { RESEND_CONFIG } from "@/config/resend";
+import { getUnsubscribeUrl } from "@/config/newsletter";
 import { NewsletterWelcome } from "@/emails";
 
 export async function POST(req: NextRequest) {
@@ -50,17 +51,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Send welcome email
-    const { error: emailError } = await resend.emails.send({
-      from: RESEND_CONFIG.fromAddressNewsletter,
-      to: [email],
-      subject: RESEND_CONFIG.subjects.newsletterWelcome,
-      react: NewsletterWelcome({ email }),
-    });
+    // Send welcome email (only if we have a contact ID)
+    if (contact?.id) {
+      const { error: emailError } = await resend.emails.send({
+        from: RESEND_CONFIG.fromAddressNewsletter,
+        to: [email],
+        subject: RESEND_CONFIG.subjects.newsletterWelcome,
+        headers: {
+          "List-Unsubscribe": `<${getUnsubscribeUrl(contact.id)}>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
+        react: NewsletterWelcome({ email, contactId: contact.id }),
+      });
 
-    if (emailError) {
-      // Log but don't fail - contact was added successfully
-      console.error("Failed to send welcome email:", emailError);
+      if (emailError) {
+        // Log but don't fail - contact was added successfully
+        console.error("Failed to send welcome email:", emailError);
+      }
     }
 
     return NextResponse.json({ success: true, contactId: contact?.id });

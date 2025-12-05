@@ -1,13 +1,15 @@
-import { Section, Text, Hr } from "@react-email/components";
+import { Section, Text, Hr, Link } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./components/EmailLayout";
-import { EmailButton, typography, layout, colors } from "@/components/email";
+import { EmailButton, typography, layout, colors, components } from "@/components/email";
+import { getUnsubscribeUrl } from "@/config/newsletter";
 
 interface NewsletterWelcomeProps {
   email: string;
+  contactId: string;
 }
 
-export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
+export function NewsletterWelcome({ email, contactId }: NewsletterWelcomeProps) {
   return (
     <EmailLayout preview="Welkom bij de Assymo nieuwsbrief!">
       <Section style={layout.content}>
@@ -34,9 +36,10 @@ export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
 
         <Text style={typography.small}>
           Je ontvangt deze e-mail omdat je je hebt ingeschreven voor de
-          nieuwsbrief met het adres {email}. Wil je geen e-mails meer ontvangen?
-          Je kunt je altijd uitschrijven via de link onderaan onze
-          nieuwsbrieven.
+          nieuwsbrief met het adres {email}. Wil je geen e-mails meer ontvangen?{" "}
+          <Link href={getUnsubscribeUrl(contactId)} style={components.link}>
+            Uitschrijven
+          </Link>
         </Text>
       </Section>
     </EmailLayout>

@@ -4,7 +4,7 @@ import { isAuthenticated } from "@/lib/auth";
 import { resend } from "@/lib/resend";
 import { RESEND_CONFIG, DEFAULT_TEST_EMAIL } from "@/config/resend";
 import { NewsletterBroadcast } from "@/emails";
-import type { NewsletterSection } from "@/config/newsletter";
+import { getUnsubscribeUrl, type NewsletterSection } from "@/config/newsletter";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -59,14 +59,20 @@ export async function POST(
       );
     }
 
-    // Send test email
+    // Send test email (use placeholder ID for test - unsubscribe won't work but that's fine for testing)
+    const testContactId = "test-preview";
     const { error: emailError } = await resend.emails.send({
       from: RESEND_CONFIG.fromAddressNewsletter,
       to: [testEmail],
       subject: `[TEST] ${subject}`,
+      headers: {
+        "List-Unsubscribe": `<${getUnsubscribeUrl(testContactId)}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      },
       react: NewsletterBroadcast({
         preheader: preheader || undefined,
         sections: sections as NewsletterSection[],
+        contactId: testContactId,
       }),
     });
 
