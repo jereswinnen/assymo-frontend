@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { DatePicker } from "./DatePicker";
-import { TimeSlotPicker } from "./TimeSlotPicker";
+import { DateTimePicker } from "./DateTimePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,19 +15,18 @@ import {
 } from "@/components/ui/field";
 import {
   CalendarIcon,
-  ClockIcon,
   MapPinIcon,
   CheckIcon,
   Loader2Icon,
-  Calendar1Icon,
+  CalendarClockIcon,
   CircleUserRoundIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import type { DateAvailability, TimeSlot } from "@/types/appointments";
+import type { DateAvailability } from "@/types/appointments";
 import { formatDateNL } from "@/lib/appointments/utils";
 
-type FormStep = "date" | "time" | "details" | "confirm";
+type FormStep = "datetime" | "details" | "confirm";
 
 interface FormData {
   appointment_date: string;
@@ -77,16 +75,12 @@ export function AppointmentBookingForm({
   className,
 }: AppointmentBookingFormProps) {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState<FormStep>("date");
+  const [currentStep, setCurrentStep] = useState<FormStep>("datetime");
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [availability, setAvailability] = useState<DateAvailability[]>([]);
   const [loadingAvailability, setLoadingAvailability] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Get current month's slots
-  const selectedDateSlots: TimeSlot[] =
-    availability.find((a) => a.date === formData.appointment_date)?.slots ?? [];
 
   // Fetch availability for a month range
   const fetchAvailability = useCallback(async (year: number, month: number) => {
@@ -124,17 +118,12 @@ export function AppointmentBookingForm({
     fetchAvailability(now.getFullYear(), now.getMonth());
   }, [fetchAvailability]);
 
-  const handleDateSelect = (date: string) => {
+  const handleDateTimeSelect = (date: string, time: string) => {
     setFormData((prev) => ({
       ...prev,
       appointment_date: date,
-      appointment_time: "",
+      appointment_time: time,
     }));
-    setCurrentStep("time");
-  };
-
-  const handleTimeSelect = (time: string) => {
-    setFormData((prev) => ({ ...prev, appointment_time: time }));
     setCurrentStep("details");
   };
 
@@ -199,14 +188,12 @@ export function AppointmentBookingForm({
   };
 
   const goBack = () => {
-    if (currentStep === "time") setCurrentStep("date");
-    else if (currentStep === "details") setCurrentStep("time");
+    if (currentStep === "details") setCurrentStep("datetime");
     else if (currentStep === "confirm") setCurrentStep("details");
   };
 
   const steps = [
-    { id: "date", label: "Datum", icon: Calendar1Icon },
-    { id: "time", label: "Tijd", icon: ClockIcon },
+    { id: "datetime", label: "Datum & tijd", icon: CalendarClockIcon },
     { id: "details", label: "Gegevens", icon: CircleUserRoundIcon },
     { id: "confirm", label: "Bevestigen", icon: CheckIcon },
   ];
@@ -250,39 +237,17 @@ export function AppointmentBookingForm({
 
       {/* Step content */}
       <div className="bg-card rounded-xl border p-6">
-        {/* Date selection */}
-        {currentStep === "date" && (
+        {/* Date & time selection */}
+        {currentStep === "datetime" && (
           <div>
-            <h2 className="text-lg! font-medium!">Kies een datum</h2>
-            <DatePicker
+            <h2 className="text-lg! font-medium! mb-4">Kies een datum en tijd</h2>
+            <DateTimePicker
               selectedDate={formData.appointment_date}
-              onDateSelect={handleDateSelect}
+              selectedTime={formData.appointment_time}
+              onDateTimeSelect={handleDateTimeSelect}
               availability={availability}
               loading={loadingAvailability}
               onMonthChange={handleMonthChange}
-            />
-          </div>
-        )}
-
-        {/* Time selection */}
-        {currentStep === "time" && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg! font-medium!">Kies een tijdstip</h2>
-              <Button variant="ghost" size="sm" onClick={goBack}>
-                Wijzig datum
-              </Button>
-            </div>
-            <p className="text-muted-foreground mb-4">
-              Geselecteerde datum:{" "}
-              <span className="font-medium text-foreground">
-                {formatDateNL(formData.appointment_date)}
-              </span>
-            </p>
-            <TimeSlotPicker
-              slots={selectedDateSlots}
-              selectedTime={formData.appointment_time}
-              onTimeSelect={handleTimeSelect}
             />
           </div>
         )}
@@ -293,7 +258,7 @@ export function AppointmentBookingForm({
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg! font-medium!">Uw gegevens</h2>
               <Button variant="ghost" size="sm" onClick={goBack}>
-                Wijzig tijd
+                Wijzig datum/tijd
               </Button>
             </div>
             <p className="text-muted-foreground mb-6">
