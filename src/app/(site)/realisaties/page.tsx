@@ -52,7 +52,7 @@ const CATEGORIES_QUERY = `*[
 }`;
 
 export const metadata = {
-  title: "Realisaties",
+  title: "Realisaties - Assymo",
   description: "Bekijk onze realisaties",
 };
 
@@ -66,7 +66,10 @@ export default async function RealisatiesPage() {
   return (
     <section className="col-span-full grid grid-cols-subgrid gap-y-14">
       {page?.sections && page.sections.length > 0 && (
-        <SectionRenderer sections={page.sections} headerImage={page.headerImage} />
+        <SectionRenderer
+          sections={page.sections}
+          headerImage={page.headerImage}
+        />
       )}
 
       <Suspense fallback={<div className="col-span-full">Laden...</div>}>

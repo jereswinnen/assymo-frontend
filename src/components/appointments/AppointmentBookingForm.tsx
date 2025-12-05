@@ -17,10 +17,11 @@ import {
 import {
   CalendarIcon,
   ClockIcon,
-  UserIcon,
   MapPinIcon,
   CheckIcon,
   Loader2Icon,
+  Calendar1Icon,
+  CircleUserRoundIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -68,7 +69,13 @@ function RequiredLabel({
   );
 }
 
-export function AppointmentBookingForm() {
+interface AppointmentBookingFormProps {
+  className?: string;
+}
+
+export function AppointmentBookingForm({
+  className,
+}: AppointmentBookingFormProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<FormStep>("date");
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -198,64 +205,47 @@ export function AppointmentBookingForm() {
   };
 
   const steps = [
-    { id: "date", label: "Datum", icon: CalendarIcon },
+    { id: "date", label: "Datum", icon: Calendar1Icon },
     { id: "time", label: "Tijd", icon: ClockIcon },
-    { id: "details", label: "Gegevens", icon: UserIcon },
+    { id: "details", label: "Gegevens", icon: CircleUserRoundIcon },
     { id: "confirm", label: "Bevestigen", icon: CheckIcon },
   ];
 
   const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className={cn("flex flex-col gap-8", className)}>
       {/* Progress steps */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            const isActive = step.id === currentStep;
-            const isCompleted = index < currentStepIndex;
+      <div className="flex gap-6">
+        {steps.map((step, index) => {
+          const Icon = step.icon;
+          const isActive = step.id === currentStep;
+          const isCompleted = index < currentStepIndex;
 
-            return (
-              <div key={step.id} className="flex items-center">
-                <div
-                  className={cn(
-                    "flex items-center gap-2",
-                    isActive && "text-accent-dark font-medium",
-                    isCompleted && "text-accent-dark",
-                    !isActive && !isCompleted && "text-muted-foreground",
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "size-8 rounded-full flex items-center justify-center border-2 transition-colors",
-                      isActive &&
-                        "border-accent-dark bg-accent-dark text-accent-light",
-                      isCompleted &&
-                        "border-accent-dark bg-accent-dark text-accent-light",
-                      !isActive && !isCompleted && "border-muted-foreground/30",
-                    )}
-                  >
-                    {isCompleted ? (
-                      <CheckIcon className="size-4" />
-                    ) : (
-                      <Icon className="size-4" />
-                    )}
-                  </div>
-                  <span className="hidden sm:inline text-sm">{step.label}</span>
-                </div>
-                {index < steps.length - 1 && (
-                  <div
-                    className={cn(
-                      "w-8 sm:w-16 h-0.5 mx-2",
-                      index < currentStepIndex ? "bg-accent-dark" : "bg-muted",
-                    )}
-                  />
+          return (
+            <div key={step.id} className="flex-1 flex flex-col gap-3">
+              <div
+                className={cn(
+                  "flex items-center gap-1.5 text-sm",
+                  isCompleted && "text-accent-dark",
+                  isActive && "text-stone-800 font-medium",
+                  !isActive && !isCompleted && "text-stone-600 font-normal",
                 )}
+              >
+                <Icon className="size-4" />
+                <span className="hidden sm:inline">{step.label}</span>
               </div>
-            );
-          })}
-        </div>
+              <div
+                className={cn(
+                  "h-0.5",
+                  isCompleted && "bg-accent-light",
+                  isActive && "bg-stone-500",
+                  !isActive && !isCompleted && "bg-stone-200",
+                )}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Step content */}
@@ -263,7 +253,7 @@ export function AppointmentBookingForm() {
         {/* Date selection */}
         {currentStep === "date" && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Kies een datum</h2>
+            <h2 className="text-lg! font-medium!">Kies een datum</h2>
             <DatePicker
               selectedDate={formData.appointment_date}
               onDateSelect={handleDateSelect}
@@ -278,7 +268,7 @@ export function AppointmentBookingForm() {
         {currentStep === "time" && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Kies een tijdstip</h2>
+              <h2 className="text-lg! font-medium!">Kies een tijdstip</h2>
               <Button variant="ghost" size="sm" onClick={goBack}>
                 Wijzig datum
               </Button>
@@ -301,7 +291,7 @@ export function AppointmentBookingForm() {
         {currentStep === "details" && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Uw gegevens</h2>
+              <h2 className="text-lg! font-medium!">Uw gegevens</h2>
               <Button variant="ghost" size="sm" onClick={goBack}>
                 Wijzig tijd
               </Button>
@@ -455,7 +445,7 @@ export function AppointmentBookingForm() {
         {currentStep === "confirm" && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Bevestig uw afspraak</h2>
+              <h2 className="text-lg! font-medium!">Bevestig uw afspraak</h2>
               <Button variant="ghost" size="sm" onClick={goBack}>
                 Wijzig gegevens
               </Button>
