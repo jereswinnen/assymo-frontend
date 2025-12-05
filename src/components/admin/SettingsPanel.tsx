@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SaveIcon, MailIcon, CheckIcon, RotateCcwIcon } from "lucide-react";
+import { MailIcon, CheckIcon, RotateCcwIcon } from "lucide-react";
 import { toast } from "sonner";
 import { getTestEmail, setTestEmail } from "@/lib/adminSettings";
 import { DEFAULT_TEST_EMAIL } from "@/config/resend";
@@ -62,8 +62,8 @@ export function SettingsPanel() {
                   placeholder={DEFAULT_TEST_EMAIL}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Dit e-mailadres wordt gebruikt voor nieuwsbrief tests ("Test
-                  versturen"). Opgeslagen in je browser.
+                  Dit e-mailadres wordt gebruikt voor nieuwsbrief tests (Test
+                  versturen). Opgeslagen in je browser.
                 </p>
               </div>
             </div>

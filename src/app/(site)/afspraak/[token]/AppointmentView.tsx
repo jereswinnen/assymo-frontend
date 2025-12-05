@@ -30,10 +30,14 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import type { PublicAppointmentView, AppointmentStatus } from "@/types/appointments";
+import type {
+  PublicAppointmentView,
+  AppointmentStatus,
+} from "@/types/appointments";
 import { STATUS_LABELS } from "@/types/appointments";
 import { formatDateNL, formatTimeNL } from "@/lib/appointments/utils";
 import { APPOINTMENTS_CONFIG } from "@/config/appointments";
+import Link from "next/link";
 
 interface AppointmentViewProps {
   token: string;
@@ -41,7 +45,9 @@ interface AppointmentViewProps {
 
 export function AppointmentView({ token }: AppointmentViewProps) {
   const router = useRouter();
-  const [appointment, setAppointment] = useState<PublicAppointmentView | null>(null);
+  const [appointment, setAppointment] = useState<PublicAppointmentView | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
@@ -87,9 +93,7 @@ export function AppointmentView({ token }: AppointmentViewProps) {
       });
     } catch (err) {
       console.error("Failed to fetch appointment:", err);
-      setError(
-        err instanceof Error ? err.message : "Kon afspraak niet laden"
-      );
+      setError(err instanceof Error ? err.message : "Kon afspraak niet laden");
     } finally {
       setLoading(false);
     }
@@ -120,7 +124,7 @@ export function AppointmentView({ token }: AppointmentViewProps) {
     } catch (err) {
       console.error("Failed to save appointment:", err);
       toast.error(
-        err instanceof Error ? err.message : "Kon wijzigingen niet opslaan"
+        err instanceof Error ? err.message : "Kon wijzigingen niet opslaan",
       );
     } finally {
       setSaving(false);
@@ -145,7 +149,7 @@ export function AppointmentView({ token }: AppointmentViewProps) {
     } catch (err) {
       console.error("Failed to cancel appointment:", err);
       toast.error(
-        err instanceof Error ? err.message : "Kon afspraak niet annuleren"
+        err instanceof Error ? err.message : "Kon afspraak niet annuleren",
       );
       setCancelling(false);
       setShowCancelConfirm(false);
@@ -184,14 +188,16 @@ export function AppointmentView({ token }: AppointmentViewProps) {
           {error || "Deze afspraak bestaat niet of is verlopen."}
         </p>
         <Button asChild>
-          <a href="/afspraak">Nieuwe afspraak maken</a>
+          <Link href="/afspraak">Nieuwe afspraak maken</Link>
         </Button>
       </div>
     );
   }
 
   const isCancelled = appointment.status === "cancelled";
-  const isPast = new Date(appointment.appointment_date) < new Date(new Date().toDateString());
+  const isPast =
+    new Date(appointment.appointment_date) <
+    new Date(new Date().toDateString());
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -266,7 +272,10 @@ export function AppointmentView({ token }: AppointmentViewProps) {
                     id="edit_name"
                     value={editData.customer_name}
                     onChange={(e) =>
-                      setEditData({ ...editData, customer_name: e.target.value })
+                      setEditData({
+                        ...editData,
+                        customer_name: e.target.value,
+                      })
                     }
                   />
                 </Field>
@@ -279,7 +288,10 @@ export function AppointmentView({ token }: AppointmentViewProps) {
                       type="email"
                       value={editData.customer_email}
                       onChange={(e) =>
-                        setEditData({ ...editData, customer_email: e.target.value })
+                        setEditData({
+                          ...editData,
+                          customer_email: e.target.value,
+                        })
                       }
                     />
                   </Field>
@@ -290,19 +302,27 @@ export function AppointmentView({ token }: AppointmentViewProps) {
                       type="tel"
                       value={editData.customer_phone}
                       onChange={(e) =>
-                        setEditData({ ...editData, customer_phone: e.target.value })
+                        setEditData({
+                          ...editData,
+                          customer_phone: e.target.value,
+                        })
                       }
                     />
                   </Field>
                 </div>
 
                 <Field>
-                  <FieldLabel htmlFor="edit_street">Straat en huisnummer</FieldLabel>
+                  <FieldLabel htmlFor="edit_street">
+                    Straat en huisnummer
+                  </FieldLabel>
                   <Input
                     id="edit_street"
                     value={editData.customer_street}
                     onChange={(e) =>
-                      setEditData({ ...editData, customer_street: e.target.value })
+                      setEditData({
+                        ...editData,
+                        customer_street: e.target.value,
+                      })
                     }
                   />
                 </Field>
@@ -314,7 +334,10 @@ export function AppointmentView({ token }: AppointmentViewProps) {
                       id="edit_postal"
                       value={editData.customer_postal_code}
                       onChange={(e) =>
-                        setEditData({ ...editData, customer_postal_code: e.target.value })
+                        setEditData({
+                          ...editData,
+                          customer_postal_code: e.target.value,
+                        })
                       }
                     />
                   </Field>
@@ -324,7 +347,10 @@ export function AppointmentView({ token }: AppointmentViewProps) {
                       id="edit_city"
                       value={editData.customer_city}
                       onChange={(e) =>
-                        setEditData({ ...editData, customer_city: e.target.value })
+                        setEditData({
+                          ...editData,
+                          customer_city: e.target.value,
+                        })
                       }
                     />
                   </Field>
@@ -386,13 +412,16 @@ export function AppointmentView({ token }: AppointmentViewProps) {
                   <span>
                     {appointment.customer_street}
                     <br />
-                    {appointment.customer_postal_code} {appointment.customer_city}
+                    {appointment.customer_postal_code}{" "}
+                    {appointment.customer_city}
                   </span>
                 </div>
                 {appointment.remarks && (
                   <div className="pt-2">
                     <p className="text-muted-foreground mb-1">Opmerkingen:</p>
-                    <p className="bg-muted/50 rounded p-2">{appointment.remarks}</p>
+                    <p className="bg-muted/50 rounded p-2">
+                      {appointment.remarks}
+                    </p>
                   </div>
                 )}
               </div>
