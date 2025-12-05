@@ -25,7 +25,6 @@ import {
   ClockPlusIcon,
   Loader2Icon,
   Trash2Icon,
-  TrashIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { DateOverride } from "@/types/appointments";
