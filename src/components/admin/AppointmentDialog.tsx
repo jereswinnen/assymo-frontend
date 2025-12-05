@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -53,6 +53,9 @@ export function AppointmentDialog({
   const [cancelling, setCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
+  // Local copy of appointment data for display (updated after save)
+  const [displayData, setDisplayData] = useState<Appointment | null>(null);
+
   // Edit form state
   const [editData, setEditData] = useState({
     appointment_date: "",
@@ -68,21 +71,28 @@ export function AppointmentDialog({
     admin_notes: "",
   });
 
-  // Initialize edit data when appointment changes
-  const startEditing = () => {
+  // Sync displayData when appointment prop changes
+  useEffect(() => {
     if (appointment) {
+      setDisplayData(appointment);
+    }
+  }, [appointment]);
+
+  // Initialize edit data when starting to edit
+  const startEditing = () => {
+    if (displayData) {
       setEditData({
-        appointment_date: appointment.appointment_date,
-        appointment_time: appointment.appointment_time.substring(0, 5),
-        customer_name: appointment.customer_name,
-        customer_email: appointment.customer_email,
-        customer_phone: appointment.customer_phone,
-        customer_street: appointment.customer_street,
-        customer_postal_code: appointment.customer_postal_code,
-        customer_city: appointment.customer_city,
-        remarks: appointment.remarks || "",
-        status: appointment.status,
-        admin_notes: appointment.admin_notes || "",
+        appointment_date: displayData.appointment_date,
+        appointment_time: displayData.appointment_time.substring(0, 5),
+        customer_name: displayData.customer_name,
+        customer_email: displayData.customer_email,
+        customer_phone: displayData.customer_phone,
+        customer_street: displayData.customer_street,
+        customer_postal_code: displayData.customer_postal_code,
+        customer_city: displayData.customer_city,
+        remarks: displayData.remarks || "",
+        status: displayData.status,
+        admin_notes: displayData.admin_notes || "",
       });
       setEditing(true);
     }
@@ -108,6 +118,16 @@ export function AppointmentDialog({
       }
 
       toast.success("Afspraak bijgewerkt");
+      // Update local display data with edited values
+      setDisplayData((prev) =>
+        prev
+          ? {
+              ...prev,
+              ...editData,
+              appointment_time: editData.appointment_time + ":00",
+            }
+          : null
+      );
       setEditing(false);
       onUpdate();
     } catch (error) {
@@ -175,7 +195,7 @@ export function AppointmentDialog({
     }
   };
 
-  if (!appointment) return null;
+  if (!appointment || !displayData) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -183,8 +203,8 @@ export function AppointmentDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Afspraak details
-            <Badge variant={getStatusBadgeVariant(appointment.status)}>
-              {STATUS_LABELS[appointment.status]}
+            <Badge variant={getStatusBadgeVariant(displayData.status)}>
+              {STATUS_LABELS[displayData.status]}
             </Badge>
           </DialogTitle>
         </DialogHeader>
@@ -201,6 +221,7 @@ export function AppointmentDialog({
                   onChange={(e) =>
                     setEditData({ ...editData, appointment_date: e.target.value })
                   }
+                  className="[&::-webkit-calendar-picker-indicator]:hidden"
                 />
               </div>
               <div className="space-y-2">
@@ -211,6 +232,7 @@ export function AppointmentDialog({
                   onChange={(e) =>
                     setEditData({ ...editData, appointment_time: e.target.value })
                   }
+                  className="[&::-webkit-calendar-picker-indicator]:hidden"
                 />
               </div>
             </div>
@@ -340,11 +362,11 @@ export function AppointmentDialog({
               <CalendarIcon className="size-5 text-muted-foreground mt-0.5" />
               <div>
                 <div className="font-medium">
-                  {formatDate(appointment.appointment_date)}
+                  {formatDate(displayData.appointment_date)}
                 </div>
                 <div className="text-sm text-muted-foreground flex items-center gap-1">
                   <ClockIcon className="size-3" />
-                  {formatTime(appointment.appointment_time)}
+                  {formatTime(displayData.appointment_time)}
                 </div>
               </div>
             </div>
@@ -355,54 +377,54 @@ export function AppointmentDialog({
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <UserIcon className="size-4 text-muted-foreground" />
-                <span className="font-medium">{appointment.customer_name}</span>
+                <span className="font-medium">{displayData.customer_name}</span>
               </div>
 
               <div className="flex items-center gap-3">
                 <MailIcon className="size-4 text-muted-foreground" />
                 <a
-                  href={`mailto:${appointment.customer_email}`}
+                  href={`mailto:${displayData.customer_email}`}
                   className="text-sm text-blue-600 hover:underline"
                 >
-                  {appointment.customer_email}
+                  {displayData.customer_email}
                 </a>
               </div>
 
               <div className="flex items-center gap-3">
                 <PhoneIcon className="size-4 text-muted-foreground" />
                 <a
-                  href={`tel:${appointment.customer_phone}`}
+                  href={`tel:${displayData.customer_phone}`}
                   className="text-sm text-blue-600 hover:underline"
                 >
-                  {appointment.customer_phone}
+                  {displayData.customer_phone}
                 </a>
               </div>
 
               <div className="flex items-start gap-3">
                 <MapPinIcon className="size-4 text-muted-foreground mt-0.5" />
                 <div className="text-sm">
-                  {appointment.customer_street}
+                  {displayData.customer_street}
                   <br />
-                  {appointment.customer_postal_code} {appointment.customer_city}
+                  {displayData.customer_postal_code} {displayData.customer_city}
                 </div>
               </div>
             </div>
 
             {/* Remarks */}
-            {appointment.remarks && (
+            {displayData.remarks && (
               <>
                 <Separator />
                 <div>
                   <Label className="text-muted-foreground">Opmerkingen</Label>
                   <p className="text-sm mt-1 whitespace-pre-wrap">
-                    {appointment.remarks}
+                    {displayData.remarks}
                   </p>
                 </div>
               </>
             )}
 
             {/* Admin notes */}
-            {appointment.admin_notes && (
+            {displayData.admin_notes && (
               <>
                 <Separator />
                 <div>
@@ -410,7 +432,7 @@ export function AppointmentDialog({
                     Interne notities
                   </Label>
                   <p className="text-sm mt-1 whitespace-pre-wrap bg-yellow-50 p-2 rounded">
-                    {appointment.admin_notes}
+                    {displayData.admin_notes}
                   </p>
                 </div>
               </>
@@ -421,11 +443,11 @@ export function AppointmentDialog({
             {/* Metadata */}
             <div className="text-xs text-muted-foreground">
               Aangemaakt op{" "}
-              {new Date(appointment.created_at).toLocaleString("nl-NL")}
+              {new Date(displayData.created_at).toLocaleString("nl-NL")}
             </div>
 
             <DialogFooter className="gap-2">
-              {appointment.status !== "cancelled" && (
+              {displayData.status !== "cancelled" && (
                 <Button
                   variant="destructive"
                   onClick={() => setShowCancelConfirm(true)}
