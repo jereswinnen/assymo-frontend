@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/select";
 import {
   Loader2Icon,
-  MailIcon,
   MailSearchIcon,
   MaximizeIcon,
+  RefreshCwIcon,
   XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -113,14 +113,23 @@ export function EmailTemplatePreview() {
             </div>
           ) : html ? (
             <>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-2 top-2 z-10"
-                onClick={() => setFullscreen(true)}
-              >
-                <MaximizeIcon className="size-4" />
-              </Button>
+              <div className="absolute right-2 top-2 z-10 flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => loadPreview(selectedTemplate)}
+                  disabled={loading}
+                >
+                  <RefreshCwIcon className="size-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setFullscreen(true)}
+                >
+                  <MaximizeIcon className="size-4" />
+                </Button>
+              </div>
               <iframe
                 srcDoc={html}
                 className="h-[500px] w-full rounded-lg bg-white"
