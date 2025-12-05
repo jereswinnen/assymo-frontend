@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,18 @@ export function DatePicker({
     return { year: now.getFullYear(), month: now.getMonth() };
   });
 
+  // Track previous month to detect actual changes
+  const prevMonthRef = useRef({ year: currentMonth.year, month: currentMonth.month });
+
+  // Notify parent when month changes (after render, not during)
+  useEffect(() => {
+    const prev = prevMonthRef.current;
+    if (prev.year !== currentMonth.year || prev.month !== currentMonth.month) {
+      prevMonthRef.current = { year: currentMonth.year, month: currentMonth.month };
+      onMonthChange?.(currentMonth.year, currentMonth.month);
+    }
+  }, [currentMonth.year, currentMonth.month, onMonthChange]);
+
   // Create a map of date -> availability for quick lookup
   const availabilityMap = useMemo(() => {
     const map = new Map<string, DateAvailability>();
@@ -42,7 +54,6 @@ export function DatePicker({
         newYear = prev.year - 1;
         newMonth = 11;
       }
-      onMonthChange?.(newYear, newMonth);
       return { year: newYear, month: newMonth };
     });
   };
@@ -55,7 +66,6 @@ export function DatePicker({
         newYear = prev.year + 1;
         newMonth = 0;
       }
-      onMonthChange?.(newYear, newMonth);
       return { year: newYear, month: newMonth };
     });
   };
