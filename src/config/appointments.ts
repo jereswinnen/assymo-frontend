@@ -37,4 +37,23 @@ export const APPOINTMENTS_CONFIG = {
    * (e.g., 24 = must book at least 24 hours in advance)
    */
   minHoursBeforeBooking: 0,
+
+  /**
+   * Reminder email settings
+   */
+  reminders: {
+    /**
+     * How many hours before the appointment to send a reminder
+     * Default: 24 hours (1 day before)
+     */
+    hoursBeforeAppointment: 24,
+
+    /**
+     * Minimum hours between booking and appointment to qualify for a reminder
+     * If someone books an appointment less than this many hours in advance,
+     * no reminder will be sent (they just received the confirmation email)
+     * Default: 48 hours (only send reminders if booked 2+ days ahead)
+     */
+    minHoursAfterBookingForReminder: 48,
+  },
 } as const;

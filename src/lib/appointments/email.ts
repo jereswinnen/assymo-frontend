@@ -6,6 +6,7 @@ import {
   AppointmentAdminNotification,
   AppointmentCancellation,
   AppointmentUpdated,
+  AppointmentReminder,
 } from "@/emails";
 import { generateICS, generateICSFilename } from "./ics";
 import { formatDateNL, formatTimeNL } from "./utils";
@@ -219,4 +220,39 @@ export async function sendNewAppointmentEmails(
     customerEmail: customerResult.success,
     adminEmail: adminResult.success,
   };
+}
+
+/**
+ * Send reminder email to customer (24h before appointment)
+ */
+export async function sendReminderEmail(
+  appointment: Appointment
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await resend.emails.send({
+      from: RESEND_CONFIG.fromAddressAppointments,
+      to: [getRecipient(appointment.customer_email)],
+      subject: RESEND_CONFIG.subjects.appointmentReminder,
+      react: AppointmentReminder({
+        customerName: appointment.customer_name,
+        appointmentDate: formatDateNL(appointment.appointment_date),
+        appointmentTime: formatTimeNL(appointment.appointment_time),
+        storeAddress: APPOINTMENTS_CONFIG.storeAddress,
+        editUrl: getEditUrl(appointment.edit_token),
+      }),
+    });
+
+    if (error) {
+      console.error("Failed to send reminder email:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("Error sending reminder email:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Unknown error",
+    };
+  }
 }

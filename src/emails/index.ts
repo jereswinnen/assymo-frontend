@@ -9,3 +9,4 @@ export { AppointmentConfirmation } from "./AppointmentConfirmation";
 export { AppointmentAdminNotification } from "./AppointmentAdminNotification";
 export { AppointmentCancellation } from "./AppointmentCancellation";
 export { AppointmentUpdated } from "./AppointmentUpdated";
+export { AppointmentReminder } from "./AppointmentReminder";

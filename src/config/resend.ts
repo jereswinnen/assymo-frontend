@@ -81,6 +81,7 @@ export const RESEND_CONFIG = {
     appointmentConfirmation: "[USER] Bevestiging afspraak bij Assymo",
     appointmentCancellation: "[USER] Uw afspraak bij Assymo is geannuleerd",
     appointmentUpdated: "[USER] Uw afspraak bij Assymo is gewijzigd",
+    appointmentReminder: "[USER] Herinnering: uw afspraak bij Assymo morgen",
     appointmentAdmin: "[ADMIN] Nieuwe afspraak ingepland",
   },
 } as const;
