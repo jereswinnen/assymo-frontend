@@ -119,7 +119,7 @@ const templates: Record<string, (props: unknown) => React.ReactElement> = {
     ),
 };
 
-export const templateList = [
+const templateList = [
   { id: "appointment-confirmation", name: "Afspraak bevestiging" },
   { id: "appointment-admin", name: "Afspraak admin notificatie" },
   { id: "appointment-cancellation", name: "Afspraak annulering" },
