@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { unsubscribeContact } from "@/app/api/newsletter/unsubscribe/route";
+import { unsubscribeContact } from "@/lib/newsletter";
 import Link from "next/link";
 
 export const metadata: Metadata = {
