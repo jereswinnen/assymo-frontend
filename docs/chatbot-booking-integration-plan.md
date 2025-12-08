@@ -80,7 +80,7 @@ This document outlines a phased approach to integrate appointment booking capabi
 
 ### Tasks
 
-- [ ] **2.1** Create a `collectBookingInfo` tool for structured data extraction
+- [x] **2.1** Create a `collectBookingInfo` tool for structured data extraction
   - This tool helps the AI track what information has been collected
   - Schema (matches `CreateAppointmentInput` from `src/types/appointments.ts`):
     ```typescript
@@ -97,7 +97,7 @@ This document outlines a phased approach to integrate appointment booking capabi
     })
     ```
 
-- [ ] **2.2** Update system prompt with data collection flow
+- [x] **2.2** Update system prompt with data collection flow
   - Instruct AI to collect information naturally, not all at once
   - **All required**: name, email, phone, street, postal code, city, date, time
   - Optional: remarks
@@ -108,14 +108,14 @@ This document outlines a phased approach to integrate appointment booking capabi
     4. User provides → AI asks for address (street, postal code, city)
     5. User provides address → AI confirms all details and asks to proceed
 
-- [ ] **2.3** Add validation helpers
+- [x] **2.3** Add validation helpers (already existed)
   - Email format validation: `isValidEmail()`
   - Dutch/Belgian phone number validation: `isValidPhone()`
   - Postal code format (Dutch: "1234 AB", Belgian: "1234"): `isValidPostalCode()`
   - Postal code normalization: `normalizePostalCode()`
   - All validators already exist in `src/lib/appointments/utils.ts`
 
-- [ ] **2.4** Consider conversation state management
+- [x] **2.4** Consider conversation state management (Option A: stateless)
   - Option A: Stateless (AI extracts from full conversation history)
   - Option B: Use tool results to track state
   - **Recommendation**: Start with Option A (simpler), the AI can read the full conversation
