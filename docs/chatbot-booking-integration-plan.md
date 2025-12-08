@@ -25,14 +25,14 @@ This document outlines a phased approach to integrate appointment booking capabi
 
 ### Tasks
 
-- [ ] **1.1** Create a `checkAvailability` tool definition in the chat API route
+- [x] **1.1** Create a `checkAvailability` tool definition in the chat API route
   - Define tool schema with Zod:
     - `start_date` (optional): Date string in YYYY-MM-DD format, defaults to today
     - `end_date` (optional): Date string in YYYY-MM-DD format, defaults to 7 days from start
   - Add `execute` function that calls `getAvailability(startDate, endDate)` from `src/lib/appointments/availability.ts`
   - Returns `DateAvailability[]` with `date`, `is_open`, and `slots` array per day
 
-- [ ] **1.2** Add tools configuration to `streamText` call
+- [x] **1.2** Add tools configuration to `streamText` call
   ```typescript
   const result = streamText({
     model: openai(CHATBOT_CONFIG.model),
@@ -54,12 +54,12 @@ This document outlines a phased approach to integrate appointment booking capabi
   });
   ```
 
-- [ ] **1.3** Update system prompt in `src/config/chatbot.ts`
+- [x] **1.3** Update system prompt in `src/config/chatbot.ts`
   - Add instructions for when to use the availability tool
   - Define how to present available times conversationally (in Dutch)
   - Example: "Als een klant vraagt naar beschikbare tijden, gebruik de checkAvailability tool"
 
-- [ ] **1.4** Test availability queries
+- [x] **1.4** Test availability queries
   - "Wanneer kan ik langskomen?"
   - "Zijn er morgen nog plekken vrij?"
   - "Wat zijn de openingstijden volgende week?"

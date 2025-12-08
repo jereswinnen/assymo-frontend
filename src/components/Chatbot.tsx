@@ -248,13 +248,13 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                           : ""
                       }`}
                     >
-                      <p>
-                        {message.parts
-                          .map((part) =>
-                            part.type === "text" ? part.text : "",
-                          )
-                          .join("")}
-                      </p>
+                      {message.parts.map((part, partIndex) => {
+                        if (part.type === "text" && part.text) {
+                          return <p key={partIndex}>{part.text}</p>;
+                        }
+                        // Skip tool invocations and tool results - the AI will provide a text response
+                        return null;
+                      })}
                     </div>
                     {/* Always show footer for messages, but change content based on streaming state */}
                     <div

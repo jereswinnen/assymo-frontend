@@ -1,10 +1,11 @@
 import { openai } from "@ai-sdk/openai";
-import { streamText, convertToModelMessages } from "ai";
+import { streamText, convertToModelMessages, stepCountIs } from "ai";
 import { NextRequest } from "next/server";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { neon } from "@neondatabase/serverless";
 import { CHATBOT_CONFIG } from "@/config/chatbot";
 import { retrieveRelevantChunks, hasDocuments } from "@/lib/retrieval";
+import { bookingTools } from "@/lib/chatbot/booking-tools";
 
 export const maxDuration = 30;
 
@@ -116,6 +117,8 @@ Baseer je antwoorden ALLEEN op bovenstaande informatie.`;
       model: openai(CHATBOT_CONFIG.model),
       system: systemPrompt,
       messages: modelMessages,
+      tools: bookingTools,
+      stopWhen: stepCountIs(3), // Allow tool call + response generation
       providerOptions: {
         openai: {
           reasoningEffort: "minimal",
