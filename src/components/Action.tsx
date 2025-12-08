@@ -5,14 +5,14 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 const actionVariants = cva(
-  "w-fit px-3.5 py-2 flex items-center gap-1.5 text-sm font-medium rounded-full transition-colors duration-250 [&_svg]:size-4",
+  "cursor-pointer w-fit px-3.5 py-2 flex items-center gap-1.5 text-sm font-medium rounded-full transition-colors duration-250 [&_svg]:size-4 disabled:opacity-50 disabled:cursor-not-allowed",
   {
     variants: {
       variant: {
         primary:
-          "text-accent-light bg-accent-dark hover:text-accent-dark hover:bg-accent-light",
+          "text-accent-light bg-accent-dark hover:text-accent-dark hover:bg-accent-light disabled:hover:bg-accent-dark disabled:hover:text-accent-light",
         secondary:
-          "text-stone-800 bg-stone-300 hover:text-stone-700 hover:bg-stone-200",
+          "text-stone-800 bg-stone-300 hover:text-stone-700 hover:bg-stone-200 disabled:hover:bg-stone-300 disabled:hover:text-stone-800",
       },
     },
     defaultVariants: {

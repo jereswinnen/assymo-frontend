@@ -8,7 +8,7 @@ export const APPOINTMENTS_CONFIG = {
   /**
    * Store address for calendar events and emails
    */
-  storeAddress: "Eikenlei 159, 2960 Brecht",
+  storeAddress: "Eikenlei 159, 2960 Sint-Job-in-'t-Goor",
 
   /**
    * Store name for display

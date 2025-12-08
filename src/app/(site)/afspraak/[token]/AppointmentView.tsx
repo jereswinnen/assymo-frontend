@@ -2,48 +2,45 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldError,
-} from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
+import { Action, actionVariants } from "@/components/Action";
 import {
-  CalendarIcon,
-  ClockIcon,
-  UserIcon,
-  MailIcon,
-  PhoneIcon,
-  MapPinIcon,
-  EditIcon,
   Trash2Icon,
   Loader2Icon,
   AlertTriangleIcon,
   CheckIcon,
   XIcon,
+  HomeIcon,
+  CalendarPlusIcon,
+  PencilIcon,
+  CircleSlashIcon,
+  UserRoundIcon,
+  MailIcon,
+  PhoneIcon,
+  MapPinIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import type {
-  PublicAppointmentView,
-  AppointmentStatus,
-} from "@/types/appointments";
-import { STATUS_LABELS } from "@/types/appointments";
+import type { PublicAppointmentView } from "@/types/appointments";
 import { formatDateNL, formatTimeNL } from "@/lib/appointments/utils";
 import { APPOINTMENTS_CONFIG } from "@/config/appointments";
-import Link from "next/link";
+import { generateICS, generateICSFilename } from "@/lib/appointments/ics";
 
 interface AppointmentViewProps {
   token: string;
+  initialStatus?: string;
+  className?: string;
 }
 
-export function AppointmentView({ token }: AppointmentViewProps) {
+export function AppointmentView({
+  token,
+  initialStatus,
+  className,
+}: AppointmentViewProps) {
   const router = useRouter();
   const [appointment, setAppointment] = useState<PublicAppointmentView | null>(
     null,
@@ -55,7 +52,6 @@ export function AppointmentView({ token }: AppointmentViewProps) {
   const [cancelling, setCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-  // Edit form state
   const [editData, setEditData] = useState({
     customer_name: "",
     customer_email: "",
@@ -72,12 +68,12 @@ export function AppointmentView({ token }: AppointmentViewProps) {
 
     try {
       const response = await fetch(`/api/appointments/${token}`);
-
       if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error("Afspraak niet gevonden");
-        }
-        throw new Error("Kon afspraak niet laden");
+        throw new Error(
+          response.status === 404
+            ? "Afspraak niet gevonden"
+            : "Kon afspraak niet laden",
+        );
       }
 
       const data = await response.json();
@@ -105,7 +101,6 @@ export function AppointmentView({ token }: AppointmentViewProps) {
 
   const handleSave = async () => {
     setSaving(true);
-
     try {
       const response = await fetch(`/api/appointments/${token}`, {
         method: "PUT",
@@ -133,7 +128,6 @@ export function AppointmentView({ token }: AppointmentViewProps) {
 
   const handleCancel = async () => {
     setCancelling(true);
-
     try {
       const response = await fetch(`/api/appointments/${token}`, {
         method: "DELETE",
@@ -145,41 +139,59 @@ export function AppointmentView({ token }: AppointmentViewProps) {
       }
 
       toast.success("Afspraak geannuleerd");
-      router.push("/afspraak/geannuleerd");
+      router.replace(`/afspraak/${token}?status=cancelled`, { scroll: false });
+      fetchAppointment();
     } catch (err) {
       console.error("Failed to cancel appointment:", err);
       toast.error(
         err instanceof Error ? err.message : "Kon afspraak niet annuleren",
       );
+    } finally {
       setCancelling(false);
       setShowCancelConfirm(false);
     }
   };
 
-  const getStatusBadgeVariant = (status: AppointmentStatus) => {
-    switch (status) {
-      case "confirmed":
-        return "default";
-      case "cancelled":
-        return "destructive";
-      case "completed":
-        return "secondary";
-      default:
-        return "outline";
-    }
+  const handleDownloadICS = () => {
+    if (!appointment) return;
+
+    const fullAppointment = {
+      ...appointment,
+      edit_token: token,
+      admin_notes: null,
+      ip_address: null,
+      updated_at: appointment.created_at,
+      cancelled_at: null,
+      reminder_sent_at: null,
+    };
+
+    const icsContent = generateICS(fullAppointment);
+    const filename = generateICSFilename(fullAppointment);
+    const blob = new Blob([icsContent], {
+      type: "text/calendar;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
+  // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16">
+      <div className={cn("flex items-center justify-center py-16", className)}>
         <Spinner className="size-8" />
       </div>
     );
   }
 
+  // Error state
   if (error || !appointment) {
     return (
-      <div className="max-w-lg mx-auto text-center py-16">
+      <div className={cn("text-center py-16", className)}>
         <div className="size-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <AlertTriangleIcon className="size-8 text-red-600" />
         </div>
@@ -187,84 +199,104 @@ export function AppointmentView({ token }: AppointmentViewProps) {
         <p className="text-muted-foreground mb-6">
           {error || "Deze afspraak bestaat niet of is verlopen."}
         </p>
-        <Button asChild>
-          <Link href="/afspraak">Nieuwe afspraak maken</Link>
-        </Button>
+        <Action href="/afspraak" label="Nieuwe afspraak maken" />
       </div>
     );
   }
 
-  const isCancelled = appointment.status === "cancelled";
+  const isCancelled =
+    appointment.status === "cancelled" || initialStatus === "cancelled";
   const isPast =
     new Date(appointment.appointment_date) <
     new Date(new Date().toDateString());
+  const hasChanges =
+    editData.customer_name !== appointment.customer_name ||
+    editData.customer_email !== appointment.customer_email ||
+    editData.customer_phone !== appointment.customer_phone ||
+    editData.customer_street !== appointment.customer_street ||
+    editData.customer_postal_code !== appointment.customer_postal_code ||
+    editData.customer_city !== appointment.customer_city ||
+    editData.remarks !== (appointment.remarks || "");
 
-  return (
-    <div className="max-w-2xl mx-auto">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">Uw afspraak</h1>
-        <p className="text-muted-foreground">
-          Bekijk, wijzig of annuleer uw afspraak hieronder.
-        </p>
-      </div>
-
-      <div className="bg-card border rounded-xl overflow-hidden">
-        {/* Header with status */}
-        <div className="bg-muted/50 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <CalendarIcon className="size-5 text-muted-foreground" />
-            <span className="font-medium">Afspraakdetails</span>
-          </div>
-          <Badge variant={getStatusBadgeVariant(appointment.status)}>
-            {STATUS_LABELS[appointment.status]}
-          </Badge>
+  // Cancelled state
+  if (isCancelled) {
+    return (
+      <div className={cn("text-center py-8", className)}>
+        <div className="size-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <XIcon className="size-8 text-red-600" />
         </div>
+        <h1 className="text-3xl font-bold mb-2">Afspraak geannuleerd</h1>
+        <p className="text-muted-foreground mb-8">
+          Uw afspraak is geannuleerd. U ontvangt een bevestigingsmail.
+        </p>
+        <div className="flex flex-wrap gap-3 justify-center">
+          <Action href="/afspraak" label="Nieuwe afspraak maken" />
+          <Action
+            href="/"
+            variant="secondary"
+            icon={<HomeIcon />}
+            label="Terug naar home"
+          />
+        </div>
+      </div>
+    );
+  }
 
-        <div className="p-6 space-y-6">
-          {/* Cancelled notice */}
-          {isCancelled && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-800">
-              Deze afspraak is geannuleerd en kan niet meer worden gewijzigd.
-            </div>
-          )}
+  // Main appointment view (fresh booking and return visits)
+  return (
+    <div className={cn("flex flex-col gap-6 md:gap-10", className)}>
+      <header className="flex flex-col gap-2">
+        <h1 className="mb-0!">Uw afspraak</h1>
+        <p className="text-muted-foreground">
+          {initialStatus === "booked"
+            ? "Uw afspraak is succesvol ingepland. Binnen enkele minuten ontvangt u een bevestigingsmail."
+            : "Bekijk of wijzig uw afspraak hieronder."}
+        </p>
+      </header>
 
-          {/* Date and time */}
-          <div className="bg-accent-light/10 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <CalendarIcon className="size-5 text-accent-dark mt-0.5" />
-              <div>
-                <p className="font-semibold text-lg">
-                  {formatDateNL(appointment.appointment_date)}
-                </p>
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <ClockIcon className="size-4" />
-                  <span>{formatTimeNL(appointment.appointment_time)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Location */}
-          <div className="flex items-start gap-3">
-            <MapPinIcon className="size-5 text-muted-foreground mt-0.5" />
-            <div>
-              <p className="font-medium">Locatie</p>
-              <p className="text-sm text-muted-foreground">
-                {APPOINTMENTS_CONFIG.storeLocation}
+      <div className="flex gap-6 md:gap-8 p-6 md:p-8 rounded-lg bg-stone-100">
+        <div className="flex flex-col h-fit bg-white shadow-sm rounded-[6px]">
+          <span className="py-0.5 text-xs uppercase font-medium tracking-wider text-white text-center bg-red-500 rounded-tl-[6px] rounded-tr-[6px]">
+            {new Date(appointment.appointment_date).toLocaleDateString(
+              "nl-NL",
+              { month: "short" },
+            )}
+          </span>
+          <span className="px-4 py-2 text-3xl font-semibold text-center">
+            {new Date(appointment.appointment_date).getDate()}
+          </span>
+        </div>
+        <div className="flex-1 flex flex-col gap-6 md:gap-8">
+          <ul className="flex flex-col gap-6 md:gap-8 *:flex *:flex-col *:gap-1">
+            <li>
+              <span className="text-xs font-medium uppercase tracking-wider text-stone-600">
+                Datum en tijd
+              </span>
+              <p className="font-medium">
+                {formatDateNL(appointment.appointment_date)} om{" "}
+                {formatTimeNL(appointment.appointment_time)}
               </p>
-            </div>
-          </div>
+            </li>
+            <li>
+              <span className="text-xs font-medium uppercase tracking-wider text-stone-600">
+                Locatie
+              </span>
+              <p className="font-medium">{APPOINTMENTS_CONFIG.storeAddress}</p>
+            </li>
+          </ul>
 
-          <Separator />
+          <button
+            onClick={handleDownloadICS}
+            className={actionVariants({ variant: "primary" })}
+          >
+            <CalendarPlusIcon />
+            Toevoegen aan agenda
+          </button>
 
-          {/* Customer info - View or Edit mode */}
+          <Separator className="bg-stone-200" />
+
           {editing ? (
-            <div className="space-y-4">
-              <h3 className="font-medium flex items-center gap-2">
-                <UserIcon className="size-4" />
-                Uw gegevens bewerken
-              </h3>
-
+            <div className="flex flex-col gap-4">
               <FieldGroup>
                 <Field>
                   <FieldLabel htmlFor="edit_name">Naam</FieldLabel>
@@ -370,116 +402,125 @@ export function AppointmentView({ token }: AppointmentViewProps) {
               </FieldGroup>
 
               <div className="flex gap-3">
-                <Button onClick={handleSave} disabled={saving}>
+                <button
+                  onClick={handleSave}
+                  disabled={saving || !hasChanges}
+                  className={actionVariants({ variant: "primary" })}
+                >
                   {saving ? (
-                    <Loader2Icon className="size-4 animate-spin" />
+                    <Loader2Icon className="animate-spin" />
                   ) : (
-                    <CheckIcon className="size-4" />
+                    <CheckIcon />
                   )}
                   Opslaan
-                </Button>
-                <Button
-                  variant="outline"
+                </button>
+                <button
                   onClick={() => setEditing(false)}
                   disabled={saving}
+                  className={actionVariants({ variant: "secondary" })}
                 >
                   Annuleren
-                </Button>
+                </button>
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              <h3 className="font-medium flex items-center gap-2">
-                <UserIcon className="size-4" />
+            <div className="flex flex-col gap-4">
+              <span className="text-xs font-medium uppercase tracking-wider text-stone-600">
                 Uw gegevens
-              </h3>
-
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-3">
-                  <UserIcon className="size-4 text-muted-foreground" />
-                  <span>{appointment.customer_name}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MailIcon className="size-4 text-muted-foreground" />
-                  <span>{appointment.customer_email}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <PhoneIcon className="size-4 text-muted-foreground" />
-                  <span>{appointment.customer_phone}</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <MapPinIcon className="size-4 text-muted-foreground mt-0.5" />
-                  <span>
-                    {appointment.customer_street}
-                    <br />
-                    {appointment.customer_postal_code}{" "}
-                    {appointment.customer_city}
+              </span>
+              <ul className="flex flex-col gap-4 text-base *:flex *:flex-col *:gap-1">
+                <li>
+                  <span className="text-sm font-medium text-stone-600">
+                    Naam
                   </span>
-                </div>
+                  <span>{appointment.customer_name}</span>
+                </li>
+                <li>
+                  <span className="text-sm font-medium text-stone-600">
+                    E-mailadres
+                  </span>
+                  {appointment.customer_email}
+                </li>
+                <li>
+                  <span className="text-sm font-medium text-stone-600">
+                    Telefoonnummer
+                  </span>
+                  {appointment.customer_phone}
+                </li>
+                <li>
+                  <span className="text-sm font-medium text-stone-600">
+                    Adres
+                  </span>
+                  {appointment.customer_street}
+                  <br></br>
+                  {appointment.customer_postal_code} {appointment.customer_city}
+                </li>
                 {appointment.remarks && (
-                  <div className="pt-2">
-                    <p className="text-muted-foreground mb-1">Opmerkingen:</p>
-                    <p className="bg-muted/50 rounded p-2">
-                      {appointment.remarks}
-                    </p>
-                  </div>
+                  <li>
+                    <span className="text-sm font-medium text-stone-600">
+                      Opmerkingen
+                    </span>
+                    {appointment.remarks}
+                  </li>
                 )}
-              </div>
+              </ul>
             </div>
           )}
 
-          {/* Actions */}
-          {!isCancelled && !isPast && !editing && (
-            <>
-              <Separator />
+          <Separator className="bg-stone-200" />
 
+          {!isPast && !editing && (
+            <>
               {showCancelConfirm ? (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <p className="font-medium text-red-800 mb-3">
                     Weet u zeker dat u deze afspraak wilt annuleren?
                   </p>
                   <div className="flex gap-3">
-                    <Button
-                      variant="destructive"
+                    <button
                       onClick={handleCancel}
                       disabled={cancelling}
+                      className={actionVariants({ variant: "primary" })}
                     >
                       {cancelling ? (
-                        <Loader2Icon className="size-4 animate-spin" />
+                        <Loader2Icon className="animate-spin" />
                       ) : (
-                        <Trash2Icon className="size-4" />
+                        <Trash2Icon />
                       )}
                       Ja, annuleren
-                    </Button>
-                    <Button
-                      variant="outline"
+                    </button>
+                    <button
                       onClick={() => setShowCancelConfirm(false)}
                       disabled={cancelling}
+                      className={actionVariants({ variant: "secondary" })}
                     >
                       Nee, behouden
-                    </Button>
+                    </button>
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Button onClick={() => setEditing(true)}>
-                    <EditIcon className="size-4" />
-                    Gegevens wijzigen
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => setShowCancelConfirm(true)}
+                <div className="flex flex-col md:flex-row flex-start md:items-center gap-4">
+                  <button
+                    onClick={() => setEditing(true)}
+                    className={actionVariants({ variant: "secondary" })}
                   >
-                    <Trash2Icon className="size-4" />
+                    <PencilIcon />
+                    Gegevens wijzigen
+                  </button>
+
+                  <button
+                    onClick={() => setShowCancelConfirm(true)}
+                    className={actionVariants({ variant: "secondary" })}
+                  >
+                    <CircleSlashIcon />
                     Afspraak annuleren
-                  </Button>
+                  </button>
                 </div>
               )}
             </>
           )}
 
-          {isPast && !isCancelled && (
+          {isPast && (
             <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
               Deze afspraak heeft al plaatsgevonden en kan niet meer worden
               gewijzigd.
