@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpIcon, ShieldCheckIcon, XIcon } from "lucide-react";
+import { ArrowUpIcon, XIcon } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import {
@@ -17,9 +17,8 @@ import { Spinner } from "./ui/spinner";
 import { CHATBOT_CONFIG } from "@/config/chatbot";
 import { usePersistedMessages } from "@/hooks/usePersistedMessages";
 import { useRateLimitCountdown } from "@/hooks/useRateLimitCountdown";
-import { Card, CardHeader, CardTitle } from "./ui/card";
-import { Exo_2 } from "next/font/google";
 import Logo from "./Logo";
+import { ToolResultCard, BookingForm } from "./chatbot/ToolResultCards";
 
 interface ChatbotProps {
   onClose?: () => void;
@@ -32,6 +31,11 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
     remaining: number;
   } | null>(null);
   const [backendMessageCount, setBackendMessageCount] = useState<number>(0);
+  const [selectedSlot, setSelectedSlot] = useState<{
+    date: string;
+    time: string;
+    dateFormatted: string;
+  } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -242,7 +246,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                 >
                   <div className="max-w-[80%] flex flex-col gap-2">
                     <div
-                      className={`rounded-full ${
+                      className={`rounded-3xl ${
                         message.role === "user"
                           ? "px-3 py-2 bg-primary text-primary-foreground"
                           : ""
@@ -252,7 +256,37 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                         if (part.type === "text" && part.text) {
                           return <p key={partIndex}>{part.text}</p>;
                         }
-                        // Skip tool invocations and tool results - the AI will provide a text response
+                        // Render tool results as UI cards
+                        // Tool parts have type like "tool-checkAvailability", "tool-createAppointment"
+                        if (
+                          part.type.startsWith("tool-") &&
+                          "state" in part &&
+                          part.state === "output-available"
+                        ) {
+                          const toolPart = part as {
+                            type: string;
+                            toolCallId: string;
+                            input: unknown;
+                            output: unknown;
+                            state: string;
+                          };
+                          // Extract tool name from type (e.g., "tool-checkAvailability" -> "checkAvailability")
+                          const toolName = toolPart.type.replace("tool-", "");
+                          return (
+                            <ToolResultCard
+                              key={partIndex}
+                              toolName={toolName}
+                              result={toolPart.output}
+                              onSelectSlot={(date, time, dateFormatted) => {
+                                // When user clicks a slot, show the booking form
+                                setSelectedSlot({ date, time, dateFormatted });
+                                sendMessage({
+                                  text: `${dateFormatted} om ${time}`,
+                                });
+                              }}
+                            />
+                          );
+                        }
                         return null;
                       })}
                     </div>
@@ -303,6 +337,21 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                   <div className="flex items-center">
                     <Spinner className="size-5" />
                   </div>
+                </div>
+              </div>
+            )}
+            {/* Show booking form when a slot is selected */}
+            {selectedSlot && !showLoadingSpinner && (
+              <div className="text-sm flex justify-start">
+                <div className="max-w-[85%]">
+                  <BookingForm
+                    selectedDate={selectedSlot.date}
+                    selectedTime={selectedSlot.time}
+                    onSubmit={(data) => {
+                      sendMessage({ text: data });
+                      setSelectedSlot(null);
+                    }}
+                  />
                 </div>
               </div>
             )}
