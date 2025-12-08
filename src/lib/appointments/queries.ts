@@ -233,7 +233,8 @@ export async function getAppointmentsByDateRange(
         ip_address,
         created_at,
         updated_at,
-        cancelled_at
+        cancelled_at,
+        reminder_sent_at
       FROM appointments
       WHERE appointment_date >= ${startDate}::date
         AND appointment_date <= ${endDate}::date
@@ -262,7 +263,8 @@ export async function getAppointmentsByDateRange(
       ip_address,
       created_at,
       updated_at,
-      cancelled_at
+      cancelled_at,
+      reminder_sent_at
     FROM appointments
     WHERE appointment_date >= ${startDate}::date
       AND appointment_date <= ${endDate}::date
@@ -298,7 +300,8 @@ export async function getAllAppointments(
       ip_address,
       created_at,
       updated_at,
-      cancelled_at
+      cancelled_at,
+      reminder_sent_at
     FROM appointments
     ORDER BY appointment_date DESC, appointment_time DESC
     LIMIT ${limit}
@@ -333,7 +336,8 @@ export async function getAppointmentById(
       ip_address,
       created_at,
       updated_at,
-      cancelled_at
+      cancelled_at,
+      reminder_sent_at
     FROM appointments
     WHERE id = ${id}
   `;
@@ -366,7 +370,8 @@ export async function getAppointmentByToken(
       ip_address,
       created_at,
       updated_at,
-      cancelled_at
+      cancelled_at,
+      reminder_sent_at
     FROM appointments
     WHERE edit_token = ${token}
   `;
@@ -462,7 +467,8 @@ export async function createAppointment(
       ip_address,
       created_at,
       updated_at,
-      cancelled_at
+      cancelled_at,
+      reminder_sent_at
   `;
 
   return rows[0] as Appointment;
@@ -563,7 +569,8 @@ export async function updateAppointment(
       ip_address,
       created_at,
       updated_at,
-      cancelled_at
+      cancelled_at,
+      reminder_sent_at
   `;
 
   return (rows[0] as Appointment) || null;
@@ -598,7 +605,8 @@ export async function cancelAppointment(id: number): Promise<Appointment | null>
       ip_address,
       created_at,
       updated_at,
-      cancelled_at
+      cancelled_at,
+      reminder_sent_at
   `;
 
   return (rows[0] as Appointment) || null;
@@ -645,7 +653,8 @@ export async function searchAppointments(
       ip_address,
       created_at,
       updated_at,
-      cancelled_at
+      cancelled_at,
+      reminder_sent_at
     FROM appointments
     WHERE
       customer_name ILIKE ${searchPattern}
@@ -670,4 +679,74 @@ export async function getUpcomingAppointmentsCount(): Promise<number> {
   `;
 
   return Number((rows[0] as { count: string }).count);
+}
+
+// =============================================================================
+// Reminder Queries
+// =============================================================================
+
+/**
+ * Get appointments that need reminder emails
+ *
+ * Criteria:
+ * - Appointment is tomorrow (within the reminder window)
+ * - Status is 'confirmed'
+ * - Reminder hasn't been sent yet
+ * - Was booked far enough in advance to warrant a reminder
+ *
+ * @param hoursBeforeAppointment - Send reminder this many hours before appointment
+ * @param minHoursAfterBooking - Only send if booked at least this many hours before appointment
+ */
+export async function getAppointmentsNeedingReminder(
+  hoursBeforeAppointment: number,
+  minHoursAfterBooking: number
+): Promise<Appointment[]> {
+  // Calculate the target date (tomorrow if sending 24h reminders)
+  // We want appointments that are within the reminder window
+  const rows = await sql`
+    SELECT
+      id,
+      appointment_date::text,
+      appointment_time::text,
+      duration_minutes,
+      customer_name,
+      customer_email,
+      customer_phone,
+      customer_street,
+      customer_postal_code,
+      customer_city,
+      remarks,
+      status,
+      edit_token,
+      admin_notes,
+      ip_address,
+      created_at,
+      updated_at,
+      cancelled_at,
+      reminder_sent_at
+    FROM appointments
+    WHERE status = 'confirmed'
+      AND reminder_sent_at IS NULL
+      -- Appointment is tomorrow (for 24h reminder)
+      AND appointment_date = CURRENT_DATE + INTERVAL '1 day'
+      -- Was booked far enough in advance (not a last-minute booking)
+      AND created_at <= (appointment_date + appointment_time) - (${minHoursAfterBooking} || ' hours')::interval
+    ORDER BY appointment_time
+  `;
+
+  return rows as Appointment[];
+}
+
+/**
+ * Mark an appointment's reminder as sent
+ */
+export async function markReminderSent(id: number): Promise<boolean> {
+  const result = await sql`
+    UPDATE appointments
+    SET reminder_sent_at = NOW()
+    WHERE id = ${id}
+    RETURNING id
+  `;
+
+  return result.length > 0;
 }

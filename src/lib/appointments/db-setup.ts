@@ -63,6 +63,7 @@ export async function setupAppointmentTables() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         cancelled_at TIMESTAMP,
+        reminder_sent_at TIMESTAMP,
         UNIQUE(appointment_date, appointment_time)
       )
     `;
@@ -167,6 +168,7 @@ CREATE TABLE IF NOT EXISTS appointments (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   cancelled_at TIMESTAMP,
+  reminder_sent_at TIMESTAMP,
   UNIQUE(appointment_date, appointment_time)
 );
 
