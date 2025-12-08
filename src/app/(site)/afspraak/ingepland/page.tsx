@@ -1,19 +1,26 @@
 import { client } from "@/sanity/client";
 import { sectionsFragment } from "@/sanity/fragments";
 import SectionRenderer from "@/components/SectionRenderer";
-import { AppointmentBookingForm } from "@/components/appointments/AppointmentBookingForm";
 import Link from "next/link";
-import { MailIcon, PhoneIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  CheckCircleIcon,
+  CalendarIcon,
+  HomeIcon,
+  PhoneIcon,
+  MailIcon,
+} from "lucide-react";
+import { APPOINTMENTS_CONFIG } from "@/config/appointments";
 import Map from "@/components/Map";
 import Logo from "@/components/Logo";
 
 export const metadata = {
-  title: "Maak een afspraak - Assymo",
-  description: "Breng een bezoekje aan onze toonzaal.",
+  title: "Afspraak ingepland - Assymo",
+  description: "Uw afspraak is succesvol ingepland.",
 };
 
 const PAGE_QUERY = `*[
-  _type == "page" && slug.current == "afspraak"
+  _type == "page" && slug.current == "afspraak/ingepland"
 ][0]{
   _id,
   title,
@@ -34,7 +41,7 @@ type SiteSettings = {
   email?: string;
 };
 
-export default async function AppointmentPage() {
+export default async function AppointmentConfirmedPage() {
   const [page, settings] = await Promise.all([
     client.fetch(PAGE_QUERY),
     client.fetch<SiteSettings>(PARAMETERS_QUERY),
@@ -48,10 +55,19 @@ export default async function AppointmentPage() {
           headerImage={page.headerImage}
         />
       )}
-      <section className="col-span-full grid grid-cols-subgrid gap-y-14">
-        <AppointmentBookingForm className="col-span-full md:col-span-6" />
 
-        <section className="col-span-full md:col-span-3 flex flex-col gap-6">
+      <section className="col-span-full grid grid-cols-subgrid gap-y-14">
+        <div className="col-span-full md:col-span-6 flex flex-col gap-6">
+          <div>
+            APPOINTMENT DETAILS (date/hour/email of user who made appointment)
+          </div>
+          <div>
+            two Action buttons (primary is ics file download and second is back
+            to homepage
+          </div>
+        </div>
+
+        <div className="col-span-full md:col-span-3 flex flex-col gap-6">
           <Map className="max-h-[360px]" />
 
           <div className="flex flex-col gap-6">
@@ -87,7 +103,7 @@ export default async function AppointmentPage() {
               )}
             </ul>
           </div>
-        </section>
+        </div>
       </section>
     </section>
   );

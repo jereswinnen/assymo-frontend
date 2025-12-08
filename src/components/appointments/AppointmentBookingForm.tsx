@@ -171,7 +171,7 @@ export function AppointmentBookingForm({
       }
 
       // Redirect to confirmation page
-      router.push("/afspraak/bevestigd");
+      router.push("/afspraak/ingepland");
     } catch (err) {
       console.error("Failed to create appointment:", err);
       setError(
