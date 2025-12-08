@@ -1,5 +1,7 @@
 # Chatbot Booking Integration Plan
 
+> **Last Updated**: December 2025 - Updated field names to match actual implementation (snake_case), marked address fields as required, added Belgian postal code support notes, and documented existing helper functions.
+
 This document outlines a phased approach to integrate appointment booking capabilities into the AI chatbot using Vercel AI SDK tool calling.
 
 ## Overview
@@ -10,6 +12,8 @@ This document outlines a phased approach to integrate appointment booking capabi
 - Chatbot uses Vercel AI SDK with `streamText` and `useChat` hook
 - Fully functional appointment booking system with availability API
 - RAG-enabled chatbot with OpenAI integration
+- Email system with confirmation, admin notification (with ICS), reminders, and cancellation emails
+- Support for both Dutch (1234 AB) and Belgian (4-digit) postal codes
 
 **Approach**: Leverage Vercel AI SDK's [tool calling](https://sdk.vercel.ai/docs/ai-sdk-ui/chatbot-with-tool-calling) feature to give the AI model access to booking functions.
 
@@ -23,9 +27,10 @@ This document outlines a phased approach to integrate appointment booking capabi
 
 - [ ] **1.1** Create a `checkAvailability` tool definition in the chat API route
   - Define tool schema with Zod:
-    - `startDate` (optional): Date string, defaults to today
-    - `endDate` (optional): Date string, defaults to 7 days from start
-  - Add `execute` function that calls existing availability logic from `src/lib/appointments/availability.ts`
+    - `start_date` (optional): Date string in YYYY-MM-DD format, defaults to today
+    - `end_date` (optional): Date string in YYYY-MM-DD format, defaults to 7 days from start
+  - Add `execute` function that calls `getAvailability(startDate, endDate)` from `src/lib/appointments/availability.ts`
+  - Returns `DateAvailability[]` with `date`, `is_open`, and `slots` array per day
 
 - [ ] **1.2** Add tools configuration to `streamText` call
   ```typescript
@@ -37,11 +42,11 @@ This document outlines a phased approach to integrate appointment booking capabi
       checkAvailability: {
         description: 'Check available appointment slots for visiting the showroom',
         parameters: z.object({
-          startDate: z.string().optional().describe('Start date in YYYY-MM-DD format'),
-          endDate: z.string().optional().describe('End date in YYYY-MM-DD format'),
+          start_date: z.string().optional().describe('Start date in YYYY-MM-DD format'),
+          end_date: z.string().optional().describe('End date in YYYY-MM-DD format'),
         }),
-        execute: async ({ startDate, endDate }) => {
-          // Call availability logic and return formatted slots
+        execute: async ({ start_date, end_date }) => {
+          // Call getAvailability() and return DateAvailability[]
         },
       },
     },
@@ -61,7 +66,9 @@ This document outlines a phased approach to integrate appointment booking capabi
 
 ### Technical Notes
 
-- Reuse existing `getAvailableSlots()` from `src/lib/appointments/availability.ts`
+- Use `getAvailability(startDate, endDate)` from `src/lib/appointments/availability.ts` for date ranges
+- Use `getAvailableSlots(date)` for single-day queries
+- Additional helpers available: `getAvailableDates()`, `getNextAvailableDate()`, `isSlotAvailable()`
 - Return structured data that the AI can format conversationally
 - Consider limiting results to prevent overwhelming responses (e.g., max 5 days)
 
@@ -75,36 +82,38 @@ This document outlines a phased approach to integrate appointment booking capabi
 
 - [ ] **2.1** Create a `collectBookingInfo` tool for structured data extraction
   - This tool helps the AI track what information has been collected
-  - Schema:
+  - Schema (matches `CreateAppointmentInput` from `src/types/appointments.ts`):
     ```typescript
     z.object({
-      customerName: z.string().optional(),
-      customerEmail: z.string().email().optional(),
-      customerPhone: z.string().optional(),
-      customerStreet: z.string().optional(),
-      customerPostalCode: z.string().optional(),
-      customerCity: z.string().optional(),
-      preferredDate: z.string().optional(),
-      preferredTime: z.string().optional(),
+      customer_name: z.string().optional(),
+      customer_email: z.string().email().optional(),
+      customer_phone: z.string().optional(),
+      customer_street: z.string().optional(),
+      customer_postal_code: z.string().optional(),
+      customer_city: z.string().optional(),
+      appointment_date: z.string().optional(),
+      appointment_time: z.string().optional(),
       remarks: z.string().optional(),
     })
     ```
 
 - [ ] **2.2** Update system prompt with data collection flow
   - Instruct AI to collect information naturally, not all at once
-  - Minimum required: name, email, phone, date, time
-  - Optional but nice to have: address, remarks
+  - **All required**: name, email, phone, street, postal code, city, date, time
+  - Optional: remarks
   - Example conversation flow:
     1. User asks to book → AI uses checkAvailability
     2. User picks a time → AI asks for name
     3. User gives name → AI asks for email and phone
-    4. User provides → AI confirms details and asks to proceed
+    4. User provides → AI asks for address (street, postal code, city)
+    5. User provides address → AI confirms all details and asks to proceed
 
 - [ ] **2.3** Add validation helpers
-  - Email format validation
-  - Dutch/Belgian phone number validation
-  - Postal code format (Dutch: "1234 AB")
-  - Reuse existing validators from `src/lib/appointments/utils.ts`
+  - Email format validation: `isValidEmail()`
+  - Dutch/Belgian phone number validation: `isValidPhone()`
+  - Postal code format (Dutch: "1234 AB", Belgian: "1234"): `isValidPostalCode()`
+  - Postal code normalization: `normalizePostalCode()`
+  - All validators already exist in `src/lib/appointments/utils.ts`
 
 - [ ] **2.4** Consider conversation state management
   - Option A: Stateless (AI extracts from full conversation history)
@@ -126,26 +135,26 @@ This document outlines a phased approach to integrate appointment booking capabi
 ### Tasks
 
 - [ ] **3.1** Create a `createAppointment` server-side tool
-  - Schema with all required fields:
+  - Schema matching `CreateAppointmentInput` from `src/types/appointments.ts`:
     ```typescript
     z.object({
-      appointmentDate: z.string().describe('Date in YYYY-MM-DD format'),
-      appointmentTime: z.string().describe('Time in HH:MM format'),
-      customerName: z.string(),
-      customerEmail: z.string().email(),
-      customerPhone: z.string(),
-      customerStreet: z.string().optional(),
-      customerPostalCode: z.string().optional(),
-      customerCity: z.string().optional(),
+      appointment_date: z.string().describe('Date in YYYY-MM-DD format'),
+      appointment_time: z.string().describe('Time in HH:MM format'),
+      customer_name: z.string(),
+      customer_email: z.string().email(),
+      customer_phone: z.string(),
+      customer_street: z.string(),        // REQUIRED
+      customer_postal_code: z.string(),   // REQUIRED
+      customer_city: z.string(),          // REQUIRED
       remarks: z.string().optional(),
     })
     ```
   - Execute function:
-    - Validate all inputs
-    - Check slot is still available (prevent race conditions)
-    - Create appointment using existing logic from `src/lib/appointments/`
-    - Trigger email notifications
-    - Return confirmation with edit link
+    - Validate all inputs using existing validators
+    - Check slot is still available with `isSlotAvailable(date, time)` (prevents race conditions)
+    - Create appointment using `createAppointment()` from `src/lib/appointments/queries.ts`
+    - Send emails using `sendNewAppointmentEmails()` from `src/lib/appointments/email.ts`
+    - Return confirmation with edit link (uses `appointment.edit_token`)
 
 - [ ] **3.2** Add confirmation step before booking
   - AI should summarize all details and ask for confirmation
@@ -164,9 +173,11 @@ This document outlines a phased approach to integrate appointment booking capabi
 
 ### Technical Notes
 
-- Reuse `createAppointment()` from appointment API logic
-- Ensure email notifications are sent (confirmation + admin notification)
-- Include edit token in response so AI can share the link
+- Reuse `createAppointment()` from `src/lib/appointments/queries.ts`
+- Use `sendNewAppointmentEmails()` which sends both customer confirmation and admin notification (with ICS attachment)
+- Edit token is auto-generated and included in `appointment.edit_token`
+- Edit URL format: `https://assymo.be/afspraak/{edit_token}`
+- Reminder emails are sent automatically 24h before appointment via cron job
 
 ---
 
@@ -184,10 +195,10 @@ This document outlines a phased approach to integrate appointment booking capabi
     description: 'Ask user to confirm booking details',
     parameters: z.object({
       summary: z.string(),
-      date: z.string(),
-      time: z.string(),
-      customerName: z.string(),
-      customerEmail: z.string(),
+      appointment_date: z.string(),
+      appointment_time: z.string(),
+      customer_name: z.string(),
+      customer_email: z.string(),
     }),
     // No execute = client-side tool
   }
@@ -222,7 +233,8 @@ This document outlines a phased approach to integrate appointment booking capabi
   - Consider summarizing booking state periodically
 
 - [ ] **5.2** Add rate limiting considerations
-  - Booking attempts should count toward rate limit
+  - Chat already has rate limiting via `checkRateLimit()` in `src/lib/rateLimit.ts`
+  - Consider: should booking attempts count separately toward rate limit?
   - Prevent abuse of booking tool
 
 - [ ] **5.3** Add analytics/logging
@@ -285,7 +297,7 @@ This document outlines a phased approach to integrate appointment booking capabi
 │                  Existing Appointments Lib                       │
 │                  src/lib/appointments/                           │
 ├─────────────────────────────────────────────────────────────────┤
-│  availability.ts  │  db-setup.ts  │  email.ts  │  utils.ts      │
+│  availability.ts  │  queries.ts  │  email.ts  │  utils.ts  │  ics.ts  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -329,12 +341,18 @@ AI: Bedankt Jan! En op welk e-mailadres en telefoonnummer kan ik je bereiken?
 
 User: jan@example.com en 06-12345678
 
+AI: Bedankt! Om de afspraak te kunnen bevestigen heb ik ook je adres nodig.
+    Wat is je straatnaam en huisnummer, postcode en plaats?
+
+User: Kerkstraat 12, 2000 Antwerpen
+
 AI: Super! Even ter bevestiging:
 
     📅 Woensdag 11 december 2024 om 14:00
     👤 Jan de Vries
     ✉️ jan@example.com
     📱 06-12345678
+    🏠 Kerkstraat 12, 2000 Antwerpen
     📍 Assymo Showroom, Eikenlei 159, 2960 Brecht
 
     Klopt dit en mag ik de afspraak voor je inplannen?
