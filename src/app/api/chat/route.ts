@@ -118,7 +118,7 @@ Baseer je antwoorden ALLEEN op bovenstaande informatie.`;
       system: systemPrompt,
       messages: modelMessages,
       tools: bookingTools,
-      stopWhen: stepCountIs(3), // Allow tool call + response generation
+      stopWhen: stepCountIs(5), // Allow multiple tool calls + response generation
       providerOptions: {
         openai: {
           reasoningEffort: "minimal",

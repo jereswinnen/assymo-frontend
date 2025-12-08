@@ -1,12 +1,19 @@
 import { z } from "zod";
 import { tool } from "ai";
-import { getAvailability } from "@/lib/appointments/availability";
+import {
+  getAvailability,
+  isSlotAvailable,
+} from "@/lib/appointments/availability";
+import { createAppointment } from "@/lib/appointments/queries";
+import { sendNewAppointmentEmails } from "@/lib/appointments/email";
 import {
   toDateString,
   isValidEmail,
   isValidPhone,
   isValidPostalCode,
   normalizePostalCode,
+  formatDateNL,
+  formatTimeNL,
 } from "@/lib/appointments/utils";
 
 /**
@@ -58,8 +65,10 @@ export const checkAvailabilityTool = tool({
       );
 
       // Format for the AI to present conversationally
+      // Pre-format dates so the AI doesn't need to calculate day names
       const formattedAvailability = daysWithAvailability.map((day) => ({
         date: day.date,
+        date_formatted: formatDateNL(day.date), // e.g., "maandag 9 december 2024"
         available_times: day.slots
           .filter((slot) => slot.available)
           .map((slot) => slot.time),
@@ -235,9 +244,169 @@ export const collectBookingInfoTool = tool({
 });
 
 /**
+ * Schema for creating an appointment
+ */
+const createAppointmentSchema = z.object({
+  appointment_date: z.string().describe("Appointment date in YYYY-MM-DD format"),
+  appointment_time: z.string().describe("Appointment time in HH:MM format"),
+  customer_name: z.string().describe("Customer's full name"),
+  customer_email: z.string().describe("Customer's email address"),
+  customer_phone: z.string().describe("Customer's phone number"),
+  customer_street: z.string().describe("Street name and house number"),
+  customer_postal_code: z.string().describe("Postal code"),
+  customer_city: z.string().describe("City name"),
+  remarks: z.string().optional().describe("Optional remarks from the customer"),
+});
+
+type CreateAppointmentParams = z.infer<typeof createAppointmentSchema>;
+
+/**
+ * Tool for creating an appointment
+ *
+ * IMPORTANT: Only use this tool AFTER the customer has confirmed all details.
+ * The AI should summarize the booking details and ask for explicit confirmation
+ * before calling this tool.
+ */
+export const createAppointmentTool = tool({
+  description:
+    "Create a new appointment booking. ONLY use this after the customer has explicitly confirmed all their details are correct. This will create the appointment and send confirmation emails.",
+  inputSchema: createAppointmentSchema,
+  execute: async (params: CreateAppointmentParams) => {
+    // Validate all required fields
+    const errors: string[] = [];
+
+    if (!params.customer_name?.trim()) {
+      errors.push("Naam ontbreekt");
+    }
+
+    if (!isValidEmail(params.customer_email)) {
+      errors.push("Ongeldig e-mailadres");
+    }
+
+    if (!isValidPhone(params.customer_phone)) {
+      errors.push("Ongeldig telefoonnummer");
+    }
+
+    if (!isValidPostalCode(params.customer_postal_code)) {
+      errors.push("Ongeldige postcode");
+    }
+
+    if (!params.customer_street?.trim()) {
+      errors.push("Straat ontbreekt");
+    }
+
+    if (!params.customer_city?.trim()) {
+      errors.push("Plaats ontbreekt");
+    }
+
+    // Validate date format
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(params.appointment_date)) {
+      errors.push("Ongeldige datum");
+    }
+
+    // Validate time format
+    if (!/^\d{2}:\d{2}$/.test(params.appointment_time)) {
+      errors.push("Ongeldige tijd");
+    }
+
+    if (errors.length > 0) {
+      return {
+        success: false,
+        error: "validation_error",
+        message: `Validatiefouten: ${errors.join(", ")}`,
+        errors,
+      };
+    }
+
+    // Check if slot is still available (race condition prevention)
+    try {
+      const slotAvailable = await isSlotAvailable(
+        params.appointment_date,
+        params.appointment_time
+      );
+
+      if (!slotAvailable) {
+        return {
+          success: false,
+          error: "slot_unavailable",
+          message:
+            "Helaas, dit tijdslot is niet meer beschikbaar. Wil je een ander moment kiezen?",
+        };
+      }
+    } catch (error) {
+      console.error("Error checking slot availability:", error);
+      return {
+        success: false,
+        error: "system_error",
+        message:
+          "Er ging iets mis bij het controleren van de beschikbaarheid. Probeer het opnieuw.",
+      };
+    }
+
+    // Create the appointment
+    try {
+      const normalizedPostalCode = normalizePostalCode(params.customer_postal_code);
+
+      const appointment = await createAppointment({
+        appointment_date: params.appointment_date,
+        appointment_time: params.appointment_time,
+        customer_name: params.customer_name.trim(),
+        customer_email: params.customer_email.trim().toLowerCase(),
+        customer_phone: params.customer_phone.trim(),
+        customer_street: params.customer_street.trim(),
+        customer_postal_code: normalizedPostalCode,
+        customer_city: params.customer_city.trim(),
+        remarks: params.remarks?.trim() || undefined,
+      });
+
+      // Send confirmation emails (customer + admin)
+      const emailResults = await sendNewAppointmentEmails(appointment);
+
+      if (!emailResults.customerEmail) {
+        console.error("Failed to send customer confirmation email");
+      }
+
+      if (!emailResults.adminEmail) {
+        console.error("Failed to send admin notification email");
+      }
+
+      // Generate edit URL
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be";
+      const editUrl = `${baseUrl}/afspraak/${appointment.edit_token}`;
+
+      return {
+        success: true,
+        appointment: {
+          id: appointment.id,
+          date: formatDateNL(appointment.appointment_date),
+          time: formatTimeNL(appointment.appointment_time),
+          customer_name: appointment.customer_name,
+          customer_email: appointment.customer_email,
+        },
+        edit_url: editUrl,
+        emails_sent: {
+          customer: emailResults.customerEmail,
+          admin: emailResults.adminEmail,
+        },
+        message: `Afspraak bevestigd voor ${formatDateNL(appointment.appointment_date)} om ${formatTimeNL(appointment.appointment_time)}`,
+      };
+    } catch (error) {
+      console.error("Error creating appointment:", error);
+      return {
+        success: false,
+        error: "system_error",
+        message:
+          "Er ging iets mis bij het aanmaken van de afspraak. Je kunt ook direct boeken via onze website: assymo.be/afspraak",
+      };
+    }
+  },
+});
+
+/**
  * All booking-related tools for the chatbot
  */
 export const bookingTools = {
   checkAvailability: checkAvailabilityTool,
   collectBookingInfo: collectBookingInfoTool,
+  createAppointment: createAppointmentTool,
 };

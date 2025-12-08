@@ -134,7 +134,7 @@ This document outlines a phased approach to integrate appointment booking capabi
 
 ### Tasks
 
-- [ ] **3.1** Create a `createAppointment` server-side tool
+- [x] **3.1** Create a `createAppointment` server-side tool
   - Schema matching `CreateAppointmentInput` from `src/types/appointments.ts`:
     ```typescript
     z.object({
@@ -156,17 +156,17 @@ This document outlines a phased approach to integrate appointment booking capabi
     - Send emails using `sendNewAppointmentEmails()` from `src/lib/appointments/email.ts`
     - Return confirmation with edit link (uses `appointment.edit_token`)
 
-- [ ] **3.2** Add confirmation step before booking
+- [x] **3.2** Add confirmation step before booking
   - AI should summarize all details and ask for confirmation
   - Only call `createAppointment` after user confirms
   - Example: "Ik heb de volgende gegevens: [summary]. Klopt dit en mag ik de afspraak inplannen?"
 
-- [ ] **3.3** Handle booking errors gracefully
+- [x] **3.3** Handle booking errors gracefully
   - Slot no longer available → Suggest alternatives
   - Validation errors → Ask for corrected info
   - System errors → Apologize and suggest using the booking form directly
 
-- [ ] **3.4** Update system prompt with booking instructions
+- [x] **3.4** Update system prompt with booking instructions
   - Always confirm before booking
   - Explain what happens after booking (email confirmation)
   - Provide edit link if booking succeeds
