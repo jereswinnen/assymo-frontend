@@ -59,8 +59,16 @@ export default function AdminPage() {
 
   return (
     <>
-      <Tabs defaultValue="conversations" className="w-full">
+      <Tabs defaultValue="appointments" className="w-full">
         <TabsList>
+          <TabsTrigger value="appointments">
+            <CalendarDaysIcon />
+            Afspraken
+          </TabsTrigger>
+          <TabsTrigger value="emails">
+            <MailIcon />
+            E-mails
+          </TabsTrigger>
           <TabsTrigger value="conversations">
             <MessagesSquareIcon />
             Conversaties
@@ -69,19 +77,19 @@ export default function AdminPage() {
             <ScanTextIcon />
             Embeddings
           </TabsTrigger>
-          <TabsTrigger value="emails">
-            <MailIcon />
-            E-mails
-          </TabsTrigger>
-          <TabsTrigger value="appointments">
-            <CalendarDaysIcon />
-            Afspraken
-          </TabsTrigger>
           <TabsTrigger value="settings">
             <SettingsIcon />
             Instellingen
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="appointments">
+          <AppointmentsDashboard />
+        </TabsContent>
+
+        <TabsContent value="emails">
+          <EmailDashboard />
+        </TabsContent>
 
         <TabsContent value="conversations">
           <ConversationList
@@ -92,14 +100,6 @@ export default function AdminPage() {
 
         <TabsContent value="embeddings">
           <DocumentEmbeddings />
-        </TabsContent>
-
-        <TabsContent value="emails">
-          <EmailDashboard />
-        </TabsContent>
-
-        <TabsContent value="appointments">
-          <AppointmentsDashboard />
         </TabsContent>
 
         <TabsContent value="settings">
