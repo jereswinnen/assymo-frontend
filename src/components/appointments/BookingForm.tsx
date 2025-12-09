@@ -15,18 +15,19 @@ import {
 } from "@/components/ui/field";
 import {
   CalendarIcon,
-  MapPinIcon,
-  CheckIcon,
   Loader2Icon,
   CalendarClockIcon,
   CircleUserRoundIcon,
+  CheckIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { DateAvailability } from "@/types/appointments";
 import { formatDateNL } from "@/lib/appointments/utils";
+import { actionVariants } from "../Action";
+import { Label } from "../ui/label";
 
-type FormStep = "datetime" | "details" | "confirm";
+type FormStep = "datetime" | "details";
 
 interface FormData {
   appointment_date: string;
@@ -71,9 +72,7 @@ interface BookingFormProps {
   className?: string;
 }
 
-export function BookingForm({
-  className,
-}: BookingFormProps) {
+export function BookingForm({ className }: BookingFormProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<FormStep>("datetime");
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -146,14 +145,10 @@ export function BookingForm({
     );
   };
 
-  const handleDetailsSubmit = (e: React.FormEvent) => {
+  const handleDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isDetailsValid()) {
-      setCurrentStep("confirm");
-    }
-  };
+    if (!isDetailsValid()) return;
 
-  const handleConfirm = async () => {
     setSubmitting(true);
     setError(null);
 
@@ -189,13 +184,11 @@ export function BookingForm({
 
   const goBack = () => {
     if (currentStep === "details") setCurrentStep("datetime");
-    else if (currentStep === "confirm") setCurrentStep("details");
   };
 
   const steps = [
     { id: "datetime", label: "Datum & tijd", icon: CalendarClockIcon },
     { id: "details", label: "Gegevens", icon: CircleUserRoundIcon },
-    { id: "confirm", label: "Bevestigen", icon: CheckIcon },
   ];
 
   const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
@@ -220,7 +213,7 @@ export function BookingForm({
                 )}
               >
                 <Icon className="size-4" />
-                <span className="hidden sm:inline">{step.label}</span>
+                <span>{step.label}</span>
               </div>
               <div
                 className={cn(
@@ -236,38 +229,23 @@ export function BookingForm({
       </div>
 
       {/* Step content */}
-      <div className="bg-card rounded-xl border p-6">
+      <div className="rounded-xl border border-stone-200 p-6">
         {/* Date & time selection */}
         {currentStep === "datetime" && (
-          <div>
-            <h2 className="text-lg! font-medium! mb-4">Kies een datum en tijd</h2>
-            <Calendar
-              selectedDate={formData.appointment_date}
-              selectedTime={formData.appointment_time}
-              onDateTimeSelect={handleDateTimeSelect}
-              availability={availability}
-              loading={loadingAvailability}
-              onMonthChange={handleMonthChange}
-            />
-          </div>
+          <Calendar
+            selectedDate={formData.appointment_date}
+            selectedTime={formData.appointment_time}
+            onDateTimeSelect={handleDateTimeSelect}
+            availability={availability}
+            loading={loadingAvailability}
+            onMonthChange={handleMonthChange}
+          />
         )}
 
         {/* Customer details */}
         {currentStep === "details" && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg! font-medium!">Uw gegevens</h2>
-              <Button variant="ghost" size="sm" onClick={goBack}>
-                Wijzig datum/tijd
-              </Button>
-            </div>
-            <p className="text-muted-foreground mb-6">
-              {formatDateNL(formData.appointment_date)} om{" "}
-              <span className="font-medium text-foreground">
-                {formData.appointment_time} uur
-              </span>
-            </p>
-
+          <div className="flex flex-col gap-6">
+            <h3 className="mb-0!">Uw gegevens</h3>
             <form onSubmit={handleDetailsSubmit}>
               <FieldGroup>
                 <Field>
@@ -320,13 +298,6 @@ export function BookingForm({
                       autoComplete="tel"
                     />
                   </Field>
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <MapPinIcon className="size-4" />
-                  <span className="text-sm font-medium">Adresgegevens</span>
                 </div>
 
                 <Field>
@@ -394,110 +365,56 @@ export function BookingForm({
                   />
                 </Field>
 
-                <Button
-                  type="submit"
-                  disabled={!isDetailsValid()}
-                  className="w-full sm:w-auto"
-                >
-                  Doorgaan naar bevestiging
-                </Button>
-              </FieldGroup>
-            </form>
-          </div>
-        )}
+                <Separator />
 
-        {/* Confirmation */}
-        {currentStep === "confirm" && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg! font-medium!">Bevestig uw afspraak</h2>
-              <Button variant="ghost" size="sm" onClick={goBack}>
-                Wijzig gegevens
-              </Button>
-            </div>
-
-            <div className="space-y-6">
-              {/* Appointment summary */}
-              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                <div className="flex items-start gap-3">
-                  <CalendarIcon className="size-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="font-medium">
-                      {formatDateNL(formData.appointment_date)}
+                {/* Selected date/time display */}
+                <div className="flex flex-col gap-3">
+                  <Label>Datum &amp; tijd</Label>
+                  <div className="flex items-center justify-between bg-stone-100 rounded-lg p-4">
+                    <p className="mb-0! font-medium">
+                      {formatDateNL(formData.appointment_date)}{" "}
+                      <span className="font-normal text-stone-600">om</span>{" "}
+                      {formData.appointment_time}{" "}
+                      <span className="font-normal text-stone-600">uur</span>
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      {formData.appointment_time} uur
-                    </p>
+                    <button
+                      onClick={goBack}
+                      className={actionVariants({ variant: "secondary" })}
+                    >
+                      <CalendarClockIcon />
+                      Wijzig
+                    </button>
                   </div>
                 </div>
-              </div>
 
-              {/* Customer info summary */}
-              <div className="space-y-3">
-                <h3 className="font-medium">Uw gegevens</h3>
-                <div className="text-sm space-y-1">
-                  <p>
-                    <span className="text-muted-foreground">Naam:</span>{" "}
-                    {formData.customer_name}
+                {error && <FieldError>{error}</FieldError>}
+
+                <div className="flex flex-col gap-4">
+                  <Button
+                    type="submit"
+                    disabled={!isDetailsValid() || submitting}
+                    className={actionVariants({ variant: "primary" })}
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2Icon className="size-4 animate-spin" />
+                        Bezig met aanmaken...
+                      </>
+                    ) : (
+                      <>
+                        <CheckIcon className="size-4" />
+                        Bevestig afspraak
+                      </>
+                    )}
+                  </Button>
+
+                  <p className="text-xs text-stone-500">
+                    Na het bevestigen ontvangt u een e-mail met de details van
+                    uw afspraak en een link om deze te wijzigen of te annuleren.
                   </p>
-                  <p>
-                    <span className="text-muted-foreground">E-mail:</span>{" "}
-                    {formData.customer_email}
-                  </p>
-                  <p>
-                    <span className="text-muted-foreground">Telefoon:</span>{" "}
-                    {formData.customer_phone}
-                  </p>
-                  <p>
-                    <span className="text-muted-foreground">Adres:</span>{" "}
-                    {formData.customer_street}, {formData.customer_postal_code}{" "}
-                    {formData.customer_city}
-                  </p>
-                  {formData.remarks && (
-                    <p>
-                      <span className="text-muted-foreground">
-                        Opmerkingen:
-                      </span>{" "}
-                      {formData.remarks}
-                    </p>
-                  )}
                 </div>
-              </div>
-
-              {error && <FieldError>{error}</FieldError>}
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  onClick={handleConfirm}
-                  disabled={submitting}
-                  className="flex-1"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2Icon className="size-4 animate-spin" />
-                      Bezig met aanmaken...
-                    </>
-                  ) : (
-                    <>
-                      <CheckIcon className="size-4" />
-                      Afspraak bevestigen
-                    </>
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={goBack}
-                  disabled={submitting}
-                >
-                  Terug
-                </Button>
-              </div>
-
-              <p className="text-xs text-muted-foreground">
-                Na het bevestigen ontvangt u een e-mail met de details van uw
-                afspraak en een link om deze te wijzigen of te annuleren.
-              </p>
-            </div>
+              </FieldGroup>
+            </form>
           </div>
         )}
       </div>

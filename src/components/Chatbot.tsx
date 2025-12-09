@@ -188,7 +188,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
         {onClose && (
           <button
             onClick={onClose}
-            className="cursor-pointer p-1 bg-muted text-muted-foreground rounded-full transition-colors"
+            className="p-1 bg-muted text-muted-foreground rounded-full transition-colors"
             aria-label="Sluit chat"
           >
             <XIcon className="size-4" />
@@ -220,7 +220,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                       onClick={() => {
                         sendMessage({ text: question });
                       }}
-                      className="cursor-pointer text-left flex text-sm font-medium rounded-lg p-2 bg-stone-100 hover:bg-stone-200 transition-colors"
+                      className="text-left flex text-sm font-medium rounded-lg p-2 bg-stone-100 hover:bg-stone-200 transition-colors"
                       //disabled={status !== "ready"}
                     >
                       {question}
@@ -399,11 +399,11 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                 <InputGroupText className="ml-auto text-xs text-muted-foreground">
                   {CHATBOT_CONFIG.maxInputLength - input.length}
                 </InputGroupText>
-                <Separator orientation="vertical" className="!h-4" />
+                <Separator orientation="vertical" className="h-4!" />
                 <InputGroupButton
                   type="submit"
                   variant="default"
-                  className="cursor-pointer rounded-full"
+                  className="rounded-full"
                   size="icon-xs"
                   disabled={!input.trim() || isThinking}
                 >
