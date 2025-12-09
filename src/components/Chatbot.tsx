@@ -188,7 +188,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
         {onClose && (
           <button
             onClick={onClose}
-            className="p-1 bg-muted text-muted-foreground rounded-full transition-colors"
+            className="cursor-pointer p-1 bg-muted text-muted-foreground rounded-full transition-colors"
             aria-label="Sluit chat"
           >
             <XIcon className="size-4" />
@@ -372,51 +372,57 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
             <p className="text-sm mt-1">Reset over: {countdown}</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit}>
-            <InputGroup>
-              <InputGroupTextarea
-                ref={textareaRef}
-                placeholder="Stel je vraag..."
-                value={input}
-                onChange={(e) => {
-                  const newValue = e.target.value;
-                  // Enforce character limit
-                  if (newValue.length <= CHATBOT_CONFIG.maxInputLength) {
-                    setInput(newValue);
-                  }
-                }}
-                onKeyDown={handleKeyDown}
-                rows={2}
-                disabled={isThinking}
-                maxLength={CHATBOT_CONFIG.maxInputLength}
-              />
-              <InputGroupAddon align="block-end">
-                <InputGroupText className="text-xs text-muted-foreground">
-                  {remainingMessages}{" "}
-                  {remainingMessages === 1 ? "bericht" : "berichten"} resterend
-                  {countdown && ` (reset: ${countdown})`}
-                </InputGroupText>
-                <InputGroupText className="ml-auto text-xs text-muted-foreground">
-                  {CHATBOT_CONFIG.maxInputLength - input.length}
-                </InputGroupText>
-                <Separator orientation="vertical" className="h-4!" />
-                <InputGroupButton
-                  type="submit"
-                  variant="default"
-                  className="rounded-full"
-                  size="icon-xs"
-                  disabled={!input.trim() || isThinking}
-                >
-                  {isThinking ? (
-                    <Spinner className="size-4" />
-                  ) : (
-                    <ArrowUpIcon />
-                  )}
-                  <span className="sr-only">Verstuur bericht</span>
-                </InputGroupButton>
-              </InputGroupAddon>
-            </InputGroup>
-          </form>
+          <div className="flex flex-col gap-1">
+            <form onSubmit={handleSubmit}>
+              <InputGroup>
+                <InputGroupTextarea
+                  ref={textareaRef}
+                  placeholder="Stel je vraag..."
+                  value={input}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    // Enforce character limit
+                    if (newValue.length <= CHATBOT_CONFIG.maxInputLength) {
+                      setInput(newValue);
+                    }
+                  }}
+                  onKeyDown={handleKeyDown}
+                  rows={2}
+                  disabled={isThinking}
+                  maxLength={CHATBOT_CONFIG.maxInputLength}
+                />
+                <InputGroupAddon align="block-end">
+                  <InputGroupText className="text-xs text-muted-foreground">
+                    {remainingMessages}{" "}
+                    {remainingMessages === 1 ? "bericht" : "berichten"}{" "}
+                    resterend
+                    {countdown && ` (reset: ${countdown})`}
+                  </InputGroupText>
+                  <InputGroupText className="ml-auto text-xs text-muted-foreground">
+                    {CHATBOT_CONFIG.maxInputLength - input.length}
+                  </InputGroupText>
+                  <Separator orientation="vertical" className="h-4!" />
+                  <InputGroupButton
+                    type="submit"
+                    variant="default"
+                    className="cursor-pointer rounded-full"
+                    size="icon-xs"
+                    disabled={!input.trim() || isThinking}
+                  >
+                    {isThinking ? (
+                      <Spinner className="size-4" />
+                    ) : (
+                      <ArrowUpIcon />
+                    )}
+                    <span className="sr-only">Verstuur bericht</span>
+                  </InputGroupButton>
+                </InputGroupAddon>
+              </InputGroup>
+            </form>
+            <p className="hidden mb-0! text-xs text-stone-500 text-center">
+              Kan fouten maken.
+            </p>
+          </div>
         )}
       </div>
     </div>
