@@ -170,8 +170,8 @@ export function BookingForm({
         throw new Error(data.error || "Kon afspraak niet aanmaken");
       }
 
-      // Redirect to appointment page with success status
-      router.push(`${data.edit_url}?status=booked`);
+      // Redirect to appointment page with success status (relative URL for correct domain)
+      router.push(`/afspraak/${data.appointment.edit_token}?status=booked`);
     } catch (err) {
       console.error("Failed to create appointment:", err);
       setError(

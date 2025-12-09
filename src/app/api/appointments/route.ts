@@ -28,8 +28,7 @@ import type { CreateAppointmentInput } from "@/types/appointments";
  *
  * Returns:
  * - success: boolean
- * - appointment: Created appointment data
- * - edit_url: URL for customer to manage their appointment
+ * - appointment: Created appointment data (includes edit_token for building manage URL)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -138,10 +137,6 @@ export async function POST(request: NextRequest) {
       console.error("Failed to send appointment emails:", err);
     });
 
-    // Generate edit URL
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be";
-    const editUrl = `${baseUrl}/afspraak/${appointment.edit_token}`;
-
     return NextResponse.json({
       success: true,
       appointment: {
@@ -151,8 +146,8 @@ export async function POST(request: NextRequest) {
         customer_name: appointment.customer_name,
         customer_email: appointment.customer_email,
         status: appointment.status,
+        edit_token: appointment.edit_token,
       },
-      edit_url: editUrl,
     });
   } catch (error) {
     console.error("Error creating appointment:", error);
