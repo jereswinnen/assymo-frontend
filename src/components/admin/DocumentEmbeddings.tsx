@@ -1,19 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Item,
-  ItemMedia,
-  ItemContent,
-  ItemTitle,
-  ItemDescription,
-  ItemActions,
-} from "@/components/ui/item";
 import {
   Dialog,
   DialogContent,
@@ -220,28 +211,24 @@ export function DocumentEmbeddings() {
 
   if (loading) {
     return (
-      <Card className="h-full">
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center py-8">
+        <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+      </div>
     );
   }
 
   return (
-    <Card className="h-full overflow-auto">
-      <CardContent className="space-y-6">
-        {/* Current Document Status */}
-        {documentInfo ? (
-          <Item variant="outline">
-            <ItemMedia variant="icon">
-              <FileTextIcon />
-            </ItemMedia>
-            <ItemContent className="flex flex-col gap-2">
-              <ItemTitle>{documentInfo.documentName}</ItemTitle>
-              <ItemDescription className="flex flex-wrap gap-2">
+    <div className="space-y-6">
+      {/* Current Document Status */}
+      {documentInfo ? (
+        <div className="flex items-center justify-between p-4 border rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center size-10 border rounded-md bg-muted">
+              <FileTextIcon className="size-5" />
+            </div>
+            <div>
+              <div className="font-medium">{documentInfo.documentName}</div>
+              <div className="flex flex-wrap gap-2 mt-1">
                 <Badge variant="secondary">
                   {documentInfo.chunkCount} chunks
                 </Badge>
@@ -258,195 +245,193 @@ export function DocumentEmbeddings() {
                     },
                   )}
                 </Badge>
-              </ItemDescription>
-            </ItemContent>
-            <ItemActions>
-              <Button variant="destructive" size="sm" onClick={handleDeleteClick}>
-                <Trash2Icon className="size-4" />
-                Verwijder
-              </Button>
-            </ItemActions>
-          </Item>
-        ) : (
-          <Alert>
-            <AlertCircleIcon className="size-4" />
-            <AlertDescription>
-              Geen document geüpload. Upload een Markdown bestand om te
-              beginnen.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Document verwijderen</DialogTitle>
-              <DialogDescription>
-                Weet je zeker dat je het huidige document wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setDeleteDialogOpen(false)}
-                disabled={deleting}
-              >
-                Annuleren
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDeleteConfirm}
-                disabled={deleting}
-              >
-                {deleting ? (
-                  <>
-                    <Loader2Icon className="size-4 animate-spin" />
-                    Verwijderen...
-                  </>
-                ) : (
-                  <>
-                    <Trash2Icon className="size-4" />
-                    Verwijderen
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        <Separator />
-
-        {/* Upload Section */}
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="document-file" className="text-base font-semibold">
-              Upload Document
-            </Label>
-            <p className="text-sm text-muted-foreground mt-1">
-              Upload een Markdown document (vervangt het huidige document)
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            <Input
-              id="document-file"
-              type="file"
-              accept=".md"
-              onChange={handleFileChange}
-              disabled={uploading}
-            />
-
-            {file && (
-              <div className="text-sm text-muted-foreground">
-                Geselecteerd: <span className="font-medium">{file.name}</span> (
-                {(file.size / 1024).toFixed(0)} KB)
               </div>
-            )}
+            </div>
+          </div>
+          <Button variant="destructive" size="sm" onClick={handleDeleteClick}>
+            <Trash2Icon className="size-4" />
+            Verwijder
+          </Button>
+        </div>
+      ) : (
+        <Alert>
+          <AlertCircleIcon className="size-4" />
+          <AlertDescription>
+            Geen document geüpload. Upload een Markdown bestand om te
+            beginnen.
+          </AlertDescription>
+        </Alert>
+      )}
 
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Document verwijderen</DialogTitle>
+            <DialogDescription>
+              Weet je zeker dat je het huidige document wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
             <Button
-              onClick={handleUpload}
-              disabled={!file || uploading}
-              className="w-full"
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deleting}
             >
-              {uploading ? (
+              Annuleren
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+            >
+              {deleting ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Verwerken...
+                  Verwijderen...
                 </>
               ) : (
                 <>
-                  <UploadIcon className="size-4" />
-                  Upload en Verwerk Document
+                  <Trash2Icon className="size-4" />
+                  Verwijderen
                 </>
               )}
             </Button>
-          </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Separator />
+
+      {/* Upload Section */}
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="document-file" className="text-base font-semibold">
+            Upload Document
+          </Label>
+          <p className="text-sm text-muted-foreground mt-1">
+            Upload een Markdown document (vervangt het huidige document)
+          </p>
         </div>
 
-        <Separator />
+        <div className="space-y-3">
+          <Input
+            id="document-file"
+            type="file"
+            accept=".md"
+            onChange={handleFileChange}
+            disabled={uploading}
+          />
 
-        {/* Test Retrieval Section */}
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="test-query" className="text-base font-semibold">
-              Test Retrieval
-            </Label>
-            <p className="text-sm text-muted-foreground mt-1">
-              Test de vector search met een voorbeeldvraag
-            </p>
-          </div>
-
-          <form onSubmit={handleTestRetrieval} className="space-y-3">
-            <Textarea
-              id="test-query"
-              placeholder="bijv. Wat zijn jullie openingstijden?"
-              value={testQuery}
-              onChange={(e) => setTestQuery(e.target.value)}
-              disabled={testing || !documentInfo}
-              rows={2}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleTestRetrieval();
-                }
-              }}
-            />
-
-            <Button
-              type="submit"
-              disabled={!testQuery.trim() || testing || !documentInfo}
-              variant="outline"
-              className="w-full"
-            >
-              {testing ? (
-                <>
-                  <Loader2Icon className="size-4 animate-spin" />
-                  Zoeken...
-                </>
-              ) : (
-                <>
-                  <ScanTextIcon className="size-4" />
-                  Test Retrieval
-                </>
-              )}
-            </Button>
-          </form>
-
-          {/* Test Results */}
-          {testResults && testResults.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-sm font-medium">
-                Gevonden chunks ({testResults.length}):
-              </p>
-              {testResults.map((chunk, index) => (
-                <div
-                  key={index}
-                  className="p-3 bg-muted rounded-lg text-sm space-y-1"
-                >
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      Chunk {index + 1}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {chunk.length} tekens
-                    </span>
-                  </div>
-                  <p className="text-foreground whitespace-pre-wrap">{chunk}</p>
-                </div>
-              ))}
+          {file && (
+            <div className="text-sm text-muted-foreground">
+              Geselecteerd: <span className="font-medium">{file.name}</span> (
+              {(file.size / 1024).toFixed(0)} KB)
             </div>
           )}
 
-          {testResults && testResults.length === 0 && (
-            <Alert>
-              <AlertCircleIcon className="size-4" />
-              <AlertDescription>
-                Geen relevante chunks gevonden voor deze query.
-              </AlertDescription>
-            </Alert>
-          )}
+          <Button
+            onClick={handleUpload}
+            disabled={!file || uploading}
+            className="w-full"
+          >
+            {uploading ? (
+              <>
+                <Loader2Icon className="size-4 animate-spin" />
+                Verwerken...
+              </>
+            ) : (
+              <>
+                <UploadIcon className="size-4" />
+                Upload en Verwerk Document
+              </>
+            )}
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      <Separator />
+
+      {/* Test Retrieval Section */}
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="test-query" className="text-base font-semibold">
+            Test Retrieval
+          </Label>
+          <p className="text-sm text-muted-foreground mt-1">
+            Test de vector search met een voorbeeldvraag
+          </p>
+        </div>
+
+        <form onSubmit={handleTestRetrieval} className="space-y-3">
+          <Textarea
+            id="test-query"
+            placeholder="bijv. Wat zijn jullie openingstijden?"
+            value={testQuery}
+            onChange={(e) => setTestQuery(e.target.value)}
+            disabled={testing || !documentInfo}
+            rows={2}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleTestRetrieval();
+              }
+            }}
+          />
+
+          <Button
+            type="submit"
+            disabled={!testQuery.trim() || testing || !documentInfo}
+            variant="outline"
+            className="w-full"
+          >
+            {testing ? (
+              <>
+                <Loader2Icon className="size-4 animate-spin" />
+                Zoeken...
+              </>
+            ) : (
+              <>
+                <ScanTextIcon className="size-4" />
+                Test Retrieval
+              </>
+            )}
+          </Button>
+        </form>
+
+        {/* Test Results */}
+        {testResults && testResults.length > 0 && (
+          <div className="space-y-3">
+            <p className="text-sm font-medium">
+              Gevonden chunks ({testResults.length}):
+            </p>
+            {testResults.map((chunk, index) => (
+              <div
+                key={index}
+                className="p-3 bg-muted rounded-lg text-sm space-y-1"
+              >
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs">
+                    Chunk {index + 1}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {chunk.length} tekens
+                  </span>
+                </div>
+                <p className="text-foreground whitespace-pre-wrap">{chunk}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {testResults && testResults.length === 0 && (
+          <Alert>
+            <AlertCircleIcon className="size-4" />
+            <AlertDescription>
+              Geen relevante chunks gevonden voor deze query.
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+    </div>
   );
 }

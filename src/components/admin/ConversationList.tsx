@@ -1,15 +1,13 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import {
-  Item,
-  ItemGroup,
-  ItemContent,
-  ItemTitle,
-  ItemDescription,
-  ItemMedia,
-} from "@/components/ui/item";
-import { MessageSquareIcon } from "lucide-react";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export type Message = {
   id: number;
@@ -38,42 +36,47 @@ export function ConversationList({
   conversations,
   onConversationClick,
 }: ConversationListProps) {
+  if (conversations.length === 0) {
+    return (
+      <div className="text-muted-foreground text-center text-sm py-8">
+        Nog geen conversaties
+      </div>
+    );
+  }
+
   return (
-    <Card className="flex flex-col">
-      <CardContent className="flex-1 overflow-hidden">
-        {conversations.length === 0 ? (
-          <div className="text-muted-foreground text-center text-sm py-8">
-            Nog geen conversaties
-          </div>
-        ) : (
-          <ItemGroup className="max-h-full overflow-y-auto space-y-1">
-            {conversations.map((conv) => (
-              <Item
-                key={conv.session_id}
-                variant="outline"
-                size="sm"
-                className="cursor-pointer hover:bg-accent/50"
-                onClick={() => onConversationClick(conv)}
-              >
-                <ItemMedia variant="icon">
-                  <MessageSquareIcon className="size-4" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>
-                    Session {conv.session_id.substring(0, 8)}...
-                  </ItemTitle>
-                  <ItemDescription>
-                    {conv.message_count} message
-                    {conv.message_count !== 1 ? "s" : ""} •
-                    {new Date(conv.last_message_at).toLocaleDateString()} at{" "}
-                    {new Date(conv.last_message_at).toLocaleTimeString()}
-                  </ItemDescription>
-                </ItemContent>
-              </Item>
-            ))}
-          </ItemGroup>
-        )}
-      </CardContent>
-    </Card>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Session</TableHead>
+          <TableHead>Berichten</TableHead>
+          <TableHead>Laatste activiteit</TableHead>
+          <TableHead>Gem. responstijd</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {conversations.map((conv) => (
+          <TableRow
+            key={conv.session_id}
+            className="cursor-pointer"
+            onClick={() => onConversationClick(conv)}
+          >
+            <TableCell className="font-mono text-sm">
+              {conv.session_id.substring(0, 8)}...
+            </TableCell>
+            <TableCell>{conv.message_count}</TableCell>
+            <TableCell>
+              {new Date(conv.last_message_at).toLocaleDateString("nl-NL", {
+                day: "numeric",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </TableCell>
+            <TableCell>{Math.round(conv.avg_response_time)}ms</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,45 +41,39 @@ export function SettingsPanel() {
   };
 
   return (
-    <Card className="h-full overflow-auto">
-      <CardContent>
-        <div className="space-y-8">
-          <div className="max-w-md space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <MailIcon className="size-4" />
-                <span className="text-sm font-medium">E-mail instellingen</span>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="testEmail">Test e-mailadres</Label>
-                <Input
-                  id="testEmail"
-                  type="email"
-                  value={testEmail}
-                  onChange={(e) => setTestEmailState(e.target.value)}
-                  placeholder={DEFAULT_TEST_EMAIL}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Dit e-mailadres wordt gebruikt voor nieuwsbrief tests (Test
-                  versturen). Opgeslagen in je browser.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <Button onClick={handleSave}>
-                <CheckIcon className="size-4" />
-                Opslaan
-              </Button>
-              <Button variant="outline" onClick={handleReset}>
-                <RotateCcwIcon className="size-4" />
-                Reset
-              </Button>
-            </div>
-          </div>
+    <div className="max-w-md space-y-6">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <MailIcon className="size-4" />
+          <span className="text-sm font-medium">E-mail instellingen</span>
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="space-y-2">
+          <Label htmlFor="testEmail">Test e-mailadres</Label>
+          <Input
+            id="testEmail"
+            type="email"
+            value={testEmail}
+            onChange={(e) => setTestEmailState(e.target.value)}
+            placeholder={DEFAULT_TEST_EMAIL}
+          />
+          <p className="text-xs text-muted-foreground">
+            Dit e-mailadres wordt gebruikt voor nieuwsbrief tests (Test
+            versturen). Opgeslagen in je browser.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex gap-3">
+        <Button onClick={handleSave}>
+          <CheckIcon className="size-4" />
+          Opslaan
+        </Button>
+        <Button variant="outline" onClick={handleReset}>
+          <RotateCcwIcon className="size-4" />
+          Reset
+        </Button>
+      </div>
+    </div>
   );
 }

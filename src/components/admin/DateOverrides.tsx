@@ -7,12 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
-  Item,
-  ItemGroup,
-  ItemContent,
-  ItemTitle,
-  ItemDescription,
-} from "@/components/ui/item";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -205,17 +206,20 @@ export function DateOverrides() {
               <h4 className="text-sm font-medium text-muted-foreground mb-2">
                 Aankomend
               </h4>
-              <ItemGroup className="space-y-1">
-                {upcomingOverrides.map((override) => (
-                  <Item
-                    key={override.id}
-                    variant="outline"
-                    size="sm"
-                    className="group"
-                  >
-                    <ItemContent>
-                      <ItemTitle className="flex items-center gap-2">
-                        {formatDate(override.date)}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Datum</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Reden</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {upcomingOverrides.map((override) => (
+                    <TableRow key={override.id}>
+                      <TableCell>{formatDate(override.date)}</TableCell>
+                      <TableCell>
                         <Badge
                           variant={
                             override.is_closed ? "destructive" : "secondary"
@@ -225,27 +229,29 @@ export function DateOverrides() {
                             ? "Gesloten"
                             : `${override.open_time?.substring(0, 5)} - ${override.close_time?.substring(0, 5)}`}
                         </Badge>
-                      </ItemTitle>
-                      {override.reason && (
-                        <ItemDescription>{override.reason}</ItemDescription>
-                      )}
-                    </ItemContent>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="opacity-0 group-hover:opacity-100 text-destructive"
-                      onClick={() => confirmDelete(override.id)}
-                      disabled={deleting === override.id}
-                    >
-                      {deleting === override.id ? (
-                        <Loader2Icon className="size-4 animate-spin" />
-                      ) : (
-                        <Trash2Icon className="size-4" />
-                      )}
-                    </Button>
-                  </Item>
-                ))}
-              </ItemGroup>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {override.reason || "-"}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => confirmDelete(override.id)}
+                          disabled={deleting === override.id}
+                        >
+                          {deleting === override.id ? (
+                            <Loader2Icon className="size-4 animate-spin" />
+                          ) : (
+                            <Trash2Icon className="size-4" />
+                          )}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
 
@@ -255,23 +261,30 @@ export function DateOverrides() {
               <h4 className="text-sm font-medium text-muted-foreground mb-2">
                 Verlopen
               </h4>
-              <ItemGroup className="space-y-1 opacity-60">
-                {pastOverrides.slice(0, 5).map((override) => (
-                  <Item key={override.id} variant="outline" size="sm">
-                    <ItemContent>
-                      <ItemTitle className="flex items-center gap-2">
-                        {formatDate(override.date)}
+              <Table className="opacity-60">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Datum</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Reden</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pastOverrides.slice(0, 5).map((override) => (
+                    <TableRow key={override.id}>
+                      <TableCell>{formatDate(override.date)}</TableCell>
+                      <TableCell>
                         <Badge variant="outline">
                           {override.is_closed ? "Gesloten" : "Aangepast"}
                         </Badge>
-                      </ItemTitle>
-                      {override.reason && (
-                        <ItemDescription>{override.reason}</ItemDescription>
-                      )}
-                    </ItemContent>
-                  </Item>
-                ))}
-              </ItemGroup>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {override.reason || "-"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </div>

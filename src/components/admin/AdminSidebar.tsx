@@ -7,7 +7,6 @@ import {
   LogOutIcon,
   MailIcon,
   MessagesSquareIcon,
-  ScanTextIcon,
   SettingsIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -28,12 +27,17 @@ import {
 const navItems = [
   { href: "/admin/appointments", label: "Afspraken", icon: CalendarDaysIcon },
   { href: "/admin/emails", label: "E-mails", icon: MailIcon },
-  { href: "/admin/conversations", label: "Conversaties", icon: MessagesSquareIcon },
-  { href: "/admin/embeddings", label: "Embeddings", icon: ScanTextIcon },
+  {
+    href: "/admin/conversations",
+    label: "Conversaties",
+    icon: MessagesSquareIcon,
+  },
   { href: "/admin/settings", label: "Instellingen", icon: SettingsIcon },
 ];
 
-export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AdminSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -57,21 +61,25 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
   };
 
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        <div className="flex h-8 items-center px-2">
-          <Logo className="h-4 w-auto" />
-        </div>
+    <Sidebar collapsible="offcanvas" {...props}>
+      <SidebarHeader className="py-4 flex items-start">
+        <Logo className="w-auto h-6" />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                const isActive =
+                  pathname === item.href ||
+                  pathname.startsWith(item.href + "/");
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.label}
+                    >
                       <Link href={item.href}>
                         <item.icon />
                         <span>{item.label}</span>

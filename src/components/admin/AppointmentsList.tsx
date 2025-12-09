@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Item,
-  ItemGroup,
-  ItemContent,
-  ItemTitle,
-  ItemDescription,
-  ItemMedia,
-} from "@/components/ui/item";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
@@ -18,13 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  CalendarIcon,
-  CalendarPlusIcon,
-  Loader2Icon,
-  SearchIcon,
-  UserIcon,
-} from "lucide-react";
+import { CalendarPlusIcon, Loader2Icon, SearchIcon } from "lucide-react";
 import { toast } from "sonner";
 import { AppointmentDialog } from "./AppointmentDialog";
 import { CreateAppointmentForm } from "./CreateAppointmentForm";
@@ -205,36 +199,40 @@ export function AppointmentsList() {
           Geen afspraken gevonden
         </div>
       ) : (
-        <ItemGroup className="space-y-1">
-          {sortedAppointments.map((appointment) => (
-            <Item
-              key={appointment.id}
-              variant="outline"
-              size="sm"
-              className="cursor-pointer hover:bg-accent/50"
-              onClick={() => handleAppointmentClick(appointment)}
-            >
-              <ItemMedia variant="icon">
-                <UserIcon className="size-4" />
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle className="flex items-center gap-2">
-                  {appointment.customer_name}
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Klant</TableHead>
+              <TableHead>Datum & tijd</TableHead>
+              <TableHead>Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedAppointments.map((appointment) => (
+              <TableRow
+                key={appointment.id}
+                className="cursor-pointer"
+                onClick={() => handleAppointmentClick(appointment)}
+              >
+                <TableCell>
+                  <div className="font-medium">{appointment.customer_name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {appointment.customer_email}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {formatDate(appointment.appointment_date)} om{" "}
+                  {formatTime(appointment.appointment_time)}
+                </TableCell>
+                <TableCell>
                   <Badge variant={getStatusBadgeVariant(appointment.status)}>
                     {STATUS_LABELS[appointment.status]}
                   </Badge>
-                </ItemTitle>
-                <ItemDescription className="flex items-center gap-2">
-                  <CalendarIcon className="size-3" />
-                  {formatDate(appointment.appointment_date)} om{" "}
-                  {formatTime(appointment.appointment_time)}
-                  <span className="text-muted-foreground">•</span>
-                  {appointment.customer_email}
-                </ItemDescription>
-              </ItemContent>
-            </Item>
-          ))}
-        </ItemGroup>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
 
       {/* View/Edit Dialog */}

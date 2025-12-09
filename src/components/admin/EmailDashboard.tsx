@@ -1,14 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2Icon, MailPlusIcon, UsersIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  ExternalLinkIcon,
+  Loader2Icon,
+  MailPlusIcon,
+  Trash2Icon,
+  UsersIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 import { NewsletterComposer } from "./NewsletterComposer";
-import { DraftsList } from "./DraftsList";
-import { BroadcastHistory } from "./BroadcastHistory";
 import { EmailTemplatePreview } from "./EmailTemplatePreview";
 import type { Newsletter } from "@/config/newsletter";
 
@@ -19,6 +40,9 @@ export function EmailDashboard() {
   const [selectedDraft, setSelectedDraft] = useState<Newsletter | null>(null);
   const [creating, setCreating] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [newsletterToDelete, setNewsletterToDelete] =
+    useState<Newsletter | null>(null);
 
   useEffect(() => {
     loadDrafts();
@@ -89,8 +113,11 @@ export function EmailDashboard() {
     }
   };
 
-  const handleSelectDraft = (draft: Newsletter) => {
-    setSelectedDraft(draft);
+  const handleSelectNewsletter = (newsletter: Newsletter) => {
+    // Only allow selecting drafts for editing
+    if (newsletter.status === "draft") {
+      setSelectedDraft(newsletter);
+    }
   };
 
   const handleSave = async (newsletter: Newsletter) => {
@@ -115,15 +142,26 @@ export function EmailDashboard() {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDeleteClick = (e: React.MouseEvent, newsletter: Newsletter) => {
+    e.stopPropagation();
+    setNewsletterToDelete(newsletter);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!newsletterToDelete) return;
+
     try {
-      const response = await fetch(`/api/admin/newsletters/${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/admin/newsletters/${newsletterToDelete.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to delete draft");
 
-      if (selectedDraft?.id === id) {
+      if (selectedDraft?.id === newsletterToDelete.id) {
         setSelectedDraft(null);
       }
       await loadDrafts();
@@ -131,6 +169,9 @@ export function EmailDashboard() {
     } catch (error) {
       console.error("Failed to delete draft:", error);
       toast.error("Kon concept niet verwijderen");
+    } finally {
+      setDeleteDialogOpen(false);
+      setNewsletterToDelete(null);
     }
   };
 
@@ -144,63 +185,133 @@ export function EmailDashboard() {
     await loadSentNewsletters();
   };
 
+  const formatDate = (date: Date | string | null) => {
+    if (!date) return "-";
+    return new Intl.DateTimeFormat("nl-NL", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(date));
+  };
+
+  // Combine drafts and sent newsletters, sorted by date (newest first)
+  const allNewsletters = [...drafts, ...sentNewsletters].sort((a, b) => {
+    const dateA = new Date(a.sentAt || a.createdAt);
+    const dateB = new Date(b.sentAt || b.createdAt);
+    return dateB.getTime() - dateA.getTime();
+  });
+
   if (loading) {
     return (
-      <Card className="h-full">
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center py-8">
+        <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+      </div>
     );
   }
 
   return (
-    <Card className="h-full overflow-auto">
-      <CardContent className="space-y-6">
-        {/* Subscriber Count */}
-        {subscriberCount !== null && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <UsersIcon className="size-4" />
-            <span>
-              <strong className="text-foreground">{subscriberCount}</strong>{" "}
-              {subscriberCount === 1 ? "abonnee" : "abonnees"}
-            </span>
-          </div>
-        )}
+    <Tabs defaultValue="newsletter" className="space-y-4" id="email-tabs">
+      <TabsList>
+        <TabsTrigger value="newsletter">Nieuwsbrief</TabsTrigger>
+        <TabsTrigger value="templates">Templates</TabsTrigger>
+      </TabsList>
 
-        {/* Drafts Section */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-semibold">Concepten</h3>
-              <p className="text-sm text-muted-foreground">
-                Werk aan een nieuwsbrief of ga verder met een concept
-              </p>
+      <TabsContent value="newsletter" className="space-y-6">
+        {/* Header with subscriber count and create button */}
+        <div className="flex items-center justify-between">
+          {subscriberCount !== null && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <UsersIcon className="size-4" />
+              <span>
+                <strong className="text-foreground">{subscriberCount}</strong>{" "}
+                {subscriberCount === 1 ? "abonnee" : "abonnees"}
+              </span>
             </div>
-            <Button onClick={handleCreateNew} disabled={creating}>
-              {creating ? (
-                <Loader2Icon className="size-4 animate-spin" />
-              ) : (
-                <MailPlusIcon className="size-4" />
-              )}
-              Nieuwe nieuwsbrief
-            </Button>
-          </div>
-
-          <DraftsList
-            drafts={drafts}
-            selectedId={selectedDraft?.id}
-            onSelect={handleSelectDraft}
-            onDelete={handleDelete}
-          />
+          )}
+          <Button onClick={handleCreateNew} disabled={creating}>
+            {creating ? (
+              <Loader2Icon className="size-4 animate-spin" />
+            ) : (
+              <MailPlusIcon className="size-4" />
+            )}
+            Nieuwe nieuwsbrief
+          </Button>
         </div>
 
+        {/* Newsletter table */}
+        {allNewsletters.length === 0 ? (
+          <div className="text-muted-foreground text-center text-sm py-8">
+            Nog geen nieuwsbrieven. Maak een nieuwe aan om te beginnen.
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Onderwerp</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Datum</TableHead>
+                <TableHead className="w-[100px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {allNewsletters.map((newsletter) => (
+                <TableRow
+                  key={newsletter.id}
+                  className={
+                    newsletter.status === "draft" ? "cursor-pointer" : ""
+                  }
+                  onClick={() => handleSelectNewsletter(newsletter)}
+                >
+                  <TableCell>
+                    {newsletter.subject || (
+                      <span className="italic text-muted-foreground">
+                        Geen onderwerp
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        newsletter.status === "sent" ? "default" : "outline"
+                      }
+                    >
+                      {newsletter.status === "sent" ? "Verzonden" : "Concept"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {formatDate(newsletter.sentAt || newsletter.createdAt)}
+                  </TableCell>
+                  <TableCell>
+                    {newsletter.status === "draft" ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => handleDeleteClick(e, newsletter)}
+                      >
+                        <Trash2Icon className="size-4" />
+                      </Button>
+                    ) : newsletter.resendEmailId ? (
+                      <a
+                        href={`https://resend.com/emails/${newsletter.resendEmailId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <ExternalLinkIcon className="size-3" />
+                      </a>
+                    ) : null}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+
+        {/* Newsletter composer */}
         {selectedDraft && (
           <>
             <Separator />
-
             <NewsletterComposer
               newsletter={selectedDraft}
               subscriberCount={subscriberCount}
@@ -211,16 +322,35 @@ export function EmailDashboard() {
           </>
         )}
 
-        {sentNewsletters.length > 0 && (
-          <>
-            <Separator />
-            <BroadcastHistory newsletters={sentNewsletters} />
-          </>
-        )}
+        {/* Delete confirmation dialog */}
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Concept verwijderen</DialogTitle>
+              <DialogDescription>
+                Weet je zeker dat je dit concept wilt verwijderen? Deze actie kan
+                niet ongedaan worden gemaakt.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setDeleteDialogOpen(false)}
+              >
+                Annuleren
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteConfirm}>
+                <Trash2Icon className="size-4" />
+                Verwijderen
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </TabsContent>
 
-        <Separator />
+      <TabsContent value="templates">
         <EmailTemplatePreview />
-      </CardContent>
-    </Card>
+      </TabsContent>
+    </Tabs>
   );
 }

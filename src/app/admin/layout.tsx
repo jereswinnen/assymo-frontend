@@ -14,7 +14,6 @@ const routeLabels: Record<string, string> = {
   "/admin/appointments": "Afspraken",
   "/admin/emails": "E-mails",
   "/admin/conversations": "Conversaties",
-  "/admin/embeddings": "Embeddings",
   "/admin/settings": "Instellingen",
 };
 
