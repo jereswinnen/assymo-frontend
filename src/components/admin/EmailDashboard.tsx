@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -29,15 +29,14 @@ import {
   UsersIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { NewsletterComposer } from "./NewsletterComposer";
 import { EmailTemplatePreview } from "./EmailTemplatePreview";
 import type { Newsletter } from "@/config/newsletter";
 
 export function EmailDashboard() {
+  const router = useRouter();
   const [drafts, setDrafts] = useState<Newsletter[]>([]);
   const [sentNewsletters, setSentNewsletters] = useState<Newsletter[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDraft, setSelectedDraft] = useState<Newsletter | null>(null);
   const [creating, setCreating] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -102,8 +101,7 @@ export function EmailDashboard() {
       if (!response.ok) throw new Error("Failed to create draft");
 
       const data = await response.json();
-      setSelectedDraft(data.newsletter);
-      await loadDrafts();
+      router.push(`/admin/emails/${data.newsletter.id}`);
       toast.success("Nieuw concept aangemaakt");
     } catch (error) {
       console.error("Failed to create draft:", error);
@@ -116,29 +114,7 @@ export function EmailDashboard() {
   const handleSelectNewsletter = (newsletter: Newsletter) => {
     // Only allow selecting drafts for editing
     if (newsletter.status === "draft") {
-      setSelectedDraft(newsletter);
-    }
-  };
-
-  const handleSave = async (newsletter: Newsletter) => {
-    try {
-      const response = await fetch(`/api/admin/newsletters/${newsletter.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          subject: newsletter.subject,
-          preheader: newsletter.preheader,
-          sections: newsletter.sections,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to save draft");
-
-      await loadDrafts();
-      toast.success("Concept opgeslagen");
-    } catch (error) {
-      console.error("Failed to save draft:", error);
-      toast.error("Kon concept niet opslaan");
+      router.push(`/admin/emails/${newsletter.id}`);
     }
   };
 
@@ -161,9 +137,6 @@ export function EmailDashboard() {
 
       if (!response.ok) throw new Error("Failed to delete draft");
 
-      if (selectedDraft?.id === newsletterToDelete.id) {
-        setSelectedDraft(null);
-      }
       await loadDrafts();
       toast.success("Concept verwijderd");
     } catch (error) {
@@ -173,16 +146,6 @@ export function EmailDashboard() {
       setDeleteDialogOpen(false);
       setNewsletterToDelete(null);
     }
-  };
-
-  const handleClose = () => {
-    setSelectedDraft(null);
-  };
-
-  const handleBroadcastSent = async () => {
-    setSelectedDraft(null);
-    await loadDrafts();
-    await loadSentNewsletters();
   };
 
   const formatDate = (date: Date | string | null) => {
@@ -306,20 +269,6 @@ export function EmailDashboard() {
               ))}
             </TableBody>
           </Table>
-        )}
-
-        {/* Newsletter composer */}
-        {selectedDraft && (
-          <>
-            <Separator />
-            <NewsletterComposer
-              newsletter={selectedDraft}
-              subscriberCount={subscriberCount}
-              onSave={handleSave}
-              onClose={handleClose}
-              onBroadcastSent={handleBroadcastSent}
-            />
-          </>
         )}
 
         {/* Delete confirmation dialog */}

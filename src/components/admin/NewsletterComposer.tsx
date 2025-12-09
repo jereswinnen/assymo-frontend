@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { getTestEmail } from "@/lib/adminSettings";
 import {
   Dialog,
@@ -16,10 +15,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  ArrowLeftIcon,
   Loader2Icon,
   PlusIcon,
   Trash2Icon,
-  XIcon,
   CheckIcon,
   ForwardIcon,
   SendIcon,
@@ -31,7 +30,7 @@ interface NewsletterComposerProps {
   newsletter: Newsletter;
   subscriberCount: number | null;
   onSave: (newsletter: Newsletter) => Promise<void>;
-  onClose: () => void;
+  onBack: () => void;
   onBroadcastSent: () => void;
 }
 
@@ -39,10 +38,12 @@ export function NewsletterComposer({
   newsletter: initialNewsletter,
   subscriberCount,
   onSave,
-  onClose,
+  onBack,
   onBroadcastSent,
 }: NewsletterComposerProps) {
   const [newsletter, setNewsletter] = useState<Newsletter>(initialNewsletter);
+  const [savedNewsletter, setSavedNewsletter] =
+    useState<Newsletter>(initialNewsletter);
   const [saving, setSaving] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
@@ -50,6 +51,10 @@ export function NewsletterComposer({
   const [showBroadcastConfirm, setShowBroadcastConfirm] = useState(false);
   const [showTestDialog, setShowTestDialog] = useState(false);
   const [testEmail, setTestEmailState] = useState<string>("");
+
+  // Track if there are unsaved changes
+  const hasChanges =
+    JSON.stringify(newsletter) !== JSON.stringify(savedNewsletter);
 
   // Load test email from centralized admin settings
   useEffect(() => {
@@ -108,6 +113,7 @@ export function NewsletterComposer({
     setSaving(true);
     try {
       await onSave(newsletter);
+      setSavedNewsletter(newsletter);
     } finally {
       setSaving(false);
     }
@@ -222,11 +228,63 @@ export function NewsletterComposer({
 
   return (
     <div className="space-y-6">
+      {/* Actions bar */}
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold">Nieuwsbrief bewerken</h3>
-        <Button variant="ghost" size="sm" onClick={onClose}>
-          <XIcon className="size-4" />
+        <Button variant="ghost" size="sm" onClick={onBack}>
+          <ArrowLeftIcon className="size-4" />
+          Terug
         </Button>
+
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSave}
+            disabled={!hasChanges || saving || sendingBroadcast}
+          >
+            {saving ? (
+              <Loader2Icon className="size-4 animate-spin" />
+            ) : (
+              <CheckIcon className="size-4" />
+            )}
+            Bewaren
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSendTestClick}
+            disabled={sendingTest || saving || sendingBroadcast}
+          >
+            {sendingTest ? (
+              <Loader2Icon className="size-4 animate-spin" />
+            ) : (
+              <ForwardIcon className="size-4" />
+            )}
+            Test
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={handleSendBroadcast}
+            disabled={
+              sendingBroadcast ||
+              saving ||
+              sendingTest ||
+              !subscriberCount ||
+              subscriberCount === 0
+            }
+          >
+            {sendingBroadcast ? (
+              <Loader2Icon className="size-4 animate-spin" />
+            ) : (
+              <SendIcon className="size-4" />
+            )}
+            {subscriberCount && subscriberCount > 0
+              ? `Verstuur (${subscriberCount})`
+              : "Verstuur"}
+          </Button>
+        </div>
       </div>
 
       {/* Subject & Preheader */}
@@ -256,8 +314,6 @@ export function NewsletterComposer({
           />
         </div>
       </div>
-
-      <Separator />
 
       {/* Sections */}
       <div className="space-y-4">
@@ -360,54 +416,6 @@ export function NewsletterComposer({
         <Button variant="outline" onClick={addSection} className="w-full">
           <PlusIcon className="size-4" />
           Sectie toevoegen
-        </Button>
-      </div>
-
-      <Separator />
-
-      {/* Actions */}
-      <div className="flex gap-3">
-        <Button onClick={handleSave} disabled={saving || sendingBroadcast}>
-          {saving ? (
-            <Loader2Icon className="size-4 animate-spin" />
-          ) : (
-            <CheckIcon className="size-4" />
-          )}
-          Bewaren
-        </Button>
-
-        <Button
-          variant="outline"
-          onClick={handleSendTestClick}
-          disabled={sendingTest || saving || sendingBroadcast}
-        >
-          {sendingTest ? (
-            <Loader2Icon className="size-4 animate-spin" />
-          ) : (
-            <ForwardIcon className="size-4" />
-          )}
-          Test versturen
-        </Button>
-
-        <Button
-          variant="default"
-          onClick={handleSendBroadcast}
-          disabled={
-            sendingBroadcast ||
-            saving ||
-            sendingTest ||
-            !subscriberCount ||
-            subscriberCount === 0
-          }
-        >
-          {sendingBroadcast ? (
-            <Loader2Icon className="size-4 animate-spin" />
-          ) : (
-            <SendIcon className="size-4" />
-          )}
-          {subscriberCount && subscriberCount > 0
-            ? `Verstuur naar ${subscriberCount} ${subscriberCount === 1 ? "abonnee" : "abonnees"}`
-            : "Verstuur"}
         </Button>
       </div>
 

@@ -10,11 +10,24 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 
-const routeLabels: Record<string, string> = {
-  "/admin/appointments": "Afspraken",
-  "/admin/emails": "E-mails",
-  "/admin/conversations": "Conversaties",
-  "/admin/settings": "Instellingen",
+const getRouteLabel = (pathname: string): string => {
+  const staticLabels: Record<string, string> = {
+    "/admin/appointments": "Afspraken",
+    "/admin/emails": "E-mails",
+    "/admin/conversations": "Conversaties",
+    "/admin/settings": "Instellingen",
+  };
+
+  if (staticLabels[pathname]) {
+    return staticLabels[pathname];
+  }
+
+  // Dynamic routes
+  if (pathname.startsWith("/admin/emails/")) {
+    return "Nieuwsbrief bewerken";
+  }
+
+  return "Admin";
 };
 
 export default function AdminLayout({
@@ -37,7 +50,7 @@ export default function AdminLayout({
     );
   }
 
-  const currentLabel = routeLabels[pathname] || "Admin";
+  const currentLabel = getRouteLabel(pathname);
 
   return (
     <SidebarProvider>
