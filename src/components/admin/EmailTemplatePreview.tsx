@@ -84,29 +84,21 @@ export function EmailTemplatePreview() {
 
   return (
     <>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MailSearchIcon className="size-4 text-muted-foreground" />
-            <h3 className="mb-0! text-base font-semibold">
-              E-mail template preview
-            </h3>
-          </div>
-          <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-            <SelectTrigger className="w-[280px]">
-              <SelectValue placeholder="Selecteer een template" />
-            </SelectTrigger>
-            <SelectContent>
-              {templates.map((template) => (
-                <SelectItem key={template.id} value={template.id}>
-                  {template.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="flex flex-col gap-4 min-h-[calc(100vh-150px)]">
+        <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+          <SelectTrigger className="w-[280px]">
+            <SelectValue placeholder="Selecteer een template" />
+          </SelectTrigger>
+          <SelectContent>
+            {templates.map((template) => (
+              <SelectItem key={template.id} value={template.id}>
+                {template.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        <div className="relative rounded-lg border bg-muted/30">
+        <div className="relative flex-1 rounded-lg border bg-muted/30">
           {loading ? (
             <div className="flex items-center justify-center py-16">
               <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
@@ -132,7 +124,7 @@ export function EmailTemplatePreview() {
               </div>
               <iframe
                 srcDoc={html}
-                className="h-[500px] w-full rounded-lg bg-white"
+                className="absolute inset-0 size-full rounded-lg bg-white"
                 title="Email preview"
               />
             </>

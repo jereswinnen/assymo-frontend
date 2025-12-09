@@ -21,19 +21,21 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  CalendarOffIcon,
-  ClockPlusIcon,
-  Loader2Icon,
-  Trash2Icon,
-} from "lucide-react";
+import { CalendarOffIcon, Loader2Icon, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 import type { DateOverride } from "@/types/appointments";
 
-export function DateOverrides() {
+interface DateOverridesProps {
+  createDialogOpen: boolean;
+  onCreateDialogOpenChange: (open: boolean) => void;
+}
+
+export function DateOverrides({
+  createDialogOpen,
+  onCreateDialogOpenChange,
+}: DateOverridesProps) {
   const [overrides, setOverrides] = useState<DateOverride[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
@@ -92,7 +94,7 @@ export function DateOverrides() {
       }
 
       toast.success("Override toegevoegd");
-      setDialogOpen(false);
+      onCreateDialogOpenChange(false);
       resetForm();
       loadOverrides();
     } catch (error) {
@@ -147,10 +149,12 @@ export function DateOverrides() {
     });
   };
 
-  const openCreateDialog = () => {
-    resetForm();
-    setDialogOpen(true);
-  };
+  // Reset form when dialog opens
+  useEffect(() => {
+    if (createDialogOpen) {
+      resetForm();
+    }
+  }, [createDialogOpen]);
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("nl-NL", {
@@ -181,18 +185,9 @@ export function DateOverrides() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-base font-semibold">Uitzonderingen</h3>
-          <p className="text-sm text-muted-foreground">
-            Sluit specifieke dagen of stel afwijkende openingsuren in.
-          </p>
-        </div>
-        <Button onClick={openCreateDialog}>
-          <ClockPlusIcon className="size-4" />
-          Toevoegen
-        </Button>
-      </div>
+      <p className="text-sm text-muted-foreground">
+        Sluit specifieke dagen of stel afwijkende openingsuren in.
+      </p>
 
       {overrides.length === 0 ? (
         <div className="text-muted-foreground text-center text-sm py-8">
@@ -291,7 +286,7 @@ export function DateOverrides() {
       )}
 
       {/* Create Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={createDialogOpen} onOpenChange={onCreateDialogOpenChange}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -365,7 +360,10 @@ export function DateOverrides() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => onCreateDialogOpenChange(false)}
+            >
               Annuleren
             </Button>
             <Button onClick={handleCreate} disabled={saving}>

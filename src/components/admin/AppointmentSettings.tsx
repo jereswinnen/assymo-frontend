@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckIcon, Loader2Icon } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import type { AppointmentSettings as SettingsType } from "@/types/appointments";
 import { DAYS_OF_WEEK } from "@/types/appointments";
@@ -18,12 +17,33 @@ interface DaySettingRow {
   slot_duration_minutes: number;
 }
 
-export function AppointmentSettings() {
+interface AppointmentSettingsProps {
+  onHasChangesChange: (hasChanges: boolean) => void;
+  triggerSave: number;
+  onSaveComplete: () => void;
+}
+
+export function AppointmentSettings({
+  onHasChangesChange,
+  triggerSave,
+  onSaveComplete,
+}: AppointmentSettingsProps) {
   const [settings, setSettings] = useState<DaySettingRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const originalSettings = useRef<DaySettingRow[]>([]);
+
+  // Notify parent of hasChanges
+  useEffect(() => {
+    onHasChangesChange(hasChanges);
+  }, [hasChanges, onHasChangesChange]);
+
+  // Respond to save trigger from parent
+  useEffect(() => {
+    if (triggerSave > 0) {
+      handleSave();
+    }
+  }, [triggerSave]);
 
   useEffect(() => {
     loadSettings();
@@ -72,14 +92,13 @@ export function AppointmentSettings() {
       );
       // Check if settings differ from original
       setHasChanges(
-        JSON.stringify(updated) !== JSON.stringify(originalSettings.current)
+        JSON.stringify(updated) !== JSON.stringify(originalSettings.current),
       );
       return updated;
     });
   };
 
   const handleSave = async () => {
-    setSaving(true);
     try {
       const response = await fetch("/api/admin/appointments/settings", {
         method: "PATCH",
@@ -111,7 +130,7 @@ export function AppointmentSettings() {
           : "Kon instellingen niet opslaan",
       );
     } finally {
-      setSaving(false);
+      onSaveComplete();
     }
   };
 
@@ -125,13 +144,6 @@ export function AppointmentSettings() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-base font-semibold">Openingsuren</h3>
-        <p className="text-sm text-muted-foreground">
-          Configureer de dagen en tijden waarop afspraken gemaakt kunnen worden.
-        </p>
-      </div>
-
       <div className="space-y-4">
         {settings.map((setting) => {
           const dayInfo = DAYS_OF_WEEK[setting.day_of_week];
@@ -221,15 +233,6 @@ export function AppointmentSettings() {
           );
         })}
       </div>
-
-      <Button onClick={handleSave} disabled={saving || !hasChanges}>
-        {saving ? (
-          <Loader2Icon className="size-4 animate-spin" />
-        ) : (
-          <CheckIcon className="size-4" />
-        )}
-        Opslaan
-      </Button>
     </div>
   );
 }

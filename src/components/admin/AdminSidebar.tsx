@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarDaysIcon,
   LogOutIcon,
-  MailIcon,
+  MailboxIcon,
   MessagesSquareIcon,
   SettingsIcon,
 } from "lucide-react";
@@ -26,7 +26,7 @@ import {
 
 const navItems = [
   { href: "/admin/appointments", label: "Afspraken", icon: CalendarDaysIcon },
-  { href: "/admin/emails", label: "E-mails", icon: MailIcon },
+  { href: "/admin/emails", label: "E-mails", icon: MailboxIcon },
   {
     href: "/admin/conversations",
     label: "Conversaties",

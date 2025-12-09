@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -18,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarPlusIcon, Loader2Icon, SearchIcon } from "lucide-react";
+import { Loader2Icon, SearchIcon } from "lucide-react";
 import { toast } from "sonner";
 import { AppointmentDialog } from "./AppointmentDialog";
 import { CreateAppointmentForm } from "./CreateAppointmentForm";
@@ -31,7 +30,15 @@ import {
   InputGroupInput,
 } from "../ui/input-group";
 
-export function AppointmentsList() {
+interface AppointmentsListProps {
+  createDialogOpen: boolean;
+  onCreateDialogOpenChange: (open: boolean) => void;
+}
+
+export function AppointmentsList({
+  createDialogOpen,
+  onCreateDialogOpenChange,
+}: AppointmentsListProps) {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,7 +48,6 @@ export function AppointmentsList() {
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   useEffect(() => {
     loadAppointments();
@@ -101,7 +107,7 @@ export function AppointmentsList() {
   };
 
   const handleAppointmentCreated = () => {
-    setCreateDialogOpen(false);
+    onCreateDialogOpenChange(false);
     loadAppointments();
   };
 
@@ -139,54 +145,45 @@ export function AppointmentsList() {
 
   return (
     <div className="space-y-4">
-      {/* Header with actions */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 max-w-xl gap-4">
-          <div className="flex flex-1 gap-2">
-            <InputGroup className="flex flex-1">
-              <InputGroupInput
-                placeholder="Zoek op naam, email of telefoon..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              />
-              <InputGroupAddon>
-                <SearchIcon />
-              </InputGroupAddon>
-              <InputGroupAddon align="inline-end">
-                <InputGroupButton
-                  onClick={handleSearch}
-                  type="submit"
-                  variant="default"
-                  disabled={!searchQuery.trim()}
-                >
-                  Zoeken
-                </InputGroupButton>
-              </InputGroupAddon>
-            </InputGroup>
-            <Select
-              value={statusFilter}
-              onValueChange={(value) =>
-                setStatusFilter(value as AppointmentStatus | "all")
-              }
+      {/* Search and filter */}
+      <div className="flex flex-1 max-w-xl gap-2">
+        <InputGroup className="flex flex-1">
+          <InputGroupInput
+            placeholder="Zoek op naam, email of telefoon..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+          />
+          <InputGroupAddon>
+            <SearchIcon />
+          </InputGroupAddon>
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton
+              onClick={handleSearch}
+              type="submit"
+              variant="default"
+              disabled={!searchQuery.trim()}
             >
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alle</SelectItem>
-                <SelectItem value="confirmed">Bevestigd</SelectItem>
-                <SelectItem value="cancelled">Geannuleerd</SelectItem>
-                <SelectItem value="completed">Afgerond</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <Button onClick={() => setCreateDialogOpen(true)}>
-          <CalendarPlusIcon className="size-4" />
-          Nieuwe afspraak
-        </Button>
+              Zoeken
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
+        <Select
+          value={statusFilter}
+          onValueChange={(value) =>
+            setStatusFilter(value as AppointmentStatus | "all")
+          }
+        >
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle</SelectItem>
+            <SelectItem value="confirmed">Bevestigd</SelectItem>
+            <SelectItem value="cancelled">Geannuleerd</SelectItem>
+            <SelectItem value="completed">Afgerond</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Appointments list */}
@@ -246,7 +243,7 @@ export function AppointmentsList() {
       {/* Create Dialog */}
       <CreateAppointmentForm
         open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
+        onOpenChange={onCreateDialogOpenChange}
         onCreated={handleAppointmentCreated}
       />
     </div>

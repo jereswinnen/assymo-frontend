@@ -24,7 +24,9 @@ import {
 import {
   ExternalLinkIcon,
   Loader2Icon,
+  MailIcon,
   MailPlusIcon,
+  TextSelectIcon,
   Trash2Icon,
   UsersIcon,
 } from "lucide-react";
@@ -132,7 +134,7 @@ export function EmailDashboard() {
         `/api/admin/newsletters/${newsletterToDelete.id}`,
         {
           method: "DELETE",
-        }
+        },
       );
 
       if (!response.ok) throw new Error("Failed to delete draft");
@@ -174,23 +176,29 @@ export function EmailDashboard() {
 
   return (
     <Tabs defaultValue="newsletter" className="space-y-4" id="email-tabs">
-      <TabsList>
-        <TabsTrigger value="newsletter">Nieuwsbrief</TabsTrigger>
-        <TabsTrigger value="templates">Templates</TabsTrigger>
-      </TabsList>
+      <header className="flex items-center justify-between">
+        <TabsList>
+          <TabsTrigger value="newsletter">
+            <MailIcon className="size-4" />
+            Nieuwsbrieven
+          </TabsTrigger>
+          <TabsTrigger value="templates">
+            <TextSelectIcon className="size-4" />
+            Templates
+          </TabsTrigger>
+        </TabsList>
 
-      <TabsContent value="newsletter" className="space-y-6">
-        {/* Header with subscriber count and create button */}
-        <div className="flex items-center justify-between">
-          {subscriberCount !== null && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <UsersIcon className="size-4" />
-              <span>
-                <strong className="text-foreground">{subscriberCount}</strong>{" "}
-                {subscriberCount === 1 ? "abonnee" : "abonnees"}
-              </span>
-            </div>
-          )}
+        <div className="flex items-center gap-2">
+          <Button variant="outline" asChild>
+            <a
+              href="https://resend.com/audience"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLinkIcon className="size-4" />
+              Resend
+            </a>
+          </Button>
           <Button onClick={handleCreateNew} disabled={creating}>
             {creating ? (
               <Loader2Icon className="size-4 animate-spin" />
@@ -200,7 +208,9 @@ export function EmailDashboard() {
             Nieuwe nieuwsbrief
           </Button>
         </div>
+      </header>
 
+      <TabsContent value="newsletter" className="space-y-6">
         {/* Newsletter table */}
         {allNewsletters.length === 0 ? (
           <div className="text-muted-foreground text-center text-sm py-8">
@@ -217,56 +227,69 @@ export function EmailDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {allNewsletters.map((newsletter) => (
-                <TableRow
-                  key={newsletter.id}
-                  className={
-                    newsletter.status === "draft" ? "cursor-pointer" : ""
-                  }
-                  onClick={() => handleSelectNewsletter(newsletter)}
-                >
-                  <TableCell>
-                    {newsletter.subject || (
-                      <span className="italic text-muted-foreground">
-                        Geen onderwerp
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        newsletter.status === "sent" ? "default" : "outline"
+              {allNewsletters.map((newsletter) => {
+                const resendUrl = newsletter.resendEmailId
+                  ? `https://resend.com/emails/${newsletter.resendEmailId}`
+                  : null;
+
+                return (
+                  <TableRow
+                    key={newsletter.id}
+                    className="cursor-pointer group"
+                    onClick={() => {
+                      if (newsletter.status === "draft") {
+                        handleSelectNewsletter(newsletter);
+                      } else if (resendUrl) {
+                        window.open(resendUrl, "_blank");
                       }
-                    >
-                      {newsletter.status === "sent" ? "Verzonden" : "Concept"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {formatDate(newsletter.sentAt || newsletter.createdAt)}
-                  </TableCell>
-                  <TableCell>
-                    {newsletter.status === "draft" ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => handleDeleteClick(e, newsletter)}
+                    }}
+                  >
+                    <TableCell>
+                      {newsletter.subject || (
+                        <span className="italic text-muted-foreground">
+                          Geen onderwerp
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          newsletter.status === "sent" ? "default" : "outline"
+                        }
                       >
-                        <Trash2Icon className="size-4" />
-                      </Button>
-                    ) : newsletter.resendEmailId ? (
-                      <a
-                        href={`https://resend.com/emails/${newsletter.resendEmailId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <ExternalLinkIcon className="size-3" />
-                      </a>
-                    ) : null}
-                  </TableCell>
-                </TableRow>
-              ))}
+                        {newsletter.status === "sent" ? "Verzonden" : "Concept"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {formatDate(newsletter.sentAt || newsletter.createdAt)}
+                    </TableCell>
+                    <TableCell>
+                      {newsletter.status === "draft" ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => handleDeleteClick(e, newsletter)}
+                        >
+                          <Trash2Icon className="size-4" />
+                        </Button>
+                      ) : resendUrl ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(resendUrl, "_blank");
+                          }}
+                        >
+                          <ExternalLinkIcon className="size-4" />
+                        </Button>
+                      ) : null}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}
@@ -277,8 +300,8 @@ export function EmailDashboard() {
             <DialogHeader>
               <DialogTitle>Concept verwijderen</DialogTitle>
               <DialogDescription>
-                Weet je zeker dat je dit concept wilt verwijderen? Deze actie kan
-                niet ongedaan worden gemaakt.
+                Weet je zeker dat je dit concept wilt verwijderen? Deze actie
+                kan niet ongedaan worden gemaakt.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
