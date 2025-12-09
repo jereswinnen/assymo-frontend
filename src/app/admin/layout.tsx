@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LogOutIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { AdminNav } from "@/components/admin/AdminNav";
 
 export default function AdminLayout({
   children,
@@ -48,7 +49,10 @@ export default function AdminLayout({
           </Button>
         </header>
       )}
-      <div className="container mx-auto max-w-5xl">{children}</div>
+      <div className="container mx-auto max-w-5xl">
+        {!isLoginPage && <AdminNav />}
+        {children}
+      </div>
     </div>
   );
 }
