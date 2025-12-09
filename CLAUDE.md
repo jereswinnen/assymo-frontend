@@ -55,7 +55,7 @@ This is a Next.js 15.3.2 application using App Router with Sanity CMS as the con
 - **src/components/**: Reusable React components
   - **Layout components**: Header, Footer, NavLinks
   - **Content components**: SolutionCard, SectionUSPs, SectionRenderer
-  - **Section components**: TextCentered, TextLeftImageRight, TextRightImageLeft, ProductGrid, Map, ContactForm, SalonizedBookingSection, Slideshow variants
+  - **Section components**: TextCentered, TextLeftImageRight, TextRightImageLeft, ProductGrid, Map, ContactForm, Slideshow variants
   - **Chatbot components**: ChatbotWrapper, Chatbot
   - **Admin components**: ConversationList, ConversationDialog, DocumentEmbeddings
   - **UI primitives**: button, input, textarea, dialog, dropdown-menu, card, badge, alert, progress, spinner, sonner (toast)
