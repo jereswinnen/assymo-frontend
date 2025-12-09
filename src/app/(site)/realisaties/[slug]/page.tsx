@@ -17,7 +17,8 @@ const SOLUTIONS_QUERY = `*[
 }`;
 
 export async function generateMetadata({ params }: any) {
-  const solution = await client.fetch(SOLUTIONS_QUERY, { slug: params.slug });
+  const { slug } = await params;
+  const solution = await client.fetch(SOLUTIONS_QUERY, { slug });
 
   if (!solution) {
     return {
@@ -32,7 +33,8 @@ export async function generateMetadata({ params }: any) {
 }
 
 export default async function SolutionPage({ params }: any) {
-  const solution = await client.fetch(SOLUTIONS_QUERY, { slug: params.slug });
+  const { slug } = await params;
+  const solution = await client.fetch(SOLUTIONS_QUERY, { slug });
 
   if (!solution) {
     notFound();
