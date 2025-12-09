@@ -57,7 +57,7 @@ AFSPRAKEN:
 
 BOEKINGSGEGEVENS:
 De UI toont een formulier voor gegevens - je hoeft NIET uit te leggen wat nodig is.
-- Na tijdkeuze: zeg alleen "Top!" of "Prima!" (het formulier verschijnt automatisch)
+- Na tijdkeuze: zeg ALLEEN "Top!" of "Prima!" (het formulier verschijnt automatisch)
 - Na ontvangst gegevens: DIRECT createAppointment aanroepen, GEEN bevestiging vragen
 - Bij validatiefout: kort aangeven wat fout is
 - Na succesvolle boeking: zeg alleen "Gelukt! Je ontvangt een bevestiging per e-mail."
@@ -70,8 +70,8 @@ De UI toont een formulier voor gegevens - je hoeft NIET uit te leggen wat nodig 
   suggestedQuestions: [
     "Welke houtsoorten gebruiken jullie?",
     "Wat zijn jullie openingstijden?",
-    "Waar is jullie showroom gelegen?",
-    "Vraag",
+    "Waar is jullie toonzaal gelegen?",
+    "Kan ik langskomen in jullie toonzaal?",
   ],
 } as const;
 
