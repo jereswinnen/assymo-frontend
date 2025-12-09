@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, type PanInfo } from "motion/react";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 const CAROUSEL_INTERVAL = 4000;
 const TRANSITION_DURATION = 0.4;
@@ -31,6 +32,13 @@ export default function Slideshow({
 }: SlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+
+  const isLoading = !loadedImages.has(currentIndex);
+
+  const markLoaded = useCallback((index: number) => {
+    setLoadedImages((prev) => new Set(prev).add(index));
+  }, []);
 
   const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -57,6 +65,8 @@ export default function Slideshow({
   if (!images?.length) return null;
 
   const currentImage = images[currentIndex];
+  const nextIndex = (currentIndex + 1) % images.length;
+  const nextImage = images[nextIndex];
   const hasMultiple = images.length > 1;
 
   return (
@@ -68,6 +78,20 @@ export default function Slideshow({
       <div
         className={`relative overflow-hidden bg-transparent ${variant === "fullwidth" ? "aspect-video" : "aspect-4/3"}`}
       >
+        {/* Loading spinner */}
+        <AnimatePresence>
+          {isLoading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-10 flex items-center justify-center bg-stone-100"
+            >
+              <Spinner className="size-8 text-stone-400" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <AnimatePresence>
           <motion.div
             key={currentIndex}
@@ -84,9 +108,19 @@ export default function Slideshow({
               className="object-cover pointer-events-none select-none"
               sizes="100vw"
               draggable={false}
+              onLoad={() => markLoaded(currentIndex)}
             />
           </motion.div>
         </AnimatePresence>
+
+        {/* Preload next image */}
+        {hasMultiple && (
+          <link
+            rel="preload"
+            as="image"
+            href={urlFor(nextImage).url()}
+          />
+        )}
 
         {hasMultiple && (
           <motion.div
