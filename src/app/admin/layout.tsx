@@ -1,18 +1,28 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { LogOutIcon } from "lucide-react";
-import { toast } from "sonner";
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { AdminNav } from "@/components/admin/AdminNav";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+
+const routeLabels: Record<string, string> = {
+  "/admin/appointments": "Afspraken",
+  "/admin/emails": "E-mails",
+  "/admin/conversations": "Conversaties",
+  "/admin/embeddings": "Embeddings",
+  "/admin/settings": "Instellingen",
+};
 
 export default function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const router = useRouter();
   const pathname = usePathname();
   const isLoginPage = pathname === "/admin/login";
 
@@ -20,39 +30,27 @@ export default function AdminLayout({
     document.title = "Admin - Assymo";
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-      });
+  if (isLoginPage) {
+    return (
+      <div className="bg-background min-h-screen">
+        <div className="container mx-auto max-w-5xl">{children}</div>
+      </div>
+    );
+  }
 
-      if (response.ok) {
-        toast.success("Uitgelogd");
-        router.push("/admin/login");
-        router.refresh();
-      } else {
-        toast.error("Uitloggen mislukt");
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
-      toast.error("Er is iets misgegaan");
-    }
-  };
+  const currentLabel = routeLabels[pathname] || "Admin";
 
   return (
-    <div className="bg-background min-h-screen">
-      {!isLoginPage && (
-        <header className="container mx-auto max-w-5xl py-4 flex justify-end">
-          <Button variant="outline" size="sm" onClick={handleLogout}>
-            <LogOutIcon className="size-4" />
-            Uitloggen
-          </Button>
+    <SidebarProvider>
+      <AdminSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <span className="font-medium">{currentLabel}</span>
         </header>
-      )}
-      <div className="container mx-auto max-w-5xl">
-        {!isLoginPage && <AdminNav />}
-        {children}
-      </div>
-    </div>
+        <div className="flex-1 p-4">{children}</div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
