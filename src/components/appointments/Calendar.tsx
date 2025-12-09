@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import type { DateAvailability, TimeSlot } from "@/types/appointments";
 import { DAYS_OF_WEEK } from "@/types/appointments";
 
-interface DateTimePickerProps {
+interface CalendarProps {
   selectedDate: string | null;
   selectedTime: string | null;
   onDateTimeSelect: (date: string, time: string) => void;
@@ -16,14 +16,14 @@ interface DateTimePickerProps {
   onMonthChange?: (year: number, month: number) => void;
 }
 
-export function DateTimePicker({
+export function Calendar({
   selectedDate,
   selectedTime,
   onDateTimeSelect,
   availability,
   loading = false,
   onMonthChange,
-}: DateTimePickerProps) {
+}: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() };

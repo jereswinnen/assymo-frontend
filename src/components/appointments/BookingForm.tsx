@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { DateTimePicker } from "./DateTimePicker";
+import { Calendar } from "./Calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -67,13 +67,13 @@ function RequiredLabel({
   );
 }
 
-interface AppointmentBookingFormProps {
+interface BookingFormProps {
   className?: string;
 }
 
-export function AppointmentBookingForm({
+export function BookingForm({
   className,
-}: AppointmentBookingFormProps) {
+}: BookingFormProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<FormStep>("datetime");
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -241,7 +241,7 @@ export function AppointmentBookingForm({
         {currentStep === "datetime" && (
           <div>
             <h2 className="text-lg! font-medium! mb-4">Kies een datum en tijd</h2>
-            <DateTimePicker
+            <Calendar
               selectedDate={formData.appointment_date}
               selectedTime={formData.appointment_time}
               onDateTimeSelect={handleDateTimeSelect}

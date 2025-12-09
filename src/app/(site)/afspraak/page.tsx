@@ -1,7 +1,7 @@
 import { client } from "@/sanity/client";
 import { sectionsFragment } from "@/sanity/fragments";
 import SectionRenderer from "@/components/SectionRenderer";
-import { AppointmentBookingForm } from "@/components/appointments/AppointmentBookingForm";
+import { BookingForm } from "@/components/appointments/BookingForm";
 import Link from "next/link";
 import { MailIcon, PhoneIcon } from "lucide-react";
 import Map from "@/components/Map";
@@ -49,7 +49,7 @@ export default async function AppointmentPage() {
         />
       )}
       <section className="col-span-full grid grid-cols-subgrid gap-y-14">
-        <AppointmentBookingForm className="col-span-full md:col-span-6" />
+        <BookingForm className="col-span-full md:col-span-6" />
 
         <section className="col-span-full md:col-span-3 flex flex-col gap-6">
           <Map className="max-h-[360px]" />
