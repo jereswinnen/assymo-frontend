@@ -75,7 +75,7 @@ export default async function RealisatiesPage() {
       <Suspense
         fallback={
           <div className="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">
-            {solutions.slice(0, 6).map((solution) => (
+            {solutions.slice(0, 6).map((solution: { _id: string }) => (
               <div key={solution._id} className="flex flex-col gap-4 p-4">
                 <div className="aspect-5/3 bg-stone-100 animate-pulse" />
                 <div className="flex flex-col gap-2">
