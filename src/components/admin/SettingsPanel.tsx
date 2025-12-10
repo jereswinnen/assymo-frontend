@@ -1,53 +1,69 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MailIcon, CheckIcon, RotateCcwIcon } from "lucide-react";
 import { toast } from "sonner";
 import { getTestEmail, setTestEmail } from "@/lib/adminSettings";
 import { DEFAULT_TEST_EMAIL } from "@/config/resend";
 
-export function SettingsPanel() {
+interface SettingsPanelProps {
+  onHasChangesChange?: (hasChanges: boolean) => void;
+  triggerSave?: number;
+  onSaveComplete?: () => void;
+}
+
+export function SettingsPanel({
+  onHasChangesChange,
+  triggerSave,
+  onSaveComplete,
+}: SettingsPanelProps) {
   const [testEmail, setTestEmailState] = useState(DEFAULT_TEST_EMAIL);
+  const [originalEmail, setOriginalEmail] = useState(DEFAULT_TEST_EMAIL);
 
   useEffect(() => {
-    setTestEmailState(getTestEmail());
+    const saved = getTestEmail();
+    setTestEmailState(saved);
+    setOriginalEmail(saved);
   }, []);
+
+  // Track changes
+  useEffect(() => {
+    onHasChangesChange?.(testEmail !== originalEmail);
+  }, [testEmail, originalEmail, onHasChangesChange]);
+
+  // Handle external save trigger
+  useEffect(() => {
+    if (triggerSave && triggerSave > 0) {
+      handleSave();
+    }
+  }, [triggerSave]);
 
   const handleSave = () => {
     const trimmed = testEmail.trim();
     if (!trimmed) {
       toast.error("Vul een e-mailadres in");
+      onSaveComplete?.();
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmed)) {
       toast.error("Vul een geldig e-mailadres in");
+      onSaveComplete?.();
       return;
     }
 
     setTestEmail(trimmed);
     setTestEmailState(trimmed);
+    setOriginalEmail(trimmed);
     toast.success("Instellingen opgeslagen");
-  };
-
-  const handleReset = () => {
-    setTestEmail(DEFAULT_TEST_EMAIL);
-    setTestEmailState(DEFAULT_TEST_EMAIL);
-    toast.success("Teruggezet naar standaardwaarde");
+    onSaveComplete?.();
   };
 
   return (
     <div className="max-w-md space-y-6">
       <div className="space-y-4">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <MailIcon className="size-4" />
-          <span className="text-sm font-medium">E-mail instellingen</span>
-        </div>
-
         <div className="space-y-2">
           <Label htmlFor="testEmail">Test e-mailadres</Label>
           <Input
@@ -64,16 +80,6 @@ export function SettingsPanel() {
         </div>
       </div>
 
-      <div className="flex gap-3">
-        <Button onClick={handleSave}>
-          <CheckIcon className="size-4" />
-          Opslaan
-        </Button>
-        <Button variant="outline" onClick={handleReset}>
-          <RotateCcwIcon className="size-4" />
-          Reset
-        </Button>
-      </div>
     </div>
   );
 }

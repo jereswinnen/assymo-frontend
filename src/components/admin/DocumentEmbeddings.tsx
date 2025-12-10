@@ -17,12 +17,12 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  UploadIcon,
   AlertCircleIcon,
   FileTextIcon,
   Loader2Icon,
-  ScanTextIcon,
   Trash2Icon,
+  BotMessageSquareIcon,
+  CloudUploadIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { DocumentInfo } from "@/types/chat";
@@ -257,8 +257,7 @@ export function DocumentEmbeddings() {
         <Alert>
           <AlertCircleIcon className="size-4" />
           <AlertDescription>
-            Geen document geüpload. Upload een Markdown bestand om te
-            beginnen.
+            Geen document geüpload. Upload een Markdown bestand om te beginnen.
           </AlertDescription>
         </Alert>
       )}
@@ -268,7 +267,8 @@ export function DocumentEmbeddings() {
           <DialogHeader>
             <DialogTitle>Document verwijderen</DialogTitle>
             <DialogDescription>
-              Weet je zeker dat je het huidige document wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+              Weet je zeker dat je het huidige document wilt verwijderen? Deze
+              actie kan niet ongedaan worden gemaakt.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -341,8 +341,8 @@ export function DocumentEmbeddings() {
               </>
             ) : (
               <>
-                <UploadIcon className="size-4" />
-                Upload en Verwerk Document
+                <CloudUploadIcon className="size-4" />
+                Upload
               </>
             )}
           </Button>
@@ -391,8 +391,8 @@ export function DocumentEmbeddings() {
               </>
             ) : (
               <>
-                <ScanTextIcon className="size-4" />
-                Test Retrieval
+                <BotMessageSquareIcon className="size-4" />
+                Verstuur
               </>
             )}
           </Button>
