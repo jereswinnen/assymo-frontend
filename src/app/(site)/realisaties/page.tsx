@@ -40,11 +40,11 @@ const SOLUTIONS_QUERY = `*[
 
 const CATEGORIES_QUERY = `*[
   _type == "filterCategory"
-] | order(order asc) {
+] | order(orderRank asc) {
   _id,
   name,
   slug,
-  "options": *[_type == "filterOption" && references(^._id)] | order(order asc) {
+  "options": *[_type == "filterOption" && references(^._id)] | order(orderRank asc) {
     _id,
     name,
     slug
