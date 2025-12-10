@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -17,7 +17,12 @@ import { OpeningHours } from "./OpeningHours";
 import { DateOverrides } from "./DateOverrides";
 
 export function AppointmentsDashboard() {
+  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Lifted state for AppointmentsList
   const [createAppointmentOpen, setCreateAppointmentOpen] = useState(false);
@@ -39,13 +44,15 @@ export function AppointmentsDashboard() {
     setSettingsSaving(false);
   };
 
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <Tabs
-      defaultValue="overview"
       value={activeTab}
       onValueChange={setActiveTab}
       className="space-y-4"
-      id="appointments-tabs"
     >
       <header className="flex items-center justify-between">
         <TabsList>

@@ -3,10 +3,16 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldDescription,
+  FieldSeparator,
+} from "@/components/ui/field";
 import {
   Table,
   TableBody,
@@ -119,7 +125,9 @@ export function DateOverrides({
     } catch (error) {
       console.error("Failed to create override:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon uitzondering niet toevoegen"
+        error instanceof Error
+          ? error.message
+          : "Kon uitzondering niet toevoegen",
       );
     } finally {
       setSaving(false);
@@ -131,7 +139,7 @@ export function DateOverrides({
     try {
       const response = await fetch(
         `/api/admin/appointments/overrides?id=${id}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
 
       if (!response.ok) {
@@ -146,7 +154,7 @@ export function DateOverrides({
       toast.error(
         error instanceof Error
           ? error.message
-          : "Kon uitzondering niet verwijderen"
+          : "Kon uitzondering niet verwijderen",
       );
     } finally {
       setDeleting(null);
@@ -232,10 +240,6 @@ export function DateOverrides({
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">
-        Sluit specifieke dagen of stel afwijkende openingsuren in.
-      </p>
-
       {overrides.length === 0 ? (
         <div className="text-muted-foreground text-center text-sm py-8">
           Geen uitzonderingen
@@ -366,10 +370,12 @@ export function DateOverrides({
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <FieldGroup>
             {/* Date selection */}
-            <div className="space-y-2">
-              <Label>{formData.hasDateRange ? "Begindatum" : "Datum"}</Label>
+            <Field>
+              <FieldLabel>
+                {formData.hasDateRange ? "Begindatum" : "Datum"}
+              </FieldLabel>
               <Input
                 type="date"
                 value={formData.date}
@@ -383,29 +389,31 @@ export function DateOverrides({
                 }
                 className="[&::-webkit-calendar-picker-indicator]:hidden"
               />
-            </div>
+            </Field>
 
             {/* Date range toggle */}
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="hasDateRange">Meerdere dagen</Label>
-                <p className="text-xs text-muted-foreground">
-                  Sluiting voor een periode
-                </p>
-              </div>
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="hasDateRange">
+                Meerdere dagen
+                <FieldDescription>Sluiting voor een periode</FieldDescription>
+              </FieldLabel>
               <Switch
                 id="hasDateRange"
                 checked={formData.hasDateRange}
                 onCheckedChange={(checked) =>
-                  setFormData({ ...formData, hasDateRange: checked, end_date: "" })
+                  setFormData({
+                    ...formData,
+                    hasDateRange: checked,
+                    end_date: "",
+                  })
                 }
               />
-            </div>
+            </Field>
 
             {/* End date (conditional) */}
             {formData.hasDateRange && (
-              <div className="space-y-2">
-                <Label>Einddatum</Label>
+              <Field>
+                <FieldLabel>Einddatum</FieldLabel>
                 <Input
                   type="date"
                   value={formData.end_date}
@@ -415,11 +423,11 @@ export function DateOverrides({
                   min={formData.date || new Date().toISOString().split("T")[0]}
                   className="[&::-webkit-calendar-picker-indicator]:hidden"
                 />
-              </div>
+              </Field>
             )}
 
             {/* Closed toggle */}
-            <div className="flex items-center gap-2">
+            <Field orientation="horizontal">
               <Checkbox
                 id="is_closed"
                 checked={formData.is_closed}
@@ -427,14 +435,14 @@ export function DateOverrides({
                   setFormData({ ...formData, is_closed: !!checked })
                 }
               />
-              <Label htmlFor="is_closed">Volledig gesloten</Label>
-            </div>
+              <FieldLabel htmlFor="is_closed">Volledig gesloten</FieldLabel>
+            </Field>
 
             {/* Custom hours (conditional) */}
             {!formData.is_closed && (
               <div className="flex gap-4">
-                <div className="space-y-2 flex-1">
-                  <Label>Van</Label>
+                <Field className="flex-1">
+                  <FieldLabel>Van</FieldLabel>
                   <Input
                     type="time"
                     value={formData.open_time}
@@ -443,9 +451,9 @@ export function DateOverrides({
                     }
                     className="[&::-webkit-calendar-picker-indicator]:hidden"
                   />
-                </div>
-                <div className="space-y-2 flex-1">
-                  <Label>Tot</Label>
+                </Field>
+                <Field className="flex-1">
+                  <FieldLabel>Tot</FieldLabel>
                   <Input
                     type="time"
                     value={formData.close_time}
@@ -454,13 +462,13 @@ export function DateOverrides({
                     }
                     className="[&::-webkit-calendar-picker-indicator]:hidden"
                   />
-                </div>
+                </Field>
               </div>
             )}
 
             {/* Reason */}
-            <div className="space-y-2">
-              <Label>Reden (optioneel)</Label>
+            <Field>
+              <FieldLabel>Reden (optioneel)</FieldLabel>
               <Input
                 value={formData.reason}
                 onChange={(e) =>
@@ -468,54 +476,46 @@ export function DateOverrides({
                 }
                 placeholder="bijv. Feestdag, Vakantie..."
               />
-            </div>
+            </Field>
 
-            {/* Divider */}
-            <div className="border-t pt-4 space-y-4">
-              {/* Recurring toggle */}
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="is_recurring" className="flex items-center gap-2">
-                    <RefreshCwIcon className="size-4" />
-                    Jaarlijks herhalen
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Deze uitzondering herhaalt elk jaar
-                  </p>
-                </div>
-                <Switch
-                  id="is_recurring"
-                  checked={formData.is_recurring}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, is_recurring: checked })
-                  }
-                />
-              </div>
+            <FieldSeparator />
 
-              {/* Show on website toggle */}
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label
-                    htmlFor="show_on_website"
-                    className="flex items-center gap-2"
-                  >
-                    <GlobeIcon className="size-4" />
-                    Toon op website
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Bezoekers zien dat we gesloten zijn
-                  </p>
-                </div>
-                <Switch
-                  id="show_on_website"
-                  checked={formData.show_on_website}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, show_on_website: checked })
-                  }
-                />
-              </div>
-            </div>
-          </div>
+            {/* Recurring toggle */}
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="is_recurring">
+                <RefreshCwIcon className="size-4" />
+                Jaarlijks herhalen
+                <FieldDescription>
+                  Deze uitzondering herhaalt elk jaar
+                </FieldDescription>
+              </FieldLabel>
+              <Switch
+                id="is_recurring"
+                checked={formData.is_recurring}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, is_recurring: checked })
+                }
+              />
+            </Field>
+
+            {/* Show on website toggle */}
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="show_on_website">
+                <GlobeIcon className="size-4" />
+                Toon op website
+                <FieldDescription>
+                  Bezoekers zien dat we gesloten zijn
+                </FieldDescription>
+              </FieldLabel>
+              <Switch
+                id="show_on_website"
+                checked={formData.show_on_website}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, show_on_website: checked })
+                }
+              />
+            </Field>
+          </FieldGroup>
 
           <DialogFooter>
             <Button
