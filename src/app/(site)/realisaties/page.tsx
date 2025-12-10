@@ -18,7 +18,7 @@ const PAGE_QUERY = `*[
 
 const SOLUTIONS_QUERY = `*[
   _type == "solution"
-] | order(name asc) {
+] | order(orderRank asc) {
   _id,
   name,
   subtitle,

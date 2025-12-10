@@ -3,7 +3,7 @@ import { urlFor } from "@/sanity/imageUrl";
 import SolutionsScrollerClient from "./SolutionsScrollerClient";
 
 // Query to fetch all solutions
-const SOLUTIONS_QUERY = `*[_type == "solution"] | order(name asc) {
+const SOLUTIONS_QUERY = `*[_type == "solution"] | order(orderRank asc) {
   _id,
   name,
   subtitle,
