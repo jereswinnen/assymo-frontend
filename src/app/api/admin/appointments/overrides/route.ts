@@ -54,11 +54,14 @@ export async function GET(request: NextRequest) {
  * Create a new date override (close a day, special hours, etc.).
  *
  * Request body:
- * - date: Date in YYYY-MM-DD format (required)
+ * - date: Date in YYYY-MM-DD format (required, start date)
+ * - end_date: Date in YYYY-MM-DD format (optional, for date ranges)
  * - is_closed: Boolean (default true)
  * - open_time: "HH:MM" (optional, for special hours)
  * - close_time: "HH:MM" (optional, for special hours)
  * - reason: String (optional, e.g., "Feestdag", "Vakantie")
+ * - is_recurring: Boolean (optional, repeat yearly)
+ * - show_on_website: Boolean (optional, publish to public API)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -85,12 +88,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate that date is not in the past
+    // Validate end_date if provided
+    if (body.end_date) {
+      if (!dateRegex.test(body.end_date)) {
+        return NextResponse.json(
+          { error: "Ongeldige einddatum (YYYY-MM-DD verwacht)" },
+          { status: 400 }
+        );
+      }
+
+      // end_date must be >= date
+      if (body.end_date < body.date) {
+        return NextResponse.json(
+          { error: "Einddatum moet na of gelijk aan begindatum zijn" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate that date is not in the past (unless recurring)
     const overrideDate = new Date(body.date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (overrideDate < today) {
+    // Allow past dates for recurring overrides (e.g., setting up Christmas for next year)
+    if (overrideDate < today && !body.is_recurring) {
       return NextResponse.json(
         { error: "Kan geen override maken voor datum in het verleden" },
         { status: 400 }
@@ -120,10 +142,13 @@ export async function POST(request: NextRequest) {
 
     const input: CreateDateOverrideInput = {
       date: body.date,
+      end_date: body.end_date || null,
       is_closed: isClosed,
       open_time: isClosed ? null : body.open_time,
       close_time: isClosed ? null : body.close_time,
       reason: body.reason?.trim() || undefined,
+      is_recurring: body.is_recurring ?? false,
+      show_on_website: body.show_on_website ?? false,
     };
 
     const override = await createDateOverride(input);

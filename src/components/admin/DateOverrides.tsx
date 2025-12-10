@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -21,7 +22,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { CalendarOffIcon, Loader2Icon, Trash2Icon } from "lucide-react";
+import {
+  CalendarOffIcon,
+  GlobeIcon,
+  Loader2Icon,
+  RefreshCwIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { toast } from "sonner";
 import type { DateOverride } from "@/types/appointments";
 
@@ -43,10 +50,14 @@ export function DateOverrides({
   // Form state
   const [formData, setFormData] = useState({
     date: "",
+    end_date: "",
     is_closed: true,
     open_time: "10:00",
     close_time: "17:00",
     reason: "",
+    is_recurring: false,
+    show_on_website: false,
+    hasDateRange: false,
   });
 
   useEffect(() => {
@@ -74,6 +85,11 @@ export function DateOverrides({
       return;
     }
 
+    if (formData.hasDateRange && !formData.end_date) {
+      toast.error("Selecteer een einddatum");
+      return;
+    }
+
     setSaving(true);
     try {
       const response = await fetch("/api/admin/appointments/overrides", {
@@ -81,10 +97,13 @@ export function DateOverrides({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           date: formData.date,
+          end_date: formData.hasDateRange ? formData.end_date : null,
           is_closed: formData.is_closed,
           open_time: formData.is_closed ? null : formData.open_time,
           close_time: formData.is_closed ? null : formData.close_time,
           reason: formData.reason || undefined,
+          is_recurring: formData.is_recurring,
+          show_on_website: formData.show_on_website,
         }),
       });
 
@@ -93,14 +112,14 @@ export function DateOverrides({
         throw new Error(data.error || "Failed to create");
       }
 
-      toast.success("Override toegevoegd");
+      toast.success("Uitzondering toegevoegd");
       onCreateDialogOpenChange(false);
       resetForm();
       loadOverrides();
     } catch (error) {
       console.error("Failed to create override:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon override niet toevoegen",
+        error instanceof Error ? error.message : "Kon uitzondering niet toevoegen"
       );
     } finally {
       setSaving(false);
@@ -112,7 +131,7 @@ export function DateOverrides({
     try {
       const response = await fetch(
         `/api/admin/appointments/overrides?id=${id}`,
-        { method: "DELETE" },
+        { method: "DELETE" }
       );
 
       if (!response.ok) {
@@ -120,14 +139,14 @@ export function DateOverrides({
         throw new Error(data.error || "Failed to delete");
       }
 
-      toast.success("Override verwijderd");
+      toast.success("Uitzondering verwijderd");
       loadOverrides();
     } catch (error) {
       console.error("Failed to delete override:", error);
       toast.error(
         error instanceof Error
           ? error.message
-          : "Kon override niet verwijderen",
+          : "Kon uitzondering niet verwijderen"
       );
     } finally {
       setDeleting(null);
@@ -142,10 +161,14 @@ export function DateOverrides({
   const resetForm = () => {
     setFormData({
       date: "",
+      end_date: "",
       is_closed: true,
       open_time: "10:00",
       close_time: "17:00",
       reason: "",
+      is_recurring: false,
+      show_on_website: false,
+      hasDateRange: false,
     });
   };
 
@@ -156,24 +179,48 @@ export function DateOverrides({
     }
   }, [createDialogOpen]);
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("nl-NL", {
+  const formatDate = (dateStr: string, includeYear = true) => {
+    const options: Intl.DateTimeFormatOptions = {
       weekday: "long",
       day: "numeric",
       month: "long",
-      year: "numeric",
+    };
+    if (includeYear) {
+      options.year = "numeric";
+    }
+    return new Date(dateStr).toLocaleDateString("nl-NL", options);
+  };
+
+  const formatDateShort = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("nl-NL", {
+      day: "numeric",
+      month: "short",
     });
   };
 
-  const isPast = (dateStr: string) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return new Date(dateStr) < today;
+  const formatDateRange = (override: DateOverride) => {
+    if (override.end_date) {
+      // Show range
+      return `${formatDateShort(override.date)} - ${formatDateShort(override.end_date)}`;
+    }
+    return formatDate(override.date, !override.is_recurring);
   };
 
-  // Separate into upcoming and past
-  const upcomingOverrides = overrides.filter((o) => !isPast(o.date));
-  const pastOverrides = overrides.filter((o) => isPast(o.date));
+  const isPast = (override: DateOverride) => {
+    // Recurring overrides are never "past"
+    if (override.is_recurring) return false;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // For ranges, check if end_date is past
+    const checkDate = override.end_date || override.date;
+    return new Date(checkDate) < today;
+  };
+
+  // Separate into upcoming/recurring and past
+  const upcomingOverrides = overrides.filter((o) => !isPast(o));
+  const pastOverrides = overrides.filter((o) => isPast(o));
 
   if (loading) {
     return (
@@ -191,15 +238,15 @@ export function DateOverrides({
 
       {overrides.length === 0 ? (
         <div className="text-muted-foreground text-center text-sm py-8">
-          Geen geblokkeerde data
+          Geen uitzonderingen
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Upcoming overrides */}
+          {/* Upcoming/recurring overrides */}
           {upcomingOverrides.length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                Aankomend
+                Actief & Aankomend
               </h4>
               <Table>
                 <TableHeader>
@@ -213,7 +260,31 @@ export function DateOverrides({
                 <TableBody>
                   {upcomingOverrides.map((override) => (
                     <TableRow key={override.id}>
-                      <TableCell>{formatDate(override.date)}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <span>{formatDateRange(override)}</span>
+                          <div className="flex gap-1">
+                            {override.is_recurring && (
+                              <Badge
+                                variant="outline"
+                                className="text-xs gap-1"
+                              >
+                                <RefreshCwIcon className="size-3" />
+                                Jaarlijks
+                              </Badge>
+                            )}
+                            {override.show_on_website && (
+                              <Badge
+                                variant="outline"
+                                className="text-xs gap-1 border-green-500 text-green-600"
+                              >
+                                <GlobeIcon className="size-3" />
+                                Website
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <Badge
                           variant={
@@ -267,7 +338,7 @@ export function DateOverrides({
                 <TableBody>
                   {pastOverrides.slice(0, 5).map((override) => (
                     <TableRow key={override.id}>
-                      <TableCell>{formatDate(override.date)}</TableCell>
+                      <TableCell>{formatDateRange(override)}</TableCell>
                       <TableCell>
                         <Badge variant="outline">
                           {override.is_closed ? "Gesloten" : "Aangepast"}
@@ -287,7 +358,7 @@ export function DateOverrides({
 
       {/* Create Dialog */}
       <Dialog open={createDialogOpen} onOpenChange={onCreateDialogOpenChange}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CalendarOffIcon className="size-4" />
@@ -296,19 +367,58 @@ export function DateOverrides({
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* Date selection */}
             <div className="space-y-2">
-              <Label>Datum</Label>
+              <Label>{formData.hasDateRange ? "Begindatum" : "Datum"}</Label>
               <Input
                 type="date"
                 value={formData.date}
                 onChange={(e) =>
                   setFormData({ ...formData, date: e.target.value })
                 }
-                min={new Date().toISOString().split("T")[0]}
+                min={
+                  formData.is_recurring
+                    ? undefined
+                    : new Date().toISOString().split("T")[0]
+                }
                 className="[&::-webkit-calendar-picker-indicator]:hidden"
               />
             </div>
 
+            {/* Date range toggle */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="hasDateRange">Meerdere dagen</Label>
+                <p className="text-xs text-muted-foreground">
+                  Sluiting voor een periode
+                </p>
+              </div>
+              <Switch
+                id="hasDateRange"
+                checked={formData.hasDateRange}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, hasDateRange: checked, end_date: "" })
+                }
+              />
+            </div>
+
+            {/* End date (conditional) */}
+            {formData.hasDateRange && (
+              <div className="space-y-2">
+                <Label>Einddatum</Label>
+                <Input
+                  type="date"
+                  value={formData.end_date}
+                  onChange={(e) =>
+                    setFormData({ ...formData, end_date: e.target.value })
+                  }
+                  min={formData.date || new Date().toISOString().split("T")[0]}
+                  className="[&::-webkit-calendar-picker-indicator]:hidden"
+                />
+              </div>
+            )}
+
+            {/* Closed toggle */}
             <div className="flex items-center gap-2">
               <Checkbox
                 id="is_closed"
@@ -320,6 +430,7 @@ export function DateOverrides({
               <Label htmlFor="is_closed">Volledig gesloten</Label>
             </div>
 
+            {/* Custom hours (conditional) */}
             {!formData.is_closed && (
               <div className="flex gap-4">
                 <div className="space-y-2 flex-1">
@@ -347,6 +458,7 @@ export function DateOverrides({
               </div>
             )}
 
+            {/* Reason */}
             <div className="space-y-2">
               <Label>Reden (optioneel)</Label>
               <Input
@@ -356,6 +468,52 @@ export function DateOverrides({
                 }
                 placeholder="bijv. Feestdag, Vakantie..."
               />
+            </div>
+
+            {/* Divider */}
+            <div className="border-t pt-4 space-y-4">
+              {/* Recurring toggle */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="is_recurring" className="flex items-center gap-2">
+                    <RefreshCwIcon className="size-4" />
+                    Jaarlijks herhalen
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Deze uitzondering herhaalt elk jaar
+                  </p>
+                </div>
+                <Switch
+                  id="is_recurring"
+                  checked={formData.is_recurring}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, is_recurring: checked })
+                  }
+                />
+              </div>
+
+              {/* Show on website toggle */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label
+                    htmlFor="show_on_website"
+                    className="flex items-center gap-2"
+                  >
+                    <GlobeIcon className="size-4" />
+                    Toon op website
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Bezoekers zien dat we gesloten zijn
+                  </p>
+                </div>
+                <Switch
+                  id="show_on_website"
+                  checked={formData.show_on_website}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, show_on_website: checked })
+                  }
+                />
+              </div>
             </div>
           </div>
 

@@ -96,6 +96,8 @@ export async function updateSettings(
 
 /**
  * Get date overrides within a date range
+ * Includes both single-date overrides and date ranges that overlap with the query range
+ * Also includes recurring overrides that match the month/day
  */
 export async function getDateOverrides(
   startDate: string,
@@ -105,13 +107,22 @@ export async function getDateOverrides(
     SELECT
       id,
       date::text,
+      end_date::text,
       is_closed,
       open_time::text,
       close_time::text,
       reason,
+      is_recurring,
+      show_on_website,
       created_at
     FROM appointment_date_overrides
-    WHERE date >= ${startDate}::date AND date <= ${endDate}::date
+    WHERE
+      -- Single date or range start falls within query range
+      (date >= ${startDate}::date AND date <= ${endDate}::date)
+      -- Or range overlaps with query range
+      OR (end_date IS NOT NULL AND date <= ${endDate}::date AND end_date >= ${startDate}::date)
+      -- Or recurring override matches any date in the range (by month/day)
+      OR is_recurring = true
     ORDER BY date
   `;
 
@@ -126,10 +137,13 @@ export async function getAllDateOverrides(): Promise<DateOverride[]> {
     SELECT
       id,
       date::text,
+      end_date::text,
       is_closed,
       open_time::text,
       close_time::text,
       reason,
+      is_recurring,
+      show_on_website,
       created_at
     FROM appointment_date_overrides
     ORDER BY date DESC
@@ -140,21 +154,44 @@ export async function getAllDateOverrides(): Promise<DateOverride[]> {
 
 /**
  * Get override for a specific date
+ * Checks for exact date match, date ranges, and recurring overrides
  */
 export async function getDateOverride(
   date: string
 ): Promise<DateOverride | null> {
+  // Extract month and day for recurring check
+  const dateObj = new Date(date);
+  const month = dateObj.getMonth() + 1; // 1-indexed
+  const day = dateObj.getDate();
+
   const rows = await sql`
     SELECT
       id,
       date::text,
+      end_date::text,
       is_closed,
       open_time::text,
       close_time::text,
       reason,
+      is_recurring,
+      show_on_website,
       created_at
     FROM appointment_date_overrides
-    WHERE date = ${date}::date
+    WHERE
+      -- Exact date match
+      date = ${date}::date
+      -- Or date falls within a range
+      OR (end_date IS NOT NULL AND date <= ${date}::date AND end_date >= ${date}::date)
+      -- Or recurring override matches month/day
+      OR (is_recurring = true AND EXTRACT(MONTH FROM date) = ${month} AND EXTRACT(DAY FROM date) = ${day})
+    ORDER BY
+      -- Prefer exact match over range over recurring
+      CASE
+        WHEN date = ${date}::date THEN 1
+        WHEN end_date IS NOT NULL THEN 2
+        ELSE 3
+      END
+    LIMIT 1
   `;
 
   return (rows[0] as DateOverride) || null;
@@ -167,21 +204,36 @@ export async function createDateOverride(
   input: CreateDateOverrideInput
 ): Promise<DateOverride> {
   const rows = await sql`
-    INSERT INTO appointment_date_overrides (date, is_closed, open_time, close_time, reason)
+    INSERT INTO appointment_date_overrides (
+      date,
+      end_date,
+      is_closed,
+      open_time,
+      close_time,
+      reason,
+      is_recurring,
+      show_on_website
+    )
     VALUES (
       ${input.date}::date,
+      ${input.end_date ?? null}::date,
       ${input.is_closed},
       ${input.open_time ?? null},
       ${input.close_time ?? null},
-      ${input.reason ?? null}
+      ${input.reason ?? null},
+      ${input.is_recurring ?? false},
+      ${input.show_on_website ?? false}
     )
     RETURNING
       id,
       date::text,
+      end_date::text,
       is_closed,
       open_time::text,
       close_time::text,
       reason,
+      is_recurring,
+      show_on_website,
       created_at
   `;
 
@@ -199,6 +251,43 @@ export async function deleteDateOverride(id: number): Promise<boolean> {
   `;
 
   return result.length > 0;
+}
+
+/**
+ * Get public closures for website display
+ * Returns only overrides with show_on_website = true
+ * that are current or upcoming (or recurring)
+ */
+export async function getPublicClosures(): Promise<DateOverride[]> {
+  const rows = await sql`
+    SELECT
+      id,
+      date::text,
+      end_date::text,
+      is_closed,
+      open_time::text,
+      close_time::text,
+      reason,
+      is_recurring,
+      show_on_website,
+      created_at
+    FROM appointment_date_overrides
+    WHERE show_on_website = true
+      AND (
+        -- Future or today (single date)
+        (end_date IS NULL AND date >= CURRENT_DATE)
+        -- Future or today (date range - check if end_date is still in future)
+        OR (end_date IS NOT NULL AND end_date >= CURRENT_DATE)
+        -- Recurring overrides always show (they apply every year)
+        OR is_recurring = true
+      )
+    ORDER BY
+      -- Put recurring at the end, sort others by date
+      CASE WHEN is_recurring THEN 1 ELSE 0 END,
+      date ASC
+  `;
+
+  return rows as DateOverride[];
 }
 
 // =============================================================================

@@ -21,8 +21,94 @@ import {
 } from "./utils";
 
 /**
+ * Check if a date matches an override (handles single dates, ranges, and recurring)
+ */
+function doesOverrideApply(override: DateOverride, dateStr: string): boolean {
+  const checkDate = new Date(dateStr);
+  const overrideStart = new Date(override.date);
+
+  // For recurring overrides, match by month and day
+  if (override.is_recurring) {
+    const checkMonth = checkDate.getMonth();
+    const checkDay = checkDate.getDate();
+    const overrideMonth = overrideStart.getMonth();
+    const overrideDay = overrideStart.getDate();
+
+    if (override.end_date) {
+      // Recurring range - check if date falls within month/day range
+      const overrideEnd = new Date(override.end_date);
+      const overrideEndMonth = overrideEnd.getMonth();
+      const overrideEndDay = overrideEnd.getDate();
+
+      // Simple case: same month
+      if (overrideMonth === overrideEndMonth) {
+        return (
+          checkMonth === overrideMonth &&
+          checkDay >= overrideDay &&
+          checkDay <= overrideEndDay
+        );
+      }
+
+      // Cross-month range (e.g., Dec 24 - Jan 2)
+      // Check if in start month after start day, or end month before end day,
+      // or any month in between
+      if (checkMonth === overrideMonth && checkDay >= overrideDay) return true;
+      if (checkMonth === overrideEndMonth && checkDay <= overrideEndDay) return true;
+      // For cross-year ranges like Dec-Jan, check if month is Dec or Jan
+      if (overrideMonth > overrideEndMonth) {
+        // Wraps around year
+        if (checkMonth > overrideMonth || checkMonth < overrideEndMonth) return true;
+      }
+      return false;
+    }
+
+    // Single recurring date
+    return checkMonth === overrideMonth && checkDay === overrideDay;
+  }
+
+  // Non-recurring: exact date match or within range
+  if (override.end_date) {
+    const overrideEnd = new Date(override.end_date);
+    return checkDate >= overrideStart && checkDate <= overrideEnd;
+  }
+
+  // Single date match
+  return dateStr === override.date;
+}
+
+/**
+ * Find the applicable override for a date from a list of overrides
+ * Returns the most specific match (exact date > range > recurring)
+ */
+function findApplicableOverride(
+  overrides: DateOverride[],
+  dateStr: string
+): DateOverride | undefined {
+  let exactMatch: DateOverride | undefined;
+  let rangeMatch: DateOverride | undefined;
+  let recurringMatch: DateOverride | undefined;
+
+  for (const override of overrides) {
+    if (!doesOverrideApply(override, dateStr)) continue;
+
+    if (!override.is_recurring && !override.end_date && override.date === dateStr) {
+      // Exact date match - highest priority
+      exactMatch = override;
+    } else if (!override.is_recurring && override.end_date) {
+      // Date range match
+      rangeMatch = override;
+    } else if (override.is_recurring) {
+      // Recurring match - lowest priority
+      recurringMatch = override;
+    }
+  }
+
+  return exactMatch || rangeMatch || recurringMatch;
+}
+
+/**
  * Get the schedule for a specific date
- * Considers weekly settings and date-specific overrides
+ * Considers weekly settings and date-specific overrides (including ranges and recurring)
  */
 export async function getDaySchedule(date: string): Promise<DaySchedule> {
   const dayOfWeek = getDayOfWeek(date);
@@ -31,9 +117,9 @@ export async function getDaySchedule(date: string): Promise<DaySchedule> {
   const allSettings = await getAppointmentSettings();
   const daySetting = allSettings.find((s) => s.day_of_week === dayOfWeek);
 
-  // Check for date-specific override
+  // Check for date-specific override (the query now returns ranges and recurring)
   const overrides = await getDateOverrides(date, date);
-  const override = overrides[0];
+  const override = findApplicableOverride(overrides, date);
 
   // If there's an override, use it
   if (override) {
@@ -176,10 +262,8 @@ export async function getAvailability(
   const settingsMap = new Map<number, AppointmentSettings>();
   settings.forEach((s) => settingsMap.set(s.day_of_week, s));
 
-  // Get all overrides in range
+  // Get all overrides in range (includes ranges and recurring)
   const overrides = await getDateOverrides(startDate, endDate);
-  const overrideMap = new Map<string, DateOverride>();
-  overrides.forEach((o) => overrideMap.set(o.date, o));
 
   // Generate date range
   const start = new Date(startDate);
@@ -211,7 +295,8 @@ export async function getAvailability(
     }
 
     const dayOfWeek = getDayOfWeek(date);
-    const override = overrideMap.get(date);
+    // Find applicable override for this date (handles ranges and recurring)
+    const override = findApplicableOverride(overrides, date);
     const daySetting = settingsMap.get(dayOfWeek);
 
     let isOpen = false;

@@ -13,6 +13,7 @@ export {
   getDateOverride,
   createDateOverride,
   deleteDateOverride,
+  getPublicClosures,
   // Appointments
   getAppointmentsByDateRange,
   getAllAppointments,

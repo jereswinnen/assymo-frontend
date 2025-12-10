@@ -25,11 +25,14 @@ export interface AppointmentSettings {
  */
 export interface DateOverride {
   id: number;
-  date: string; // "YYYY-MM-DD" format
+  date: string; // "YYYY-MM-DD" format (start date)
+  end_date: string | null; // "YYYY-MM-DD" format (end date for ranges, null = single day)
   is_closed: boolean;
   open_time: string | null; // Override hours if not fully closed
   close_time: string | null;
   reason: string | null; // e.g., "Feestdag", "Vakantie"
+  is_recurring: boolean; // Repeat yearly (matches month/day regardless of year)
+  show_on_website: boolean; // Publish to public website closures API
   created_at: Date;
 }
 
@@ -111,11 +114,14 @@ export interface UpdateSettingsInput {
  * Input for creating a date override
  */
 export interface CreateDateOverrideInput {
-  date: string; // "YYYY-MM-DD"
+  date: string; // "YYYY-MM-DD" (start date)
+  end_date?: string | null; // "YYYY-MM-DD" (end date for ranges)
   is_closed: boolean;
   open_time?: string | null;
   close_time?: string | null;
   reason?: string;
+  is_recurring?: boolean; // Repeat yearly
+  show_on_website?: boolean; // Publish to public website
 }
 
 // =============================================================================
@@ -212,6 +218,18 @@ export interface AppointmentsFilter {
   end_date?: string;
   status?: AppointmentStatus | "all";
   search?: string; // Search in name, email, phone
+}
+
+/**
+ * Public closure info (for website display)
+ */
+export interface PublicClosure {
+  id: number;
+  start_date: string; // "YYYY-MM-DD"
+  end_date: string | null; // "YYYY-MM-DD" or null for single day
+  is_closed: boolean;
+  reason: string | null;
+  is_recurring: boolean;
 }
 
 // =============================================================================
