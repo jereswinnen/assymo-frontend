@@ -34,6 +34,7 @@ export function Calendar({
     return { year: now.getFullYear(), month: now.getMonth() };
   });
   const [expandedDate, setExpandedDate] = useState<string | null>(selectedDate);
+  const timeSlotsRef = useRef<HTMLDivElement>(null);
 
   // Track previous month to detect actual changes
   const prevMonthRef = useRef({
@@ -175,7 +176,15 @@ export function Calendar({
   }, [expandedDate, calendarDays]);
 
   const handleDateClick = (date: string) => {
-    setExpandedDate(date === expandedDate ? null : date);
+    const isExpanding = date !== expandedDate;
+    setExpandedDate(isExpanding ? date : null);
+
+    if (isExpanding) {
+      // Scroll time slots into view after state update
+      setTimeout(() => {
+        timeSlotsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 0);
+    }
   };
 
   const handleTimeSelect = (time: string) => {
@@ -185,7 +194,7 @@ export function Calendar({
   };
 
   return (
-    <div className="w-full flex flex-col gap-6">
+    <div className="w-full flex flex-col gap-4">
       {/* Month navigation */}
       <div className="flex items-center justify-between">
         <h3 className="mb-0! capitalize">{monthName}</h3>
@@ -243,7 +252,7 @@ export function Calendar({
                 disabled={!isClickable}
                 onClick={() => isClickable && handleDateClick(day.date!)}
                 className={cn(
-                  "aspect-square relative border-r border-b border-stone-200 p-1",
+                  "aspect-3/2 relative border-r border-b border-stone-200 p-1",
                   "focus:outline-none",
                   !day.date && "bg-transparent",
                   day.date && day.isPast && "bg-stone-50 cursor-not-allowed",
@@ -287,7 +296,7 @@ export function Calendar({
                     aria-hidden="true"
                   >
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-[141%] h-px bg-stone-200 origin-center rotate-45" />
+                      <div className="w-[141%] h-px bg-stone-200 origin-center rotate-32" />
                     </div>
                   </div>
                 )}
@@ -298,7 +307,7 @@ export function Calendar({
 
         {/* Time slots for selected date */}
         {expandedDate && (
-          <div className="flex flex-col gap-3">
+          <div ref={timeSlotsRef} className="flex flex-col gap-3">
             <div className="flex items-center gap-1.5">
               <ClockIcon className="size-4" />
               <p className="mb-0! text-base font-medium text-stone-700">
