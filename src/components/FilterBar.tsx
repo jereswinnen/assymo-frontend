@@ -54,6 +54,7 @@ function CategoryFilter({
       ? selectedOptions.filter((s) => s !== optionSlug)
       : [...selectedOptions, optionSlug];
     onSelectionChange(category.slug.current, newSelection);
+    setOpen(false);
   };
 
   const handleClear = () => {
