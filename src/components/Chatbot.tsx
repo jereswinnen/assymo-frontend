@@ -220,7 +220,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                       onClick={() => {
                         sendMessage({ text: question });
                       }}
-                      className="text-left flex text-sm font-medium rounded-lg p-2 bg-stone-100 hover:bg-stone-200 transition-colors"
+                      className="cursor-pointer text-left flex text-sm font-medium rounded-lg p-2 bg-stone-100 hover:bg-stone-200 transition-colors"
                       //disabled={status !== "ready"}
                     >
                       {question}
