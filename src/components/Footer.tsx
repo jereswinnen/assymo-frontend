@@ -2,7 +2,7 @@ import Link from "next/link";
 import Logo from "./Logo";
 import { cn } from "@/lib/utils";
 import { client } from "@/sanity/client";
-import { PhoneIcon, InstagramIcon, FacebookIcon } from "lucide-react";
+import { PhoneIcon, InstagramIcon, FacebookIcon, MailIcon } from "lucide-react";
 import { Separator } from "./ui/separator";
 import { NewsletterForm } from "./NewsletterForm";
 import { CookieSettingsButton } from "./CookieSettingsButton";
@@ -21,6 +21,7 @@ const NAV_QUERY = `*[_type == "navigation"][0]{
 const PARAMETERS_QUERY = `*[_type == "siteParameters"][0]{
   address,
   phone,
+  email,
   vatNumber,
   instagram,
   facebook
@@ -40,6 +41,7 @@ type NavLink = {
 type SiteSettings = {
   address?: string;
   phone?: string;
+  email?: string;
   vatNumber?: string;
   instagram?: string;
   facebook?: string;
@@ -84,6 +86,17 @@ export default async function Footer({ className }: FooterProps) {
                   >
                     <PhoneIcon className="size-4" />
                     <span>{settings.phone}</span>
+                  </a>
+                </li>
+              )}
+              {settings?.email && (
+                <li>
+                  <a
+                    href={`mailto:${settings.email}`}
+                    className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                  >
+                    <MailIcon className="size-4" />
+                    <span>{settings.email}</span>
                   </a>
                 </li>
               )}
