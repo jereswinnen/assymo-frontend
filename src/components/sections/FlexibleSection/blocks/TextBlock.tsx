@@ -1,6 +1,9 @@
+"use client";
+
 import { PortableText } from "@portabletext/react";
-import { Action } from "@/components/Action";
+import { Action, actionVariants } from "@/components/Action";
 import { iconMap } from "@/lib/icons";
+import { cn } from "@/lib/utils";
 import type { FlexTextBlock } from "../types";
 
 interface TextBlockProps {
@@ -12,6 +15,10 @@ export default function TextBlock({ block }: TextBlockProps) {
 
   const IconComponent =
     button?.icon && button.icon in iconMap ? iconMap[button.icon] : null;
+
+  const handleOpenChatbot = () => {
+    window.dispatchEvent(new CustomEvent("openChatbot"));
+  };
 
   const renderHeading = () => {
     if (!heading) return null;
@@ -35,13 +42,23 @@ export default function TextBlock({ block }: TextBlockProps) {
           </div>
         )}
       </div>
-      {showButton && button?.label && button?.url && (
-        <Action
-          href={button.url}
-          icon={IconComponent ? <IconComponent /> : undefined}
-          label={button.label}
-          variant={button.variant}
-        />
+      {showButton && button?.label && (
+        button.action === "openChatbot" ? (
+          <button
+            onClick={handleOpenChatbot}
+            className={cn(actionVariants({ variant: button.variant }))}
+          >
+            {IconComponent && <IconComponent />}
+            {button.label}
+          </button>
+        ) : button.url ? (
+          <Action
+            href={button.url}
+            icon={IconComponent ? <IconComponent /> : undefined}
+            label={button.label}
+            variant={button.variant}
+          />
+        ) : null
       )}
     </div>
   );

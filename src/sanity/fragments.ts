@@ -84,6 +84,7 @@ export const flexibleBlockFields = `
   showButton,
   button{
     label,
+    action,
     url,
     icon,
     variant

@@ -15,7 +15,8 @@ export interface FlexTextBlock extends BaseBlock {
   showButton?: boolean;
   button?: {
     label: string;
-    url: string;
+    action?: "link" | "openChatbot";
+    url?: string;
     icon?: string;
     variant?: "primary" | "secondary";
   };

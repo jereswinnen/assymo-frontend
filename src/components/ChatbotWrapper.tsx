@@ -24,6 +24,17 @@ export default function ChatbotWrapper() {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen]);
 
+  // Handle external open trigger (e.g., from CTA buttons)
+  useEffect(() => {
+    const handleOpenChatbot = () => {
+      setIsOpen(true);
+      setIsClosing(false);
+    };
+
+    window.addEventListener("openChatbot", handleOpenChatbot);
+    return () => window.removeEventListener("openChatbot", handleOpenChatbot);
+  }, []);
+
   // Handle click outside to close
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
