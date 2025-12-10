@@ -9,6 +9,7 @@ import {
   Calendar1Icon,
   FacebookIcon,
   InstagramIcon,
+  MailIcon,
   PhoneIcon,
 } from "lucide-react";
 import { Separator } from "./ui/separator";
@@ -52,6 +53,7 @@ type NavLink = {
 type SiteSettings = {
   address?: string;
   phone?: string;
+  email?: string;
   instagram?: string;
   facebook?: string;
 };
@@ -388,6 +390,17 @@ export default function HeaderClient({
                               >
                                 <PhoneIcon className="size-4" />
                                 <span>{settings.phone}</span>
+                              </a>
+                            </li>
+                          )}
+                          {settings?.email && (
+                            <li>
+                              <a
+                                href={`mailto:${settings.email}`}
+                                className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                              >
+                                <MailIcon className="size-4" />
+                                <span>{settings.email}</span>
                               </a>
                             </li>
                           )}

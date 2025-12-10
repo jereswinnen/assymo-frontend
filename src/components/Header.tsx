@@ -21,6 +21,7 @@ const NAV_QUERY = `*[_type == "navigation"][0]{
 const PARAMETERS_QUERY = `*[_type == "siteParameters"][0]{
   address,
   phone,
+  email,
   instagram,
   facebook
 }`;
