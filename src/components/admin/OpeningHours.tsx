@@ -17,17 +17,17 @@ interface DaySettingRow {
   slot_duration_minutes: number;
 }
 
-interface AppointmentSettingsProps {
+interface OpeningHoursProps {
   onHasChangesChange: (hasChanges: boolean) => void;
   triggerSave: number;
   onSaveComplete: () => void;
 }
 
-export function AppointmentSettings({
+export function OpeningHours({
   onHasChangesChange,
   triggerSave,
   onSaveComplete,
-}: AppointmentSettingsProps) {
+}: OpeningHoursProps) {
   const [settings, setSettings] = useState<DaySettingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
@@ -51,7 +51,7 @@ export function AppointmentSettings({
 
   const loadSettings = async () => {
     try {
-      const response = await fetch("/api/admin/appointments/settings");
+      const response = await fetch("/api/admin/appointments/opening-hours");
       if (!response.ok) throw new Error("Failed to load settings");
 
       const data = await response.json();
@@ -100,7 +100,7 @@ export function AppointmentSettings({
 
   const handleSave = async () => {
     try {
-      const response = await fetch("/api/admin/appointments/settings", {
+      const response = await fetch("/api/admin/appointments/opening-hours", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

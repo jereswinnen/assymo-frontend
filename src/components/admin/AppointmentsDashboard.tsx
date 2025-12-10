@@ -13,7 +13,7 @@ import {
   SquareDashedMousePointerIcon,
 } from "lucide-react";
 import { AppointmentsList } from "./AppointmentsList";
-import { AppointmentSettings } from "./AppointmentSettings";
+import { OpeningHours } from "./OpeningHours";
 import { DateOverrides } from "./DateOverrides";
 
 export function AppointmentsDashboard() {
@@ -53,7 +53,7 @@ export function AppointmentsDashboard() {
             <ListTreeIcon className="size-4" />
             Overzicht
           </TabsTrigger>
-          <TabsTrigger value="settings">
+          <TabsTrigger value="opening-hours">
             <ClockIcon className="size-4" />
             Openingsuren
           </TabsTrigger>
@@ -71,7 +71,7 @@ export function AppointmentsDashboard() {
             </Button>
           )}
 
-          {activeTab === "settings" && (
+          {activeTab === "opening-hours" && (
             <Button
               onClick={handleSaveSettings}
               disabled={settingsSaving || !settingsHasChanges}
@@ -101,8 +101,8 @@ export function AppointmentsDashboard() {
         />
       </TabsContent>
 
-      <TabsContent value="settings">
-        <AppointmentSettings
+      <TabsContent value="opening-hours">
+        <OpeningHours
           onHasChangesChange={setSettingsHasChanges}
           triggerSave={triggerSettingsSave}
           onSaveComplete={handleSettingsSaveComplete}
