@@ -123,10 +123,6 @@ export function CreateAppointmentForm({
     onOpenChange(isOpen);
   };
 
-  // Get tomorrow's date as min date
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split("T")[0];
 
   // Check if required fields are filled
   const isFormValid =
@@ -161,7 +157,6 @@ export function CreateAppointmentForm({
                 onChange={(e) =>
                   setFormData({ ...formData, appointment_date: e.target.value })
                 }
-                min={minDate}
                 required
                 className="[&::-webkit-calendar-picker-indicator]:hidden"
               />

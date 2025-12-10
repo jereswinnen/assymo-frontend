@@ -6,7 +6,7 @@ import {
   searchAppointments,
   createAppointment,
   sendNewAppointmentEmails,
-  isSlotAvailable,
+  isSlotBooked,
   isValidEmail,
   isValidPhone,
   isValidPostalCode,
@@ -137,15 +137,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check slot availability
-    const available = await isSlotAvailable(
+    // Admin can book any day/time, only check for double-booking
+    const alreadyBooked = await isSlotBooked(
       body.appointment_date,
       body.appointment_time
     );
 
-    if (!available) {
+    if (alreadyBooked) {
       return NextResponse.json(
-        { error: "Dit tijdslot is niet beschikbaar" },
+        { error: "Dit tijdslot is al geboekt" },
         { status: 409 }
       );
     }

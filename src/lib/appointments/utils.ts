@@ -199,14 +199,16 @@ export function isValidEmail(email: string): boolean {
 }
 
 /**
- * Validate Dutch phone number (basic validation)
- * Accepts formats: 0612345678, 06 12345678, +31 6 12345678, etc.
+ * Validate phone number (permissive international validation)
+ * Accepts any number with 8-15 digits, optionally starting with + for international format.
+ * Examples: 0612345678, +31612345678, +32412345678, +49123456789, etc.
  */
 export function isValidPhone(phone: string): boolean {
-  // Remove spaces, dashes, and parentheses
-  const cleaned = phone.replace(/[\s\-()]/g, "");
-  // Should start with 0 or +31 and have 10-12 digits
-  return /^(\+31|0)\d{9,11}$/.test(cleaned);
+  // Remove spaces, dashes, parentheses, and dots
+  const cleaned = phone.replace(/[\s\-().]/g, "");
+  // Must have 8-15 digits, optionally starting with +
+  // This covers most international formats (E.164 standard allows up to 15 digits)
+  return /^\+?\d{8,15}$/.test(cleaned);
 }
 
 /**

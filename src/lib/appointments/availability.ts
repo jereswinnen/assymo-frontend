@@ -169,8 +169,8 @@ export async function getDaySchedule(date: string): Promise<DaySchedule> {
  * Get available time slots for a specific date
  */
 export async function getAvailableSlots(date: string): Promise<TimeSlot[]> {
-  // Don't allow booking in the past
-  if (isDateInPast(date)) {
+  // Don't allow booking in the past or same-day
+  if (isDateInPast(date) || isToday(date)) {
     return [];
   }
 
@@ -214,13 +214,8 @@ export async function isSlotAvailable(
   date: string,
   time: string
 ): Promise<boolean> {
-  // Check if date is in past
-  if (isDateInPast(date)) {
-    return false;
-  }
-
-  // Check if time is in past for today
-  if (isToday(date) && isTimeInPast(time)) {
+  // Check if date is in past or same-day (no same-day bookings allowed)
+  if (isDateInPast(date) || isToday(date)) {
     return false;
   }
 
@@ -288,8 +283,8 @@ export async function getAvailability(
   const availability: DateAvailability[] = [];
 
   for (const date of dates) {
-    // Skip past dates
-    if (isDateInPast(date)) {
+    // Skip past dates and today (no same-day bookings)
+    if (isDateInPast(date) || isToday(date)) {
       availability.push({ date, is_open: false, slots: [] });
       continue;
     }
