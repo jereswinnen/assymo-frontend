@@ -1,89 +1,86 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { CalendarFoldIcon, CalendarOffIcon } from "lucide-react";
+import { CalendarFoldIcon } from "lucide-react";
+import { getPublicClosures } from "@/lib/appointments";
 import type { PublicClosure } from "@/types/appointments";
 
-export function ClosureBanner() {
-  const [closures, setClosures] = useState<PublicClosure[]>([]);
-  const [loading, setLoading] = useState(true);
+// Format the closure message
+function formatClosureMessage(closure: PublicClosure) {
+  const reasonText = closure.reason ? ` (${closure.reason})` : "";
 
-  useEffect(() => {
-    fetch("/api/appointments/closures")
-      .then((res) => res.json())
-      .then((data) => {
-        setClosures(data.closures || []);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch closures:", err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+  if (closure.end_date && closure.end_date !== closure.start_date) {
+    const startDate = new Date(closure.start_date);
+    const endDate = new Date(closure.end_date);
+    const sameMonth =
+      startDate.getMonth() === endDate.getMonth() &&
+      startDate.getFullYear() === endDate.getFullYear();
 
-  // Don't render if loading or no closures
-  if (loading || closures.length === 0) {
+    if (sameMonth) {
+      // Same month: "van 6 t/m 12 dec"
+      const day1 = startDate.getDate();
+      const day2 = endDate.getDate();
+      const month = endDate.toLocaleDateString("nl-NL", { month: "short" });
+      return {
+        prefix: closure.is_closed
+          ? "Wij zijn gesloten"
+          : "Aangepaste openingsuren",
+        dateRange: `van ${day1} t/m ${day2} ${month}`,
+        suffix: reasonText,
+      };
+    } else {
+      // Different months: "6 dec tot en met 1 jan"
+      const formatShort = (d: Date) =>
+        d.toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
+      return {
+        prefix: closure.is_closed
+          ? "Wij zijn gesloten van"
+          : "Aangepaste openingsuren van",
+        startDate: formatShort(startDate),
+        endDate: formatShort(endDate),
+        suffix: reasonText,
+      };
+    }
+  }
+
+  // Single day
+  const date = new Date(closure.start_date);
+  const formatted = date.toLocaleDateString("nl-NL", {
+    day: "numeric",
+    month: "short",
+  });
+  return {
+    prefix: closure.is_closed
+      ? "Wij zijn gesloten op"
+      : "Aangepaste openingsuren op",
+    startDate: formatted,
+    endDate: null,
+    suffix: reasonText,
+  };
+}
+
+export async function ClosureBanner() {
+  let closures: PublicClosure[] = [];
+
+  try {
+    const overrides = await getPublicClosures();
+    closures = overrides.map((override) => ({
+      id: override.id,
+      start_date: override.date,
+      end_date: override.end_date,
+      is_closed: override.is_closed,
+      reason: override.reason,
+      is_recurring: override.is_recurring,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch closures:", error);
+    return null;
+  }
+
+  // Don't render if no closures
+  if (closures.length === 0) {
     return null;
   }
 
   // Get the most relevant closure (first one, sorted by date)
   const closure = closures[0];
-
-  // Format the closure message
-  const formatClosureMessage = (closure: PublicClosure) => {
-    const reasonText = closure.reason ? ` (${closure.reason})` : "";
-
-    if (closure.end_date && closure.end_date !== closure.start_date) {
-      const startDate = new Date(closure.start_date);
-      const endDate = new Date(closure.end_date);
-      const sameMonth =
-        startDate.getMonth() === endDate.getMonth() &&
-        startDate.getFullYear() === endDate.getFullYear();
-
-      if (sameMonth) {
-        // Same month: "van 6 t/m 12 dec"
-        const day1 = startDate.getDate();
-        const day2 = endDate.getDate();
-        const month = endDate.toLocaleDateString("nl-NL", { month: "short" });
-        return {
-          prefix: closure.is_closed
-            ? "Wij zijn gesloten"
-            : "Aangepaste openingsuren",
-          dateRange: `van ${day1} t/m ${day2} ${month}`,
-          suffix: reasonText,
-        };
-      } else {
-        // Different months: "6 dec tot en met 1 jan"
-        const formatShort = (d: Date) =>
-          d.toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
-        return {
-          prefix: closure.is_closed
-            ? "Wij zijn gesloten van"
-            : "Aangepaste openingsuren van",
-          startDate: formatShort(startDate),
-          endDate: formatShort(endDate),
-          suffix: reasonText,
-        };
-      }
-    }
-
-    // Single day
-    const date = new Date(closure.start_date);
-    const formatted = date.toLocaleDateString("nl-NL", {
-      day: "numeric",
-      month: "short",
-    });
-    return {
-      prefix: closure.is_closed
-        ? "Wij zijn gesloten op"
-        : "Aangepaste openingsuren op",
-      startDate: formatted,
-      endDate: null,
-      suffix: reasonText,
-    };
-  };
-
   const message = formatClosureMessage(closure);
 
   return (
@@ -94,9 +91,7 @@ export function ClosureBanner() {
           <span>
             {message.prefix}{" "}
             {"dateRange" in message ? (
-              <span className="font-medium text-white">
-                {message.dateRange}
-              </span>
+              <span className="font-medium text-white">{message.dateRange}</span>
             ) : (
               <>
                 <span className="font-medium text-white">
