@@ -138,11 +138,7 @@ export function ProjectsGrid({ solutions, categories }: ProjectsGridProps) {
           filteredSolutions.map((solution, index) => (
             <div
               key={`${solution._id}-${filterKey}`}
-              className="group relative w-full flex flex-col gap-4 p-4 cursor-pointer transition-all ease-circ duration-400 animate-in fade-in slide-in-from-bottom-4"
-              style={{
-                animationDelay: `${index * 60}ms`,
-                animationFillMode: "backwards",
-              }}
+              className="group relative w-full flex flex-col gap-4 p-4 cursor-pointer transition-all ease-circ duration-400"
               onClick={() => router.push(`/realisaties/${solution.slug.current}`)}
             >
               {/* Image */}
