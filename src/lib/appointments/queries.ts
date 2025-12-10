@@ -31,7 +31,7 @@ export async function getAppointmentSettings(): Promise<AppointmentSettings[]> {
       slot_duration_minutes,
       created_at,
       updated_at
-    FROM appointment_settings
+    FROM appointment_opening_hours
     ORDER BY day_of_week
   `;
 
@@ -54,7 +54,7 @@ export async function getSettingsForDay(
       slot_duration_minutes,
       created_at,
       updated_at
-    FROM appointment_settings
+    FROM appointment_opening_hours
     WHERE day_of_week = ${dayOfWeek}
   `;
 
@@ -68,7 +68,7 @@ export async function updateSettings(
   input: UpdateSettingsInput
 ): Promise<AppointmentSettings> {
   const rows = await sql`
-    UPDATE appointment_settings
+    UPDATE appointment_opening_hours
     SET
       is_open = ${input.is_open},
       open_time = ${input.open_time ?? null},
