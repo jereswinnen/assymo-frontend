@@ -43,12 +43,16 @@ export default function AdminLoginPage() {
         if (
           typeof window !== "undefined" &&
           window.PublicKeyCredential &&
-          typeof PublicKeyCredential.isConditionalMediationAvailable === "function"
+          typeof PublicKeyCredential.isConditionalMediationAvailable ===
+            "function"
         ) {
-          const available = await PublicKeyCredential.isConditionalMediationAvailable();
+          const available =
+            await PublicKeyCredential.isConditionalMediationAvailable();
           if (available) {
             // Start listening for passkey autofill
-            const { error } = await authClient.signIn.passkey({ autoFill: true });
+            const { error } = await authClient.signIn.passkey({
+              autoFill: true,
+            });
             if (!error) {
               router.push("/admin");
               router.refresh();
@@ -255,7 +259,7 @@ export default function AdminLoginPage() {
                   setEmail(e.target.value);
                   setError(null);
                 }}
-                placeholder="admin@assymo.nl"
+                placeholder="admin@assymo.be"
                 disabled={loading}
                 autoFocus
               />
@@ -403,7 +407,7 @@ export default function AdminLoginPage() {
                 setEmail(e.target.value);
                 setError(null);
               }}
-              placeholder="admin@assymo.nl"
+              placeholder="admin@assymo.be"
               autoComplete="username webauthn"
               disabled={loading}
               autoFocus
