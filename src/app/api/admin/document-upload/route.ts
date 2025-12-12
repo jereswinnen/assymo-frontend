@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { extractTextFromFile, chunkText } from '@/lib/documentProcessor';
 import { storeChunksWithEmbeddings, clearAllChunks } from '@/lib/embeddings';
-import { isAuthenticated } from '@/lib/auth';
+import { isAuthenticated } from '@/lib/auth-utils';
 
 export const maxDuration = 300; // 5 minutes for large documents
 

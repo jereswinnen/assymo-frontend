@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { render } from "@react-email/components";
-import { isAuthenticated } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth-utils";
 import {
   AppointmentConfirmation,
   AppointmentAdminNotification,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth-utils";
 import { getAppointmentSettings, updateSettings } from "@/lib/appointments";
 import type { UpdateSettingsInput } from "@/types/appointments";
 

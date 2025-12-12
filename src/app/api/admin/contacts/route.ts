@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth-utils";
 import { resend } from "@/lib/resend";
 import { RESEND_CONFIG } from "@/config/resend";
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { isAuthenticated } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth-utils";
 import type { Newsletter, NewsletterSection } from "@/config/newsletter";
 
 const sql = neon(process.env.DATABASE_URL!);

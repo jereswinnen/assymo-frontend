@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { retrieveRelevantChunks } from '@/lib/retrieval';
-import { isAuthenticated } from '@/lib/auth';
+import { isAuthenticated } from '@/lib/auth-utils';
 
 export async function POST(req: NextRequest) {
   try {

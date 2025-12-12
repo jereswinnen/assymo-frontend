@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDocumentInfo } from '@/lib/embeddings';
-import { isAuthenticated } from '@/lib/auth';
+import { isAuthenticated } from '@/lib/auth-utils';
 
 export async function GET(req: NextRequest) {
   try {
