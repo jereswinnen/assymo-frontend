@@ -1,5 +1,8 @@
 import { betterAuth } from "better-auth";
 import { Pool } from "pg";
+import { resend } from "@/lib/resend";
+import { RESEND_CONFIG } from "@/config/resend";
+import { PasswordReset } from "@/emails/PasswordReset";
 
 export const auth = betterAuth({
   database: new Pool({
@@ -9,6 +12,14 @@ export const auth = betterAuth({
     enabled: true,
     // Disable sign-up - admins create users manually via CLI
     disableSignUp: true,
+    sendResetPassword: async ({ user, url }) => {
+      await resend.emails.send({
+        from: RESEND_CONFIG.fromAddressAuth,
+        to: user.email,
+        subject: RESEND_CONFIG.subjects.passwordReset,
+        react: PasswordReset({ resetUrl: url }),
+      });
+    },
   },
   session: {
     // 24 hour sessions

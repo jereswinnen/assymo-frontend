@@ -36,13 +36,14 @@ export default function AdminLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const isLoginPage = pathname === "/admin/login";
+  const isAuthPage =
+    pathname === "/admin/login" || pathname === "/admin/reset-password";
 
   useEffect(() => {
     document.title = "Admin - Assymo";
   }, []);
 
-  if (isLoginPage) {
+  if (isAuthPage) {
     return (
       <div className="bg-background min-h-screen">
         <div className="container mx-auto max-w-5xl">{children}</div>

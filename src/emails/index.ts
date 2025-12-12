@@ -10,3 +10,6 @@ export { AppointmentAdminNotification } from "./AppointmentAdminNotification";
 export { AppointmentCancellation } from "./AppointmentCancellation";
 export { AppointmentUpdated } from "./AppointmentUpdated";
 export { AppointmentReminder } from "./AppointmentReminder";
+
+// Auth emails
+export { PasswordReset } from "./PasswordReset";
