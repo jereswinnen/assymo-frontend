@@ -62,7 +62,8 @@ export default function SetupPasskeyPage() {
         return;
       }
 
-      // Success - go to admin
+      // Success - mark MFA choice as complete and go to admin
+      await fetch("/api/admin/user/mfa-choice", { method: "POST" });
       router.push("/admin");
       router.refresh();
     } catch (err) {
@@ -76,8 +77,9 @@ export default function SetupPasskeyPage() {
     }
   };
 
-  const handleSkip = () => {
-    localStorage.setItem("passkey_skipped", "true");
+  const handleSkip = async () => {
+    // Mark MFA choice as complete
+    await fetch("/api/admin/user/mfa-choice", { method: "POST" });
     router.push("/admin");
     router.refresh();
   };

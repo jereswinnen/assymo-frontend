@@ -11,6 +11,14 @@ export const auth = betterAuth({
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
   }),
+  user: {
+    additionalFields: {
+      mfaChoiceCompleted: {
+        type: "boolean",
+        defaultValue: false,
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     // Disable sign-up - admins create users manually via CLI

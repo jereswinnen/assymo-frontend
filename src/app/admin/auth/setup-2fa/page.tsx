@@ -161,14 +161,10 @@ export default function Setup2FAPage() {
         setBackupCodes(responseData.backupCodes);
         setStep("backup-codes");
       } else {
-        // No backup codes, check if should go to passkey setup
-        const skippedPasskey = localStorage.getItem("passkey_skipped") === "true";
-        if (skippedPasskey) {
-          router.push("/admin");
-          router.refresh();
-        } else {
-          router.push("/admin/auth/setup-passkey");
-        }
+        // No backup codes, mark MFA choice as complete and go to admin
+        await fetch("/api/admin/user/mfa-choice", { method: "POST" });
+        router.push("/admin");
+        router.refresh();
       }
     } catch (err) {
       console.error("2FA verification error:", err);
@@ -185,14 +181,11 @@ export default function Setup2FAPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleComplete = () => {
-    const skippedPasskey = localStorage.getItem("passkey_skipped") === "true";
-    if (skippedPasskey) {
-      router.push("/admin");
-      router.refresh();
-    } else {
-      router.push("/admin/auth/setup-passkey");
-    }
+  const handleComplete = async () => {
+    // Mark MFA choice as complete
+    await fetch("/api/admin/user/mfa-choice", { method: "POST" });
+    router.push("/admin");
+    router.refresh();
   };
 
   if (loading) {

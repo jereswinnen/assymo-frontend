@@ -102,12 +102,15 @@ export default function AdminLoginPage() {
         return;
       }
 
-      // No 2FA, check if user needs to set it up
+      // Check if user needs to complete MFA choice
       const session = await authClient.getSession();
-      if (session.data?.user && !session.data.user.twoFactorEnabled) {
-        // Redirect to 2FA setup
-        router.push("/admin/auth/setup-2fa");
-        return;
+      if (session.data?.user) {
+        const user = session.data.user as { mfaChoiceCompleted?: boolean };
+        if (!user.mfaChoiceCompleted) {
+          // Redirect to MFA choice page
+          router.push("/admin/auth/multi-factor");
+          return;
+        }
       }
 
       // Login complete
@@ -144,16 +147,7 @@ export default function AdminLoginPage() {
         return;
       }
 
-      // Check if user has passkeys (and hasn't skipped setup)
-      const skippedPasskey = localStorage.getItem("passkey_skipped") === "true";
-      if (!skippedPasskey) {
-        const { data: passkeys } = await authClient.passkey.listUserPasskeys();
-        if (!passkeys || passkeys.length === 0) {
-          router.push("/admin/auth/setup-passkey");
-          return;
-        }
-      }
-
+      // 2FA verified, go to admin
       router.push("/admin");
       router.refresh();
     } catch (err) {
