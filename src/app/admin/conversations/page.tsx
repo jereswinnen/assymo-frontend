@@ -27,7 +27,7 @@ function ConversationsContent() {
       const response = await fetch("/api/admin/conversations");
 
       if (response.status === 401) {
-        router.push("/admin/auth/login");
+        router.push("/admin/auth");
         return;
       }
 

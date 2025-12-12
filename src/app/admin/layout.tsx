@@ -36,10 +36,16 @@ export default function AdminLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
+  const isAuthRoute = pathname.startsWith("/admin/auth");
 
   useEffect(() => {
     document.title = "Admin - Assymo";
   }, []);
+
+  // Auth pages render without sidebar
+  if (isAuthRoute) {
+    return children;
+  }
 
   const currentLabel = getRouteLabel(pathname);
 

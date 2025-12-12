@@ -125,7 +125,7 @@ function ResetPasswordForm() {
 
             <Button
               className="w-full"
-              onClick={() => router.push("/admin/auth/login")}
+              onClick={() => router.push("/admin/auth")}
             >
               Terug naar inloggen
             </Button>
@@ -154,7 +154,7 @@ function ResetPasswordForm() {
 
             <Button
               className="w-full"
-              onClick={() => router.push("/admin/auth/login")}
+              onClick={() => router.push("/admin/auth")}
             >
               Naar inloggen
             </Button>

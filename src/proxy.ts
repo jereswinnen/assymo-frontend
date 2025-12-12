@@ -13,7 +13,7 @@ export default function proxy(request: NextRequest) {
     const sessionCookie = request.cookies.get("better-auth.session_token");
 
     if (!sessionCookie) {
-      return NextResponse.redirect(new URL("/admin/auth/login", request.url));
+      return NextResponse.redirect(new URL("/admin/auth", request.url));
     }
   }
 

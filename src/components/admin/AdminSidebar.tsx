@@ -46,7 +46,7 @@ export function AdminSidebar({
     try {
       await authClient.signOut();
       toast.success("Uitgelogd");
-      router.push("/admin/auth/login");
+      router.push("/admin/auth");
       router.refresh();
     } catch (error) {
       console.error("Logout error:", error);
