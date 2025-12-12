@@ -82,7 +82,7 @@ export default function AdminLoginPage() {
     try {
       const { error } = await authClient.requestPasswordReset({
         email,
-        redirectTo: "/admin/reset-password",
+        redirectTo: "/admin/auth/reset-password",
       });
 
       if (error) {
