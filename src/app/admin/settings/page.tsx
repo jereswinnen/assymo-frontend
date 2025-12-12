@@ -5,11 +5,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { SettingsPanel } from "@/components/admin/SettingsPanel";
 import { DocumentEmbeddings } from "@/components/admin/DocumentEmbeddings";
+import { SecuritySettings } from "@/components/admin/SecuritySettings";
 import {
   CheckIcon,
   ListTreeIcon,
   Loader2Icon,
   ScanTextIcon,
+  ShieldCheckIcon,
 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -46,6 +48,10 @@ export default function SettingsPage() {
             <ScanTextIcon className="size-4" />
             Embeddings
           </TabsTrigger>
+          <TabsTrigger value="security">
+            <ShieldCheckIcon className="size-4" />
+            Beveiliging
+          </TabsTrigger>
         </TabsList>
 
         {activeTab === "general" && (
@@ -73,6 +79,10 @@ export default function SettingsPage() {
 
       <TabsContent value="embeddings">
         <DocumentEmbeddings />
+      </TabsContent>
+
+      <TabsContent value="security">
+        <SecuritySettings />
       </TabsContent>
     </Tabs>
   );
