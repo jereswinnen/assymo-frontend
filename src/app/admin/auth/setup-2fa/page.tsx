@@ -36,8 +36,29 @@ export default function Setup2FAPage() {
   const [enabling, setEnabling] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [secretCopied, setSecretCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Extract secret from TOTP URI
+  const getSecretFromUri = (uri: string): string | null => {
+    try {
+      const url = new URL(uri);
+      return url.searchParams.get("secret");
+    } catch {
+      return null;
+    }
+  };
+
+  const secret = totpUri ? getSecretFromUri(totpUri) : null;
+
+  const copySecret = () => {
+    if (secret) {
+      navigator.clipboard.writeText(secret);
+      setSecretCopied(true);
+      setTimeout(() => setSecretCopied(false), 2000);
+    }
+  };
 
   useEffect(() => {
     async function checkSession() {
@@ -341,8 +362,32 @@ export default function Setup2FAPage() {
           )}
 
           {totpUri && (
-            <div className="flex justify-center bg-white p-4 rounded-lg">
-              <QRCode value={totpUri} size={200} />
+            <div className="space-y-3">
+              <div className="flex justify-center bg-white p-4 rounded-lg">
+                <QRCode value={totpUri} size={200} />
+              </div>
+
+              {secret && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={copySecret}
+                  className="w-full"
+                >
+                  {secretCopied ? (
+                    <>
+                      <CheckCircleIcon className="size-4" />
+                      Gekopieerd
+                    </>
+                  ) : (
+                    <>
+                      <CopyIcon className="size-4" />
+                      Kopieer setup code
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           )}
 
