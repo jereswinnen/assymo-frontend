@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, test, expect } from 'vitest'
 import { generateICS, generateCancellationICS, generateICSFilename } from './ics'
 import type { Appointment } from '@/types/appointments'
