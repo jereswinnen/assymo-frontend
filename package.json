@@ -7,7 +7,7 @@
     "build": "vitest --run && next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest --reporter=verbose"
+    "test": "vitest"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.65",
