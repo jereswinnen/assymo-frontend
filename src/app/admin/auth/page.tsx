@@ -8,25 +8,33 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import {
   LogInIcon,
   Loader2Icon,
   ArrowLeftIcon,
   MailIcon,
   AlertCircleIcon,
   CheckCircleIcon,
+  ShieldCheckIcon,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
+type AuthStep = "login" | "2fa" | "forgot-password" | "reset-email-sent";
+
 export default function AdminLoginPage() {
+  const [step, setStep] = useState<AuthStep>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [otpCode, setOtpCode] = useState("");
   const [loading, setLoading] = useState(false);
-  const [forgotPassword, setForgotPassword] = useState(false);
-  const [resetEmailSent, setResetEmailSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -38,14 +46,13 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const { error } = await authClient.signIn.email({
+      const { data, error } = await authClient.signIn.email({
         email,
         password,
       });
 
       if (error) {
         console.error("Login error:", error);
-        // Provide user-friendly error messages
         if (
           error.message?.toLowerCase().includes("invalid") ||
           error.message?.toLowerCase().includes("incorrect")
@@ -56,13 +63,63 @@ export default function AdminLoginPage() {
         } else {
           setError(error.message || "Ongeldige inloggegevens.");
         }
-      } else {
-        router.push("/admin");
-        router.refresh();
+        return;
       }
+
+      // Check if 2FA is required
+      if ((data as { twoFactorRedirect?: boolean })?.twoFactorRedirect) {
+        setStep("2fa");
+        return;
+      }
+
+      // No 2FA, check if user needs to set it up
+      const session = await authClient.getSession();
+      if (session.data?.user && !session.data.user.twoFactorEnabled) {
+        // Redirect to 2FA setup
+        router.push("/admin/auth/setup-2fa");
+        return;
+      }
+
+      // Login complete
+      router.push("/admin");
+      router.refresh();
     } catch (err) {
       console.error("Login error:", err);
       setError("Er is iets misgegaan. Probeer het opnieuw.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerify2FA = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (otpCode.length !== 6) {
+      setError("Vul een 6-cijferige code in.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } = await authClient.twoFactor.verifyTotp({
+        code: otpCode,
+      });
+
+      if (error) {
+        console.error("2FA verification error:", error);
+        setError("Ongeldige code. Probeer opnieuw.");
+        setOtpCode("");
+        return;
+      }
+
+      router.push("/admin");
+      router.refresh();
+    } catch (err) {
+      console.error("2FA verification error:", err);
+      setError("Er is iets misgegaan. Probeer het opnieuw.");
+      setOtpCode("");
     } finally {
       setLoading(false);
     }
@@ -89,7 +146,7 @@ export default function AdminLoginPage() {
         console.error("Forgot password error:", error);
         setError(error.message || "Er is iets misgegaan.");
       } else {
-        setResetEmailSent(true);
+        setStep("reset-email-sent");
       }
     } catch (err) {
       console.error("Forgot password error:", err);
@@ -99,7 +156,14 @@ export default function AdminLoginPage() {
     }
   };
 
-  if (resetEmailSent) {
+  const resetToLogin = () => {
+    setStep("login");
+    setError(null);
+    setOtpCode("");
+  };
+
+  // Reset email sent confirmation
+  if (step === "reset-email-sent") {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-6">
@@ -117,15 +181,7 @@ export default function AdminLoginPage() {
               link om je wachtwoord te resetten.
             </p>
 
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                setForgotPassword(false);
-                setResetEmailSent(false);
-                setError(null);
-              }}
-            >
+            <Button variant="outline" className="w-full" onClick={resetToLogin}>
               <ArrowLeftIcon className="size-4" />
               Terug naar inloggen
             </Button>
@@ -135,7 +191,8 @@ export default function AdminLoginPage() {
     );
   }
 
-  if (forgotPassword) {
+  // Forgot password form
+  if (step === "forgot-password") {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-6">
@@ -170,7 +227,11 @@ export default function AdminLoginPage() {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading || !email}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || !email}
+            >
               {loading ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
@@ -188,10 +249,7 @@ export default function AdminLoginPage() {
               type="button"
               variant="ghost"
               className="w-full"
-              onClick={() => {
-                setForgotPassword(false);
-                setError(null);
-              }}
+              onClick={resetToLogin}
               disabled={loading}
             >
               <ArrowLeftIcon className="size-4" />
@@ -203,6 +261,86 @@ export default function AdminLoginPage() {
     );
   }
 
+  // 2FA verification
+  if (step === "2fa") {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="w-full max-w-md p-6">
+          <CardHeader className="p-0 pb-6">
+            <div className="flex items-center gap-2">
+              <ShieldCheckIcon className="size-6" />
+              <p className="text-2xl font-medium">Verificatie</p>
+            </div>
+            <p className="text-muted-foreground text-sm mt-1">
+              Vul de 6-cijferige code uit je authenticator app in.
+            </p>
+          </CardHeader>
+
+          <form onSubmit={handleVerify2FA} className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircleIcon className="size-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="flex justify-center">
+              <InputOTP
+                maxLength={6}
+                value={otpCode}
+                onChange={(value) => {
+                  setOtpCode(value);
+                  setError(null);
+                }}
+                disabled={loading}
+                autoFocus
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || otpCode.length !== 6}
+            >
+              {loading ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin" />
+                  Verifiëren...
+                </>
+              ) : (
+                <>
+                  <ShieldCheckIcon className="size-4" />
+                  Verifiëren
+                </>
+              )}
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full"
+              onClick={resetToLogin}
+              disabled={loading}
+            >
+              <ArrowLeftIcon className="size-4" />
+              Terug naar inloggen
+            </Button>
+          </form>
+        </Card>
+      </div>
+    );
+  }
+
+  // Login form
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-6">
@@ -210,7 +348,7 @@ export default function AdminLoginPage() {
           <p className="text-2xl font-medium">Assymo Admin</p>
         </CardHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           {error && (
             <Alert variant="destructive">
               <AlertCircleIcon className="size-4" />
@@ -242,7 +380,7 @@ export default function AdminLoginPage() {
                 tabIndex={-1}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => {
-                  setForgotPassword(true);
+                  setStep("forgot-password");
                   setError(null);
                 }}
               >

@@ -1,10 +1,12 @@
 import { betterAuth } from "better-auth";
+import { twoFactor } from "better-auth/plugins";
 import { Pool } from "pg";
 import { resend } from "@/lib/resend";
 import { RESEND_CONFIG } from "@/config/resend";
 import { PasswordReset } from "@/emails/PasswordReset";
 
 export const auth = betterAuth({
+  appName: "Assymo Admin",
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
   }),
@@ -21,6 +23,11 @@ export const auth = betterAuth({
       });
     },
   },
+  plugins: [
+    twoFactor({
+      issuer: "Assymo Admin",
+    }),
+  ],
   session: {
     // 24 hour sessions
     expiresIn: 60 * 60 * 24,
