@@ -5,23 +5,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ```bash
-# Install dependencies
-npm install
-
-# Run development server with Turbopack
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm run start
-
-# Run ESLint
-npm run lint
-
-# Type checking (use TypeScript compiler directly)
-npx tsc --noEmit
+pnpm install          # Install dependencies
+pnpm dev              # Dev server with Turbopack (localhost:3000)
+pnpm build            # Production build
+pnpm start            # Start production server
+pnpm lint             # ESLint
+pnpm test             # Run tests (watch mode)
+pnpm test --run       # Run tests once
+npx tsc --noEmit      # Type checking
 ```
 
 ## Architecture Overview
@@ -35,6 +26,7 @@ This is a Next.js 15.3.2 application using App Router with Sanity CMS as the con
 - **Database**: Neon Postgres (serverless)
 - **AI**: OpenAI GPT models via Vercel AI SDK
 - **UI Components**: Radix UI primitives with custom styling
+- **Testing**: Vitest with React Testing Library
 - **TypeScript**: Strict mode enabled
 - **Font**: Instrument Sans from Google Fonts
 
