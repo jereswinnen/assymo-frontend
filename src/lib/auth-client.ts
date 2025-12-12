@@ -2,6 +2,6 @@
 
 import { createAuthClient } from "better-auth/react";
 
-export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
-});
+// No baseURL needed - Better Auth automatically uses the current origin
+// This works for localhost, preview deployments, and production
+export const authClient = createAuthClient();
