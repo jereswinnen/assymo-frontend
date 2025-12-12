@@ -10,6 +10,7 @@ import {
   SettingsIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 import Logo from "@/components/Logo";
 import {
   Sidebar,
@@ -43,17 +44,10 @@ export function AdminSidebar({
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-      });
-
-      if (response.ok) {
-        toast.success("Uitgelogd");
-        router.push("/admin/login");
-        router.refresh();
-      } else {
-        toast.error("Uitloggen mislukt");
-      }
+      await authClient.signOut();
+      toast.success("Uitgelogd");
+      router.push("/admin/login");
+      router.refresh();
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("Er is iets misgegaan");
