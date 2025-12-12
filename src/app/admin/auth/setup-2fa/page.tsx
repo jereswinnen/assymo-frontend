@@ -139,9 +139,14 @@ export default function Setup2FAPage() {
         setBackupCodes(responseData.backupCodes);
         setStep("backup-codes");
       } else {
-        // No backup codes, go directly to admin
-        router.push("/admin");
-        router.refresh();
+        // No backup codes, check if should go to passkey setup
+        const skippedPasskey = localStorage.getItem("passkey_skipped") === "true";
+        if (skippedPasskey) {
+          router.push("/admin");
+          router.refresh();
+        } else {
+          router.push("/admin/auth/setup-passkey");
+        }
       }
     } catch (err) {
       console.error("2FA verification error:", err);
@@ -159,8 +164,13 @@ export default function Setup2FAPage() {
   };
 
   const handleComplete = () => {
-    router.push("/admin");
-    router.refresh();
+    const skippedPasskey = localStorage.getItem("passkey_skipped") === "true";
+    if (skippedPasskey) {
+      router.push("/admin");
+      router.refresh();
+    } else {
+      router.push("/admin/auth/setup-passkey");
+    }
   };
 
   if (loading) {

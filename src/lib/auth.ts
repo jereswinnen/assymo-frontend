@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { twoFactor } from "better-auth/plugins";
+import { passkey } from "@better-auth/passkey";
 import { Pool } from "pg";
 import { resend } from "@/lib/resend";
 import { RESEND_CONFIG } from "@/config/resend";
@@ -27,6 +28,7 @@ export const auth = betterAuth({
     twoFactor({
       issuer: "Assymo Admin",
     }),
+    passkey(),
   ],
   session: {
     // 24 hour sessions

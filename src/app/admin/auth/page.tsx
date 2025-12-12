@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,35 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Start passkey autofill listener when page loads
+  useEffect(() => {
+    const startPasskeyAutofill = async () => {
+      try {
+        // Check if WebAuthn conditional mediation is supported
+        if (
+          typeof window !== "undefined" &&
+          window.PublicKeyCredential &&
+          typeof PublicKeyCredential.isConditionalMediationAvailable === "function"
+        ) {
+          const available = await PublicKeyCredential.isConditionalMediationAvailable();
+          if (available) {
+            // Start listening for passkey autofill
+            const { error } = await authClient.signIn.passkey({ autoFill: true });
+            if (!error) {
+              router.push("/admin");
+              router.refresh();
+            }
+          }
+        }
+      } catch (err) {
+        // Silently ignore - autofill is optional
+        console.debug("Passkey autofill not available:", err);
+      }
+    };
+
+    startPasskeyAutofill();
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,6 +141,16 @@ export default function AdminLoginPage() {
         setError("Ongeldige code. Probeer opnieuw.");
         setOtpCode("");
         return;
+      }
+
+      // Check if user has passkeys (and hasn't skipped setup)
+      const skippedPasskey = localStorage.getItem("passkey_skipped") === "true";
+      if (!skippedPasskey) {
+        const { data: passkeys } = await authClient.passkey.listUserPasskeys();
+        if (!passkeys || passkeys.length === 0) {
+          router.push("/admin/auth/setup-passkey");
+          return;
+        }
       }
 
       router.push("/admin");
@@ -367,6 +406,7 @@ export default function AdminLoginPage() {
                 setError(null);
               }}
               placeholder="admin@assymo.nl"
+              autoComplete="username webauthn"
               disabled={loading}
               autoFocus
             />

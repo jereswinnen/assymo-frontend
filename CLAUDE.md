@@ -115,12 +115,43 @@ The chatbot is an AI-powered customer service assistant for Assymo (Dutch garden
 5. User queries retrieve relevant chunks via vector similarity
 6. Context is injected into the AI prompt
 
+### Admin Authentication
+
+Admin authentication uses Better Auth with multiple security layers:
+
+**Auth Stack:**
+- **Better Auth**: Core authentication library with Postgres adapter
+- **Email/Password**: Primary login method (sign-up disabled, admins created via CLI)
+- **Two-Factor (TOTP)**: Required for all users, setup enforced on first login
+- **Passkeys**: Optional WebAuthn passkeys for passwordless login
+
+**Auth Files:**
+- `src/lib/auth.ts`: Server-side Better Auth configuration
+- `src/lib/auth-client.ts`: Client-side auth with plugins
+- `src/app/api/auth/[...all]/route.ts`: API route handler
+
+**Auth Pages (`src/app/admin/auth/`):**
+- `page.tsx`: Login with email/password, 2FA verification, forgot password
+- `setup-2fa/page.tsx`: QR code setup, TOTP verification, backup codes
+- `setup-passkey/page.tsx`: WebAuthn passkey registration
+- `reset-password/page.tsx`: Password reset form
+
+**Login Flow:**
+1. User enters email/password
+2. If 2FA enabled → inline TOTP verification
+3. If no 2FA → redirect to `/admin/auth/setup-2fa`
+4. If no passkey → redirect to `/admin/auth/setup-passkey`
+5. Subsequent logins can use passkey directly
+
 ### Database Schema
 
 **Neon Postgres tables:**
 - `chat_conversations`: Stores all chat interactions
 - `rate_limits`: Tracks usage per session
 - `document_chunks`: Stores embedded document chunks with vector data
+- `user`, `session`, `account`: Better Auth user tables
+- `twoFactor`: TOTP secrets and backup codes
+- `passkey`: WebAuthn credential storage
 
 ### Styling Approach
 
