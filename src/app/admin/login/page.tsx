@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader } from "@/components/ui/card";
 import { LogInIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 export default function AdminLoginPage() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -17,30 +19,25 @@ export default function AdminLoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!password) {
-      toast.error("Voer een wachtwoord in");
+    if (!email || !password) {
+      toast.error("Vul alle velden in");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ password }),
+      const { error } = await authClient.signIn.email({
+        email,
+        password,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (error) {
+        toast.error(error.message || "Ongeldige inloggegevens");
+      } else {
         toast.success("Succesvol ingelogd");
         router.push("/admin");
         router.refresh();
-      } else {
-        toast.error(data.error || "Ongeldig wachtwoord");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -53,11 +50,24 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Card className="w-full max-w-md p-6">
-        <CardHeader className="p-0">
-          <p className="text-2xl font-medium">Assymo</p>
+        <CardHeader className="p-0 pb-6">
+          <p className="text-2xl font-medium">Assymo Admin</p>
         </CardHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">E-mailadres</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@assymo.nl"
+              disabled={loading}
+              autoFocus
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="password">Wachtwoord</Label>
             <Input
@@ -65,16 +75,15 @@ export default function AdminLoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Vul in..."
+              placeholder="••••••••"
               disabled={loading}
-              autoFocus
             />
           </div>
 
           <Button
             type="submit"
             className="w-full"
-            disabled={loading || !password}
+            disabled={loading || !email || !password}
           >
             {loading ? (
               <>
