@@ -151,3 +151,19 @@ Required environment variables:
 - API routes use edge runtime where applicable
 - Rate limiting is session-based (not IP-based) for better UX
 - All chatbot configuration is in `src/config/chatbot.ts` - modify there instead of hardcoding values
+
+### Testing
+
+Tests run automatically before every Vercel deploy. When adding or modifying utility functions, consider adding tests.
+
+**Current test coverage:**
+- `src/lib/utils.ts` - class merging utilities
+- `src/lib/appointments/utils.ts` - validation, time slots, date formatting
+- `src/lib/appointments/ics.ts` - calendar file generation
+
+**When to write tests:**
+- Adding new pure functions (validation, formatting, calculations)
+- Modifying existing tested functions
+- Fixing bugs (add a test that would have caught it)
+
+**Test file location:** Place tests next to the source file with `.test.ts` suffix (e.g., `utils.ts` → `utils.test.ts`)
