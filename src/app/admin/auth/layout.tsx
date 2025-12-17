@@ -15,10 +15,10 @@ export default function AuthLayout({
   return (
     <main className="relative p-4 flex min-h-screen bg-[url(/images/auth-bg.avif)] bg-cover bg-center *:flex *:flex-1 *:items-center *:justify-center">
       <section className="z-10">
-        <Logo className="w-64 text-white" />
+        <Logo className="w-72 text-white" />
       </section>
       <section className="z-10 p-4 bg-white rounded-3xl">{children}</section>
-      <div className="absolute inset-0 bg-black/15"></div>
+      <div className="absolute inset-0 bg-black/30"></div>
     </main>
   );
 }
