@@ -4,14 +4,19 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import {
-  KeyIcon,
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import {
   Loader2Icon,
-  CheckCircleIcon,
   AlertCircleIcon,
+  KeyRoundIcon,
+  CheckIcon,
+  UnlinkIcon,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
@@ -31,7 +36,7 @@ function ResetPasswordForm() {
     // Check for error parameter from Better Auth (invalid/expired token)
     if (urlError === "INVALID_TOKEN") {
       setPageError(
-        "Deze reset link is verlopen of ongeldig. Vraag een nieuwe link aan."
+        "Deze reset link is verlopen of ongeldig. Vraag een nieuwe link aan.",
       );
       return;
     }
@@ -91,11 +96,11 @@ function ResetPasswordForm() {
           error.message?.toLowerCase().includes("expired")
         ) {
           setValidationError(
-            "Deze reset link is verlopen of ongeldig. Vraag een nieuwe link aan."
+            "Deze reset link is verlopen of ongeldig. Vraag een nieuwe link aan.",
           );
         } else {
           setValidationError(
-            error.message || "Er is iets misgegaan. Probeer het opnieuw."
+            error.message || "Er is iets misgegaan. Probeer het opnieuw.",
           );
         }
       } else {
@@ -111,129 +116,117 @@ function ResetPasswordForm() {
 
   if (pageError) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader className="p-0 pb-6">
-            <p className="text-2xl font-medium">Link ongeldig</p>
-          </CardHeader>
+      <div className="w-full max-w-lg space-y-6">
+        <header className="flex items-center gap-2">
+          <UnlinkIcon className="size-6 opacity-80" />
+          <p className="text-2xl font-semibold tracking-tight">Link ongeldig</p>
+        </header>
 
-          <div className="space-y-4">
-            <Alert variant="destructive">
-              <AlertCircleIcon className="size-4" />
-              <AlertDescription>{pageError}</AlertDescription>
-            </Alert>
+        <div className="space-y-4">
+          <Alert variant="destructive">
+            <AlertCircleIcon className="size-4" />
+            <AlertDescription>{pageError}</AlertDescription>
+          </Alert>
 
-            <Button
-              className="w-full"
-              onClick={() => router.push("/admin/auth")}
-            >
-              Terug naar inloggen
-            </Button>
-          </div>
-        </Card>
+          <Button onClick={() => router.push("/admin/auth")}>
+            Terug naar inloggen
+          </Button>
+        </div>
       </div>
     );
   }
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader className="p-0 pb-6">
-            <div className="flex items-center gap-2">
-              <CheckCircleIcon className="size-6 text-green-600" />
-              <p className="text-2xl font-medium">Wachtwoord gewijzigd</p>
-            </div>
-          </CardHeader>
+      <div className="w-full max-w-lg space-y-6">
+        <header className="flex items-center gap-2">
+          <KeyRoundIcon className="size-6 opacity-80" />
+          <p className="text-2xl font-semibold tracking-tight">
+            Wachtwoord gewijzigd
+          </p>
+        </header>
 
-          <div className="space-y-4">
-            <p className="text-muted-foreground">
-              Je wachtwoord is succesvol gewijzigd. Je kunt nu inloggen met je
-              nieuwe wachtwoord.
-            </p>
-
-            <Button
-              className="w-full"
-              onClick={() => router.push("/admin/auth")}
-            >
-              Naar inloggen
-            </Button>
-          </div>
-        </Card>
+        <p className="text-muted-foreground">
+          Je wachtwoord is succesvol gewijzigd. Je kunt nu inloggen met je
+          nieuwe wachtwoord.
+        </p>
+        <Button onClick={() => router.push("/admin/auth")}>
+          Naar inloggen
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-6">
-        <CardHeader className="p-0 pb-6">
-          <p className="text-2xl font-medium">Nieuw wachtwoord</p>
-          <p className="text-muted-foreground text-sm mt-1">
-            Kies een nieuw wachtwoord voor je account.
-          </p>
-        </CardHeader>
+    <div className="w-full max-w-lg space-y-6">
+      <header className="flex items-center gap-2">
+        <KeyRoundIcon className="size-6 opacity-80" />
+        <p className="text-2xl font-semibold tracking-tight">
+          Nieuw wachtwoord
+        </p>
+      </header>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {validationError && (
-            <Alert variant="destructive">
-              <AlertCircleIcon className="size-4" />
-              <AlertDescription>{validationError}</AlertDescription>
-            </Alert>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {validationError && (
+          <Alert variant="destructive">
+            <AlertCircleIcon className="size-4" />
+            <AlertDescription>{validationError}</AlertDescription>
+          </Alert>
+        )}
+
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="password">Wachtwoord</FieldLabel>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setValidationError(null);
+              }}
+              placeholder="••••••••"
+              disabled={loading}
+              autoFocus
+            />
+            <FieldDescription>Minimaal 8 tekens</FieldDescription>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="confirmPassword">
+              Bevestig wachtwoord
+            </FieldLabel>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setValidationError(null);
+              }}
+              placeholder="••••••••"
+              disabled={loading}
+            />
+          </Field>
+        </FieldGroup>
+
+        <Button
+          type="submit"
+          disabled={loading || !password || !confirmPassword}
+        >
+          {loading ? (
+            <>
+              <Loader2Icon className="size-4 animate-spin" />
+              Bewaren...
+            </>
+          ) : (
+            <>
+              <CheckIcon className="size-4" />
+              Bewaren
+            </>
           )}
-
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="password">Nieuw wachtwoord</FieldLabel>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setValidationError(null);
-                }}
-                placeholder="Minimaal 8 tekens"
-                disabled={loading}
-                autoFocus
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="confirmPassword">Bevestig wachtwoord</FieldLabel>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value);
-                  setValidationError(null);
-                }}
-                placeholder="Herhaal je wachtwoord"
-                disabled={loading}
-              />
-            </Field>
-          </FieldGroup>
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading || !password || !confirmPassword}
-          >
-            {loading ? (
-              <>
-                <Loader2Icon className="size-4 animate-spin" />
-                Opslaan...
-              </>
-            ) : (
-              <>
-                <KeyIcon className="size-4" />
-                Wachtwoord opslaan
-              </>
-            )}
-          </Button>
-        </form>
-      </Card>
+        </Button>
+      </form>
     </div>
   );
 }
@@ -242,9 +235,9 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
+        <>
           <Loader2Icon className="size-8 animate-spin text-muted-foreground" />
-        </div>
+        </>
       }
     >
       <ResetPasswordForm />

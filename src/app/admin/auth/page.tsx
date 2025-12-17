@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Field,
@@ -22,14 +21,13 @@ import {
 import {
   LogInIcon,
   Loader2Icon,
-  ArrowLeftIcon,
   MailIcon,
   AlertCircleIcon,
-  CheckCircleIcon,
-  ShieldCheckIcon,
   LockKeyholeIcon,
   RotateCcwKeyIcon,
   MailboxIcon,
+  ShieldEllipsisIcon,
+  CheckIcon,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
@@ -313,16 +311,11 @@ export default function AdminLoginPage() {
   // 2FA verification
   if (step === "2fa") {
     return (
-      <Card className="bg-orange-300 w-full max-w-lg">
-        <CardHeader className="p-0 pb-6">
-          <div className="flex items-center gap-2">
-            <ShieldCheckIcon className="size-6" />
-            <p className="text-2xl font-medium">Verificatie</p>
-          </div>
-          <p className="text-muted-foreground text-sm mt-1">
-            Vul de 6-cijferige code uit je authenticator app in.
-          </p>
-        </CardHeader>
+      <div className="w-full max-w-lg space-y-6">
+        <header className="flex items-center gap-2">
+          <ShieldEllipsisIcon className="size-6 opacity-80" />
+          <p className="text-2xl font-semibold tracking-tight">Verificatie</p>
+        </header>
 
         <form onSubmit={handleVerify2FA} className="space-y-4">
           {error && (
@@ -332,36 +325,45 @@ export default function AdminLoginPage() {
             </Alert>
           )}
 
-          <div className="flex justify-center">
-            <InputOTP
-              maxLength={6}
-              value={otpCode}
-              onChange={(value) => {
-                setOtpCode(value);
-                setError(null);
-              }}
-              disabled={loading}
-              autoFocus
-            >
-              <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-              </InputOTPGroup>
-              <InputOTPSeparator />
-              <InputOTPGroup>
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
-              </InputOTPGroup>
-            </InputOTP>
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading || otpCode.length !== 6}
+          <InputOTP
+            maxLength={6}
+            value={otpCode}
+            onChange={(value) => {
+              setOtpCode(value);
+              setError(null);
+            }}
+            disabled={loading}
+            autoFocus
           >
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+            </InputOTPGroup>
+            <InputOTPSeparator />
+            <InputOTPGroup>
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
+
+          <p className="text-muted-foreground text-sm">
+            Vul de 6-cijferige code uit je authenticator app in.
+          </p>
+        </form>
+
+        <div className="flex items-center justify-between">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={resetToLogin}
+            disabled={loading}
+          >
+            Terug naar inloggen
+          </Button>
+
+          <Button type="submit" disabled={loading || otpCode.length !== 6}>
             {loading ? (
               <>
                 <Loader2Icon className="size-4 animate-spin" />
@@ -369,24 +371,13 @@ export default function AdminLoginPage() {
               </>
             ) : (
               <>
-                <ShieldCheckIcon className="size-4" />
+                <CheckIcon className="size-4" />
                 Verifiëren
               </>
             )}
           </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            className="w-full"
-            onClick={resetToLogin}
-            disabled={loading}
-          >
-            <ArrowLeftIcon className="size-4" />
-            Terug naar inloggen
-          </Button>
-        </form>
-      </Card>
+        </div>
+      </div>
     );
   }
 

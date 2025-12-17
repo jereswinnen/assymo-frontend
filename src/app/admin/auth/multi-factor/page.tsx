@@ -3,15 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
 import {
   Loader2Icon,
   ShieldCheckIcon,
   FingerprintIcon,
-  ArrowRightIcon,
-  KeyIcon,
+  RectangleEllipsisIcon,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { Separator } from "@/components/ui/separator";
 
 export default function MultiFactorChoicePage() {
   const [loading, setLoading] = useState(true);
@@ -43,6 +42,7 @@ export default function MultiFactorChoicePage() {
     }
 
     checkSession();
+    setLoading(false);
   }, [router]);
 
   const handleSetupOTP = () => {
@@ -79,81 +79,72 @@ export default function MultiFactorChoicePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <>
         <Loader2Icon className="size-8 animate-spin text-muted-foreground" />
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-6">
-        <CardHeader className="p-0 pb-6">
-          <div className="flex items-center gap-2">
-            <ShieldCheckIcon className="size-6" />
-            <p className="text-2xl font-medium">Extra beveiliging</p>
-          </div>
-          <p className="text-muted-foreground text-sm mt-1">
-            Versterk de beveiliging van je account met tweestapsverificatie of een passkey.
-            Je kunt dit later altijd nog instellen via instellingen.
+    <div className="w-full max-w-lg space-y-6">
+      <header className="space-y-2">
+        <div className="flex items-center gap-2">
+          <ShieldCheckIcon className="size-6 opacity-80" />
+          <p className="text-2xl font-semibold tracking-tight">
+            Tweestapsverificatie
           </p>
-        </CardHeader>
-
-        <div className="space-y-3">
-          <Button
-            className="w-full justify-start h-auto py-4"
-            variant="outline"
-            onClick={handleSetupOTP}
-          >
-            <div className="flex items-start gap-3">
-              <KeyIcon className="size-5 mt-0.5 shrink-0" />
-              <div className="text-left">
-                <p className="font-medium">Authenticator app (OTP)</p>
-                <p className="text-sm text-muted-foreground font-normal">
-                  Gebruik een app zoals Google Authenticator of 1Password
-                </p>
-              </div>
-            </div>
-          </Button>
-
-          <Button
-            className="w-full justify-start h-auto py-4"
-            variant="outline"
-            onClick={handleSetupPasskey}
-          >
-            <div className="flex items-start gap-3">
-              <FingerprintIcon className="size-5 mt-0.5 shrink-0" />
-              <div className="text-left">
-                <p className="font-medium">Passkey</p>
-                <p className="text-sm text-muted-foreground font-normal">
-                  Log in met Face ID, Touch ID of je apparaat-PIN
-                </p>
-              </div>
-            </div>
-          </Button>
-
-          <div className="pt-2">
-            <Button
-              variant="ghost"
-              className="w-full text-muted-foreground"
-              onClick={handleSkip}
-              disabled={skipping}
-            >
-              {skipping ? (
-                <>
-                  <Loader2Icon className="size-4 animate-spin" />
-                  Laden...
-                </>
-              ) : (
-                <>
-                  Overslaan
-                  <ArrowRightIcon className="size-4" />
-                </>
-              )}
-            </Button>
-          </div>
         </div>
-      </Card>
+        <p className="text-muted-foreground text-sm mt-1">
+          Stel een extra beveilingsmethode in om je account beter te beveiligen.
+        </p>
+      </header>
+
+      <div className="p-4 space-y-4 border border-border rounded-lg">
+        <Button
+          variant="ghost"
+          className="w-full justify-start h-auto"
+          onClick={handleSetupOTP}
+        >
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <RectangleEllipsisIcon className="size-5 opacity-80" />
+              <p className="text-base font-medium">Authenticator app</p>
+            </div>
+            <p className="text-sm text-muted-foreground text-left">
+              Gebruik een app zoals Google Authenticator of 1Password
+            </p>
+          </div>
+        </Button>
+
+        <Separator />
+
+        <Button
+          variant="ghost"
+          className="w-full justify-start h-auto"
+          onClick={handleSetupPasskey}
+        >
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <FingerprintIcon className="size-5 opacity-80" />
+              <p className="text-base font-medium">Passkey</p>
+            </div>
+            <p className="text-sm text-muted-foreground text-left">
+              Gebruik je vingerafdruk, gezichtsscan of schermvergrendeling
+            </p>
+          </div>
+        </Button>
+      </div>
+
+      <Button variant="secondary" onClick={handleSkip} disabled={skipping}>
+        {skipping ? (
+          <>
+            <Loader2Icon className="size-4 animate-spin" />
+            Laden...
+          </>
+        ) : (
+          <>Overslaan</>
+        )}
+      </Button>
     </div>
   );
 }

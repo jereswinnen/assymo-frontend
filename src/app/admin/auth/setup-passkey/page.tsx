@@ -3,13 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Loader2Icon,
   AlertCircleIcon,
   FingerprintIcon,
-  ArrowRightIcon,
+  CheckIcon,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
@@ -44,6 +43,7 @@ export default function SetupPasskeyPage() {
     }
 
     checkSession();
+    setLoading(false);
   }, [router]);
 
   const handleAddPasskey = async () => {
@@ -86,63 +86,53 @@ export default function SetupPasskeyPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <>
         <Loader2Icon className="size-8 animate-spin text-muted-foreground" />
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-6">
-        <CardHeader className="p-0 pb-6">
-          <div className="flex items-center gap-2">
-            <FingerprintIcon className="size-6" />
-            <p className="text-2xl font-medium">Passkey toevoegen</p>
-          </div>
-          <p className="text-muted-foreground text-sm mt-1">
-            Voeg een passkey toe voor snellere en veiligere logins. Je kunt dan
-            inloggen met Face ID, Touch ID of je apparaat-PIN.
+    <div className="w-full max-w-lg space-y-6">
+      <header className="space-y-2">
+        <div className="flex items-center gap-2">
+          <FingerprintIcon className="size-6 opacity-80" />
+          <p className="text-2xl font-semibold tracking-tight">
+            Passkey toevoegen
           </p>
-        </CardHeader>
-
-        <div className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircleIcon className="size-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <Button
-            className="w-full"
-            onClick={handleAddPasskey}
-            disabled={adding}
-          >
-            {adding ? (
-              <>
-                <Loader2Icon className="size-4 animate-spin" />
-                Laden...
-              </>
-            ) : (
-              <>
-                <FingerprintIcon className="size-4" />
-                Passkey toevoegen
-              </>
-            )}
-          </Button>
-
-          <Button
-            variant="ghost"
-            className="w-full"
-            onClick={handleSkip}
-            disabled={adding}
-          >
-            Overslaan
-            <ArrowRightIcon className="size-4" />
-          </Button>
         </div>
-      </Card>
+        <p className="text-muted-foreground text-sm">
+          Voeg een passkey toe om in te loggen met FaceID, TouchID of de
+          toegangscode van je toestel.
+        </p>
+      </header>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircleIcon className="size-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex items-center justify-between">
+        <Button variant="secondary" onClick={handleSkip} disabled={adding}>
+          Overslaan
+        </Button>
+
+        <Button onClick={handleAddPasskey} disabled={adding}>
+          {adding ? (
+            <>
+              <Loader2Icon className="size-4 animate-spin" />
+              Laden...
+            </>
+          ) : (
+            <>
+              <CheckIcon className="size-4" />
+              Bewaren
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }

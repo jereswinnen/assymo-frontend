@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import QRCode from "react-qr-code";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   InputOTP,
@@ -20,9 +18,13 @@ import {
   ShieldCheckIcon,
   CheckCircleIcon,
   CopyIcon,
-  KeyIcon,
+  CheckIcon,
+  KeyRoundIcon,
+  ScanQrCodeIcon,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Separator } from "@/components/ui/separator";
 
 type SetupStep = "password" | "qr" | "backup-codes";
 
@@ -84,6 +86,7 @@ export default function Setup2FAPage() {
     }
 
     checkSession();
+    setLoading(false);
   }, [router]);
 
   const handleEnableTwoFactor = async (e: React.FormEvent) => {
@@ -190,34 +193,29 @@ export default function Setup2FAPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <>
         <Loader2Icon className="size-8 animate-spin text-muted-foreground" />
-      </div>
+      </>
     );
   }
 
   if (error && !totpUri) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader className="p-0 pb-6">
-            <p className="text-2xl font-medium">Fout</p>
-          </CardHeader>
+      <div className="w-full max-w-lg space-y-6">
+        <header className="flex items-center gap-2">
+          <p className="text-2xl font-semibold tracking-tight">Oeps, foutje</p>
+        </header>
 
-          <div className="space-y-4">
-            <Alert variant="destructive">
-              <AlertCircleIcon className="size-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+        <div className="space-y-4">
+          <Alert variant="destructive">
+            <AlertCircleIcon className="size-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
 
-            <Button
-              className="w-full"
-              onClick={() => router.push("/admin/auth")}
-            >
-              Terug naar inloggen
-            </Button>
-          </div>
-        </Card>
+          <Button onClick={() => router.push("/admin/auth")}>
+            Terug naar inloggen
+          </Button>
+        </div>
       </div>
     );
   }
@@ -225,46 +223,49 @@ export default function Setup2FAPage() {
   // Backup codes step
   if (step === "backup-codes") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader className="p-0 pb-6">
-            <p className="text-2xl font-medium">Backup codes</p>
-            <p className="text-muted-foreground text-sm mt-1">
-              Bewaar deze codes op een veilige plek. Je kunt ze gebruiken als je
-              geen toegang hebt tot je authenticator app.
+      <div className="w-full max-w-lg space-y-6">
+        <header className="space-y-2">
+          <div className="flex items-center gap-2">
+            <ShieldCheckIcon className="size-6 opacity-80" />
+            <p className="text-2xl font-semibold tracking-tight">
+              Backup codes
             </p>
-          </CardHeader>
-
-          <div className="space-y-4">
-            <div className="bg-muted rounded-lg p-4 font-mono text-sm">
-              <div className="grid grid-cols-2 gap-2">
-                {backupCodes.map((code, i) => (
-                  <div key={i} className="text-center py-1">
-                    {code}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Button variant="outline" className="w-full" onClick={copyBackupCodes}>
-              {copied ? (
-                <>
-                  <CheckCircleIcon className="size-4" />
-                  Gekopieerd
-                </>
-              ) : (
-                <>
-                  <CopyIcon className="size-4" />
-                  Kopieer codes
-                </>
-              )}
-            </Button>
-
-            <Button className="w-full" onClick={handleComplete}>
-              Ik heb de codes opgeslagen
-            </Button>
           </div>
-        </Card>
+          <p className="text-muted-foreground text-sm">
+            Bewaar deze codes op een veilige plek. Je kunt ze gebruiken als je
+            geen toegang hebt tot je authenticator app.
+          </p>
+        </header>
+
+        <div className="bg-muted rounded-lg p-4 font-mono text-sm">
+          <div className="grid grid-cols-2 gap-2">
+            {backupCodes.map((code, i) => (
+              <div key={i} className="text-center py-1">
+                {code}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Button variant="secondary" onClick={copyBackupCodes}>
+            {copied ? (
+              <>
+                <CheckIcon className="size-4" />
+                Gekopieerd
+              </>
+            ) : (
+              <>
+                <CopyIcon className="size-4" />
+                Kopieer codes
+              </>
+            )}
+          </Button>
+          <Button onClick={handleComplete}>
+            <CheckIcon className="size-4" />
+            Doorgaan
+          </Button>
+        </div>
       </div>
     );
   }
@@ -272,28 +273,25 @@ export default function Setup2FAPage() {
   // Password step - confirm identity before enabling 2FA
   if (step === "password") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader className="p-0 pb-6">
-            <div className="flex items-center gap-2">
-              <ShieldCheckIcon className="size-6" />
-              <p className="text-2xl font-medium">2FA instellen</p>
-            </div>
-            <p className="text-muted-foreground text-sm mt-1">
-              Bevestig je wachtwoord om tweestapsverificatie in te schakelen.
-            </p>
-          </CardHeader>
+      <div className="w-full max-w-lg space-y-6">
+        <header className="flex items-center gap-2">
+          <KeyRoundIcon className="size-6 opacity-80" />
+          <p className="text-2xl font-semibold tracking-tight">
+            Bevestig je wachtwoord
+          </p>
+        </header>
 
-          <form onSubmit={handleEnableTwoFactor} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircleIcon className="size-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+        <form onSubmit={handleEnableTwoFactor} className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircleIcon className="size-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Wachtwoord</Label>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="password">Wachtwoord</FieldLabel>
               <Input
                 id="password"
                 type="password"
@@ -303,16 +301,14 @@ export default function Setup2FAPage() {
                   setError(null);
                 }}
                 placeholder="••••••••"
-                disabled={enabling}
+                disabled={loading}
                 autoFocus
               />
-            </div>
+            </Field>
+          </FieldGroup>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={enabling || !password}
-            >
+          <Field orientation="horizontal" className="justify-between">
+            <Button type="submit" disabled={enabling || !password}>
               {enabling ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
@@ -320,118 +316,112 @@ export default function Setup2FAPage() {
                 </>
               ) : (
                 <>
-                  <KeyIcon className="size-4" />
+                  <CheckIcon className="size-4" />
                   Doorgaan
                 </>
               )}
             </Button>
-          </form>
-        </Card>
+          </Field>
+        </form>
       </div>
     );
   }
 
   // QR code step
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-6">
-        <CardHeader className="p-0 pb-6">
-          <div className="flex items-center gap-2">
-            <ShieldCheckIcon className="size-6" />
-            <p className="text-2xl font-medium">2FA instellen</p>
-          </div>
-          <p className="text-muted-foreground text-sm mt-1">
-            Scan de QR code met je authenticator app (bijv. Google Authenticator,
-            Authy, 1Password).
-          </p>
-        </CardHeader>
+    <div className="w-full max-w-lg space-y-6">
+      <header className="space-y-2">
+        <div className="flex items-center gap-2">
+          <ScanQrCodeIcon className="size-6 opacity-80" />
+          <p className="text-2xl font-semibold tracking-tight">Scan de code</p>
+        </div>
+        <p className="text-muted-foreground text-sm ">
+          Scan deze met je authenticator app (bijv. Google Authenticator, Authy,
+          1Password).
+        </p>
+      </header>
 
-        <form onSubmit={handleVerify} className="space-y-6">
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircleIcon className="size-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+      <form onSubmit={handleVerify} className="space-y-6">
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircleIcon className="size-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-          {totpUri && (
-            <div className="space-y-3">
-              <div className="flex justify-center bg-white p-4 rounded-lg">
-                <QRCode value={totpUri} size={200} />
-              </div>
-
-              {secret && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={copySecret}
-                  className="w-full"
-                >
-                  {secretCopied ? (
-                    <>
-                      <CheckCircleIcon className="size-4" />
-                      Gekopieerd
-                    </>
-                  ) : (
-                    <>
-                      <CopyIcon className="size-4" />
-                      Kopieer setup code
-                    </>
-                  )}
-                </Button>
-              )}
+        {totpUri && (
+          <div className="space-y-3">
+            <div className="flex justify-center bg-white p-4 rounded-lg">
+              <QRCode value={totpUri} size={200} />
             </div>
-          )}
 
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground text-center">
-              Voer de 6-cijferige code in om te bevestigen
-            </p>
-            <div className="flex justify-center">
-              <InputOTP
-                maxLength={6}
-                value={otpCode}
-                onChange={(value) => {
-                  setOtpCode(value);
-                  setError(null);
-                }}
-                disabled={verifying}
+            {secret && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={copySecret}
+                className="w-full"
               >
-                <InputOTPGroup>
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                </InputOTPGroup>
-                <InputOTPSeparator />
-                <InputOTPGroup>
-                  <InputOTPSlot index={3} />
-                  <InputOTPSlot index={4} />
-                  <InputOTPSlot index={5} />
-                </InputOTPGroup>
-              </InputOTP>
-            </div>
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={verifying || otpCode.length !== 6}
-          >
-            {verifying ? (
-              <>
-                <Loader2Icon className="size-4 animate-spin" />
-                Verifiëren...
-              </>
-            ) : (
-              <>
-                <ShieldCheckIcon className="size-4" />
-                Bevestigen
-              </>
+                {secretCopied ? (
+                  <>
+                    <CheckCircleIcon className="size-4" />
+                    Gekopieerd
+                  </>
+                ) : (
+                  <>
+                    <CopyIcon className="size-4" />
+                    Kopieer setup code
+                  </>
+                )}
+              </Button>
             )}
-          </Button>
-        </form>
-      </Card>
+          </div>
+        )}
+
+        <Separator />
+
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Voer de 6-cijferige code in om te bevestigen
+          </p>
+          <InputOTP
+            maxLength={6}
+            value={otpCode}
+            onChange={(value) => {
+              setOtpCode(value);
+              setError(null);
+            }}
+            disabled={verifying}
+          >
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+            </InputOTPGroup>
+            <InputOTPSeparator />
+            <InputOTPGroup>
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
+        </div>
+
+        <Button type="submit" disabled={verifying || otpCode.length !== 6}>
+          {verifying ? (
+            <>
+              <Loader2Icon className="size-4 animate-spin" />
+              Verifiëren...
+            </>
+          ) : (
+            <>
+              <CheckIcon className="size-4" />
+              Bevestigen
+            </>
+          )}
+        </Button>
+      </form>
     </div>
   );
 }
