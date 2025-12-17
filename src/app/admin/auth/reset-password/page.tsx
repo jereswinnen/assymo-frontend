@@ -4,9 +4,9 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import {
   KeyIcon,
   Loader2Icon,
@@ -174,7 +174,7 @@ function ResetPasswordForm() {
           </p>
         </CardHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {validationError && (
             <Alert variant="destructive">
               <AlertCircleIcon className="size-4" />
@@ -182,36 +182,38 @@ function ResetPasswordForm() {
             </Alert>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Nieuw wachtwoord</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setValidationError(null);
-              }}
-              placeholder="Minimaal 8 tekens"
-              disabled={loading}
-              autoFocus
-            />
-          </div>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="password">Nieuw wachtwoord</FieldLabel>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setValidationError(null);
+                }}
+                placeholder="Minimaal 8 tekens"
+                disabled={loading}
+                autoFocus
+              />
+            </Field>
 
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Bevestig wachtwoord</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                setValidationError(null);
-              }}
-              placeholder="Herhaal je wachtwoord"
-              disabled={loading}
-            />
-          </div>
+            <Field>
+              <FieldLabel htmlFor="confirmPassword">Bevestig wachtwoord</FieldLabel>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  setValidationError(null);
+                }}
+                placeholder="Herhaal je wachtwoord"
+                disabled={loading}
+              />
+            </Field>
+          </FieldGroup>
 
           <Button
             type="submit"

@@ -4,9 +4,15 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
 import {
   InputOTP,
   InputOTPGroup,
@@ -21,10 +27,15 @@ import {
   AlertCircleIcon,
   CheckCircleIcon,
   ShieldCheckIcon,
+  LockKeyholeIcon,
+  RotateCcwKeyIcon,
+  MailboxIcon,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
 type AuthStep = "login" | "2fa" | "forgot-password" | "reset-email-sent";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function AdminLoginPage() {
   const [step, setStep] = useState<AuthStep>("login");
@@ -172,6 +183,11 @@ export default function AdminLoginPage() {
       return;
     }
 
+    if (!EMAIL_REGEX.test(email)) {
+      setError("Vul een geldig e-mailadres in.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -203,28 +219,23 @@ export default function AdminLoginPage() {
   // Reset email sent confirmation
   if (step === "reset-email-sent") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader className="p-0 pb-6">
-            <div className="flex items-center gap-2">
-              <CheckCircleIcon className="size-6 text-green-600" />
-              <p className="text-2xl font-medium">E-mail verstuurd</p>
-            </div>
-          </CardHeader>
+      <div className="w-full max-w-lg space-y-6">
+        <header className="flex items-center gap-2">
+          <MailboxIcon className="size-6 opacity-80" />
+          <p className="text-2xl font-medium">E-mail verstuurd</p>
+        </header>
 
-          <div className="space-y-4">
-            <p className="text-muted-foreground">
-              Als er een account bestaat met het e-mailadres{" "}
-              <strong>{email}</strong>, ontvang je binnen enkele minuten een
-              link om je wachtwoord te resetten.
-            </p>
+        <div className="space-y-6">
+          <p className="text-muted-foreground">
+            Als er een account bestaat met het e-mailadres{" "}
+            <strong>{email}</strong>, ontvang je binnen enkele minuten een link
+            om je wachtwoord te resetten.
+          </p>
 
-            <Button variant="outline" className="w-full" onClick={resetToLogin}>
-              <ArrowLeftIcon className="size-4" />
-              Terug naar inloggen
-            </Button>
-          </div>
-        </Card>
+          <Button variant="secondary" onClick={resetToLogin}>
+            Terug naar inloggen
+          </Button>
+        </div>
       </div>
     );
   }
@@ -232,164 +243,15 @@ export default function AdminLoginPage() {
   // Forgot password form
   if (step === "forgot-password") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader className="p-0 pb-6">
-            <p className="text-2xl font-medium">Wachtwoord vergeten?</p>
-            <p className="text-muted-foreground text-sm mt-1">
-              Vul je e-mailadres in om een reset link te ontvangen.
-            </p>
-          </CardHeader>
+      <div className="w-full max-w-lg space-y-6">
+        <header className="flex items-center gap-2">
+          <RotateCcwKeyIcon className="size-6 opacity-80" />
+          <p className="text-2xl font-semibold tracking-tight">
+            Reset wachtwoord
+          </p>
+        </header>
 
-          <form onSubmit={handleForgotPassword} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircleIcon className="size-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="email">E-mailadres</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setError(null);
-                }}
-                placeholder="admin@assymo.be"
-                disabled={loading}
-                autoFocus
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading || !email}
-            >
-              {loading ? (
-                <>
-                  <Loader2Icon className="size-4 animate-spin" />
-                  Versturen...
-                </>
-              ) : (
-                <>
-                  <MailIcon className="size-4" />
-                  Verstuur reset link
-                </>
-              )}
-            </Button>
-
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full"
-              onClick={resetToLogin}
-              disabled={loading}
-            >
-              <ArrowLeftIcon className="size-4" />
-              Terug naar inloggen
-            </Button>
-          </form>
-        </Card>
-      </div>
-    );
-  }
-
-  // 2FA verification
-  if (step === "2fa") {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader className="p-0 pb-6">
-            <div className="flex items-center gap-2">
-              <ShieldCheckIcon className="size-6" />
-              <p className="text-2xl font-medium">Verificatie</p>
-            </div>
-            <p className="text-muted-foreground text-sm mt-1">
-              Vul de 6-cijferige code uit je authenticator app in.
-            </p>
-          </CardHeader>
-
-          <form onSubmit={handleVerify2FA} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircleIcon className="size-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="flex justify-center">
-              <InputOTP
-                maxLength={6}
-                value={otpCode}
-                onChange={(value) => {
-                  setOtpCode(value);
-                  setError(null);
-                }}
-                disabled={loading}
-                autoFocus
-              >
-                <InputOTPGroup>
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                </InputOTPGroup>
-                <InputOTPSeparator />
-                <InputOTPGroup>
-                  <InputOTPSlot index={3} />
-                  <InputOTPSlot index={4} />
-                  <InputOTPSlot index={5} />
-                </InputOTPGroup>
-              </InputOTP>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading || otpCode.length !== 6}
-            >
-              {loading ? (
-                <>
-                  <Loader2Icon className="size-4 animate-spin" />
-                  Verifiëren...
-                </>
-              ) : (
-                <>
-                  <ShieldCheckIcon className="size-4" />
-                  Verifiëren
-                </>
-              )}
-            </Button>
-
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full"
-              onClick={resetToLogin}
-              disabled={loading}
-            >
-              <ArrowLeftIcon className="size-4" />
-              Terug naar inloggen
-            </Button>
-          </form>
-        </Card>
-      </div>
-    );
-  }
-
-  // Login form
-  return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-6">
-        <CardHeader className="p-0 pb-6">
-          <p className="text-2xl font-medium">Assymo Admin</p>
-        </CardHeader>
-
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleForgotPassword} className="space-y-6">
           {error && (
             <Alert variant="destructive">
               <AlertCircleIcon className="size-4" />
@@ -397,8 +259,8 @@ export default function AdminLoginPage() {
             </Alert>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="email">E-mailadres</Label>
+          <Field>
+            <FieldLabel htmlFor="email">E-mailadres</FieldLabel>
             <Input
               id="email"
               type="email"
@@ -408,45 +270,191 @@ export default function AdminLoginPage() {
                 setError(null);
               }}
               placeholder="admin@assymo.be"
-              autoComplete="username webauthn"
               disabled={loading}
               autoFocus
             />
-          </div>
+            <FieldDescription>
+              We sturen je een e-mail met een link om je wachtwoord te resetten
+            </FieldDescription>
+          </Field>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Wachtwoord</Label>
-              <button
-                type="button"
-                tabIndex={-1}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => {
-                  setStep("forgot-password");
-                  setError(null);
-                }}
-              >
-                Wachtwoord vergeten?
-              </button>
-            </div>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
+          <Field orientation="horizontal" className="justify-between">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={resetToLogin}
+              disabled={loading}
+            >
+              Terug naar inloggen
+            </Button>
+
+            <Button
+              type="submit"
+              disabled={loading || !EMAIL_REGEX.test(email)}
+            >
+              {loading ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin" />
+                  Versturen...
+                </>
+              ) : (
+                <>
+                  <MailIcon className="size-4" />
+                  Link versturen
+                </>
+              )}
+            </Button>
+          </Field>
+        </form>
+      </div>
+    );
+  }
+
+  // 2FA verification
+  if (step === "2fa") {
+    return (
+      <Card className="bg-orange-300 w-full max-w-lg">
+        <CardHeader className="p-0 pb-6">
+          <div className="flex items-center gap-2">
+            <ShieldCheckIcon className="size-6" />
+            <p className="text-2xl font-medium">Verificatie</p>
+          </div>
+          <p className="text-muted-foreground text-sm mt-1">
+            Vul de 6-cijferige code uit je authenticator app in.
+          </p>
+        </CardHeader>
+
+        <form onSubmit={handleVerify2FA} className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircleIcon className="size-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex justify-center">
+            <InputOTP
+              maxLength={6}
+              value={otpCode}
+              onChange={(value) => {
+                setOtpCode(value);
                 setError(null);
               }}
-              placeholder="••••••••"
               disabled={loading}
-            />
+              autoFocus
+            >
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+              </InputOTPGroup>
+              <InputOTPSeparator />
+              <InputOTPGroup>
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
           </div>
 
           <Button
             type="submit"
             className="w-full"
-            disabled={loading || !email || !password}
+            disabled={loading || otpCode.length !== 6}
           >
+            {loading ? (
+              <>
+                <Loader2Icon className="size-4 animate-spin" />
+                Verifiëren...
+              </>
+            ) : (
+              <>
+                <ShieldCheckIcon className="size-4" />
+                Verifiëren
+              </>
+            )}
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full"
+            onClick={resetToLogin}
+            disabled={loading}
+          >
+            <ArrowLeftIcon className="size-4" />
+            Terug naar inloggen
+          </Button>
+        </form>
+      </Card>
+    );
+  }
+
+  // Login form
+  return (
+    <div className="w-full max-w-lg space-y-6">
+      <header className="flex items-center gap-2">
+        <LockKeyholeIcon className="size-6 opacity-80" />
+        <p className="text-2xl font-semibold tracking-tight">Inloggen</p>
+      </header>
+
+      <form onSubmit={handleLogin} className="space-y-6">
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircleIcon className="size-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="email">E-mailadres</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError(null);
+                }}
+                placeholder="admin@assymo.be"
+                autoComplete="username webauthn"
+                disabled={loading}
+                autoFocus
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="password">Wachtwoord</FieldLabel>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError(null);
+                }}
+                placeholder="••••••••"
+                disabled={loading}
+              />
+            </Field>
+          </FieldGroup>
+        </FieldSet>
+
+        <Field orientation="horizontal" className="justify-between">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              setStep("forgot-password");
+              setError(null);
+            }}
+          >
+            Wachtwoord vergeten?
+          </Button>
+
+          <Button type="submit" disabled={loading || !email || !password}>
             {loading ? (
               <>
                 <Loader2Icon className="size-4 animate-spin" />
@@ -459,8 +467,8 @@ export default function AdminLoginPage() {
               </>
             )}
           </Button>
-        </form>
-      </Card>
+        </Field>
+      </form>
     </div>
   );
 }

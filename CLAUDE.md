@@ -122,7 +122,7 @@ Admin authentication uses Better Auth with multiple security layers:
 **Auth Stack:**
 - **Better Auth**: Core authentication library with Postgres adapter
 - **Email/Password**: Primary login method (sign-up disabled, admins created via CLI)
-- **Two-Factor (TOTP)**: Required for all users, setup enforced on first login
+- **Two-Factor (TOTP)**: Optional, prompted on first login via MFA choice page
 - **Passkeys**: Optional WebAuthn passkeys for passwordless login
 
 **Auth Files:**
@@ -131,17 +131,18 @@ Admin authentication uses Better Auth with multiple security layers:
 - `src/app/api/auth/[...all]/route.ts`: API route handler
 
 **Auth Pages (`src/app/admin/auth/`):**
-- `page.tsx`: Login with email/password, 2FA verification, forgot password
+- `page.tsx`: Login with email/password, inline 2FA verification, forgot password, passkey autofill
+- `multi-factor/page.tsx`: MFA choice page (OTP, passkey, or skip)
 - `setup-2fa/page.tsx`: QR code setup, TOTP verification, backup codes
 - `setup-passkey/page.tsx`: WebAuthn passkey registration
 - `reset-password/page.tsx`: Password reset form
 
 **Login Flow:**
-1. User enters email/password
+1. User enters email/password (passkey autofill available for returning users)
 2. If 2FA enabled → inline TOTP verification
-3. If no 2FA → redirect to `/admin/auth/setup-2fa`
-4. If no passkey → redirect to `/admin/auth/setup-passkey`
-5. Subsequent logins can use passkey directly
+3. If `mfaChoiceCompleted` is false → redirect to `/admin/auth/multi-factor`
+4. User chooses: setup OTP, setup passkey, or skip
+5. Subsequent logins can use passkey directly via autofill
 
 ### Database Schema
 
