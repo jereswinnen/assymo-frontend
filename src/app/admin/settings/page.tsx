@@ -10,6 +10,7 @@ import {
   CheckIcon,
   ListTreeIcon,
   Loader2Icon,
+  LockIcon,
   ScanTextIcon,
   ShieldCheckIcon,
 } from "lucide-react";
@@ -49,7 +50,7 @@ export default function SettingsPage() {
             Embeddings
           </TabsTrigger>
           <TabsTrigger value="security">
-            <ShieldCheckIcon className="size-4" />
+            <LockIcon className="size-4" />
             Beveiliging
           </TabsTrigger>
         </TabsList>

@@ -62,7 +62,7 @@ export function SettingsPanel({
   };
 
   return (
-    <div className="max-w-md space-y-6">
+    <div className="max-w-2xl space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="testEmail">Test e-mailadres</Label>

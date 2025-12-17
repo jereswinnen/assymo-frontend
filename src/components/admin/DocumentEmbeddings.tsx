@@ -23,6 +23,7 @@ import {
   Trash2Icon,
   BotMessageSquareIcon,
   CloudUploadIcon,
+  UploadCloudIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { DocumentInfo } from "@/types/chat";
@@ -218,7 +219,7 @@ export function DocumentEmbeddings() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-2xl space-y-6">
       {/* Current Document Status */}
       {documentInfo ? (
         <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -304,14 +305,15 @@ export function DocumentEmbeddings() {
 
       {/* Upload Section */}
       <div className="space-y-4">
-        <div>
-          <Label htmlFor="document-file" className="text-base font-semibold">
-            Upload Document
-          </Label>
-          <p className="text-sm text-muted-foreground mt-1">
+        <header className="space-y-2">
+          <h3 className="mb-1! font-medium flex items-center gap-1.5">
+            <UploadCloudIcon className="size-5" />
+            Upload document
+          </h3>
+          <p className="text-sm text-muted-foreground">
             Upload een Markdown document (vervangt het huidige document)
           </p>
-        </div>
+        </header>
 
         <div className="space-y-3">
           <Input
@@ -353,14 +355,15 @@ export function DocumentEmbeddings() {
 
       {/* Test Retrieval Section */}
       <div className="space-y-4">
-        <div>
-          <Label htmlFor="test-query" className="text-base font-semibold">
-            Test Retrieval
-          </Label>
-          <p className="text-sm text-muted-foreground mt-1">
+        <header className="space-y-2">
+          <h3 className="mb-1! font-medium flex items-center gap-1.5">
+            <BotMessageSquareIcon className="size-5" />
+            Test retrieval
+          </h3>
+          <p className="text-sm text-muted-foreground">
             Test de vector search met een voorbeeldvraag
           </p>
-        </div>
+        </header>
 
         <form onSubmit={handleTestRetrieval} className="space-y-3">
           <Textarea
@@ -381,7 +384,7 @@ export function DocumentEmbeddings() {
           <Button
             type="submit"
             disabled={!testQuery.trim() || testing || !documentInfo}
-            variant="outline"
+            variant="secondary"
             className="w-full"
           >
             {testing ? (
@@ -392,7 +395,7 @@ export function DocumentEmbeddings() {
             ) : (
               <>
                 <BotMessageSquareIcon className="size-4" />
-                Verstuur
+                Versturen
               </>
             )}
           </Button>

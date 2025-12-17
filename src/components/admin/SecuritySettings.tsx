@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -15,11 +14,12 @@ import {
   Loader2Icon,
   ShieldCheckIcon,
   FingerprintIcon,
-  TrashIcon,
   PlusIcon,
+  Trash2Icon,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { Separator } from "../ui/separator";
 
 interface Passkey {
   id: string;
@@ -83,7 +83,9 @@ export function SecuritySettings() {
 
     setDeletingId(passkeyToDelete.id);
     try {
-      const { error } = await authClient.passkey.deletePasskey({ id: passkeyToDelete.id });
+      const { error } = await authClient.passkey.deletePasskey({
+        id: passkeyToDelete.id,
+      });
       if (error) {
         toast.error("Kon passkey niet verwijderen");
         return;
@@ -117,60 +119,70 @@ export function SecuritySettings() {
   }
 
   return (
-    <div className="max-w-md space-y-6">
+    <div className="max-w-2xl space-y-6">
       {/* 2FA Status */}
-      <div className="space-y-2">
-        <h3 className="font-medium flex items-center gap-2">
-          <ShieldCheckIcon className="size-4" />
-          Tweestapsverificatie
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          2FA is ingeschakeld voor je account. Dit is verplicht voor alle admin
-          gebruikers.
-        </p>
+      <div className="space-y-4">
+        <header className="space-y-2">
+          <h3 className="mb-1! font-medium flex items-center gap-1.5">
+            <ShieldCheckIcon className="size-5" />
+            Tweestapsverificatie
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            2FA is ingeschakeld voor je account. Dit is verplicht voor alle
+            admin gebruikers.
+          </p>
+        </header>
       </div>
 
+      <Separator />
+
       {/* Passkeys */}
-      <div className="space-y-3">
-        <h3 className="font-medium flex items-center gap-2">
-          <FingerprintIcon className="size-4" />
-          Passkeys
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          Log sneller in met Face ID, Touch ID of je apparaat-PIN.
-        </p>
+      <div className="space-y-4">
+        <header className="space-y-2">
+          <h3 className="mb-1! font-medium flex items-center gap-1.5">
+            <FingerprintIcon className="size-5" />
+            Passkeys
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Log sneller in met FaceID, TouchID of de toegangscode van je
+            toestel.
+          </p>
+        </header>
 
         {passkeys.length > 0 ? (
-          <div className="space-y-2">
+          <div className="p-3 space-y-4 border border-border rounded-lg">
             {passkeys.map((passkey) => (
-              <Card key={passkey.id} className="p-3 flex items-center justify-between">
+              <div
+                key={passkey.id}
+                className="flex items-center justify-between"
+              >
                 <div>
-                  <p className="text-sm font-medium">
+                  <p className="mb-0! text-base font-medium">
                     {passkey.name || "Passkey"}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     Toegevoegd op {formatDate(passkey.createdAt)}
                   </p>
                 </div>
                 <Button
-                  variant="ghost"
+                  variant="destructive"
                   size="sm"
                   onClick={() => openDeleteDialog(passkey)}
                   disabled={deletingId === passkey.id}
                 >
-                  <TrashIcon className="size-4" />
+                  <Trash2Icon className="size-4" /> Verwijderen
                 </Button>
-              </Card>
+              </div>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground italic">
+          <p className="text-sm text-muted-foreground">
             Geen passkeys geregistreerd
           </p>
         )}
 
         <Button
-          variant="outline"
+          variant="secondary"
           onClick={handleAddPasskey}
           disabled={adding}
           className="w-full"
