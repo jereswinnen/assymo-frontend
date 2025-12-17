@@ -13,11 +13,13 @@ export default function AuthLayout({
   }, []);
 
   return (
-    <main className="relative p-4 flex min-h-screen bg-[url(/images/auth-bg.avif)] bg-cover bg-center *:flex *:flex-1 *:items-center *:justify-center">
-      <section className="z-10">
-        <Logo className="w-72 text-white" />
+    <main className="relative p-6 md:p-4 flex flex-col md:flex-row min-h-screen bg-[url(/images/auth-bg.avif)] bg-cover bg-center *:flex *:items-center *:justify-center">
+      <section className="z-10 flex-1">
+        <Logo className="w-52 md:w-72 text-white" />
       </section>
-      <section className="z-10 p-4 bg-white rounded-3xl">{children}</section>
+      <section className="z-10 p-8 md:p-4 bg-white rounded-3xl">
+        {children}
+      </section>
       <div className="absolute inset-0 bg-black/30"></div>
     </main>
   );
