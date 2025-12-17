@@ -12,13 +12,13 @@ import {
   InputGroupText,
 } from "@/components/ui/input-group";
 import { clearSession, getSessionId } from "@/lib/chatSession";
-import { Separator } from "./ui/separator";
-import { Spinner } from "./ui/spinner";
+import { Separator } from "../ui/separator";
+import { Spinner } from "../ui/spinner";
 import { CHATBOT_CONFIG } from "@/config/chatbot";
 import { usePersistedMessages } from "@/hooks/usePersistedMessages";
 import { useRateLimitCountdown } from "@/hooks/useRateLimitCountdown";
-import Logo from "./Logo";
-import { ToolResultCard, BookingForm } from "./chatbot/ToolResultCards";
+import Logo from "../layout/Logo";
+import { ToolResultCard, BookingForm } from "../chatbot/ToolResultCards";
 
 interface ChatbotProps {
   onClose?: () => void;

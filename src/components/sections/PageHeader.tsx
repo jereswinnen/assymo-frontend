@@ -1,4 +1,4 @@
-import { Action } from "@/components/Action";
+import { Action } from "@/components/general/Action";
 import { iconMap } from "@/lib/icons";
 import { urlFor } from "@/sanity/imageUrl";
 import type { SanityImage } from "@/types/sanity";

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "./Logo";
 import { cn } from "@/lib/utils";
-import { Action } from "./Action";
+import { Action } from "../general/Action";
 import {
   Calendar1Icon,
   FacebookIcon,
@@ -12,7 +12,7 @@ import {
   MailIcon,
   PhoneIcon,
 } from "lucide-react";
-import { Separator } from "./ui/separator";
+import { Separator } from "../ui/separator";
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
 import { createPortal, flushSync } from "react-dom";

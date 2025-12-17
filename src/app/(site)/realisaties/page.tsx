@@ -3,8 +3,8 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { client } from "@/sanity/client";
 import { sectionsFragment, imageFields } from "@/sanity/fragments";
-import SectionRenderer from "@/components/SectionRenderer";
-import { ProjectsGrid } from "@/components/ProjectsGrid";
+import SectionRenderer from "@/components/general/SectionRenderer";
+import { ProjectsGrid } from "@/components/general/ProjectsGrid";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "realisaties"

@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { client } from "@/sanity/client";
 import { sectionsFragment } from "@/sanity/fragments";
 import { notFound } from "next/navigation";
-import SectionRenderer from "@/components/SectionRenderer";
+import SectionRenderer from "@/components/general/SectionRenderer";
 
 const SOLUTIONS_QUERY = `*[
   _type == "solution" && slug.current == $slug

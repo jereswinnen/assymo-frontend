@@ -3,9 +3,9 @@ import Logo from "./Logo";
 import { cn } from "@/lib/utils";
 import { client } from "@/sanity/client";
 import { PhoneIcon, InstagramIcon, FacebookIcon, MailIcon } from "lucide-react";
-import { Separator } from "./ui/separator";
-import { NewsletterForm } from "./NewsletterForm";
-import { CookieSettingsButton } from "./CookieSettingsButton";
+import { Separator } from "../ui/separator";
+import { NewsletterForm } from "../forms/NewsletterForm";
+import { CookieSettingsButton } from "../cookies/CookieSettingsButton";
 
 const NAV_QUERY = `*[_type == "navigation"][0]{
   links[]{

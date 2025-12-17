@@ -6,9 +6,9 @@ import {
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "./ui/input-group";
+} from "../ui/input-group";
 import { cn } from "@/lib/utils";
-import { Spinner } from "./ui/spinner";
+import { Spinner } from "../ui/spinner";
 import { CheckIcon, MailCheckIcon, SendIcon } from "lucide-react";
 
 interface NewsletterFormProps {

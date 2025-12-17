@@ -1,11 +1,11 @@
 import { client } from "@/sanity/client";
 import { sectionsFragment } from "@/sanity/fragments";
-import SectionRenderer from "@/components/SectionRenderer";
+import SectionRenderer from "@/components/general/SectionRenderer";
 import { BookingForm } from "@/components/appointments/BookingForm";
 import Link from "next/link";
 import { MailIcon, PhoneIcon } from "lucide-react";
-import Map from "@/components/Map";
-import Logo from "@/components/Logo";
+import Map from "@/components/general/Map";
+import Logo from "@/components/layout/Logo";
 
 export const metadata = {
   title: "Maak een afspraak - Assymo",

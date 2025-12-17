@@ -3,8 +3,8 @@ import { client } from "@/sanity/client";
 import { AppointmentView } from "./AppointmentView";
 import Link from "next/link";
 import { MailIcon, PhoneIcon } from "lucide-react";
-import Map from "@/components/Map";
-import Logo from "@/components/Logo";
+import Map from "@/components/general/Map";
+import Logo from "@/components/layout/Logo";
 
 export const metadata: Metadata = {
   title: "Uw afspraak - Assymo",

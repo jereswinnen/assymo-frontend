@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-import Logo from "@/components/Logo";
+import Logo from "@/components/layout/Logo";
 import {
   Sidebar,
   SidebarContent,

@@ -1,11 +1,11 @@
-import Slideshow from "./sections/Slideshow";
-import PageHeader from "./sections/PageHeader";
-import { SplitSection } from "./sections/SplitSection";
-import UspSection from "./sections/UspSection";
-import SolutionsScroller from "./sections/SolutionsScroller";
-import FlexibleSection from "./sections/FlexibleSection";
+import Slideshow from "../sections/Slideshow";
+import PageHeader from "../sections/PageHeader";
+import { SplitSection } from "../sections/SplitSection";
+import UspSection from "../sections/UspSection";
+import SolutionsScroller from "../sections/SolutionsScroller";
+import FlexibleSection from "../sections/FlexibleSection";
 import type { SanityImage } from "@/types/sanity";
-import type { FlexibleSectionData } from "./sections/FlexibleSection/types";
+import type { FlexibleSectionData } from "../sections/FlexibleSection/types";
 
 // Section type definitions using discriminated unions
 // Each section has a _type field that narrows the type in the switch

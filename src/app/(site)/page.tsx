@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { getPageMetadata } from "@/lib/getPageMetadata";
 import { client } from "@/sanity/client";
 import { sectionsFragment } from "@/sanity/fragments";
-import SectionRenderer from "@/components/SectionRenderer";
+import SectionRenderer from "@/components/general/SectionRenderer";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "home"

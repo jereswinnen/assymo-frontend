@@ -1,4 +1,4 @@
-import SlideshowComponent from "@/components/Slideshow";
+import SlideshowComponent from "@/components/general/Slideshow";
 
 interface SlideshowImage {
   _type: "image";

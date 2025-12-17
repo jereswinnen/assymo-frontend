@@ -1,9 +1,9 @@
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import ChatbotWrapper from "@/components/ChatbotWrapper";
-import CookieBanner from "@/components/CookieBanner";
-import { ClosureBanner } from "@/components/ClosureBanner";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import ChatbotWrapper from "@/components/general/ChatbotWrapper";
+import CookieBanner from "@/components/cookies/CookieBanner";
+import { ClosureBanner } from "@/components/layout/ClosureBanner";
 
 export default function SiteLayout({
   children,

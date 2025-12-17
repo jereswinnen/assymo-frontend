@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion, useInView } from "motion/react";
 import { ChevronLeftIcon, ChevronRightIcon, InfoIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Action } from "../Action";
+import { Action } from "../general/Action";
 
 // Animation tokens
 const SCROLL_INTERVAL = 4500;

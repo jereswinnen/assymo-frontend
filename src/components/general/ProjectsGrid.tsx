@@ -4,8 +4,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import Image from "next/image";
 import { urlFor } from "@/sanity/imageUrl";
-import { FilterBar } from "@/components/FilterBar";
-import { Action } from "@/components/Action";
+import { FilterBar } from "@/components/forms/FilterBar";
+import { Action } from "./Action";
 import { InfoIcon } from "lucide-react";
 
 interface SolutionFilter {

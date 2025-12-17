@@ -1,7 +1,7 @@
 "use client";
 
 import { PortableText } from "@portabletext/react";
-import { Action, actionVariants } from "@/components/Action";
+import { Action, actionVariants } from "@/components/general/Action";
 import { iconMap } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import type { FlexTextBlock } from "../types";

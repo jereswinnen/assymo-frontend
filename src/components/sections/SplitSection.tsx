@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { urlFor } from "@/sanity/imageUrl";
-import { Action } from "../Action";
+import { Action } from "../general/Action";
 import { iconMap } from "@/lib/icons";
 
 interface SanityImage {

@@ -12,7 +12,7 @@ import {
   FacebookIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Separator } from "./ui/separator";
+import { Separator } from "../ui/separator";
 
 // Animation tokens (matching HeaderClient)
 const easing: [number, number, number, number] = [0.645, 0, 0.045, 1];

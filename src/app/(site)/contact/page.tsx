@@ -6,7 +6,7 @@ import { sectionsFragment } from "@/sanity/fragments";
 import { urlFor } from "@/sanity/imageUrl";
 import { PortableText } from "@portabletext/react";
 import Link from "next/link";
-import SectionRenderer from "@/components/SectionRenderer";
+import SectionRenderer from "@/components/general/SectionRenderer";
 
 const PAGE_QUERY = `*[
   _type == "page" && slug.current == "contact"

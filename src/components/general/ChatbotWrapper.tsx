@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { MessagesSquareIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Chatbot from "@/components/Chatbot";
+import Chatbot from "./Chatbot";
 
 export default function ChatbotWrapper() {
   const [isOpen, setIsOpen] = useState(false);
