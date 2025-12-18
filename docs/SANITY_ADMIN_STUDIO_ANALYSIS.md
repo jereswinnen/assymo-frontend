@@ -2,30 +2,54 @@
 
 ## Overview
 
-Replace Sanity entirely with a custom content management system built into the admin panel. Content will be stored in Neon Postgres (already in use), and images will be stored via a cloud provider.
+Replace Sanity entirely with a custom CMS built into the admin panel. Content stored in Neon Postgres, images via cloud storage.
 
-**Goal:** Full independence from Sanity - one less external dependency, full control, simpler architecture.
+**Complexity:** 🟢 Very doable
+
+**Total estimate:** ~3 weeks of focused work, broken into small phases
 
 ---
 
-## Phase 1: Foundation
+## Existing Assets We'll Use
 
-### 1.1 Database Schema
+You already have these shadcn components - no need to create field wrappers:
 
-Create tables for all content types in Neon Postgres.
+| Component | Use For |
+|-----------|---------|
+| `Input` | Text fields, slugs |
+| `Textarea` | Multi-line text |
+| `Switch` | Boolean toggles |
+| `Select` | Dropdowns, layout pickers |
+| `Button` | Actions |
+| `Dialog` | Modals for editing |
+| `DropdownMenu` | Section type picker |
+| `Card` | List items, section cards |
+| `Badge` | Status indicators |
+| `Separator` | Form sections |
+| `Label` | Field labels |
+
+Plus existing patterns from appointments/newsletters for CRUD operations.
+
+---
+
+## Phase 1: Database Schema
+**Time: 2-3 hours**
+
+Run this SQL in Neon:
 
 ```sql
--- Core content types
+-- Pages
 CREATE TABLE pages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
-  header_image JSONB, -- { url, alt, hotspot? }
-  sections JSONB DEFAULT '[]', -- Array of section objects
+  header_image JSONB,
+  sections JSONB DEFAULT '[]',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Solutions (Realisaties)
 CREATE TABLE solutions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -38,6 +62,7 @@ CREATE TABLE solutions (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Filter categories
 CREATE TABLE filter_categories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -45,6 +70,7 @@ CREATE TABLE filter_categories (
   order_rank INTEGER DEFAULT 0
 );
 
+-- Filters
 CREATE TABLE filters (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -53,14 +79,14 @@ CREATE TABLE filters (
   UNIQUE(slug, category_id)
 );
 
--- Junction table for solution <-> filter many-to-many
+-- Solution <-> Filter junction
 CREATE TABLE solution_filters (
   solution_id UUID REFERENCES solutions(id) ON DELETE CASCADE,
   filter_id UUID REFERENCES filters(id) ON DELETE CASCADE,
   PRIMARY KEY (solution_id, filter_id)
 );
 
--- Navigation (singleton-ish, but stored as rows for flexibility)
+-- Navigation links
 CREATE TABLE navigation_links (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   location TEXT NOT NULL, -- 'header' or 'footer'
@@ -70,6 +96,7 @@ CREATE TABLE navigation_links (
   order_rank INTEGER DEFAULT 0
 );
 
+-- Navigation sub-items
 CREATE TABLE navigation_subitems (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   link_id UUID REFERENCES navigation_links(id) ON DELETE CASCADE,
@@ -79,7 +106,7 @@ CREATE TABLE navigation_subitems (
 
 -- Site parameters (singleton)
 CREATE TABLE site_parameters (
-  id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1), -- Ensures singleton
+  id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
   address TEXT,
   phone TEXT,
   email TEXT,
@@ -87,18 +114,6 @@ CREATE TABLE site_parameters (
   facebook TEXT,
   vat_number TEXT,
   updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Images table (metadata, actual files in cloud storage)
-CREATE TABLE images (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  url TEXT NOT NULL,
-  filename TEXT NOT NULL,
-  alt TEXT,
-  width INTEGER,
-  height INTEGER,
-  size INTEGER, -- bytes
-  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Indexes
@@ -109,30 +124,27 @@ CREATE INDEX idx_filters_category ON filters(category_id);
 CREATE INDEX idx_nav_links_location ON navigation_links(location);
 ```
 
-**Effort:** Half day
+**Deliverable:** Tables created in Neon
 
-### 1.2 Image Storage Setup
+---
 
-Choose one (recommendation: **Vercel Blob** if on Vercel, otherwise **Cloudinary**):
+## Phase 2: Image Storage Setup
+**Time: 1-2 hours**
 
-| Option | Pros | Cons |
-|--------|------|------|
-| Vercel Blob | Native integration, simple API | Vercel-only |
-| Cloudinary | Great transforms, generous free tier | External service |
-| AWS S3 | Full control, cheap | More setup |
-| uploadthing | Popular in Next.js | Another dependency |
+Install Vercel Blob:
+```bash
+pnpm add @vercel/blob
+```
 
-**Vercel Blob example:**
+Create storage helper:
+
 ```typescript
 // src/lib/storage.ts
 import { put, del } from '@vercel/blob';
 
 export async function uploadImage(file: File) {
   const blob = await put(file.name, file, { access: 'public' });
-  return {
-    url: blob.url,
-    filename: file.name,
-  };
+  return { url: blob.url, filename: file.name };
 }
 
 export async function deleteImage(url: string) {
@@ -140,90 +152,66 @@ export async function deleteImage(url: string) {
 }
 ```
 
-**Effort:** Half day
+Create upload API route:
 
-### 1.3 Base API Routes
-
-```
-src/app/api/admin/content/
-├── pages/
-│   ├── route.ts           # GET (list), POST (create)
-│   └── [id]/route.ts      # GET, PUT, DELETE
-├── solutions/
-│   ├── route.ts
-│   └── [id]/route.ts
-├── filters/
-│   └── route.ts           # GET, POST, PUT, DELETE (all in one)
-├── filter-categories/
-│   └── route.ts
-├── navigation/
-│   └── route.ts           # GET, PUT
-├── site-parameters/
-│   └── route.ts           # GET, PUT
-└── images/
-    └── upload/route.ts    # POST (upload), DELETE
-```
-
-**Example route:**
 ```typescript
-// src/app/api/admin/content/pages/route.ts
-import { db } from '@/lib/db';
+// src/app/api/admin/content/images/upload/route.ts
 import { isAuthenticated } from '@/lib/auth-utils';
-
-export async function GET() {
-  if (!await isAuthenticated()) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const pages = await db.query(`
-    SELECT id, title, slug, updated_at
-    FROM pages
-    ORDER BY title
-  `);
-
-  return Response.json(pages.rows);
-}
+import { uploadImage } from '@/lib/storage';
 
 export async function POST(req: Request) {
   if (!await isAuthenticated()) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { title, slug, header_image, sections } = await req.json();
-
-  const result = await db.query(`
-    INSERT INTO pages (title, slug, header_image, sections)
-    VALUES ($1, $2, $3, $4)
-    RETURNING *
-  `, [title, slug, header_image, JSON.stringify(sections)]);
-
-  return Response.json(result.rows[0]);
+  const formData = await req.formData();
+  const file = formData.get('file') as File;
+  const result = await uploadImage(file);
+  return Response.json(result);
 }
 ```
 
-**Effort:** 1-2 days
+Add `BLOB_READ_WRITE_TOKEN` to env vars (from Vercel dashboard).
+
+**Deliverable:** Image upload working
 
 ---
 
-## Phase 2: Frontend Data Layer
+## Phase 3: Content Data Layer
+**Time: 3-4 hours**
 
-### 2.1 Replace Sanity Client Calls
+Create functions to fetch content from Postgres:
 
-Create a new data layer to replace Sanity queries.
-
-**Current (Sanity):**
-```typescript
-const page = await client.fetch(`*[_type == "page" && slug.current == $slug][0]`, { slug });
-```
-
-**New (Postgres):**
 ```typescript
 // src/lib/content.ts
 import { db } from './db';
 
 export async function getPageBySlug(slug: string) {
+  const result = await db.query(
+    'SELECT * FROM pages WHERE slug = $1',
+    [slug]
+  );
+  return result.rows[0] || null;
+}
+
+export async function getAllPages() {
+  const result = await db.query(
+    'SELECT id, title, slug, updated_at FROM pages ORDER BY title'
+  );
+  return result.rows;
+}
+
+export async function getSolutionBySlug(slug: string) {
   const result = await db.query(`
-    SELECT * FROM pages WHERE slug = $1
+    SELECT s.*,
+      COALESCE(json_agg(
+        json_build_object('id', f.id, 'name', f.name, 'slug', f.slug)
+      ) FILTER (WHERE f.id IS NOT NULL), '[]') as filters
+    FROM solutions s
+    LEFT JOIN solution_filters sf ON s.id = sf.solution_id
+    LEFT JOIN filters f ON sf.filter_id = f.id
+    WHERE s.slug = $1
+    GROUP BY s.id
   `, [slug]);
   return result.rows[0] || null;
 }
@@ -231,12 +219,9 @@ export async function getPageBySlug(slug: string) {
 export async function getAllSolutions() {
   const result = await db.query(`
     SELECT s.*,
-      COALESCE(
-        json_agg(
-          json_build_object('id', f.id, 'name', f.name, 'slug', f.slug, 'category_id', f.category_id)
-        ) FILTER (WHERE f.id IS NOT NULL),
-        '[]'
-      ) as filters
+      COALESCE(json_agg(
+        json_build_object('id', f.id, 'name', f.name, 'slug', f.slug, 'category_id', f.category_id)
+      ) FILTER (WHERE f.id IS NOT NULL), '[]') as filters
     FROM solutions s
     LEFT JOIN solution_filters sf ON s.id = sf.solution_id
     LEFT JOIN filters f ON sf.filter_id = f.id
@@ -246,23 +231,30 @@ export async function getAllSolutions() {
   return result.rows;
 }
 
-export async function getSolutionBySlug(slug: string) {
-  // Similar query with filters included
+export async function getFilterCategories() {
+  const result = await db.query(`
+    SELECT fc.*,
+      COALESCE(json_agg(
+        json_build_object('id', f.id, 'name', f.name, 'slug', f.slug)
+        ORDER BY f.name
+      ) FILTER (WHERE f.id IS NOT NULL), '[]') as filters
+    FROM filter_categories fc
+    LEFT JOIN filters f ON fc.id = f.category_id
+    GROUP BY fc.id
+    ORDER BY fc.order_rank
+  `);
+  return result.rows;
 }
 
 export async function getNavigation(location: 'header' | 'footer') {
   const result = await db.query(`
     SELECT nl.*,
-      COALESCE(
-        json_agg(
-          json_build_object(
-            'id', ns.id,
-            'solution', json_build_object('name', s.name, 'slug', s.slug, 'header_image', s.header_image)
-          )
-          ORDER BY ns.order_rank
-        ) FILTER (WHERE ns.id IS NOT NULL),
-        '[]'
-      ) as sub_items
+      COALESCE(json_agg(
+        json_build_object(
+          'id', ns.id,
+          'solution', json_build_object('name', s.name, 'slug', s.slug, 'header_image', s.header_image)
+        ) ORDER BY ns.order_rank
+      ) FILTER (WHERE ns.id IS NOT NULL), '[]') as sub_items
     FROM navigation_links nl
     LEFT JOIN navigation_subitems ns ON nl.id = ns.link_id
     LEFT JOIN solutions s ON ns.solution_id = s.id
@@ -274,171 +266,243 @@ export async function getNavigation(location: 'header' | 'footer') {
 }
 
 export async function getSiteParameters() {
-  const result = await db.query(`SELECT * FROM site_parameters WHERE id = 1`);
+  const result = await db.query('SELECT * FROM site_parameters WHERE id = 1');
   return result.rows[0] || null;
-}
-
-export async function getFilterCategories() {
-  const result = await db.query(`
-    SELECT fc.*,
-      COALESCE(
-        json_agg(
-          json_build_object('id', f.id, 'name', f.name, 'slug', f.slug)
-          ORDER BY f.name
-        ) FILTER (WHERE f.id IS NOT NULL),
-        '[]'
-      ) as filters
-    FROM filter_categories fc
-    LEFT JOIN filters f ON fc.id = f.category_id
-    GROUP BY fc.id
-    ORDER BY fc.order_rank
-  `);
-  return result.rows;
 }
 ```
 
-**Effort:** 1 day
+**Deliverable:** All read functions ready
 
-### 2.2 Update Page Components
+---
 
-Replace Sanity fetches in all pages:
+## Phase 4: Update Frontend Pages
+**Time: 2-3 hours**
+
+Replace Sanity fetches with new data layer:
 
 | File | Change |
 |------|--------|
-| `src/app/(site)/page.tsx` | `client.fetch(GROQ)` → `getPageBySlug('home')` |
-| `src/app/(site)/contact/page.tsx` | Same pattern |
-| `src/app/(site)/over-ons/page.tsx` | Same pattern |
-| `src/app/(site)/afspraak/page.tsx` | Same pattern |
+| `src/app/(site)/page.tsx` | `getPageBySlug('home')` |
+| `src/app/(site)/contact/page.tsx` | `getPageBySlug('contact')` |
+| `src/app/(site)/over-ons/page.tsx` | `getPageBySlug('over-ons')` |
+| `src/app/(site)/afspraak/page.tsx` | `getPageBySlug('afspraak')` |
 | `src/app/(site)/realisaties/page.tsx` | `getAllSolutions()` + `getFilterCategories()` |
 | `src/app/(site)/realisaties/[slug]/page.tsx` | `getSolutionBySlug(slug)` |
 | `src/components/layout/Header.tsx` | `getNavigation('header')` |
 | `src/components/layout/Footer.tsx` | `getNavigation('footer')` + `getSiteParameters()` |
 
-**Effort:** 1 day
+**Deliverable:** Site reads from Postgres
 
-### 2.3 Update Image Handling
+---
 
-Replace Sanity's `urlFor()` with direct URLs.
+## Phase 5: Update Image References
+**Time: 1-2 hours**
 
-**Current:**
-```typescript
+Replace `urlFor(image)` with direct URLs in all components:
+
+**Before:**
+```tsx
 import { urlFor } from '@/sanity/imageUrl';
 <img src={urlFor(image).width(800).url()} />
 ```
 
-**New:**
-```typescript
-// Images now have direct URLs stored in the database
-<img src={image.url} />
-
-// If you need transforms (resize, crop), use Cloudinary URL transforms
-// or a Next.js Image component with loader
-<Image
-  src={image.url}
-  width={800}
-  height={600}
-  alt={image.alt || ''}
-/>
+**After:**
+```tsx
+<Image src={image.url} width={800} height={600} alt={image.alt || ''} />
 ```
 
-**Effort:** Half day (mostly find-and-replace)
-
-### 2.4 Update Section Components
-
-The section data structure stays the same - just comes from Postgres instead of Sanity. `SectionRenderer` should work without changes.
-
-Only difference: image references are now `{ url, alt }` instead of `{ asset: { _ref }, alt }`.
-
-Update any component that uses `urlFor()`:
+Files to update:
 - `src/components/sections/Slideshow.tsx`
 - `src/components/sections/PageHeader.tsx`
 - `src/components/sections/SplitSection.tsx`
+- `src/components/sections/SolutionsScrollerClient.tsx`
 - `src/components/sections/FlexibleSection/blocks/ImageBlock.tsx`
-- etc.
 
-**Effort:** Half day
+**Deliverable:** All images use direct URLs
 
 ---
 
-## Phase 3: Admin UI - Simple Editors
+## Phase 6: Site Parameters Editor
+**Time: 2-3 hours**
 
-### 3.1 Admin Routes Structure
+API route:
+```typescript
+// src/app/api/admin/content/site-parameters/route.ts
+export async function GET() {
+  const params = await getSiteParameters();
+  return Response.json(params);
+}
 
+export async function PUT(req: Request) {
+  if (!await isAuthenticated()) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const data = await req.json();
+  await db.query(`
+    INSERT INTO site_parameters (id, address, phone, email, instagram, facebook, vat_number)
+    VALUES (1, $1, $2, $3, $4, $5, $6)
+    ON CONFLICT (id) DO UPDATE SET
+      address = $1, phone = $2, email = $3, instagram = $4, facebook = $5, vat_number = $6,
+      updated_at = NOW()
+  `, [data.address, data.phone, data.email, data.instagram, data.facebook, data.vat_number]);
+  return Response.json({ success: true });
+}
 ```
-src/app/admin/
-├── content/
-│   ├── page.tsx                    # Content overview/dashboard
-│   ├── pages/
-│   │   ├── page.tsx                # Pages list
-│   │   └── [id]/page.tsx           # Page editor
-│   ├── solutions/
-│   │   ├── page.tsx                # Solutions list
-│   │   └── [id]/page.tsx           # Solution editor
-│   ├── filters/
-│   │   └── page.tsx                # Filters & categories (combined)
-│   ├── navigation/
-│   │   └── page.tsx                # Navigation editor
-│   └── settings/
-│       └── page.tsx                # Site parameters
+
+Admin page (using existing shadcn components):
+```typescript
+// src/app/admin/content/settings/page.tsx
+'use client';
+import { useState, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+
+export default function SiteSettingsPage() {
+  const [params, setParams] = useState({ address: '', phone: '', email: '', instagram: '', facebook: '', vat_number: '' });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/content/site-parameters').then(r => r.json()).then(setParams);
+  }, []);
+
+  const save = async () => {
+    setSaving(true);
+    await fetch('/api/admin/content/site-parameters', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
+    });
+    toast.success('Instellingen opgeslagen');
+    setSaving(false);
+  };
+
+  return (
+    <div className="max-w-2xl space-y-6">
+      <h1 className="text-2xl font-bold">Site Instellingen</h1>
+
+      <div className="space-y-4">
+        <div>
+          <Label>Adres</Label>
+          <Input value={params.address} onChange={e => setParams({...params, address: e.target.value})} />
+        </div>
+        <div>
+          <Label>Telefoon</Label>
+          <Input value={params.phone} onChange={e => setParams({...params, phone: e.target.value})} />
+        </div>
+        <div>
+          <Label>E-mail</Label>
+          <Input value={params.email} onChange={e => setParams({...params, email: e.target.value})} />
+        </div>
+        <div>
+          <Label>Instagram URL</Label>
+          <Input value={params.instagram} onChange={e => setParams({...params, instagram: e.target.value})} />
+        </div>
+        <div>
+          <Label>Facebook URL</Label>
+          <Input value={params.facebook} onChange={e => setParams({...params, facebook: e.target.value})} />
+        </div>
+        <div>
+          <Label>BTW Nummer</Label>
+          <Input value={params.vat_number} onChange={e => setParams({...params, vat_number: e.target.value})} />
+        </div>
+      </div>
+
+      <Button onClick={save} disabled={saving}>
+        {saving ? 'Opslaan...' : 'Opslaan'}
+      </Button>
+    </div>
+  );
+}
 ```
 
-### 3.2 Simple Editors First
+**Deliverable:** Site parameters editable in admin
 
-**Filters & Categories** (`src/app/admin/content/filters/page.tsx`):
-- Two-column layout: categories on left, filters on right
-- Add/edit/delete categories
-- Add/edit/delete filters within categories
+---
+
+## Phase 7: Filter Categories Editor
+**Time: 3-4 hours**
+
+API routes for CRUD on filter_categories and filters.
+
+Admin page with:
+- List of categories (left side)
+- Filters within selected category (right side)
+- Add/edit/delete for both
 - Drag to reorder categories
 
-**Site Parameters** (`src/app/admin/content/settings/page.tsx`):
-- Simple form: address, phone, email, social URLs
-- Save button
+Use existing shadcn: `Card`, `Button`, `Input`, `Dialog`
 
-**Effort:** 1-2 days
-
-### 3.3 Navigation Editor
-
-- List of nav links with drag-to-reorder
-- Each link: title, slug, submenu heading
-- Sub-items: pick from solutions (searchable dropdown)
-- Separate tabs for header/footer nav
-
-**Effort:** 1 day
+**Deliverable:** Filters fully manageable
 
 ---
 
-## Phase 4: Admin UI - Content Editors
+## Phase 8: Navigation Editor
+**Time: 3-4 hours**
 
-### 4.1 Reusable Field Components
+API routes for navigation_links and navigation_subitems.
 
-```
-src/components/admin/content/fields/
-├── TextField.tsx          # Text input
-├── TextAreaField.tsx      # Multi-line text
-├── SlugField.tsx          # Auto-generates from title
-├── ToggleField.tsx        # Boolean switch
-├── SelectField.tsx        # Dropdown
-├── ImageField.tsx         # Upload + preview
-├── PortableTextField.tsx  # Rich text (@portabletext/editor)
-└── ArrayField.tsx         # Add/remove/reorder items
-```
+Admin page with:
+- Tabs for "Header" and "Footer"
+- List of links with drag-to-reorder
+- Each link expandable to edit title, slug, submenu heading
+- Sub-items: select from solutions (use `Select` component)
 
-**ImageField example:**
+**Deliverable:** Navigation editable in admin
+
+---
+
+## Phase 9: Pages List View
+**Time: 2-3 hours**
+
+API route:
 ```typescript
-'use client';
+// src/app/api/admin/content/pages/route.ts
+export async function GET() { /* list all pages */ }
+export async function POST(req) { /* create page */ }
 
+// src/app/api/admin/content/pages/[id]/route.ts
+export async function GET(req, { params }) { /* get single page */ }
+export async function PUT(req, { params }) { /* update page */ }
+export async function DELETE(req, { params }) { /* delete page */ }
+```
+
+Admin page:
+- Table with title, slug, updated date
+- "Nieuwe pagina" button
+- Click row to edit
+
+**Deliverable:** Pages list in admin
+
+---
+
+## Phase 10: Page Editor (Basic Fields)
+**Time: 2-3 hours**
+
+Page at `/admin/content/pages/[id]/page.tsx`:
+- Title input
+- Slug input (auto-generate from title)
+- Header image upload
+- Save/Delete buttons
+
+Image upload component (reusable):
+```typescript
+// src/components/admin/ImageUpload.tsx
+'use client';
 import { useState } from 'react';
 import Image from 'next/image';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, Upload, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Upload, X, Loader2 } from 'lucide-react';
 
-interface ImageFieldProps {
+interface ImageUploadProps {
   value: { url: string; alt?: string } | null;
   onChange: (value: { url: string; alt?: string } | null) => void;
 }
 
-export function ImageField({ value, onChange }: ImageFieldProps) {
+export function ImageUpload({ value, onChange }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -449,11 +513,7 @@ export function ImageField({ value, onChange }: ImageFieldProps) {
     const formData = new FormData();
     formData.append('file', file);
 
-    const res = await fetch('/api/admin/content/images/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
+    const res = await fetch('/api/admin/content/images/upload', { method: 'POST', body: formData });
     const { url } = await res.json();
     onChange({ url, alt: '' });
     setUploading(false);
@@ -463,130 +523,133 @@ export function ImageField({ value, onChange }: ImageFieldProps) {
     return (
       <div className="space-y-2">
         <div className="relative inline-block">
-          <Image src={value.url} alt={value.alt || ''} width={200} height={150} className="rounded" />
-          <Button
-            size="icon"
-            variant="destructive"
-            className="absolute -top-2 -right-2 h-6 w-6"
-            onClick={() => onChange(null)}
-          >
+          <Image src={value.url} alt={value.alt || ''} width={300} height={200} className="rounded border" />
+          <Button size="icon" variant="destructive" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => onChange(null)}>
             <X className="h-4 w-4" />
           </Button>
         </div>
-        <Input
-          placeholder="Alt text"
-          value={value.alt || ''}
-          onChange={(e) => onChange({ ...value, alt: e.target.value })}
-        />
+        <div>
+          <Label>Alt tekst</Label>
+          <Input value={value.alt || ''} onChange={e => onChange({ ...value, alt: e.target.value })} placeholder="Beschrijving van de afbeelding" />
+        </div>
       </div>
     );
   }
 
   return (
-    <label className="flex items-center gap-2 cursor-pointer border-2 border-dashed rounded-lg p-4 hover:border-primary">
-      {uploading ? <Loader2 className="animate-spin" /> : <Upload />}
-      <span>{uploading ? 'Uploading...' : 'Upload image'}</span>
-      <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+    <label className="flex flex-col items-center justify-center gap-2 cursor-pointer border-2 border-dashed rounded-lg p-8 hover:border-primary transition-colors">
+      {uploading ? <Loader2 className="h-8 w-8 animate-spin" /> : <Upload className="h-8 w-8" />}
+      <span className="text-sm text-muted-foreground">{uploading ? 'Uploaden...' : 'Klik om afbeelding te uploaden'}</span>
+      <input type="file" accept="image/*" className="hidden" onChange={handleUpload} disabled={uploading} />
     </label>
   );
 }
 ```
 
-**Effort:** 1-2 days for all field components
-
-### 4.2 Pages List & Basic Editor
-
-**List view:**
-- Table: title, slug, last updated
-- Search/filter
-- Create new button
-- Click to edit
-
-**Editor (basic fields):**
-- Title (text)
-- Slug (auto-generate from title)
-- Header image (ImageField)
-- Save/delete buttons
-
-**Effort:** 1 day
-
-### 4.3 Solutions List & Basic Editor
-
-Same as pages, plus:
-- Subtitle field
-- Filter picker (multi-select from existing filters)
-- Order rank (drag in list or number input)
-
-**Effort:** 1 day
+**Deliverable:** Pages editable (basic fields)
 
 ---
 
-## Phase 5: Section Builder
+## Phase 11: Solutions List & Basic Editor
+**Time: 2-3 hours**
 
-### 5.1 Section List Component
+Same pattern as pages, plus:
+- Subtitle field
+- Order rank (number input or drag in list)
+- Filter picker (multi-select checkboxes)
+
+**Deliverable:** Solutions list and basic editing
+
+---
+
+## Phase 12: Section Builder Core
+**Time: 3-4 hours**
+
+Install dnd-kit:
+```bash
+pnpm add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+```
+
+Create sortable section list component:
 
 ```typescript
+// src/components/admin/SectionList.tsx
 'use client';
-
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { GripVertical, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 
-function SortableSection({ section, onEdit, onDelete }) {
+function SortableSection({ section, onUpdate, onDelete, children }) {
   const [expanded, setExpanded] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: section._key });
 
-  const style = { transform: CSS.Transform.toString(transform), transition };
+  return (
+    <Card ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="mb-2">
+      <div className="flex items-center gap-2 p-3">
+        <button {...attributes} {...listeners} className="cursor-grab"><GripVertical className="h-4 w-4" /></button>
+        <button onClick={() => setExpanded(!expanded)}>
+          {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        </button>
+        <span className="font-medium flex-1">{getSectionLabel(section._type)}</span>
+        <Button size="icon" variant="ghost" onClick={() => onDelete(section._key)}><Trash2 className="h-4 w-4" /></Button>
+      </div>
+      {expanded && <div className="p-4 border-t">{children}</div>}
+    </Card>
+  );
+}
+
+export function SectionList({ sections, onChange }) {
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (active.id !== over.id) {
+      const oldIndex = sections.findIndex(s => s._key === active.id);
+      const newIndex = sections.findIndex(s => s._key === over.id);
+      onChange(arrayMove(sections, oldIndex, newIndex));
+    }
+  };
 
   return (
-    <div ref={setNodeRef} style={style} className="border rounded-lg mb-2">
-      <div className="flex items-center gap-2 p-3 bg-muted/50">
-        <button {...attributes} {...listeners} className="cursor-grab">
-          <GripVertical className="h-4 w-4" />
-        </button>
-        <button onClick={() => setExpanded(!expanded)}>
-          {expanded ? <ChevronDown /> : <ChevronRight />}
-        </button>
-        <span className="font-medium">{getSectionLabel(section._type)}</span>
-        <span className="text-muted-foreground text-sm">{getSectionSummary(section)}</span>
-        <button onClick={() => onDelete(section._key)} className="ml-auto text-destructive">
-          <Trash2 className="h-4 w-4" />
-        </button>
-      </div>
-      {expanded && (
-        <div className="p-4 border-t">
-          <SectionForm section={section} onChange={onEdit} />
-        </div>
-      )}
-    </div>
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={sections.map(s => s._key)} strategy={verticalListSortingStrategy}>
+        {sections.map(section => (
+          <SortableSection key={section._key} section={section} onDelete={...} onUpdate={...}>
+            <SectionForm section={section} onChange={...} />
+          </SortableSection>
+        ))}
+      </SortableContext>
+    </DndContext>
   );
 }
 ```
 
-### 5.2 Section Type Selector
-
+Add section button with dropdown:
 ```typescript
+// src/components/admin/AddSectionButton.tsx
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+
 const SECTION_TYPES = [
-  { type: 'pageHeader', label: 'Page Header', icon: Heading },
-  { type: 'slideshow', label: 'Slideshow', icon: Images },
-  { type: 'splitSection', label: 'Split Section', icon: Columns },
-  { type: 'uspSection', label: 'USPs', icon: Star },
-  { type: 'solutionsScroller', label: 'Solutions Scroller', icon: ScrollText },
-  { type: 'flexibleSection', label: 'Flexible Section', icon: LayoutGrid },
+  { type: 'pageHeader', label: 'Page Header' },
+  { type: 'slideshow', label: 'Slideshow' },
+  { type: 'splitSection', label: 'Split Section' },
+  { type: 'uspSection', label: 'USPs' },
+  { type: 'solutionsScroller', label: 'Solutions Scroller' },
+  { type: 'flexibleSection', label: 'Flexible Section' },
 ];
 
-function AddSectionButton({ onAdd }) {
+export function AddSectionButton({ onAdd }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline"><Plus /> Add Section</Button>
+        <Button variant="outline"><Plus className="h-4 w-4 mr-2" /> Sectie toevoegen</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {SECTION_TYPES.map(({ type, label, icon: Icon }) => (
-          <DropdownMenuItem key={type} onClick={() => onAdd(type)}>
-            <Icon className="h-4 w-4 mr-2" /> {label}
-          </DropdownMenuItem>
+        {SECTION_TYPES.map(({ type, label }) => (
+          <DropdownMenuItem key={type} onClick={() => onAdd(type)}>{label}</DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
@@ -594,218 +657,215 @@ function AddSectionButton({ onAdd }) {
 }
 ```
 
-### 5.3 Section Forms
+**Deliverable:** Sections can be added, reordered, deleted
 
-One form component per section type:
+---
 
-```
-src/components/admin/content/sections/
-├── PageHeaderForm.tsx
-├── SlideshowForm.tsx
-├── SplitSectionForm.tsx
-├── UspSectionForm.tsx
-├── SolutionsScrollerForm.tsx
-└── FlexibleSectionForm.tsx
-```
+## Phase 13: Simple Section Forms
+**Time: 2-3 hours**
 
-**Example - SolutionsScrollerForm (simplest):**
+Forms for the simpler sections:
+
+**SolutionsScrollerForm:**
 ```typescript
 export function SolutionsScrollerForm({ section, onChange }) {
   return (
     <div className="space-y-4">
-      <TextField
-        label="Heading"
-        value={section.heading || ''}
-        onChange={(heading) => onChange({ ...section, heading })}
-      />
-      <TextField
-        label="Subtitle"
-        value={section.subtitle || ''}
-        onChange={(subtitle) => onChange({ ...section, subtitle })}
-      />
+      <div>
+        <Label>Heading</Label>
+        <Input value={section.heading || ''} onChange={e => onChange({ ...section, heading: e.target.value })} />
+      </div>
+      <div>
+        <Label>Subtitle</Label>
+        <Input value={section.subtitle || ''} onChange={e => onChange({ ...section, subtitle: e.target.value })} />
+      </div>
     </div>
   );
 }
 ```
 
-**Example - PageHeaderForm (medium):**
-```typescript
-export function PageHeaderForm({ section, onChange }) {
-  return (
-    <div className="space-y-4">
-      <TextField
-        label="Title"
-        value={section.title || ''}
-        onChange={(title) => onChange({ ...section, title })}
-      />
-      <PortableTextField
-        label="Subtitle"
-        value={section.subtitle || []}
-        onChange={(subtitle) => onChange({ ...section, subtitle })}
-      />
-      <ToggleField
-        label="Show background"
-        checked={section.background || false}
-        onChange={(background) => onChange({ ...section, background })}
-      />
-      <ToggleField
-        label="Show image"
-        checked={section.showImage || false}
-        onChange={(showImage) => onChange({ ...section, showImage })}
-      />
-      <ToggleField
-        label="Show buttons"
-        checked={section.showButtons || false}
-        onChange={(showButtons) => onChange({ ...section, showButtons })}
-      />
-      {section.showButtons && (
-        <ButtonArrayField
-          value={section.buttons || []}
-          onChange={(buttons) => onChange({ ...section, buttons })}
-        />
-      )}
-    </div>
-  );
-}
-```
+**UspSectionForm:**
+- Heading input
+- Array of USPs (each: icon select, title, text, link)
+- Add/remove USP buttons
 
-**Effort:** 2-3 days for all section forms
+**SlideshowForm:**
+- Background toggle (Switch)
+- Images array (each: ImageUpload + caption input)
+- Add/remove/reorder images
 
-### 5.4 FlexibleSection Block Editor
-
-Same pattern - sortable list of blocks with per-block forms.
-
-```
-src/components/admin/content/blocks/
-├── TextBlockForm.tsx      # heading, headingLevel, content (PT), button
-├── ImageBlockForm.tsx     # image picker
-├── MapBlockForm.tsx       # no fields
-└── FormBlockForm.tsx      # title, subtitle
-```
-
-**Effort:** 1 day
+**Deliverable:** 3 section types editable
 
 ---
 
-## Phase 6: Polish & Cleanup
+## Phase 14: Complex Section Forms
+**Time: 3-4 hours**
 
-### 6.1 Remove Sanity Dependencies
+**PageHeaderForm:**
+- Title input
+- Subtitle (rich text - see Phase 15)
+- Background toggle
+- Show image toggle
+- Show buttons toggle
+- Buttons array (if enabled): label, url, icon select, variant select
 
+**SplitSectionForm:**
+- 2 items, each with: ImageUpload, title, subtitle, href, action config
+
+**Deliverable:** 5 of 6 section types editable
+
+---
+
+## Phase 15: Rich Text Editor
+**Time: 2-3 hours**
+
+Install:
+```bash
+pnpm add @portabletext/editor
+```
+
+Create wrapper:
+```typescript
+// src/components/admin/RichTextEditor.tsx
+'use client';
+import { PortableTextEditor } from '@portabletext/editor';
+import { Label } from '@/components/ui/label';
+
+export function RichTextEditor({ label, value, onChange }) {
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="border rounded-md p-2 min-h-[100px]">
+        <PortableTextEditor value={value || []} onChange={onChange} />
+      </div>
+    </div>
+  );
+}
+```
+
+Use in PageHeaderForm for subtitle, and FlexibleSection text blocks.
+
+**Deliverable:** Rich text editing works
+
+---
+
+## Phase 16: FlexibleSection Form
+**Time: 3-4 hours**
+
+The most complex section:
+- Layout selector (Select: 1-col, 2-col-equal, 2-col-left-wide, 2-col-right-wide)
+- Background toggle
+- Vertical align selector
+- Block arrays (based on layout):
+  - 1-col: blockMain
+  - 2-col: blockLeft + blockRight
+
+Block forms:
+- **flexTextBlock**: heading, headingLevel select, RichTextEditor, button config
+- **flexImageBlock**: ImageUpload
+- **flexMapBlock**: no fields needed
+- **flexFormBlock**: title, subtitle
+
+**Deliverable:** All 6 section types editable
+
+---
+
+## Phase 17: Admin Sidebar Update
+**Time: 30 minutes**
+
+Add content section to AdminSidebar:
+
+```typescript
+{
+  title: 'Content',
+  items: [
+    { title: 'Pagina\'s', href: '/admin/content/pages', icon: FileText },
+    { title: 'Realisaties', href: '/admin/content/solutions', icon: Images },
+    { title: 'Filters', href: '/admin/content/filters', icon: Filter },
+    { title: 'Navigatie', href: '/admin/content/navigation', icon: Menu },
+    { title: 'Instellingen', href: '/admin/content/settings', icon: Settings },
+  ],
+}
+```
+
+**Deliverable:** Content accessible from sidebar
+
+---
+
+## Phase 18: Cleanup
+**Time: 1-2 hours**
+
+Remove Sanity:
 ```bash
 pnpm remove @sanity/client @sanity/image-url next-sanity
 ```
 
 Delete:
 - `src/sanity/` directory
-- Any remaining GROQ queries
-- Sanity types that are no longer needed
+- `src/sanity/fragments.ts`
+- Sanity-specific types
 
-### 6.2 Update Types
+Update remaining references.
 
-```typescript
-// src/types/content.ts
-export interface Page {
-  id: string;
-  title: string;
-  slug: string;
-  header_image: ImageData | null;
-  sections: Section[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Solution {
-  id: string;
-  name: string;
-  subtitle: string | null;
-  slug: string;
-  header_image: ImageData | null;
-  sections: Section[];
-  filters: Filter[];
-  order_rank: number;
-}
-
-export interface ImageData {
-  url: string;
-  alt?: string;
-}
-
-// Section types stay similar, just with ImageData instead of SanityImage
-```
-
-### 6.3 Error Handling & Loading States
-
-- Add loading skeletons to lists
-- Toast notifications for save/delete
-- Validation before save
-- Confirm dialogs for delete
-
-### 6.4 Add to Sidebar
-
-Update `AdminSidebar.tsx` to include content section:
-
-```typescript
-{
-  title: 'Content',
-  items: [
-    { title: 'Pages', href: '/admin/content/pages', icon: FileText },
-    { title: 'Realisaties', href: '/admin/content/solutions', icon: Images },
-    { title: 'Filters', href: '/admin/content/filters', icon: Filter },
-    { title: 'Navigatie', href: '/admin/content/navigation', icon: Navigation },
-    { title: 'Instellingen', href: '/admin/content/settings', icon: Settings },
-  ],
-}
-```
-
-**Effort:** 1 day
+**Deliverable:** Sanity fully removed
 
 ---
 
 ## Summary
 
-### Total Effort by Phase
+### Phases Overview
 
-| Phase | Description | Effort |
-|-------|-------------|--------|
-| 1 | Foundation (DB, storage, base API) | 2-3 days |
-| 2 | Frontend data layer (replace Sanity) | 2-3 days |
-| 3 | Simple editors (filters, nav, params) | 2-3 days |
-| 4 | Content editors (pages, solutions basic) | 2-3 days |
-| 5 | Section builder | 3-4 days |
-| 6 | Polish & cleanup | 1-2 days |
+| # | Phase | Time |
+|---|-------|------|
+| 1 | Database schema | 2-3h |
+| 2 | Image storage | 1-2h |
+| 3 | Content data layer | 3-4h |
+| 4 | Update frontend pages | 2-3h |
+| 5 | Update image references | 1-2h |
+| 6 | Site parameters editor | 2-3h |
+| 7 | Filter categories editor | 3-4h |
+| 8 | Navigation editor | 3-4h |
+| 9 | Pages list view | 2-3h |
+| 10 | Page editor (basic) | 2-3h |
+| 11 | Solutions list & editor | 2-3h |
+| 12 | Section builder core | 3-4h |
+| 13 | Simple section forms | 2-3h |
+| 14 | Complex section forms | 3-4h |
+| 15 | Rich text editor | 2-3h |
+| 16 | FlexibleSection form | 3-4h |
+| 17 | Admin sidebar update | 30m |
+| 18 | Cleanup | 1-2h |
 
-**Total: 12-18 days of focused work (~3 weeks)**
+**Total: ~40-55 hours (~2-3 weeks)**
 
-### Dependencies to Add
+### Dependencies
 
 ```bash
-pnpm add @vercel/blob  # or cloudinary
-pnpm add @portabletext/editor
-pnpm add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
-```
+# Add
+pnpm add @vercel/blob @portabletext/editor @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
 
-### Dependencies to Remove (after migration)
-
-```bash
+# Remove (Phase 18)
 pnpm remove @sanity/client @sanity/image-url next-sanity
 ```
 
-### What You Get
+### What You're Reusing
 
-- ✅ Full control over your content
-- ✅ No external CMS dependency
-- ✅ Single admin panel for everything
-- ✅ Content stored in your database
-- ✅ Custom UI matching your admin style
-- ✅ No Sanity subscription costs
+- All shadcn components (Input, Button, Select, Switch, Dialog, Card, etc.)
+- Existing admin layout and sidebar
+- Existing auth (isAuthenticated)
+- Existing toast notifications (sonner)
+- Existing CRUD patterns from appointments/newsletters
+- Existing db.ts for Postgres queries
 
-### Recommended Order
+### Milestones
 
-1. **Phase 1** - Get database and storage working
-2. **Phase 2** - Update frontend to use new data layer (site keeps working)
-3. **Phase 3** - Build simple editors (start using them immediately)
-4. **Phase 4** - Build content list views and basic editors
-5. **Phase 5** - Add section builder
-6. **Phase 6** - Clean up, remove Sanity
+After completing these phases, you can start using the feature:
 
-You can start manually adding content via the admin as soon as Phase 3 is done for simple content, and Phase 5 for pages/solutions.
+| After Phase | What Works |
+|-------------|------------|
+| 5 | Site runs on Postgres (read-only) |
+| 6 | Site parameters editable |
+| 8 | Filters + navigation editable |
+| 11 | Pages + solutions basic editing |
+| 16 | Full page/section editing |
+| 18 | Sanity fully removed |
