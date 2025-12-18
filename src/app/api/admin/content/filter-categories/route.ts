@@ -17,7 +17,7 @@ export async function GET() {
         COALESCE(
           json_agg(
             json_build_object('id', f.id, 'name', f.name, 'slug', f.slug)
-            ORDER BY f.name
+            ORDER BY f.order_rank
           ) FILTER (WHERE f.id IS NOT NULL),
           '[]'
         ) as filters
