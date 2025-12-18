@@ -1,6 +1,3 @@
-// Database setup
-export { setupAppointmentTables, getAppointmentTablesSql } from "./db-setup";
-
 // Query functions
 export {
   // Settings
