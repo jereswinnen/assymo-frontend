@@ -6,7 +6,7 @@
 - [x] Phase 2: Image Storage Setup
 - [x] Phase 3: Content Data Layer
 - [x] Phase 4: Admin Sidebar Update
-- [ ] Phase 5: Site Parameters Editor
+- [x] Phase 5: Site Parameters Editor
 - [ ] Phase 6: Filter Categories Editor
 - [ ] Phase 7: Navigation Editor
 - [ ] Phase 8: Pages List View
@@ -319,7 +319,7 @@ const contentItems = [
   { href: '/admin/content/media', label: 'Media', icon: FolderOpenIcon },
   { href: '/admin/content/filters', label: 'Filters', icon: FilterIcon },
   { href: '/admin/content/navigation', label: 'Navigatie', icon: MenuIcon },
-  { href: '/admin/content/settings', label: 'Site Instellingen', icon: SlidersHorizontalIcon },
+  { href: '/admin/content/parameters', label: 'Parameters', icon: ChevronsLeftRightEllipsisIcon },
 ];
 ```
 
@@ -328,7 +328,7 @@ const contentItems = [
 ---
 
 ## Phase 5: Site Parameters Editor
-- [ ] Complete
+- [x] Complete
 
 **Time: 2-3 hours**
 
@@ -358,7 +358,7 @@ export async function PUT(req: Request) {
 
 Admin page (using existing shadcn components):
 ```typescript
-// src/app/admin/content/settings/page.tsx
+// src/app/admin/content/parameters/page.tsx
 'use client';
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';

@@ -54,7 +54,7 @@ const contentItems = [
   { href: "/admin/content/filters", label: "Filters", icon: ToggleRightIcon },
   { href: "/admin/content/navigation", label: "Navigatie", icon: MenuIcon },
   {
-    href: "/admin/content/settings",
+    href: "/admin/content/parameters",
     label: "Parameters",
     icon: ChevronsLeftRightEllipsisIcon,
   },
