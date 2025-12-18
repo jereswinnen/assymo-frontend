@@ -79,7 +79,7 @@ export default function MediaPage() {
     if (!files || files.length === 0) return;
 
     setUploading(true);
-    let successCount = 0;
+    const uploadedBlobs: BlobItem[] = [];
     let errorCount = 0;
 
     for (const file of Array.from(files)) {
@@ -105,7 +105,14 @@ export default function MediaPage() {
         });
 
         if (response.ok) {
-          successCount++;
+          const { url, filename } = await response.json();
+          // Add to uploaded list with file info
+          uploadedBlobs.push({
+            url,
+            pathname: filename,
+            size: file.size,
+            uploadedAt: new Date().toISOString(),
+          });
         } else {
           errorCount++;
         }
@@ -118,12 +125,12 @@ export default function MediaPage() {
     e.target.value = "";
     setUploading(false);
 
-    // Show results
-    if (successCount > 0) {
+    // Add uploaded blobs to state (newest first)
+    if (uploadedBlobs.length > 0) {
+      setBlobs((prev) => [...uploadedBlobs, ...prev]);
       toast.success(
-        `${successCount} afbeelding${successCount > 1 ? "en" : ""} geupload`
+        `${uploadedBlobs.length} afbeelding${uploadedBlobs.length > 1 ? "en" : ""} geupload`
       );
-      fetchMedia();
     }
     if (errorCount > 0) {
       toast.error(
