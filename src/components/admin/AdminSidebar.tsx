@@ -4,10 +4,16 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarDaysIcon,
+  FileTextIcon,
+  FilterIcon,
+  FolderOpenIcon,
+  ImageIcon,
   LogOutIcon,
   MailboxIcon,
+  MenuIcon,
   MessagesSquareIcon,
   SettingsIcon,
+  SlidersHorizontalIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
@@ -18,6 +24,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -34,6 +41,19 @@ const navItems = [
     icon: MessagesSquareIcon,
   },
   { href: "/admin/settings", label: "Instellingen", icon: SettingsIcon },
+];
+
+const contentItems = [
+  { href: "/admin/content/pages", label: "Pagina's", icon: FileTextIcon },
+  { href: "/admin/content/solutions", label: "Realisaties", icon: ImageIcon },
+  { href: "/admin/content/media", label: "Media", icon: FolderOpenIcon },
+  { href: "/admin/content/filters", label: "Filters", icon: FilterIcon },
+  { href: "/admin/content/navigation", label: "Navigatie", icon: MenuIcon },
+  {
+    href: "/admin/content/settings",
+    label: "Site Instellingen",
+    icon: SlidersHorizontalIcon,
+  },
 ];
 
 export function AdminSidebar({
@@ -64,6 +84,32 @@ export function AdminSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
+                const isActive =
+                  pathname === item.href ||
+                  pathname.startsWith(item.href + "/");
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.label}
+                    >
+                      <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Content</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {contentItems.map((item) => {
                 const isActive =
                   pathname === item.href ||
                   pathname.startsWith(item.href + "/");

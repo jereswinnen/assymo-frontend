@@ -5,21 +5,22 @@
 - [x] Phase 1: Database Schema
 - [x] Phase 2: Image Storage Setup
 - [x] Phase 3: Content Data Layer
-- [ ] Phase 4: Admin Sidebar Update
+- [x] Phase 4: Admin Sidebar Update
 - [ ] Phase 5: Site Parameters Editor
 - [ ] Phase 6: Filter Categories Editor
 - [ ] Phase 7: Navigation Editor
 - [ ] Phase 8: Pages List View
 - [ ] Phase 9: Page Editor (Basic Fields)
-- [ ] Phase 10: Solutions List & Basic Editor
-- [ ] Phase 11: Section Builder Core
-- [ ] Phase 12: Simple Section Forms
-- [ ] Phase 13: Complex Section Forms
-- [ ] Phase 14: Rich Text Editor
-- [ ] Phase 15: FlexibleSection Form
-- [ ] Phase 16: Update Frontend Pages
-- [ ] Phase 17: Update Image References
-- [ ] Phase 18: Cleanup
+- [ ] Phase 10: Media Browser
+- [ ] Phase 11: Solutions List & Basic Editor
+- [ ] Phase 12: Section Builder Core
+- [ ] Phase 13: Simple Section Forms
+- [ ] Phase 14: Complex Section Forms
+- [ ] Phase 15: Rich Text Editor
+- [ ] Phase 16: FlexibleSection Form
+- [ ] Phase 17: Update Frontend Pages
+- [ ] Phase 18: Update Image References
+- [ ] Phase 19: Cleanup
 
 ---
 
@@ -305,23 +306,21 @@ export async function getSiteParameters() {
 ---
 
 ## Phase 4: Admin Sidebar Update
-- [ ] Complete
+- [x] Complete
 
 **Time: 30 minutes**
 
 Add content section to AdminSidebar:
 
 ```typescript
-{
-  title: 'Content',
-  items: [
-    { title: 'Pagina\'s', href: '/admin/content/pages', icon: FileText },
-    { title: 'Realisaties', href: '/admin/content/solutions', icon: Images },
-    { title: 'Filters', href: '/admin/content/filters', icon: Filter },
-    { title: 'Navigatie', href: '/admin/content/navigation', icon: Menu },
-    { title: 'Instellingen', href: '/admin/content/settings', icon: Settings },
-  ],
-}
+const contentItems = [
+  { href: '/admin/content/pages', label: "Pagina's", icon: FileTextIcon },
+  { href: '/admin/content/solutions', label: 'Realisaties', icon: ImageIcon },
+  { href: '/admin/content/media', label: 'Media', icon: FolderOpenIcon },
+  { href: '/admin/content/filters', label: 'Filters', icon: FilterIcon },
+  { href: '/admin/content/navigation', label: 'Navigatie', icon: MenuIcon },
+  { href: '/admin/content/settings', label: 'Site Instellingen', icon: SlidersHorizontalIcon },
+];
 ```
 
 **Deliverable:** Content accessible from sidebar
@@ -566,7 +565,41 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
 
 ---
 
-## Phase 10: Solutions List & Basic Editor
+## Phase 10: Media Browser
+- [ ] Complete
+
+**Time: 2-3 hours**
+
+API route to list all blobs:
+```typescript
+// src/app/api/admin/content/media/route.ts
+import { list } from '@vercel/blob';
+import { isAuthenticated } from '@/lib/auth-utils';
+
+export async function GET() {
+  if (!await isAuthenticated()) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { blobs } = await list();
+  return Response.json(blobs);
+}
+```
+
+Admin page at `/admin/content/media/page.tsx`:
+- Grid view of all uploaded images with thumbnails
+- Click to copy URL to clipboard
+- Delete button on each image
+- Upload new image button
+- Search/filter by filename
+
+Use existing shadcn: `Card`, `Button`, `Dialog` (for delete confirmation)
+
+**Deliverable:** Browse, upload, and delete media files
+
+---
+
+## Phase 11: Solutions List & Basic Editor
 - [ ] Complete
 
 **Time: 2-3 hours**
@@ -580,7 +613,7 @@ Same pattern as pages, plus:
 
 ---
 
-## Phase 11: Section Builder Core
+## Phase 12: Section Builder Core
 - [ ] Complete
 
 **Time: 3-4 hours**
@@ -681,7 +714,7 @@ export function AddSectionButton({ onAdd }) {
 
 ---
 
-## Phase 12: Simple Section Forms
+## Phase 13: Simple Section Forms
 - [ ] Complete
 
 **Time: 2-3 hours**
@@ -720,14 +753,14 @@ export function SolutionsScrollerForm({ section, onChange }) {
 
 ---
 
-## Phase 13: Complex Section Forms
+## Phase 14: Complex Section Forms
 - [ ] Complete
 
 **Time: 3-4 hours**
 
 **PageHeaderForm:**
 - Title input
-- Subtitle (rich text - see Phase 14)
+- Subtitle (rich text - see Phase 15)
 - Background toggle
 - Show image toggle
 - Show buttons toggle
@@ -740,7 +773,7 @@ export function SolutionsScrollerForm({ section, onChange }) {
 
 ---
 
-## Phase 14: Rich Text Editor
+## Phase 15: Rich Text Editor
 - [ ] Complete
 
 **Time: 2-3 hours**
@@ -775,7 +808,7 @@ Use in PageHeaderForm for subtitle, and FlexibleSection text blocks.
 
 ---
 
-## Phase 15: FlexibleSection Form
+## Phase 16: FlexibleSection Form
 - [ ] Complete
 
 **Time: 3-4 hours**
@@ -798,7 +831,7 @@ Block forms:
 
 ---
 
-## Phase 16: Update Frontend Pages
+## Phase 17: Update Frontend Pages
 - [ ] Complete
 
 **Time: 2-3 hours**
@@ -820,7 +853,7 @@ Replace Sanity fetches with new data layer:
 
 ---
 
-## Phase 17: Update Image References
+## Phase 18: Update Image References
 - [ ] Complete
 
 **Time: 1-2 hours**
@@ -849,7 +882,7 @@ Files to update:
 
 ---
 
-## Phase 18: Cleanup
+## Phase 19: Cleanup
 - [ ] Complete
 
 **Time: 1-2 hours**
@@ -885,17 +918,18 @@ Update remaining references.
 | 7 | Navigation editor | 3-4h |
 | 8 | Pages list view | 2-3h |
 | 9 | Page editor (basic) | 2-3h |
-| 10 | Solutions list & editor | 2-3h |
-| 11 | Section builder core | 3-4h |
-| 12 | Simple section forms | 2-3h |
-| 13 | Complex section forms | 3-4h |
-| 14 | Rich text editor | 2-3h |
-| 15 | FlexibleSection form | 3-4h |
-| 16 | Update frontend pages | 2-3h |
-| 17 | Update image references | 1-2h |
-| 18 | Cleanup | 1-2h |
+| 10 | Media browser | 2-3h |
+| 11 | Solutions list & editor | 2-3h |
+| 12 | Section builder core | 3-4h |
+| 13 | Simple section forms | 2-3h |
+| 14 | Complex section forms | 3-4h |
+| 15 | Rich text editor | 2-3h |
+| 16 | FlexibleSection form | 3-4h |
+| 17 | Update frontend pages | 2-3h |
+| 18 | Update image references | 1-2h |
+| 19 | Cleanup | 1-2h |
 
-**Total: ~40-55 hours (~2-3 weeks)**
+**Total: ~45-60 hours (~3 weeks)**
 
 ### Dependencies
 
@@ -903,7 +937,7 @@ Update remaining references.
 # Add
 pnpm add @vercel/blob @portabletext/editor @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
 
-# Remove (Phase 18)
+# Remove (Phase 19)
 pnpm remove @sanity/client @sanity/image-url next-sanity
 ```
 
@@ -925,7 +959,8 @@ After completing these phases, you can start using the feature:
 | 4 | Content section visible in admin sidebar |
 | 5 | Site parameters editable |
 | 7 | Filters + navigation editable |
-| 10 | Pages + solutions basic editing |
-| 15 | Full page/section editing |
-| 17 | Site runs on Postgres (frontend switched) |
-| 18 | Sanity fully removed |
+| 10 | Media browser for uploaded images |
+| 11 | Pages + solutions basic editing |
+| 16 | Full page/section editing |
+| 18 | Site runs on Postgres (frontend switched) |
+| 19 | Sanity fully removed |
