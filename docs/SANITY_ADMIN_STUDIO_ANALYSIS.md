@@ -4,21 +4,21 @@
 
 - [x] Phase 1: Database Schema
 - [x] Phase 2: Image Storage Setup
-- [ ] Phase 3: Content Data Layer
-- [ ] Phase 4: Update Frontend Pages
-- [ ] Phase 5: Update Image References
-- [ ] Phase 6: Site Parameters Editor
-- [ ] Phase 7: Filter Categories Editor
-- [ ] Phase 8: Navigation Editor
-- [ ] Phase 9: Pages List View
-- [ ] Phase 10: Page Editor (Basic Fields)
-- [ ] Phase 11: Solutions List & Basic Editor
-- [ ] Phase 12: Section Builder Core
-- [ ] Phase 13: Simple Section Forms
-- [ ] Phase 14: Complex Section Forms
-- [ ] Phase 15: Rich Text Editor
-- [ ] Phase 16: FlexibleSection Form
-- [ ] Phase 17: Admin Sidebar Update
+- [x] Phase 3: Content Data Layer
+- [ ] Phase 4: Admin Sidebar Update
+- [ ] Phase 5: Site Parameters Editor
+- [ ] Phase 6: Filter Categories Editor
+- [ ] Phase 7: Navigation Editor
+- [ ] Phase 8: Pages List View
+- [ ] Phase 9: Page Editor (Basic Fields)
+- [ ] Phase 10: Solutions List & Basic Editor
+- [ ] Phase 11: Section Builder Core
+- [ ] Phase 12: Simple Section Forms
+- [ ] Phase 13: Complex Section Forms
+- [ ] Phase 14: Rich Text Editor
+- [ ] Phase 15: FlexibleSection Form
+- [ ] Phase 16: Update Frontend Pages
+- [ ] Phase 17: Update Image References
 - [ ] Phase 18: Cleanup
 
 ---
@@ -205,7 +205,7 @@ Add `BLOB_READ_WRITE_TOKEN` to env vars (from Vercel dashboard).
 ---
 
 ## Phase 3: Content Data Layer
-- [ ] Complete
+- [x] Complete
 
 **Time: 3-4 hours**
 
@@ -304,58 +304,31 @@ export async function getSiteParameters() {
 
 ---
 
-## Phase 4: Update Frontend Pages
+## Phase 4: Admin Sidebar Update
 - [ ] Complete
 
-**Time: 2-3 hours**
+**Time: 30 minutes**
 
-Replace Sanity fetches with new data layer:
+Add content section to AdminSidebar:
 
-| File | Change |
-|------|--------|
-| `src/app/(site)/page.tsx` | `getPageBySlug('home')` |
-| `src/app/(site)/contact/page.tsx` | `getPageBySlug('contact')` |
-| `src/app/(site)/over-ons/page.tsx` | `getPageBySlug('over-ons')` |
-| `src/app/(site)/afspraak/page.tsx` | `getPageBySlug('afspraak')` |
-| `src/app/(site)/realisaties/page.tsx` | `getAllSolutions()` + `getFilterCategories()` |
-| `src/app/(site)/realisaties/[slug]/page.tsx` | `getSolutionBySlug(slug)` |
-| `src/components/layout/Header.tsx` | `getNavigation('header')` |
-| `src/components/layout/Footer.tsx` | `getNavigation('footer')` + `getSiteParameters()` |
+```typescript
+{
+  title: 'Content',
+  items: [
+    { title: 'Pagina\'s', href: '/admin/content/pages', icon: FileText },
+    { title: 'Realisaties', href: '/admin/content/solutions', icon: Images },
+    { title: 'Filters', href: '/admin/content/filters', icon: Filter },
+    { title: 'Navigatie', href: '/admin/content/navigation', icon: Menu },
+    { title: 'Instellingen', href: '/admin/content/settings', icon: Settings },
+  ],
+}
+```
 
-**Deliverable:** Site reads from Postgres
+**Deliverable:** Content accessible from sidebar
 
 ---
 
-## Phase 5: Update Image References
-- [ ] Complete
-
-**Time: 1-2 hours**
-
-Replace `urlFor(image)` with direct URLs in all components:
-
-**Before:**
-```tsx
-import { urlFor } from '@/sanity/imageUrl';
-<img src={urlFor(image).width(800).url()} />
-```
-
-**After:**
-```tsx
-<Image src={image.url} width={800} height={600} alt={image.alt || ''} />
-```
-
-Files to update:
-- `src/components/sections/Slideshow.tsx`
-- `src/components/sections/PageHeader.tsx`
-- `src/components/sections/SplitSection.tsx`
-- `src/components/sections/SolutionsScrollerClient.tsx`
-- `src/components/sections/FlexibleSection/blocks/ImageBlock.tsx`
-
-**Deliverable:** All images use direct URLs
-
----
-
-## Phase 6: Site Parameters Editor
+## Phase 5: Site Parameters Editor
 - [ ] Complete
 
 **Time: 2-3 hours**
@@ -456,7 +429,7 @@ export default function SiteSettingsPage() {
 
 ---
 
-## Phase 7: Filter Categories Editor
+## Phase 6: Filter Categories Editor
 - [ ] Complete
 
 **Time: 3-4 hours**
@@ -475,7 +448,7 @@ Use existing shadcn: `Card`, `Button`, `Input`, `Dialog`
 
 ---
 
-## Phase 8: Navigation Editor
+## Phase 7: Navigation Editor
 - [ ] Complete
 
 **Time: 3-4 hours**
@@ -492,7 +465,7 @@ Admin page with:
 
 ---
 
-## Phase 9: Pages List View
+## Phase 8: Pages List View
 - [ ] Complete
 
 **Time: 2-3 hours**
@@ -518,7 +491,7 @@ Admin page:
 
 ---
 
-## Phase 10: Page Editor (Basic Fields)
+## Phase 9: Page Editor (Basic Fields)
 - [ ] Complete
 
 **Time: 2-3 hours**
@@ -593,7 +566,7 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
 
 ---
 
-## Phase 11: Solutions List & Basic Editor
+## Phase 10: Solutions List & Basic Editor
 - [ ] Complete
 
 **Time: 2-3 hours**
@@ -607,7 +580,7 @@ Same pattern as pages, plus:
 
 ---
 
-## Phase 12: Section Builder Core
+## Phase 11: Section Builder Core
 - [ ] Complete
 
 **Time: 3-4 hours**
@@ -708,7 +681,7 @@ export function AddSectionButton({ onAdd }) {
 
 ---
 
-## Phase 13: Simple Section Forms
+## Phase 12: Simple Section Forms
 - [ ] Complete
 
 **Time: 2-3 hours**
@@ -747,14 +720,14 @@ export function SolutionsScrollerForm({ section, onChange }) {
 
 ---
 
-## Phase 14: Complex Section Forms
+## Phase 13: Complex Section Forms
 - [ ] Complete
 
 **Time: 3-4 hours**
 
 **PageHeaderForm:**
 - Title input
-- Subtitle (rich text - see Phase 15)
+- Subtitle (rich text - see Phase 14)
 - Background toggle
 - Show image toggle
 - Show buttons toggle
@@ -767,7 +740,7 @@ export function SolutionsScrollerForm({ section, onChange }) {
 
 ---
 
-## Phase 15: Rich Text Editor
+## Phase 14: Rich Text Editor
 - [ ] Complete
 
 **Time: 2-3 hours**
@@ -802,7 +775,7 @@ Use in PageHeaderForm for subtitle, and FlexibleSection text blocks.
 
 ---
 
-## Phase 16: FlexibleSection Form
+## Phase 15: FlexibleSection Form
 - [ ] Complete
 
 **Time: 3-4 hours**
@@ -825,27 +798,54 @@ Block forms:
 
 ---
 
-## Phase 17: Admin Sidebar Update
+## Phase 16: Update Frontend Pages
 - [ ] Complete
 
-**Time: 30 minutes**
+**Time: 2-3 hours**
 
-Add content section to AdminSidebar:
+Replace Sanity fetches with new data layer:
 
-```typescript
-{
-  title: 'Content',
-  items: [
-    { title: 'Pagina\'s', href: '/admin/content/pages', icon: FileText },
-    { title: 'Realisaties', href: '/admin/content/solutions', icon: Images },
-    { title: 'Filters', href: '/admin/content/filters', icon: Filter },
-    { title: 'Navigatie', href: '/admin/content/navigation', icon: Menu },
-    { title: 'Instellingen', href: '/admin/content/settings', icon: Settings },
-  ],
-}
+| File | Change |
+|------|--------|
+| `src/app/(site)/page.tsx` | `getPageBySlug('home')` |
+| `src/app/(site)/contact/page.tsx` | `getPageBySlug('contact')` |
+| `src/app/(site)/over-ons/page.tsx` | `getPageBySlug('over-ons')` |
+| `src/app/(site)/afspraak/page.tsx` | `getPageBySlug('afspraak')` |
+| `src/app/(site)/realisaties/page.tsx` | `getAllSolutions()` + `getFilterCategories()` |
+| `src/app/(site)/realisaties/[slug]/page.tsx` | `getSolutionBySlug(slug)` |
+| `src/components/layout/Header.tsx` | `getNavigation('header')` |
+| `src/components/layout/Footer.tsx` | `getNavigation('footer')` + `getSiteParameters()` |
+
+**Deliverable:** Site reads from Postgres
+
+---
+
+## Phase 17: Update Image References
+- [ ] Complete
+
+**Time: 1-2 hours**
+
+Replace `urlFor(image)` with direct URLs in all components:
+
+**Before:**
+```tsx
+import { urlFor } from '@/sanity/imageUrl';
+<img src={urlFor(image).width(800).url()} />
 ```
 
-**Deliverable:** Content accessible from sidebar
+**After:**
+```tsx
+<Image src={image.url} width={800} height={600} alt={image.alt || ''} />
+```
+
+Files to update:
+- `src/components/sections/Slideshow.tsx`
+- `src/components/sections/PageHeader.tsx`
+- `src/components/sections/SplitSection.tsx`
+- `src/components/sections/SolutionsScrollerClient.tsx`
+- `src/components/sections/FlexibleSection/blocks/ImageBlock.tsx`
+
+**Deliverable:** All images use direct URLs
 
 ---
 
@@ -879,20 +879,20 @@ Update remaining references.
 | 1 | Database schema | 2-3h |
 | 2 | Image storage | 1-2h |
 | 3 | Content data layer | 3-4h |
-| 4 | Update frontend pages | 2-3h |
-| 5 | Update image references | 1-2h |
-| 6 | Site parameters editor | 2-3h |
-| 7 | Filter categories editor | 3-4h |
-| 8 | Navigation editor | 3-4h |
-| 9 | Pages list view | 2-3h |
-| 10 | Page editor (basic) | 2-3h |
-| 11 | Solutions list & editor | 2-3h |
-| 12 | Section builder core | 3-4h |
-| 13 | Simple section forms | 2-3h |
-| 14 | Complex section forms | 3-4h |
-| 15 | Rich text editor | 2-3h |
-| 16 | FlexibleSection form | 3-4h |
-| 17 | Admin sidebar update | 30m |
+| 4 | Admin sidebar update | 30m |
+| 5 | Site parameters editor | 2-3h |
+| 6 | Filter categories editor | 3-4h |
+| 7 | Navigation editor | 3-4h |
+| 8 | Pages list view | 2-3h |
+| 9 | Page editor (basic) | 2-3h |
+| 10 | Solutions list & editor | 2-3h |
+| 11 | Section builder core | 3-4h |
+| 12 | Simple section forms | 2-3h |
+| 13 | Complex section forms | 3-4h |
+| 14 | Rich text editor | 2-3h |
+| 15 | FlexibleSection form | 3-4h |
+| 16 | Update frontend pages | 2-3h |
+| 17 | Update image references | 1-2h |
 | 18 | Cleanup | 1-2h |
 
 **Total: ~40-55 hours (~2-3 weeks)**
@@ -922,9 +922,10 @@ After completing these phases, you can start using the feature:
 
 | After Phase | What Works |
 |-------------|------------|
-| 5 | Site runs on Postgres (read-only) |
-| 6 | Site parameters editable |
-| 8 | Filters + navigation editable |
-| 11 | Pages + solutions basic editing |
-| 16 | Full page/section editing |
+| 4 | Content section visible in admin sidebar |
+| 5 | Site parameters editable |
+| 7 | Filters + navigation editable |
+| 10 | Pages + solutions basic editing |
+| 15 | Full page/section editing |
+| 17 | Site runs on Postgres (frontend switched) |
 | 18 | Sanity fully removed |
