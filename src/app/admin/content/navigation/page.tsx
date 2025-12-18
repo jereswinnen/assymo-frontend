@@ -22,7 +22,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -301,7 +300,6 @@ function SortableSubitem({
 }
 
 export default function NavigationPage() {
-  const [location, setLocation] = useState<"header" | "footer">("header");
   const [links, setLinks] = useState<NavigationLink[]>([]);
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -330,11 +328,8 @@ export default function NavigationPage() {
 
   useEffect(() => {
     fetchSolutions();
-  }, []);
-
-  useEffect(() => {
     fetchLinks();
-  }, [location]);
+  }, []);
 
   const fetchSolutions = async () => {
     try {
@@ -350,9 +345,7 @@ export default function NavigationPage() {
   const fetchLinks = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `/api/admin/content/navigation?location=${location}`
-      );
+      const response = await fetch("/api/admin/content/navigation?location=header");
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setLinks(data);
@@ -411,7 +404,7 @@ export default function NavigationPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            location,
+            location: "header",
             title: linkTitle,
             slug,
             submenu_heading: linkSubmenuHeading || null,
@@ -537,117 +530,62 @@ export default function NavigationPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Navigatie</h1>
-        <p className="text-sm text-muted-foreground">
-          Beheer header en footer navigatie links
-        </p>
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Navigatie</h1>
+          <p className="text-sm text-muted-foreground">
+            Beheer de hoofdnavigatie van de website
+          </p>
+        </div>
+        <Button size="sm" onClick={openNewLinkDialog}>
+          <PlusIcon className="size-4" />
+          Nieuwe link
+        </Button>
       </header>
 
-      <Tabs value={location} onValueChange={(v) => setLocation(v as "header" | "footer")}>
-        <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="header">Header</TabsTrigger>
-            <TabsTrigger value="footer">Footer</TabsTrigger>
-          </TabsList>
-          <Button size="sm" onClick={openNewLinkDialog}>
-            <PlusIcon className="size-4" />
-            Nieuwe link
-          </Button>
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
         </div>
-
-        <TabsContent value="header" className="mt-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : links.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">
-              Nog geen header links
-            </p>
-          ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleLinkDragEnd}
-            >
-              <SortableContext
-                items={links.map((l) => l.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                {links.map((link) => (
-                  <SortableLinkItem
-                    key={link.id}
-                    link={link}
-                    isExpanded={expandedLinkId === link.id}
-                    onToggleExpand={() =>
-                      setExpandedLinkId(expandedLinkId === link.id ? null : link.id)
-                    }
-                    onEdit={() => openEditLinkDialog(link)}
-                    onDelete={() =>
-                      setDeleteTarget({ id: link.id, title: link.title })
-                    }
-                    onAddSubitem={(solutionId) =>
-                      handleAddSubitem(link.id, solutionId)
-                    }
-                    onDeleteSubitem={handleDeleteSubitem}
-                    onReorderSubitems={(orderedIds) =>
-                      handleReorderSubitems(link.id, orderedIds)
-                    }
-                    solutions={solutions}
-                  />
-                ))}
-              </SortableContext>
-            </DndContext>
-          )}
-        </TabsContent>
-
-        <TabsContent value="footer" className="mt-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : links.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">
-              Nog geen footer links
-            </p>
-          ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleLinkDragEnd}
-            >
-              <SortableContext
-                items={links.map((l) => l.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                {links.map((link) => (
-                  <SortableLinkItem
-                    key={link.id}
-                    link={link}
-                    isExpanded={expandedLinkId === link.id}
-                    onToggleExpand={() =>
-                      setExpandedLinkId(expandedLinkId === link.id ? null : link.id)
-                    }
-                    onEdit={() => openEditLinkDialog(link)}
-                    onDelete={() =>
-                      setDeleteTarget({ id: link.id, title: link.title })
-                    }
-                    onAddSubitem={(solutionId) =>
-                      handleAddSubitem(link.id, solutionId)
-                    }
-                    onDeleteSubitem={handleDeleteSubitem}
-                    onReorderSubitems={(orderedIds) =>
-                      handleReorderSubitems(link.id, orderedIds)
-                    }
-                    solutions={solutions}
-                  />
-                ))}
-              </SortableContext>
-            </DndContext>
-          )}
-        </TabsContent>
-      </Tabs>
+      ) : links.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-8 text-center">
+          Nog geen navigatie links
+        </p>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleLinkDragEnd}
+        >
+          <SortableContext
+            items={links.map((l) => l.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {links.map((link) => (
+              <SortableLinkItem
+                key={link.id}
+                link={link}
+                isExpanded={expandedLinkId === link.id}
+                onToggleExpand={() =>
+                  setExpandedLinkId(expandedLinkId === link.id ? null : link.id)
+                }
+                onEdit={() => openEditLinkDialog(link)}
+                onDelete={() =>
+                  setDeleteTarget({ id: link.id, title: link.title })
+                }
+                onAddSubitem={(solutionId) =>
+                  handleAddSubitem(link.id, solutionId)
+                }
+                onDeleteSubitem={handleDeleteSubitem}
+                onReorderSubitems={(orderedIds) =>
+                  handleReorderSubitems(link.id, orderedIds)
+                }
+                solutions={solutions}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
+      )}
 
       {/* Link Dialog */}
       <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
