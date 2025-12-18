@@ -2,532 +2,332 @@
 
 ## Executive Summary
 
-Building a custom content studio within the admin panel to replace/supplement Sanity Studio is a **moderate-to-significant undertaking**. While the existing admin architecture provides a solid foundation, the complexity lies primarily in:
+Building a custom content studio within the admin panel is **very doable**. The key insight is that we're not building anything from scratch:
 
-1. **Portable Text editing** (rich text) - requires implementing a full WYSIWYG editor
-2. **Image management** - needs upload/crop/hotspot functionality
-3. **Page section builder** - drag-and-drop interface for composing pages
-4. **Sanity API integration** - mutations, references, and asset uploads
+- **Portable Text** → `@portabletext/editor` handles this natively
+- **Drag-and-drop** → `@dnd-kit/core` is straightforward
+- **Image uploads** → Sanity's asset API is simple
+- **API layer** → You already have CRUD patterns from appointments/newsletters
 
-**Estimated complexity**: 🟡 Medium-High
+The work is essentially: **install packages, build forms, wire up APIs**.
 
----
-
-## Current Architecture Overview
-
-### Content Types in Sanity
-
-| Type | Purpose | Complexity to Edit |
-|------|---------|-------------------|
-| `page` | Site pages (home, contact, etc.) | High - has sections array |
-| `solution` | "Realisaties" (realizations/projects) | High - sections + filters |
-| `filter` | Solution filter tags | Low - simple fields |
-| `filterCategory` | Groups of filters | Low - simple fields |
-| `filterOption` | Filter option values | Low - simple fields |
-| `navigation` | Header/footer nav | Medium - nested links |
-| `siteParameters` | Global settings | Low - simple fields |
-
-### Section Types (for page builder)
-
-| Section Type | Fields | Complexity |
-|--------------|--------|------------|
-| `pageHeader` | title, subtitle (PT), buttons | Medium |
-| `slideshow` | images array with captions | Medium |
-| `splitSection` | 2 items with images, titles | Medium |
-| `uspSection` | heading, USPs array | Medium |
-| `solutionsScroller` | heading, subtitle | Low |
-| `flexibleSection` | layout, 3 block arrays | High |
-
-### FlexibleSection Block Types
-
-| Block Type | Fields | Complexity |
-|------------|--------|------------|
-| `flexTextBlock` | heading, content (PT), button | Medium |
-| `flexImageBlock` | image | Low |
-| `flexMapBlock` | none | Low |
-| `flexFormBlock` | title, subtitle | Low |
+**Estimated complexity**: 🟢 Medium
 
 ---
 
-## What Needs to Be Built
+## What You Already Have
 
-### 1. Core Admin Infrastructure
+Your existing admin panel provides 80% of the infrastructure:
 
-**Already exists:**
-- Authentication (Better Auth with 2FA/passkeys)
-- Admin layout with sidebar
-- API route patterns
-- CRUD patterns (appointments, newsletters)
-- UI component library (Radix UI)
-
-**Needs to be added:**
-- Sanity mutation API integration
-- Image upload service
-- Content type registry
-- Form generation system
-
-### 2. Content Editors by Type
-
-#### Simple Content Types (Low effort)
-- **filter** - name, slug
-- **filterCategory** - name, slug, orderRank
-- **filterOption** - name, slug
-- **siteParameters** - address, phone, email, social URLs
-
-These are straightforward forms with text inputs.
-
-#### Medium Content Types
-- **navigation** - requires nested item management, references to solutions
-
-#### Complex Content Types (High effort)
-- **page** - requires full section builder
-- **solution** - requires section builder + filter picker
-
-### 3. Rich Text Editor (Portable Text)
-
-**The Challenge:**
-Sanity uses Portable Text, a JSON-based rich text format. You'll need a WYSIWYG editor that outputs this format.
-
-**Options:**
-1. **Sanity UI + Portable Text Editor** - Sanity's own editor as a standalone package
-   - Pros: Native PT output, feature-complete
-   - Cons: Requires Sanity dependencies
-
-2. **TipTap/ProseMirror** - Popular rich text framework
-   - Pros: Highly customizable, great React support
-   - Cons: Requires custom PT serialization
-
-3. **Plate** - Pluggable rich text editor built on Slate
-   - Pros: Modern, composable
-   - Cons: Complex setup
-
-**Recommendation:** TipTap with custom Portable Text serializer
-
-**Estimated effort:** 3-5 days for basic implementation
-
-### 4. Image Management
-
-**Requirements:**
-- Upload images to Sanity's asset pipeline
-- Crop/hotspot selection
-- Alt text editing
-- Image library browser
-
-**Sanity Upload API:**
-```typescript
-// Upload requires Sanity client with write token
-const asset = await client.assets.upload('image', file, {
-  filename: file.name
-});
-// Returns: { _id: 'image-xxx', url: '...' }
-```
-
-**Hotspot/Crop UI:**
-Need to build an image editor with:
-- Click-to-place hotspot
-- Crop rectangle drawing
-- Preview at different aspect ratios
-
-**Estimated effort:** 2-3 days
-
-### 5. Page Section Builder
-
-**The Challenge:**
-The current SectionRenderer supports 6 section types, each with different field structures. A visual builder needs:
-
-1. **Section palette** - list of available section types
-2. **Section list** - current sections with reorder
-3. **Section editor** - form for each section type
-4. **Preview** - live preview of the page
-
-**Architecture:**
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  Page Editor                                            │
-├──────────────┬─────────────────────┬───────────────────┤
-│  Section     │  Section Editor     │  Live Preview     │
-│  Palette     │  (form for active   │  (iframe or       │
-│              │   section)          │   component)      │
-│  + Header    │                     │                   │
-│  + Slideshow │  ┌───────────────┐  │  ┌─────────────┐  │
-│  + Split     │  │ Title: [____] │  │  │             │  │
-│  + USPs      │  │ Subtitle: [PT]│  │  │  Rendered   │  │
-│  + Scroller  │  │ Background: □ │  │  │  Section    │  │
-│  + Flexible  │  │ Buttons: [+]  │  │  │             │  │
-│              │  └───────────────┘  │  └─────────────┘  │
-└──────────────┴─────────────────────┴───────────────────┘
-```
-
-**Drag-and-drop:**
-- Use `@dnd-kit/core` for section reordering
-- Allow adding/removing sections
-- Collapse/expand sections
-
-**Section-specific forms:**
-Each section type needs its own form component:
-
-| Section | Form Requirements |
-|---------|-------------------|
-| `pageHeader` | title input, PT editor, boolean toggles, button array |
-| `slideshow` | image array with drag-reorder, captions |
-| `splitSection` | 2 item forms, each with image, title, subtitle, link |
-| `uspSection` | heading, USP array (icon picker, title, text, link) |
-| `solutionsScroller` | heading, subtitle |
-| `flexibleSection` | layout picker, 3 block arrays (each block has own form) |
-
-**Estimated effort:** 5-8 days for basic implementation
-
-### 6. FlexibleSection Block Builder
-
-The `flexibleSection` is essentially a page builder within a section. It needs:
-
-- Layout selector (4 options)
-- Block arrays for main/left/right columns
-- Block type selector
-- Per-block editors
-
-**Block editors:**
-- `flexTextBlock`: heading input, level selector, PT editor, button config
-- `flexImageBlock`: image picker
-- `flexMapBlock`: no config needed
-- `flexFormBlock`: title, subtitle inputs
-
-**Estimated effort:** 3-4 days
-
-### 7. Reference Fields
-
-**The Challenge:**
-Content types reference each other:
-- `solution.filters` → array of `filter` references
-- `navigation.subItems` → array of `solution` references
-- `filter.category` → single `filterCategory` reference
-
-**UI Requirements:**
-- Searchable dropdown for single references
-- Multi-select for array references
-- Reference preview (show name/thumbnail)
-
-**Estimated effort:** 1-2 days
-
-### 8. API Layer
-
-**New API routes needed:**
-
-```
-/api/admin/content/
-├── pages/
-│   ├── route.ts          # GET (list), POST (create)
-│   └── [id]/route.ts     # GET, PUT, DELETE
-├── solutions/
-│   ├── route.ts
-│   └── [id]/route.ts
-├── filters/
-│   ├── route.ts
-│   └── [id]/route.ts
-├── filter-categories/
-│   ├── route.ts
-│   └── [id]/route.ts
-├── navigation/
-│   └── route.ts          # GET, PUT (singleton)
-├── site-parameters/
-│   └── route.ts          # GET, PUT (singleton)
-└── assets/
-    └── upload/route.ts   # POST (image upload)
-```
-
-**Sanity Mutations:**
-```typescript
-// Create
-await client.create({ _type: 'page', title: '...' });
-
-// Update
-await client.patch(id).set({ title: '...' }).commit();
-
-// Delete
-await client.delete(id);
-
-// Upload asset
-await client.assets.upload('image', file);
-```
-
-**Requires:** Sanity write token (currently only using read access)
-
-**Estimated effort:** 2-3 days
+| Component | Status |
+|-----------|--------|
+| Authentication (Better Auth + 2FA) | ✅ Done |
+| Admin layout & sidebar | ✅ Done |
+| API route patterns | ✅ Done |
+| CRUD patterns | ✅ Done (appointments, newsletters) |
+| UI components (Radix) | ✅ Done |
+| Form patterns | ✅ Done |
+| Loading/error states | ✅ Done |
+| Toast notifications | ✅ Done |
 
 ---
 
-## Technical Challenges
+## Content Types Overview
 
-### 1. Sanity Write Access
+| Type | Fields | Effort |
+|------|--------|--------|
+| `filter` | name, slug | Trivial |
+| `filterCategory` | name, slug, orderRank | Trivial |
+| `filterOption` | name, slug | Trivial |
+| `siteParameters` | address, phone, email, socials | Easy |
+| `navigation` | links array with nested items | Easy |
+| `page` | title, slug, headerImage, sections[] | Medium |
+| `solution` | name, slug, headerImage, filters[], sections[] | Medium |
 
-**Current state:** Read-only client
-**Needed:** Client with write token
+---
+
+## Key Dependencies
+
+```bash
+pnpm add @portabletext/editor @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+```
+
+That's it. These packages do the heavy lifting.
+
+---
+
+## Implementation Breakdown
+
+### 1. Sanity Write Client (30 minutes)
 
 ```typescript
-// src/sanity/client.ts - needs update
+// src/sanity/client.ts
 export const writeClient = createClient({
   projectId: "naj44gzh",
   dataset: "production",
   apiVersion: "2024-01-01",
-  token: process.env.SANITY_WRITE_TOKEN, // New env var
+  token: process.env.SANITY_WRITE_TOKEN,
   useCdn: false,
 });
 ```
 
-### 2. Portable Text Complexity
+Add `SANITY_WRITE_TOKEN` to your environment variables.
 
-Portable Text is more than just rich text:
-- Block styles (normal, h1-h4, blockquote)
-- Marks (bold, italic, underline, links)
-- Custom marks (could have code, highlight, etc.)
-- Inline objects (could have image, reference)
-- Block objects (could have code block, table)
+### 2. Simple Content Editors (1-2 days)
 
-Need to audit current Sanity schema to understand what PT features are used.
+These are just forms. You've built these before.
 
-### 3. Concurrent Editing
+**Filters & Categories:**
+```tsx
+// Literally just:
+<Input label="Name" value={name} onChange={setName} />
+<Input label="Slug" value={slug} onChange={setSlug} />
+<Button onClick={save}>Save</Button>
+```
 
-Sanity Studio handles concurrent editing with real-time presence. Your admin panel would need:
-- Optimistic locking (check `_rev` before save)
-- Warning if document was modified by someone else
-- No real-time collaboration (acceptable limitation)
+**Site Parameters:**
+```tsx
+<Input label="Address" />
+<Input label="Phone" />
+<Input label="Email" />
+<Input label="Instagram URL" />
+<Input label="Facebook URL" />
+```
 
-### 4. Validation
+### 3. Portable Text Editor (1 day)
 
-Sanity schemas define validation rules. You'd need to:
-- Replicate validation in the frontend
-- Or accept potentially invalid data and rely on Sanity's validation errors
+Using `@portabletext/editor`:
 
-### 5. Preview/Draft Mode
+```tsx
+import { PortableTextEditor } from '@portabletext/editor';
 
-Sanity has draft documents (`drafts.document-id`). Consider whether to:
-- Work directly with published documents (simpler)
-- Implement draft/publish workflow (more complex)
+function RichTextField({ value, onChange }) {
+  return (
+    <PortableTextEditor
+      value={value}
+      onChange={onChange}
+      // Configure which marks/blocks you need
+    />
+  );
+}
+```
+
+The package handles:
+- Bold, italic, underline
+- Headings (h1-h4)
+- Links
+- Block quotes
+- Lists
+
+No custom serialization needed - it outputs Portable Text natively.
+
+### 4. Image Field (1 day)
+
+```tsx
+function ImageField({ value, onChange }) {
+  const handleUpload = async (file: File) => {
+    const asset = await writeClient.assets.upload('image', file);
+    onChange({
+      asset: { _ref: asset._id },
+      alt: '',
+    });
+  };
+
+  return (
+    <div>
+      {value?.asset && <img src={urlFor(value).url()} />}
+      <input type="file" onChange={(e) => handleUpload(e.target.files[0])} />
+      <Input label="Alt text" value={value?.alt} onChange={...} />
+    </div>
+  );
+}
+```
+
+For hotspot editing, you can add a simple click handler on the image preview, or skip it initially (most images don't need hotspots).
+
+### 5. Section Builder (2-3 days)
+
+The "complex" part is really just:
+
+**A. Sortable list with dnd-kit:**
+```tsx
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+
+function SectionList({ sections, onReorder }) {
+  return (
+    <DndContext onDragEnd={handleDragEnd}>
+      <SortableContext items={sections} strategy={verticalListSortingStrategy}>
+        {sections.map((section) => (
+          <SortableSection key={section._key} section={section} />
+        ))}
+      </SortableContext>
+    </DndContext>
+  );
+}
+```
+
+**B. Section type selector:**
+```tsx
+const sectionTypes = [
+  { type: 'pageHeader', label: 'Page Header' },
+  { type: 'slideshow', label: 'Slideshow' },
+  { type: 'splitSection', label: 'Split Section' },
+  { type: 'uspSection', label: 'USPs' },
+  { type: 'solutionsScroller', label: 'Solutions Scroller' },
+  { type: 'flexibleSection', label: 'Flexible Section' },
+];
+
+<Select options={sectionTypes} onSelect={addSection} />
+```
+
+**C. Section forms (one per type):**
+Each is just a form with the relevant fields:
+
+| Section | Form Fields |
+|---------|-------------|
+| `pageHeader` | title, subtitle (PT), background toggle, showImage toggle, buttons array |
+| `slideshow` | images array (with ImageField + caption) |
+| `splitSection` | 2 items, each with image, title, subtitle, href |
+| `uspSection` | heading, usps array (icon, title, text, link) |
+| `solutionsScroller` | heading, subtitle |
+| `flexibleSection` | layout select, block arrays |
+
+These are forms. Tedious to build, but not complex.
+
+### 6. FlexibleSection Block Editor (1 day)
+
+Same pattern as sections - sortable list + type selector + per-block forms.
+
+Block forms are even simpler:
+- `flexTextBlock`: heading, headingLevel select, PT editor, button config
+- `flexImageBlock`: ImageField
+- `flexMapBlock`: no fields (just renders map)
+- `flexFormBlock`: title, subtitle
+
+### 7. API Routes (1 day)
+
+Copy the pattern from your existing admin routes:
+
+```typescript
+// /api/admin/content/pages/route.ts
+export async function GET() {
+  const pages = await client.fetch(`*[_type == "page"]`);
+  return Response.json(pages);
+}
+
+export async function POST(req: Request) {
+  const data = await req.json();
+  const result = await writeClient.create({ _type: 'page', ...data });
+  return Response.json(result);
+}
+
+// /api/admin/content/pages/[id]/route.ts
+export async function PUT(req: Request, { params }) {
+  const data = await req.json();
+  const result = await writeClient.patch(params.id).set(data).commit();
+  return Response.json(result);
+}
+
+export async function DELETE(req: Request, { params }) {
+  await writeClient.delete(params.id);
+  return Response.json({ success: true });
+}
+```
 
 ---
 
-## Component Inventory
+## Realistic Timeline
 
-### New Components Needed
+| Phase | Work | Time |
+|-------|------|------|
+| Setup | Write client, dependencies, routes | 1 day |
+| Simple editors | filters, categories, site params | 1-2 days |
+| Rich text | @portabletext/editor integration | 1 day |
+| Images | Upload, preview, alt text | 1 day |
+| Section builder | Sortable list, type selector | 1 day |
+| Section forms | 6 form components | 2 days |
+| Block forms | 4 form components | 1 day |
+| Navigation editor | Nested links, references | 1 day |
+| Polish | Error handling, validation, UX | 1-2 days |
+
+**Total: 10-12 days of focused work**
+
+This is assuming you're building it yourself and are familiar with the codebase (which you are).
+
+---
+
+## Component Structure
 
 ```
 src/components/admin/content/
-├── ContentList.tsx           # Generic list with filters/search
-├── ContentForm.tsx           # Generic form wrapper
 ├── fields/
-│   ├── TextField.tsx         # Text input with validation
-│   ├── SlugField.tsx         # Auto-generate slug from title
-│   ├── BooleanField.tsx      # Toggle/checkbox
-│   ├── SelectField.tsx       # Dropdown select
-│   ├── ReferenceField.tsx    # Single reference picker
-│   ├── ReferencesField.tsx   # Multi reference picker
-│   ├── ImageField.tsx        # Image picker with hotspot
-│   ├── ImagesField.tsx       # Image array
-│   ├── PortableTextField.tsx # Rich text editor
-│   └── ArrayField.tsx        # Generic array with add/remove/reorder
-├── page-builder/
-│   ├── PageBuilder.tsx       # Main section builder
-│   ├── SectionPalette.tsx    # Available sections
-│   ├── SectionList.tsx       # Current sections
-│   ├── SectionEditor.tsx     # Section form router
-│   ├── SectionPreview.tsx    # Preview panel
-│   └── sections/
-│       ├── PageHeaderForm.tsx
-│       ├── SlideshowForm.tsx
-│       ├── SplitSectionForm.tsx
-│       ├── UspSectionForm.tsx
-│       ├── SolutionsScrollerForm.tsx
-│       └── FlexibleSectionForm.tsx
-├── block-builder/
-│   ├── BlockList.tsx         # Block array editor
-│   └── blocks/
-│       ├── TextBlockForm.tsx
-│       ├── ImageBlockForm.tsx
-│       ├── MapBlockForm.tsx
-│       └── FormBlockForm.tsx
-└── image-editor/
-    ├── ImageUploader.tsx     # Drag-drop upload
-    ├── ImageCropper.tsx      # Crop/hotspot editor
-    └── ImageLibrary.tsx      # Browse existing assets
+│   ├── TextField.tsx           # Already have Input
+│   ├── SlugField.tsx           # Auto-generate from title
+│   ├── ToggleField.tsx         # Already have Switch
+│   ├── SelectField.tsx         # Already have Select
+│   ├── ImageField.tsx          # Upload + preview + alt
+│   ├── PortableTextField.tsx   # @portabletext/editor wrapper
+│   ├── ArrayField.tsx          # Generic add/remove/reorder
+│   └── ReferenceField.tsx      # Searchable dropdown
+├── editors/
+│   ├── FilterEditor.tsx
+│   ├── SiteParamsEditor.tsx
+│   ├── NavigationEditor.tsx
+│   ├── PageEditor.tsx
+│   └── SolutionEditor.tsx
+└── sections/
+    ├── SectionList.tsx         # Sortable container
+    ├── SectionPalette.tsx      # Type selector
+    └── forms/
+        ├── PageHeaderForm.tsx
+        ├── SlideshowForm.tsx
+        ├── SplitSectionForm.tsx
+        ├── UspSectionForm.tsx
+        ├── SolutionsScrollerForm.tsx
+        └── FlexibleSectionForm.tsx
 ```
 
-### Estimated Component Count: ~30-40 components
+**~20 components total**, most of which are simple forms.
 
 ---
 
-## Effort Estimation
+## What You Can Skip (Initially)
 
-### Phase 1: Foundation (1-2 weeks)
-- [ ] Sanity write client setup
-- [ ] API routes for simple content types
-- [ ] Basic field components (text, slug, boolean, select)
-- [ ] Simple content editors (filters, categories, site parameters)
-
-### Phase 2: References & Images (1 week)
-- [ ] Reference field components
-- [ ] Image upload to Sanity
-- [ ] Image picker with hotspot editor
-- [ ] Navigation editor
-
-### Phase 3: Rich Text (1 week)
-- [ ] TipTap integration
-- [ ] Portable Text serialization
-- [ ] Block style support
-- [ ] Link/mark support
-
-### Phase 4: Page Builder (2-3 weeks)
-- [ ] Section palette and list
-- [ ] Drag-and-drop reordering
-- [ ] Section-specific forms (6 types)
-- [ ] FlexibleSection block builder
-- [ ] Preview functionality
-
-### Phase 5: Polish (1 week)
-- [ ] Validation
-- [ ] Error handling
-- [ ] Loading states
-- [ ] Undo/redo (nice to have)
-- [ ] Keyboard shortcuts (nice to have)
-
-### Total Estimated Effort: 6-8 weeks
+1. **Hotspot editor** - Most images don't need it. Add later if needed.
+2. **Live preview** - Just save and check the live site. Add preview later.
+3. **Draft/publish workflow** - Edit published documents directly. Simpler.
+4. **Concurrent edit detection** - You're likely the only editor.
+5. **Revision history** - Sanity keeps this automatically.
+6. **Undo/redo** - Nice to have, not essential.
 
 ---
 
-## Alternatives to Consider
+## Recommended Order
 
-### 1. Embedded Sanity Studio
-
-Instead of building from scratch, embed Sanity Studio within your admin:
-
-```tsx
-// Option A: iframe
-<iframe src="https://your-project.sanity.studio" />
-
-// Option B: Sanity Studio as component (newer approach)
-import { Studio } from 'sanity';
-```
-
-**Pros:** Full Sanity feature set, maintained by Sanity
-**Cons:** Different UI style, requires separate auth, less control
-
-### 2. Hybrid Approach
-
-Build simple editors in your admin, link to Sanity Studio for complex editing:
-
-```tsx
-// For simple edits
-<SimpleContentForm type="filter" />
-
-// For page editing
-<Button href={`https://your-project.sanity.studio/desk/page;${id}`}>
-  Edit in Sanity Studio
-</Button>
-```
-
-**Pros:** Faster to implement, best of both worlds
-**Cons:** Split user experience
-
-### 3. Sanity Studio V3 with Custom Branding
-
-Customize Sanity Studio to match your admin UI and deploy at `/admin/studio`:
-
-```typescript
-// sanity.config.ts
-export default defineConfig({
-  theme: {
-    // Custom colors matching your admin
-  },
-});
-```
-
-**Pros:** Minimal custom development
-**Cons:** Still a separate application
-
----
-
-## Recommendation
-
-Given your assessment that this "might not be that difficult", I'd suggest:
-
-### Start with Phase 1 + Hybrid
-
-1. **Build simple editors** for filters, categories, site parameters
-2. **Link to Sanity Studio** for page/solution editing
-3. **Evaluate** if the custom editor adds enough value
-
-This gives you ~80% of the admin functionality with ~20% of the effort.
-
-### If you proceed with full custom studio:
-
-1. **Portable Text is the bottleneck** - invest in getting this right first
-2. **Reuse your SectionRenderer** - components for preview
-3. **Consider Sanity's libraries**:
-   - `@sanity/client` for mutations (already using for reads)
-   - `@portabletext/editor` for rich text editing
-   - `@sanity/image-url` for image handling (already using)
-
----
-
-## Questions to Answer Before Starting
-
-1. **What features of Sanity Studio do you actually use?**
-   - If only basic editing, custom admin is feasible
-   - If using validation, draft/publish, revision history - more work
-
-2. **Who are the users?**
-   - Just you? Simpler requirements
-   - Multiple editors? Need better error handling, concurrent edit protection
-
-3. **Do you need offline support?**
-   - Sanity Studio works offline
-   - Custom admin typically wouldn't
-
-4. **What's the timeline?**
-   - < 1 month: Hybrid approach
-   - 1-2 months: Custom simple editors + Sanity for pages
-   - 2-3 months: Full custom studio
-
----
-
-## File Structure for Implementation
-
-```
-src/
-├── app/admin/
-│   └── content/
-│       ├── page.tsx              # Content overview
-│       ├── pages/
-│       │   ├── page.tsx          # Pages list
-│       │   └── [id]/page.tsx     # Page editor
-│       ├── solutions/
-│       │   ├── page.tsx          # Solutions list
-│       │   └── [id]/page.tsx     # Solution editor
-│       ├── filters/
-│       │   └── page.tsx          # Filters management
-│       ├── navigation/
-│       │   └── page.tsx          # Navigation editor
-│       └── settings/
-│           └── page.tsx          # Site parameters
-├── components/admin/content/     # (see component inventory above)
-├── lib/
-│   └── sanity/
-│       ├── mutations.ts          # Create, update, delete helpers
-│       └── validation.ts         # Field validation rules
-└── app/api/admin/content/        # (see API routes above)
-```
+1. **Start with filters/categories** - Simplest, builds confidence
+2. **Add site parameters** - Still simple, immediately useful
+3. **Add image field** - You'll need it for everything else
+4. **Add PT editor** - Wrap the package, test it works
+5. **Build page list + basic editor** - Title, slug, headerImage
+6. **Add section builder** - The fun part
+7. **Add section forms one by one** - Start with simplest (solutionsScroller)
+8. **Solutions editor** - Same as pages + filter picker
+9. **Navigation editor** - If needed
 
 ---
 
 ## Conclusion
 
-Building a custom content studio is **doable but substantial**. The current admin architecture is excellent - authentication, layouts, and patterns are all solid. The main complexity lies in:
+You were right - this isn't that difficult. The perceived complexity in my original analysis came from:
 
-1. **Rich text editing** (~30% of effort)
-2. **Page section builder** (~40% of effort)
-3. **Image management** (~15% of effort)
-4. **API layer** (~15% of effort)
+1. **Overestimating PT complexity** - `@portabletext/editor` handles it
+2. **Overestimating drag-drop** - `@dnd-kit` makes it easy
+3. **Not crediting existing patterns** - You've already built CRUD admins
 
-Your intuition that it's "not that difficult" is partially correct - the simple parts (filter management, site settings) are indeed straightforward. The page builder with Portable Text support is where the real complexity lives.
+The actual work is:
+- **70% building forms** (tedious, not hard)
+- **20% wiring up APIs** (you have patterns)
+- **10% package integration** (install and configure)
 
-**My recommendation:** Start with the hybrid approach, build confidence with simple editors, then expand to page editing if the value justifies the effort.
+**Estimated total: 2-3 weeks of focused work** to have a fully functional content studio.
