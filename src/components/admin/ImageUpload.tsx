@@ -75,15 +75,16 @@ export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
     return (
       <div className="space-y-3">
         {label && <Label>{label}</Label>}
-        <div className="relative inline-block">
-          <Image
-            src={value.url}
-            alt={value.alt || ""}
-            width={300}
-            height={200}
-            className="rounded-lg border object-cover"
-            style={{ maxHeight: "200px", width: "auto" }}
-          />
+        <div className="relative w-fit">
+          <div className="relative h-[200px] w-[300px] overflow-hidden rounded-lg border">
+            <Image
+              src={value.url}
+              alt={value.alt || ""}
+              fill
+              className="object-cover"
+              sizes="300px"
+            />
+          </div>
           <Button
             type="button"
             size="icon"
