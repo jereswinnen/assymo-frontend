@@ -1,5 +1,28 @@
 # Content Management System - Build Plan
 
+## Progress Checklist
+
+- [ ] Phase 1: Database Schema
+- [ ] Phase 2: Image Storage Setup
+- [ ] Phase 3: Content Data Layer
+- [ ] Phase 4: Update Frontend Pages
+- [ ] Phase 5: Update Image References
+- [ ] Phase 6: Site Parameters Editor
+- [ ] Phase 7: Filter Categories Editor
+- [ ] Phase 8: Navigation Editor
+- [ ] Phase 9: Pages List View
+- [ ] Phase 10: Page Editor (Basic Fields)
+- [ ] Phase 11: Solutions List & Basic Editor
+- [ ] Phase 12: Section Builder Core
+- [ ] Phase 13: Simple Section Forms
+- [ ] Phase 14: Complex Section Forms
+- [ ] Phase 15: Rich Text Editor
+- [ ] Phase 16: FlexibleSection Form
+- [ ] Phase 17: Admin Sidebar Update
+- [ ] Phase 18: Cleanup
+
+---
+
 ## Overview
 
 Replace Sanity entirely with a custom CMS built into the admin panel. Content stored in Neon Postgres, images via cloud storage.
@@ -33,6 +56,8 @@ Plus existing patterns from appointments/newsletters for CRUD operations.
 ---
 
 ## Phase 1: Database Schema
+- [ ] Complete
+
 **Time: 2-3 hours**
 
 Run this SQL in Neon:
@@ -129,6 +154,8 @@ CREATE INDEX idx_nav_links_location ON navigation_links(location);
 ---
 
 ## Phase 2: Image Storage Setup
+- [ ] Complete
+
 **Time: 1-2 hours**
 
 Install Vercel Blob:
@@ -178,6 +205,8 @@ Add `BLOB_READ_WRITE_TOKEN` to env vars (from Vercel dashboard).
 ---
 
 ## Phase 3: Content Data Layer
+- [ ] Complete
+
 **Time: 3-4 hours**
 
 Create functions to fetch content from Postgres:
@@ -276,6 +305,8 @@ export async function getSiteParameters() {
 ---
 
 ## Phase 4: Update Frontend Pages
+- [ ] Complete
+
 **Time: 2-3 hours**
 
 Replace Sanity fetches with new data layer:
@@ -296,6 +327,8 @@ Replace Sanity fetches with new data layer:
 ---
 
 ## Phase 5: Update Image References
+- [ ] Complete
+
 **Time: 1-2 hours**
 
 Replace `urlFor(image)` with direct URLs in all components:
@@ -323,6 +356,8 @@ Files to update:
 ---
 
 ## Phase 6: Site Parameters Editor
+- [ ] Complete
+
 **Time: 2-3 hours**
 
 API route:
@@ -422,6 +457,8 @@ export default function SiteSettingsPage() {
 ---
 
 ## Phase 7: Filter Categories Editor
+- [ ] Complete
+
 **Time: 3-4 hours**
 
 API routes for CRUD on filter_categories and filters.
@@ -439,6 +476,8 @@ Use existing shadcn: `Card`, `Button`, `Input`, `Dialog`
 ---
 
 ## Phase 8: Navigation Editor
+- [ ] Complete
+
 **Time: 3-4 hours**
 
 API routes for navigation_links and navigation_subitems.
@@ -454,6 +493,8 @@ Admin page with:
 ---
 
 ## Phase 9: Pages List View
+- [ ] Complete
+
 **Time: 2-3 hours**
 
 API route:
@@ -478,6 +519,8 @@ Admin page:
 ---
 
 ## Phase 10: Page Editor (Basic Fields)
+- [ ] Complete
+
 **Time: 2-3 hours**
 
 Page at `/admin/content/pages/[id]/page.tsx`:
@@ -551,6 +594,8 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
 ---
 
 ## Phase 11: Solutions List & Basic Editor
+- [ ] Complete
+
 **Time: 2-3 hours**
 
 Same pattern as pages, plus:
@@ -563,6 +608,8 @@ Same pattern as pages, plus:
 ---
 
 ## Phase 12: Section Builder Core
+- [ ] Complete
+
 **Time: 3-4 hours**
 
 Install dnd-kit:
@@ -662,6 +709,8 @@ export function AddSectionButton({ onAdd }) {
 ---
 
 ## Phase 13: Simple Section Forms
+- [ ] Complete
+
 **Time: 2-3 hours**
 
 Forms for the simpler sections:
@@ -699,6 +748,8 @@ export function SolutionsScrollerForm({ section, onChange }) {
 ---
 
 ## Phase 14: Complex Section Forms
+- [ ] Complete
+
 **Time: 3-4 hours**
 
 **PageHeaderForm:**
@@ -717,6 +768,8 @@ export function SolutionsScrollerForm({ section, onChange }) {
 ---
 
 ## Phase 15: Rich Text Editor
+- [ ] Complete
+
 **Time: 2-3 hours**
 
 Install:
@@ -750,6 +803,8 @@ Use in PageHeaderForm for subtitle, and FlexibleSection text blocks.
 ---
 
 ## Phase 16: FlexibleSection Form
+- [ ] Complete
+
 **Time: 3-4 hours**
 
 The most complex section:
@@ -771,6 +826,8 @@ Block forms:
 ---
 
 ## Phase 17: Admin Sidebar Update
+- [ ] Complete
+
 **Time: 30 minutes**
 
 Add content section to AdminSidebar:
@@ -793,6 +850,8 @@ Add content section to AdminSidebar:
 ---
 
 ## Phase 18: Cleanup
+- [ ] Complete
+
 **Time: 1-2 hours**
 
 Remove Sanity:
