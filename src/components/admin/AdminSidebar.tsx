@@ -4,16 +4,16 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarDaysIcon,
+  ChevronsLeftRightEllipsisIcon,
   FileTextIcon,
-  FilterIcon,
-  FolderOpenIcon,
+  FolderTreeIcon,
   ImageIcon,
   LogOutIcon,
   MailboxIcon,
   MenuIcon,
   MessagesSquareIcon,
   SettingsIcon,
-  SlidersHorizontalIcon,
+  ToggleRightIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
@@ -45,14 +45,18 @@ const navItems = [
 
 const contentItems = [
   { href: "/admin/content/pages", label: "Pagina's", icon: FileTextIcon },
-  { href: "/admin/content/solutions", label: "Realisaties", icon: ImageIcon },
-  { href: "/admin/content/media", label: "Media", icon: FolderOpenIcon },
-  { href: "/admin/content/filters", label: "Filters", icon: FilterIcon },
+  {
+    href: "/admin/content/solutions",
+    label: "Realisaties",
+    icon: FolderTreeIcon,
+  },
+  { href: "/admin/content/media", label: "Media", icon: ImageIcon },
+  { href: "/admin/content/filters", label: "Filters", icon: ToggleRightIcon },
   { href: "/admin/content/navigation", label: "Navigatie", icon: MenuIcon },
   {
     href: "/admin/content/settings",
-    label: "Site Instellingen",
-    icon: SlidersHorizontalIcon,
+    label: "Parameters",
+    icon: ChevronsLeftRightEllipsisIcon,
   },
 ];
 
