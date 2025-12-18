@@ -1,6 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,8 +41,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
-  ChevronDownIcon,
-  ChevronUpIcon,
+  GripVerticalIcon,
   Loader2Icon,
   PencilIcon,
   PlusIcon,
@@ -55,6 +71,147 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
+// Sortable Category Item
+function SortableCategoryItem({
+  category,
+  isSelected,
+  onSelect,
+  onEdit,
+  onDelete,
+}: {
+  category: FilterCategory;
+  isSelected: boolean;
+  onSelect: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: category.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-colors ${
+        isSelected ? "bg-accent" : "hover:bg-muted"
+      }`}
+      onClick={onSelect}
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing touch-none"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <GripVerticalIcon className="size-4 text-muted-foreground" />
+      </button>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium truncate">{category.name}</p>
+        <p className="text-xs text-muted-foreground">
+          {category.filters.length} filter
+          {category.filters.length !== 1 && "s"}
+        </p>
+      </div>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="size-8"
+        onClick={(e) => {
+          e.stopPropagation();
+          onEdit();
+        }}
+      >
+        <PencilIcon className="size-4" />
+      </Button>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="size-8 text-destructive hover:text-destructive"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
+      >
+        <Trash2Icon className="size-4" />
+      </Button>
+    </div>
+  );
+}
+
+// Sortable Filter Item
+function SortableFilterItem({
+  filter,
+  onEdit,
+  onDelete,
+}: {
+  filter: Filter;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: filter.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-2 p-2 rounded-md hover:bg-muted"
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing touch-none"
+      >
+        <GripVerticalIcon className="size-4 text-muted-foreground" />
+      </button>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium truncate">{filter.name}</p>
+        <p className="text-xs text-muted-foreground">{filter.slug}</p>
+      </div>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="size-8"
+        onClick={onEdit}
+      >
+        <PencilIcon className="size-4" />
+      </Button>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="size-8 text-destructive hover:text-destructive"
+        onClick={onDelete}
+      >
+        <Trash2Icon className="size-4" />
+      </Button>
+    </div>
+  );
+}
+
 export default function FiltersPage() {
   const [categories, setCategories] = useState<FilterCategory[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -82,6 +239,13 @@ export default function FiltersPage() {
   } | null>(null);
 
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     fetchCategories();
@@ -187,34 +351,27 @@ export default function FiltersPage() {
     }
   };
 
-  const handleMoveCategory = async (categoryId: string, direction: "up" | "down") => {
-    const index = categories.findIndex((c) => c.id === categoryId);
-    if (
-      (direction === "up" && index === 0) ||
-      (direction === "down" && index === categories.length - 1)
-    ) {
-      return;
-    }
+  const handleCategoryDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    const newIndex = direction === "up" ? index - 1 : index + 1;
-    const newCategories = [...categories];
-    [newCategories[index], newCategories[newIndex]] = [
-      newCategories[newIndex],
-      newCategories[index],
-    ];
+    if (over && active.id !== over.id) {
+      const oldIndex = categories.findIndex((c) => c.id === active.id);
+      const newIndex = categories.findIndex((c) => c.id === over.id);
 
-    setCategories(newCategories);
+      const newCategories = arrayMove(categories, oldIndex, newIndex);
+      setCategories(newCategories);
 
-    try {
-      await fetch("/api/admin/content/filter-categories/reorder", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderedIds: newCategories.map((c) => c.id) }),
-      });
-    } catch (error) {
-      console.error("Failed to reorder categories:", error);
-      toast.error("Kon volgorde niet opslaan");
-      fetchCategories();
+      try {
+        await fetch("/api/admin/content/filter-categories/reorder", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderedIds: newCategories.map((c) => c.id) }),
+        });
+      } catch (error) {
+        console.error("Failed to reorder categories:", error);
+        toast.error("Kon volgorde niet opslaan");
+        fetchCategories();
+      }
     }
   };
 
@@ -299,6 +456,39 @@ export default function FiltersPage() {
     }
   };
 
+  const handleFilterDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id && selectedCategory) {
+      const oldIndex = selectedCategory.filters.findIndex((f) => f.id === active.id);
+      const newIndex = selectedCategory.filters.findIndex((f) => f.id === over.id);
+
+      const newFilters = arrayMove(selectedCategory.filters, oldIndex, newIndex);
+
+      // Update local state
+      setCategories((prev) =>
+        prev.map((c) =>
+          c.id === selectedCategoryId ? { ...c, filters: newFilters } : c
+        )
+      );
+
+      try {
+        await fetch("/api/admin/content/filters/reorder", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            categoryId: selectedCategoryId,
+            orderedIds: newFilters.map((f) => f.id),
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to reorder filters:", error);
+        toast.error("Kon volgorde niet opslaan");
+        fetchCategories();
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -332,79 +522,35 @@ export default function FiltersPage() {
                 Nog geen categorieën
               </p>
             ) : (
-              <div className="space-y-1">
-                {categories.map((category, index) => (
-                  <div
-                    key={category.id}
-                    className={`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-colors ${
-                      selectedCategoryId === category.id
-                        ? "bg-accent"
-                        : "hover:bg-muted"
-                    }`}
-                    onClick={() => setSelectedCategoryId(category.id)}
-                  >
-                    <div className="flex flex-col gap-0.5">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="size-5"
-                        disabled={index === 0}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMoveCategory(category.id, "up");
-                        }}
-                      >
-                        <ChevronUpIcon className="size-3" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="size-5"
-                        disabled={index === categories.length - 1}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMoveCategory(category.id, "down");
-                        }}
-                      >
-                        <ChevronDownIcon className="size-3" />
-                      </Button>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{category.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {category.filters.length} filter
-                        {category.filters.length !== 1 && "s"}
-                      </p>
-                    </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="size-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openEditCategoryDialog(category);
-                      }}
-                    >
-                      <PencilIcon className="size-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="size-8 text-destructive hover:text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteTarget({
-                          type: "category",
-                          id: category.id,
-                          name: category.name,
-                        });
-                      }}
-                    >
-                      <Trash2Icon className="size-4" />
-                    </Button>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleCategoryDragEnd}
+              >
+                <SortableContext
+                  items={categories.map((c) => c.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-1">
+                    {categories.map((category) => (
+                      <SortableCategoryItem
+                        key={category.id}
+                        category={category}
+                        isSelected={selectedCategoryId === category.id}
+                        onSelect={() => setSelectedCategoryId(category.id)}
+                        onEdit={() => openEditCategoryDialog(category)}
+                        onDelete={() =>
+                          setDeleteTarget({
+                            type: "category",
+                            id: category.id,
+                            name: category.name,
+                          })
+                        }
+                      />
+                    ))}
                   </div>
-                ))}
-              </div>
+                </SortableContext>
+              </DndContext>
             )}
           </CardContent>
         </Card>
@@ -434,43 +580,33 @@ export default function FiltersPage() {
                 Nog geen filters in deze categorie
               </p>
             ) : (
-              <div className="space-y-1">
-                {selectedCategory.filters.map((filter) => (
-                  <div
-                    key={filter.id}
-                    className="flex items-center gap-2 p-2 rounded-md hover:bg-muted"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{filter.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {filter.slug}
-                      </p>
-                    </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="size-8"
-                      onClick={() => openEditFilterDialog(filter)}
-                    >
-                      <PencilIcon className="size-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="size-8 text-destructive hover:text-destructive"
-                      onClick={() =>
-                        setDeleteTarget({
-                          type: "filter",
-                          id: filter.id,
-                          name: filter.name,
-                        })
-                      }
-                    >
-                      <Trash2Icon className="size-4" />
-                    </Button>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleFilterDragEnd}
+              >
+                <SortableContext
+                  items={selectedCategory.filters.map((f) => f.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-1">
+                    {selectedCategory.filters.map((filter) => (
+                      <SortableFilterItem
+                        key={filter.id}
+                        filter={filter}
+                        onEdit={() => openEditFilterDialog(filter)}
+                        onDelete={() =>
+                          setDeleteTarget({
+                            type: "filter",
+                            id: filter.id,
+                            name: filter.name,
+                          })
+                        }
+                      />
+                    ))}
                   </div>
-                ))}
-              </div>
+                </SortableContext>
+              </DndContext>
             )}
           </CardContent>
         </Card>

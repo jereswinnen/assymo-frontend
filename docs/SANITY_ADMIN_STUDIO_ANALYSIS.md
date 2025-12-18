@@ -435,13 +435,18 @@ export default function SiteSettingsPage() {
 
 API routes for CRUD on filter_categories and filters.
 
+**Installed dnd-kit** for drag-to-reorder (used in Phase 7 and 12 as well):
+```bash
+pnpm add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+```
+
 Admin page with:
 - List of categories (left side)
 - Filters within selected category (right side)
 - Add/edit/delete for both
-- Drag to reorder categories
+- Drag to reorder categories and filters
 
-Use existing shadcn: `Card`, `Button`, `Input`, `Dialog`
+Use existing shadcn: `Card`, `Button`, `Input`, `Dialog`, `AlertDialog`
 
 **Deliverable:** Filters fully manageable
 
@@ -618,10 +623,7 @@ Same pattern as pages, plus:
 
 **Time: 3-4 hours**
 
-Install dnd-kit:
-```bash
-pnpm add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
-```
+dnd-kit is already installed (added in Phase 6).
 
 Create sortable section list component:
 
@@ -934,8 +936,12 @@ Update remaining references.
 ### Dependencies
 
 ```bash
-# Add
-pnpm add @vercel/blob @portabletext/editor @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+# Already installed:
+# - @vercel/blob (Phase 2)
+# - @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities (Phase 6)
+
+# Still to add:
+pnpm add @portabletext/editor
 
 # Remove (Phase 19)
 pnpm remove @sanity/client @sanity/image-url next-sanity
