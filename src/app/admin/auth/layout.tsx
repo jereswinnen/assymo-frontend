@@ -17,7 +17,7 @@ export default function AuthLayout({
       <section className="z-10 flex-1">
         <Logo className="w-52 md:w-72 text-white" />
       </section>
-      <section className="z-10 p-8 md:p-4 bg-white rounded-3xl">
+      <section className="z-10 p-8 md:p-4 md:flex-1 bg-white rounded-3xl">
         {children}
       </section>
       <div className="absolute inset-0 bg-black/30"></div>
