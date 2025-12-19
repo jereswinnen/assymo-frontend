@@ -27,6 +27,7 @@ import {
   SparklesIcon,
   Trash2Icon,
 } from "lucide-react";
+import { formatFileSize } from "@/lib/format";
 
 interface ImageData {
   url: string;
@@ -37,11 +38,6 @@ interface ImageData {
   displayName: string | null;
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
 
 export default function ImageDetailPage({
   params,

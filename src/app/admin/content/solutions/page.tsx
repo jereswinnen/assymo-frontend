@@ -51,6 +51,7 @@ import {
   PlusIcon,
   Trash2Icon,
 } from "lucide-react";
+import { formatDateShort } from "@/lib/format";
 
 interface Solution {
   id: string;
@@ -71,13 +72,6 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("nl-NL", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
 
 function SortableSolutionItem({
   solution,
@@ -143,7 +137,7 @@ function SortableSolutionItem({
         </div>
 
         <p className="text-sm text-muted-foreground shrink-0 hidden sm:block">
-          {formatDate(solution.updated_at)}
+          {formatDateShort(solution.updated_at)}
         </p>
 
         <div className="flex items-center gap-1 shrink-0">

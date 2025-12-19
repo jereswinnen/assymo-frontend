@@ -24,6 +24,7 @@ import {
   Trash2Icon,
   UploadIcon,
 } from "lucide-react";
+import { formatFileSize, formatDateShort } from "@/lib/format";
 
 interface MediaItem {
   url: string;
@@ -34,19 +35,6 @@ interface MediaItem {
   altText: string | null;
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("nl-NL", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
 
 export default function MediaPage() {
   const [media, setMedia] = useState<MediaItem[]>([]);
@@ -345,7 +333,7 @@ export default function MediaPage() {
                       {name}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {formatFileSize(item.size)} • {formatDate(item.uploadedAt)}
+                      {formatFileSize(item.size)} • {formatDateShort(item.uploadedAt)}
                     </p>
                   </CardContent>
                 </Link>

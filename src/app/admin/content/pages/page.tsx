@@ -34,6 +34,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { formatDateWithTime } from "@/lib/format";
 
 interface Page {
   id: string;
@@ -52,15 +53,6 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("nl-NL", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export default function PagesPage() {
   const [pages, setPages] = useState<Page[]>([]);
@@ -266,7 +258,7 @@ export default function PagesPage() {
                   </p>
                 </div>
                 <p className="text-sm text-muted-foreground shrink-0 hidden sm:block">
-                  {formatDate(page.updated_at)}
+                  {formatDateWithTime(page.updated_at)}
                 </p>
                 <div className="flex items-center gap-1 shrink-0">
                   <Button variant="ghost" size="icon" asChild>
