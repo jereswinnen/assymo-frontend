@@ -8,7 +8,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
 
 const getRouteLabel = (pathname: string): string => {
   const staticLabels: Record<string, string> = {
@@ -37,6 +36,9 @@ const getRouteLabel = (pathname: string): string => {
   }
   if (pathname.startsWith("/admin/content/solutions/")) {
     return "Realisatie bewerken";
+  }
+  if (pathname.startsWith("/admin/content/media/")) {
+    return "Afbeelding bewerken";
   }
 
   return "Admin";

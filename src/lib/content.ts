@@ -16,23 +16,60 @@ const sql = neon(process.env.DATABASE_URL!);
 // =============================================================================
 
 /**
- * Get a page by its slug
+ * Get a page by its slug (with image alt text from media library)
  */
 export async function getPageBySlug(slug: string): Promise<Page | null> {
   const rows = await sql`
-    SELECT * FROM pages WHERE slug = ${slug}
+    SELECT p.*, im.alt_text as header_image_alt
+    FROM pages p
+    LEFT JOIN image_metadata im ON im.url = p.header_image->>'url'
+    WHERE p.slug = ${slug}
   `;
-  return (rows[0] as Page) || null;
+
+  if (!rows[0]) return null;
+
+  // Merge alt text into header_image
+  const page = rows[0] as Page & { header_image_alt?: string };
+  if (page.header_image && page.header_image_alt) {
+    page.header_image.alt = page.header_image_alt;
+  }
+  delete page.header_image_alt;
+
+  // Enrich sections with alt text
+  if (page.sections && Array.isArray(page.sections)) {
+    page.sections = await enrichSectionsWithAltText(page.sections);
+  }
+
+  return page as Page;
 }
 
 /**
- * Get the homepage
+ * Get the homepage (with image alt text from media library)
  */
 export async function getHomepage(): Promise<Page | null> {
   const rows = await sql`
-    SELECT * FROM pages WHERE is_homepage = true LIMIT 1
+    SELECT p.*, im.alt_text as header_image_alt
+    FROM pages p
+    LEFT JOIN image_metadata im ON im.url = p.header_image->>'url'
+    WHERE p.is_homepage = true
+    LIMIT 1
   `;
-  return (rows[0] as Page) || null;
+
+  if (!rows[0]) return null;
+
+  // Merge alt text into header_image
+  const page = rows[0] as Page & { header_image_alt?: string };
+  if (page.header_image && page.header_image_alt) {
+    page.header_image.alt = page.header_image_alt;
+  }
+  delete page.header_image_alt;
+
+  // Enrich sections with alt text
+  if (page.sections && Array.isArray(page.sections)) {
+    page.sections = await enrichSectionsWithAltText(page.sections);
+  }
+
+  return page as Page;
 }
 
 /**
@@ -52,11 +89,12 @@ export async function getAllPages(): Promise<PageListItem[]> {
 // =============================================================================
 
 /**
- * Get a solution by its slug (with filters)
+ * Get a solution by its slug (with filters and image alt text from media library)
  */
 export async function getSolutionBySlug(slug: string): Promise<Solution | null> {
   const rows = await sql`
     SELECT s.*,
+      im.alt_text as header_image_alt,
       COALESCE(
         json_agg(
           json_build_object('id', f.id, 'name', f.name, 'slug', f.slug)
@@ -66,14 +104,30 @@ export async function getSolutionBySlug(slug: string): Promise<Solution | null> 
     FROM solutions s
     LEFT JOIN solution_filters sf ON s.id = sf.solution_id
     LEFT JOIN filters f ON sf.filter_id = f.id
+    LEFT JOIN image_metadata im ON im.url = s.header_image->>'url'
     WHERE s.slug = ${slug}
-    GROUP BY s.id
+    GROUP BY s.id, im.alt_text
   `;
-  return (rows[0] as Solution) || null;
+
+  if (!rows[0]) return null;
+
+  // Merge alt text into header_image
+  const solution = rows[0] as Solution & { header_image_alt?: string };
+  if (solution.header_image && solution.header_image_alt) {
+    solution.header_image.alt = solution.header_image_alt;
+  }
+  delete solution.header_image_alt;
+
+  // Enrich sections with alt text
+  if (solution.sections && Array.isArray(solution.sections)) {
+    solution.sections = await enrichSectionsWithAltText(solution.sections);
+  }
+
+  return solution as Solution;
 }
 
 /**
- * Get all solutions (with filters)
+ * Get all solutions (with filters and image alt text from media library)
  */
 export async function getAllSolutions(): Promise<SolutionListItem[]> {
   const rows = await sql`
@@ -84,6 +138,7 @@ export async function getAllSolutions(): Promise<SolutionListItem[]> {
       s.slug,
       s.header_image,
       s.order_rank,
+      im.alt_text as header_image_alt,
       COALESCE(
         json_agg(
           json_build_object('id', f.id, 'name', f.name, 'slug', f.slug, 'category_id', f.category_id)
@@ -93,10 +148,20 @@ export async function getAllSolutions(): Promise<SolutionListItem[]> {
     FROM solutions s
     LEFT JOIN solution_filters sf ON s.id = sf.solution_id
     LEFT JOIN filters f ON sf.filter_id = f.id
-    GROUP BY s.id
+    LEFT JOIN image_metadata im ON im.url = s.header_image->>'url'
+    GROUP BY s.id, im.alt_text
     ORDER BY s.order_rank
   `;
-  return rows as SolutionListItem[];
+
+  // Merge alt text into header_image
+  return rows.map((row) => {
+    const solution = row as SolutionListItem & { header_image_alt?: string };
+    if (solution.header_image && solution.header_image_alt) {
+      solution.header_image.alt = solution.header_image_alt;
+    }
+    delete solution.header_image_alt;
+    return solution as SolutionListItem;
+  });
 }
 
 // =============================================================================
@@ -130,6 +195,7 @@ export async function getFilterCategories(): Promise<FilterCategory[]> {
 
 /**
  * Get navigation links for a location (header or footer)
+ * Includes alt text for solution header images from media library
  */
 export async function getNavigation(
   location: "header" | "footer"
@@ -159,7 +225,47 @@ export async function getNavigation(
     GROUP BY nl.id
     ORDER BY nl.order_rank
   `;
-  return rows as NavigationLink[];
+
+  const navLinks = rows as NavigationLink[];
+
+  // Collect all solution header image URLs
+  const imageUrls: string[] = [];
+  for (const link of navLinks) {
+    if (link.sub_items) {
+      for (const subItem of link.sub_items) {
+        if (subItem.solution?.header_image?.url) {
+          imageUrls.push(subItem.solution.header_image.url);
+        }
+      }
+    }
+  }
+
+  if (imageUrls.length === 0) return navLinks;
+
+  // Batch fetch alt texts
+  const altTextRows = await sql`
+    SELECT url, alt_text FROM image_metadata WHERE url = ANY(${imageUrls})
+  ` as { url: string; alt_text: string | null }[];
+
+  const altTextMap = new Map(
+    altTextRows.filter(r => r.alt_text).map(r => [r.url, r.alt_text!])
+  );
+
+  // Merge alt texts into navigation
+  for (const link of navLinks) {
+    if (link.sub_items) {
+      for (const subItem of link.sub_items) {
+        if (subItem.solution?.header_image?.url) {
+          const alt = altTextMap.get(subItem.solution.header_image.url);
+          if (alt) {
+            subItem.solution.header_image.alt = alt;
+          }
+        }
+      }
+    }
+  }
+
+  return navLinks;
 }
 
 // =============================================================================
@@ -174,4 +280,155 @@ export async function getSiteParameters(): Promise<SiteParameters | null> {
     SELECT * FROM site_parameters WHERE id = 1
   `;
   return (rows[0] as SiteParameters) || null;
+}
+
+// =============================================================================
+// Images
+// =============================================================================
+
+interface ImageMetadataRow {
+  url: string;
+  alt_text: string | null;
+}
+
+/**
+ * Get alt text for an image from the database
+ * @param url - The Vercel Blob URL
+ * @returns The alt text or null if not set
+ */
+export async function getImageAltText(url: string): Promise<string | null> {
+  try {
+    const rows = await sql`
+      SELECT alt_text FROM image_metadata WHERE url = ${url}
+    ` as ImageMetadataRow[];
+    return rows[0]?.alt_text || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Batch fetch alt text for multiple image URLs
+ * @param urls - Array of image URLs
+ * @returns Map of URL to alt text
+ */
+async function getImageAltTexts(urls: string[]): Promise<Map<string, string>> {
+  if (urls.length === 0) return new Map();
+
+  try {
+    const rows = await sql`
+      SELECT url, alt_text FROM image_metadata WHERE url = ANY(${urls})
+    ` as ImageMetadataRow[];
+
+    const map = new Map<string, string>();
+    for (const row of rows) {
+      if (row.alt_text) {
+        map.set(row.url, row.alt_text);
+      }
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+/**
+ * Extract all image URLs from sections
+ */
+function extractImageUrlsFromSections(sections: unknown[]): string[] {
+  const urls: string[] = [];
+
+  for (const section of sections) {
+    if (!section || typeof section !== "object") continue;
+    const s = section as Record<string, unknown>;
+
+    // Slideshow images
+    if (s._type === "slideshow" && Array.isArray(s.images)) {
+      for (const item of s.images) {
+        if (item?.image?.url) urls.push(item.image.url);
+      }
+    }
+
+    // Split section items
+    if (s._type === "splitSection" && Array.isArray(s.items)) {
+      for (const item of s.items) {
+        if (item?.image?.url) urls.push(item.image.url);
+      }
+    }
+
+    // Flexible section blocks
+    if (s._type === "flexibleSection") {
+      const blocks = [
+        ...(Array.isArray(s.blockMain) ? s.blockMain : []),
+        ...(Array.isArray(s.blockLeft) ? s.blockLeft : []),
+        ...(Array.isArray(s.blockRight) ? s.blockRight : []),
+      ];
+      for (const block of blocks) {
+        if (block?._type === "flexImageBlock" && block?.image?.url) {
+          urls.push(block.image.url);
+        }
+      }
+    }
+  }
+
+  return urls;
+}
+
+/**
+ * Enrich sections with alt text from the media library
+ * @param sections - Array of sections
+ * @returns Sections with alt text filled in from media library
+ */
+export async function enrichSectionsWithAltText<T>(sections: T[]): Promise<T[]> {
+  if (!sections || sections.length === 0) return sections;
+
+  // Extract all image URLs
+  const urls = extractImageUrlsFromSections(sections as unknown[]);
+  if (urls.length === 0) return sections;
+
+  // Batch fetch alt texts
+  const altTexts = await getImageAltTexts(urls);
+  if (altTexts.size === 0) return sections;
+
+  // Deep clone and update sections
+  const enriched = JSON.parse(JSON.stringify(sections)) as Record<string, unknown>[];
+
+  for (const section of enriched) {
+    if (!section || typeof section !== "object") continue;
+
+    // Slideshow images
+    if (section._type === "slideshow" && Array.isArray(section.images)) {
+      for (const item of section.images) {
+        if (item?.image?.url && altTexts.has(item.image.url)) {
+          item.image.alt = altTexts.get(item.image.url);
+        }
+      }
+    }
+
+    // Split section items
+    if (section._type === "splitSection" && Array.isArray(section.items)) {
+      for (const item of section.items) {
+        if (item?.image?.url && altTexts.has(item.image.url)) {
+          item.image.alt = altTexts.get(item.image.url);
+        }
+      }
+    }
+
+    // Flexible section blocks
+    if (section._type === "flexibleSection") {
+      const blockArrays = ["blockMain", "blockLeft", "blockRight"];
+      for (const blockArrayName of blockArrays) {
+        const blocks = section[blockArrayName];
+        if (Array.isArray(blocks)) {
+          for (const block of blocks) {
+            if (block?._type === "flexImageBlock" && block?.image?.url && altTexts.has(block.image.url)) {
+              block.image.alt = altTexts.get(block.image.url);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return enriched as T[];
 }

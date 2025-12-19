@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,7 +18,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
-  CopyIcon,
   ImageIcon,
   Loader2Icon,
   SearchIcon,
@@ -139,15 +139,6 @@ export default function MediaPage() {
     }
   };
 
-  const copyUrl = async (url: string) => {
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success("URL gekopieerd");
-    } catch {
-      toast.error("Kon URL niet kopieren");
-    }
-  };
-
   const deleteMedia = async () => {
     if (!deleteTarget) return;
 
@@ -256,45 +247,47 @@ export default function MediaPage() {
               key={blob.url}
               className="group overflow-hidden hover:ring-2 hover:ring-primary transition-all"
             >
-              <div className="relative aspect-square">
-                <Image
-                  src={blob.url}
-                  alt={blob.pathname}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                />
-                {/* Overlay with actions */}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    onClick={() => copyUrl(blob.url)}
-                    title="Kopieer URL"
-                  >
-                    <CopyIcon className="size-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    onClick={() => setDeleteTarget(blob)}
-                    title="Verwijderen"
-                  >
-                    <Trash2Icon className="size-4" />
-                  </Button>
+              <Link
+                href={`/admin/content/media/${encodeURIComponent(blob.url)}`}
+                className="block"
+              >
+                <div className="relative aspect-square">
+                  <Image
+                    src={blob.url}
+                    alt={blob.pathname}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                  />
+                  {/* Delete button in top-right corner */}
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      className="size-8"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setDeleteTarget(blob);
+                      }}
+                      title="Verwijderen"
+                    >
+                      <Trash2Icon className="size-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              <CardContent className="p-2">
-                <p
-                  className="text-xs font-medium truncate"
-                  title={blob.pathname}
-                >
-                  {blob.pathname}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {formatFileSize(blob.size)} • {formatDate(blob.uploadedAt)}
-                </p>
-              </CardContent>
+                <CardContent className="p-2">
+                  <p
+                    className="text-xs font-medium truncate"
+                    title={blob.pathname}
+                  >
+                    {blob.pathname}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatFileSize(blob.size)} • {formatDate(blob.uploadedAt)}
+                  </p>
+                </CardContent>
+              </Link>
             </Card>
           ))}
         </div>

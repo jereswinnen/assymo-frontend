@@ -1,8 +1,15 @@
-import { put, del } from "@vercel/blob";
+import { put, del, head } from "@vercel/blob";
 
 export interface UploadedImage {
   url: string;
   filename: string;
+}
+
+export interface BlobInfo {
+  url: string;
+  pathname: string;
+  size: number;
+  uploadedAt: Date;
 }
 
 /**
@@ -13,6 +20,21 @@ export interface UploadedImage {
 export async function uploadImage(file: File): Promise<UploadedImage> {
   const blob = await put(file.name, file, { access: "public" });
   return { url: blob.url, filename: file.name };
+}
+
+/**
+ * Get blob info from Vercel Blob storage
+ * @param url - The blob URL
+ * @returns The blob info
+ */
+export async function getBlobInfo(url: string): Promise<BlobInfo> {
+  const blob = await head(url);
+  return {
+    url: blob.url,
+    pathname: blob.pathname,
+    size: blob.size,
+    uploadedAt: blob.uploadedAt,
+  };
 }
 
 /**
