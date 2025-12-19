@@ -87,7 +87,9 @@ export function MediaLibraryDialog({
             </div>
           ) : filteredImages.length === 0 ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground">
-              {search ? "Geen resultaten gevonden" : "Geen afbeeldingen in bibliotheek"}
+              {search
+                ? "Geen resultaten gevonden"
+                : "Geen afbeeldingen in bibliotheek"}
             </div>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 py-2">
@@ -106,7 +108,7 @@ export function MediaLibraryDialog({
                     sizes="(max-width: 640px) 33vw, 25vw"
                   />
                   {(image.displayName || image.altText) && (
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <p className="text-white text-xs truncate">
                         {image.displayName || image.altText}
                       </p>

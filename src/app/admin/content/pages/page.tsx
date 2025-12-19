@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
+  CopyIcon,
   FileTextIcon,
   HomeIcon,
   Loader2Icon,
@@ -76,6 +77,9 @@ export default function PagesPage() {
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<Page | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Duplicate
+  const [duplicating, setDuplicating] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPages();
@@ -188,6 +192,32 @@ export default function PagesPage() {
     }
   };
 
+  const duplicatePage = async (page: Page) => {
+    setDuplicating(page.id);
+    try {
+      const response = await fetch(`/api/admin/content/pages/${page.id}/duplicate`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to duplicate");
+      }
+
+      const newPage = await response.json();
+      setPages((prev) =>
+        [...prev, newPage].sort(
+          (a, b) => (b.is_homepage ? 1 : 0) - (a.is_homepage ? 1 : 0) || a.title.localeCompare(b.title)
+        )
+      );
+      toast.success("Pagina gedupliceerd");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Kon pagina niet dupliceren");
+    } finally {
+      setDuplicating(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-end">
@@ -243,6 +273,19 @@ export default function PagesPage() {
                     <Link href={`/admin/content/pages/${page.id}`}>
                       <PencilIcon className="size-4" />
                     </Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => duplicatePage(page)}
+                    disabled={duplicating === page.id}
+                    title="Dupliceren"
+                  >
+                    {duplicating === page.id ? (
+                      <Loader2Icon className="size-4 animate-spin" />
+                    ) : (
+                      <CopyIcon className="size-4" />
+                    )}
                   </Button>
                   <Button
                     variant="ghost"

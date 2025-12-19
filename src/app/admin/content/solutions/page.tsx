@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
+  CopyIcon,
   GripVerticalIcon,
   ImageIcon,
   Loader2Icon,
@@ -81,11 +82,15 @@ function formatDate(dateString: string): string {
 function SortableSolutionItem({
   solution,
   onEdit,
+  onDuplicate,
   onDelete,
+  duplicating,
 }: {
   solution: Solution;
   onEdit: () => void;
+  onDuplicate: () => void;
   onDelete: () => void;
+  duplicating: boolean;
 }) {
   const {
     attributes,
@@ -145,6 +150,19 @@ function SortableSolutionItem({
           <Button variant="ghost" size="icon" onClick={onEdit}>
             <PencilIcon className="size-4" />
           </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onDuplicate}
+            disabled={duplicating}
+            title="Dupliceren"
+          >
+            {duplicating ? (
+              <Loader2Icon className="size-4 animate-spin" />
+            ) : (
+              <CopyIcon className="size-4" />
+            )}
+          </Button>
           <Button variant="ghost" size="icon" onClick={onDelete}>
             <Trash2Icon className="size-4" />
           </Button>
@@ -168,6 +186,9 @@ export default function SolutionsPage() {
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<Solution | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Duplicate
+  const [duplicating, setDuplicating] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -270,6 +291,31 @@ export default function SolutionsPage() {
     }
   };
 
+  const duplicateSolution = async (solution: Solution) => {
+    setDuplicating(solution.id);
+    try {
+      const response = await fetch(
+        `/api/admin/content/solutions/${solution.id}/duplicate`,
+        { method: "POST" }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to duplicate");
+      }
+
+      const newSolution = await response.json();
+      setSolutions((prev) => [...prev, newSolution]);
+      toast.success("Realisatie gedupliceerd");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Kon realisatie niet dupliceren"
+      );
+    } finally {
+      setDuplicating(null);
+    }
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -339,7 +385,9 @@ export default function SolutionsPage() {
                   onEdit={() => {
                     window.location.href = `/admin/content/solutions/${solution.id}`;
                   }}
+                  onDuplicate={() => duplicateSolution(solution)}
                   onDelete={() => setDeleteTarget(solution)}
+                  duplicating={duplicating === solution.id}
                 />
               ))}
             </div>
