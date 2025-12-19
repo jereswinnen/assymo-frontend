@@ -2,7 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import {
   Select,
@@ -45,20 +49,20 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="heading">Heading</Label>
+    <FieldGroup>
+      <Field>
+        <FieldLabel htmlFor="heading">Heading</FieldLabel>
         <Input
           id="heading"
           value={section.heading || ""}
           onChange={(e) => onChange({ ...section, heading: e.target.value })}
           placeholder="Waarom kiezen voor ons?"
         />
-      </div>
+      </Field>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label>USPs</Label>
+          <FieldLabel>USPs</FieldLabel>
           <Button type="button" variant="outline" size="sm" onClick={addUsp}>
             <PlusIcon className="size-4" />
             USP toevoegen
@@ -76,8 +80,8 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                 <CardContent className="pt-4 space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Icoon</Label>
+                      <Field>
+                        <FieldLabel>Icoon</FieldLabel>
                         <Select
                           value={usp.icon || ""}
                           onValueChange={(value) =>
@@ -95,9 +99,9 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                             ))}
                           </SelectContent>
                         </Select>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Titel</Label>
+                      </Field>
+                      <Field>
+                        <FieldLabel>Titel</FieldLabel>
                         <Input
                           value={usp.title || ""}
                           onChange={(e) =>
@@ -105,7 +109,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                           }
                           placeholder="USP titel"
                         />
-                      </div>
+                      </Field>
                     </div>
                     <Button
                       type="button"
@@ -126,8 +130,8 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                   />
 
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1">
-                      <Label className="text-xs">Link label (optioneel)</Label>
+                    <Field>
+                      <FieldLabel>Link label (optioneel)</FieldLabel>
                       <Input
                         value={usp.link?.label || ""}
                         onChange={(e) =>
@@ -137,9 +141,9 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                         }
                         placeholder="Meer info"
                       />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Link URL (optioneel)</Label>
+                    </Field>
+                    <Field>
+                      <FieldLabel>Link URL (optioneel)</FieldLabel>
                       <Input
                         value={usp.link?.url || ""}
                         onChange={(e) =>
@@ -149,7 +153,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                         }
                         placeholder="/contact"
                       />
-                    </div>
+                    </Field>
                   </div>
                 </CardContent>
               </Card>
@@ -157,6 +161,6 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
           </div>
         )}
       </div>
-    </div>
+    </FieldGroup>
   );
 }

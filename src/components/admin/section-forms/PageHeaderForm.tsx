@@ -2,9 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import {
   Select,
@@ -55,16 +60,16 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="title">Titel</Label>
+    <FieldGroup>
+      <Field>
+        <FieldLabel htmlFor="title">Titel</FieldLabel>
         <Input
           id="title"
           value={section.title || ""}
           onChange={(e) => onChange({ ...section, title: e.target.value })}
           placeholder="Page titel"
         />
-      </div>
+      </Field>
 
       <RichTextEditor
         label="Subtitel"
@@ -73,11 +78,11 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="flex items-center justify-between sm:flex-col sm:items-start sm:gap-2">
-          <div>
-            <Label htmlFor="background">Achtergrond</Label>
-            <p className="text-xs text-muted-foreground">Grijze achtergrond</p>
-          </div>
+        <Field orientation="horizontal" className="sm:flex-col sm:items-start">
+          <FieldLabel htmlFor="background">
+            Achtergrond
+            <FieldDescription>Grijze achtergrond</FieldDescription>
+          </FieldLabel>
           <Switch
             id="background"
             checked={section.background || false}
@@ -85,13 +90,13 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
               onChange({ ...section, background: checked })
             }
           />
-        </div>
+        </Field>
 
-        <div className="flex items-center justify-between sm:flex-col sm:items-start sm:gap-2">
-          <div>
-            <Label htmlFor="showImage">Toon afbeelding</Label>
-            <p className="text-xs text-muted-foreground">Header afbeelding</p>
-          </div>
+        <Field orientation="horizontal" className="sm:flex-col sm:items-start">
+          <FieldLabel htmlFor="showImage">
+            Toon afbeelding
+            <FieldDescription>Header afbeelding</FieldDescription>
+          </FieldLabel>
           <Switch
             id="showImage"
             checked={section.showImage || false}
@@ -99,13 +104,13 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
               onChange({ ...section, showImage: checked })
             }
           />
-        </div>
+        </Field>
 
-        <div className="flex items-center justify-between sm:flex-col sm:items-start sm:gap-2">
-          <div>
-            <Label htmlFor="showButtons">Toon knoppen</Label>
-            <p className="text-xs text-muted-foreground">CTA knoppen</p>
-          </div>
+        <Field orientation="horizontal" className="sm:flex-col sm:items-start">
+          <FieldLabel htmlFor="showButtons">
+            Toon knoppen
+            <FieldDescription>CTA knoppen</FieldDescription>
+          </FieldLabel>
           <Switch
             id="showButtons"
             checked={section.showButtons || false}
@@ -113,13 +118,13 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
               onChange({ ...section, showButtons: checked })
             }
           />
-        </div>
+        </Field>
       </div>
 
       {section.showButtons && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label>Knoppen (max. 2)</Label>
+            <FieldLabel>Knoppen (max. 2)</FieldLabel>
             {buttons.length < 2 && (
               <Button
                 type="button"
@@ -144,8 +149,8 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                   <CardContent className="pt-4 space-y-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 grid gap-3 sm:grid-cols-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Label</Label>
+                        <Field>
+                          <FieldLabel>Label</FieldLabel>
                           <Input
                             value={button.label || ""}
                             onChange={(e) =>
@@ -153,9 +158,9 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                             }
                             placeholder="Knop tekst"
                           />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">URL</Label>
+                        </Field>
+                        <Field>
+                          <FieldLabel>URL</FieldLabel>
                           <Input
                             value={button.url || ""}
                             onChange={(e) =>
@@ -163,7 +168,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                             }
                             placeholder="/contact"
                           />
-                        </div>
+                        </Field>
                       </div>
                       <Button
                         type="button"
@@ -177,8 +182,8 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Icoon</Label>
+                      <Field>
+                        <FieldLabel>Icoon</FieldLabel>
                         <Select
                           value={button.icon || ""}
                           onValueChange={(value) =>
@@ -196,9 +201,9 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                             ))}
                           </SelectContent>
                         </Select>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Variant</Label>
+                      </Field>
+                      <Field>
+                        <FieldLabel>Variant</FieldLabel>
                         <Select
                           value={button.variant || "primary"}
                           onValueChange={(value) =>
@@ -215,7 +220,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                             <SelectItem value="secondary">Secondary</SelectItem>
                           </SelectContent>
                         </Select>
-                      </div>
+                      </Field>
                     </div>
                   </CardContent>
                 </Card>
@@ -224,6 +229,6 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
           )}
         </div>
       )}
-    </div>
+    </FieldGroup>
   );
 }

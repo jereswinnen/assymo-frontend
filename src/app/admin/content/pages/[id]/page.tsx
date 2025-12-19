@@ -311,10 +311,7 @@ export default function PageEditorPage({
             )}
             <Field orientation="horizontal">
               <FieldLabel htmlFor="is_homepage">
-                Homepage
-                <FieldDescription>
-                  Dit is de hoofdpagina van de website
-                </FieldDescription>
+                Stel in als homepage
               </FieldLabel>
               <Switch
                 id="is_homepage"

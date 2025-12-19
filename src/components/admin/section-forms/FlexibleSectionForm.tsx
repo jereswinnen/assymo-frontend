@@ -1,9 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -154,7 +159,7 @@ function BlockList({ blocks, onChange, title }: BlockListProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium">{title}</Label>
+        <FieldLabel>{title}</FieldLabel>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button type="button" variant="outline" size="sm">
@@ -240,10 +245,10 @@ export function FlexibleSectionForm({
   const isTwoColumn = layout !== "1-col";
 
   return (
-    <div className="space-y-4">
+    <FieldGroup>
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="space-y-2">
-          <Label>Layout</Label>
+        <Field>
+          <FieldLabel>Layout</FieldLabel>
           <Select
             value={layout}
             onValueChange={(value) =>
@@ -261,10 +266,10 @@ export function FlexibleSectionForm({
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </Field>
 
-        <div className="space-y-2">
-          <Label>Verticale uitlijning</Label>
+        <Field>
+          <FieldLabel>Verticale uitlijning</FieldLabel>
           <Select
             value={section.verticalAlign || "top"}
             onValueChange={(value) =>
@@ -285,13 +290,13 @@ export function FlexibleSectionForm({
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </Field>
 
-        <div className="flex items-center justify-between sm:flex-col sm:items-start sm:gap-2">
-          <div>
-            <Label htmlFor="background">Achtergrond</Label>
-            <p className="text-xs text-muted-foreground">Grijze achtergrond</p>
-          </div>
+        <Field orientation="horizontal" className="sm:flex-col sm:items-start">
+          <FieldLabel htmlFor="background">
+            Achtergrond
+            <FieldDescription>Grijze achtergrond</FieldDescription>
+          </FieldLabel>
           <Switch
             id="background"
             checked={section.background || false}
@@ -299,7 +304,7 @@ export function FlexibleSectionForm({
               onChange({ ...section, background: checked })
             }
           />
-        </div>
+        </Field>
       </div>
 
       {isTwoColumn ? (
@@ -322,6 +327,6 @@ export function FlexibleSectionForm({
           onChange={(blocks) => onChange({ ...section, blockMain: blocks })}
         />
       )}
-    </div>
+    </FieldGroup>
   );
 }

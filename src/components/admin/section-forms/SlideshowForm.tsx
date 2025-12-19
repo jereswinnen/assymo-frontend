@@ -2,9 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { SlideshowSection } from "@/types/sections";
@@ -43,14 +48,12 @@ export function SlideshowForm({ section, onChange }: SlideshowFormProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="space-y-0.5">
-          <Label htmlFor="background">Achtergrond</Label>
-          <p className="text-xs text-muted-foreground">
-            Toon een gekleurde achtergrond
-          </p>
-        </div>
+    <FieldGroup>
+      <Field orientation="horizontal">
+        <FieldLabel htmlFor="background">
+          Achtergrond
+          <FieldDescription>Toon een gekleurde achtergrond</FieldDescription>
+        </FieldLabel>
         <Switch
           id="background"
           checked={section.background || false}
@@ -58,11 +61,11 @@ export function SlideshowForm({ section, onChange }: SlideshowFormProps) {
             onChange({ ...section, background: checked })
           }
         />
-      </div>
+      </Field>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label>Afbeeldingen</Label>
+          <FieldLabel>Afbeeldingen</FieldLabel>
           <Button type="button" variant="outline" size="sm" onClick={addImage}>
             <PlusIcon className="size-4" />
             Afbeelding toevoegen
@@ -99,8 +102,8 @@ export function SlideshowForm({ section, onChange }: SlideshowFormProps) {
                       <Trash2Icon className="size-4" />
                     </Button>
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Bijschrift (optioneel)</Label>
+                  <Field>
+                    <FieldLabel>Bijschrift (optioneel)</FieldLabel>
                     <Input
                       value={img.caption || ""}
                       onChange={(e) =>
@@ -108,13 +111,13 @@ export function SlideshowForm({ section, onChange }: SlideshowFormProps) {
                       }
                       placeholder="Beschrijving van de afbeelding"
                     />
-                  </div>
+                  </Field>
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
       </div>
-    </div>
+    </FieldGroup>
   );
 }
