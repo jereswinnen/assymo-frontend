@@ -413,7 +413,7 @@ export function NewsletterComposer({
           </div>
         ))}
 
-        <Button variant="outline" onClick={addSection} className="w-full">
+        <Button size="sm" variant="outline" onClick={addSection} className="w-full">
           <PlusIcon className="size-4" />
           Sectie toevoegen
         </Button>
@@ -433,10 +433,10 @@ export function NewsletterComposer({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSectionToDelete(null)}>
+            <Button size="sm" variant="outline" onClick={() => setSectionToDelete(null)}>
               Annuleren
             </Button>
-            <Button variant="destructive" onClick={handleRemoveSectionConfirm}>
+            <Button size="sm" variant="destructive" onClick={handleRemoveSectionConfirm}>
               <Trash2Icon className="size-4" />
               Verwijderen
             </Button>
@@ -464,7 +464,7 @@ export function NewsletterComposer({
             >
               Annuleren
             </Button>
-            <Button onClick={handleConfirmBroadcast}>
+            <Button size="sm" onClick={handleConfirmBroadcast}>
               <SendIcon className="size-4" />
               Versturen
             </Button>
@@ -494,10 +494,10 @@ export function NewsletterComposer({
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowTestDialog(false)}>
+            <Button size="sm" variant="outline" onClick={() => setShowTestDialog(false)}>
               Annuleren
             </Button>
-            <Button onClick={handleConfirmTest}>
+            <Button size="sm" onClick={handleConfirmTest}>
               <ForwardIcon className="size-4" />
               Versturen
             </Button>

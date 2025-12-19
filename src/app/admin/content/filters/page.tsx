@@ -640,12 +640,13 @@ export default function FiltersPage() {
           </div>
           <DialogFooter>
             <Button
+              size="sm"
               variant="outline"
               onClick={() => setCategoryDialogOpen(false)}
             >
               Annuleren
             </Button>
-            <Button onClick={handleSaveCategory} disabled={savingCategory}>
+            <Button size="sm" onClick={handleSaveCategory} disabled={savingCategory}>
               {savingCategory && (
                 <Loader2Icon className="size-4 animate-spin" />
               )}
@@ -690,12 +691,13 @@ export default function FiltersPage() {
           </div>
           <DialogFooter>
             <Button
+              size="sm"
               variant="outline"
               onClick={() => setFilterDialogOpen(false)}
             >
               Annuleren
             </Button>
-            <Button onClick={handleSaveFilter} disabled={savingFilter}>
+            <Button size="sm" onClick={handleSaveFilter} disabled={savingFilter}>
               {savingFilter && <Loader2Icon className="size-4 animate-spin" />}
               {editingFilter ? "Opslaan" : "Aanmaken"}
             </Button>

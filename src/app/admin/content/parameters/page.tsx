@@ -89,7 +89,7 @@ export default function SiteParametersPage() {
   // Header actions
   const headerActions = useMemo(
     () => (
-      <Button onClick={handleSave} disabled={saving || !hasChanges}>
+      <Button size="sm" onClick={handleSave} disabled={saving || !hasChanges}>
         {saving ? (
           <Loader2Icon className="size-4 animate-spin" />
         ) : (

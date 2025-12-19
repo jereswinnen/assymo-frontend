@@ -1,11 +1,24 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -29,7 +42,7 @@ import {
   FileTextIcon,
   HomeIcon,
   Loader2Icon,
-  PencilIcon,
+  MoreHorizontalIcon,
   PlusIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -54,8 +67,8 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-
 export default function PagesPage() {
+  const router = useRouter();
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -145,20 +158,26 @@ export default function PagesPage() {
       if (newPage.is_homepage) {
         setPages((prev) =>
           [...prev.map((p) => ({ ...p, is_homepage: false })), newPage].sort(
-            (a, b) => (b.is_homepage ? 1 : 0) - (a.is_homepage ? 1 : 0) || a.title.localeCompare(b.title)
-          )
+            (a, b) =>
+              (b.is_homepage ? 1 : 0) - (a.is_homepage ? 1 : 0) ||
+              a.title.localeCompare(b.title),
+          ),
         );
       } else {
         setPages((prev) =>
           [...prev, newPage].sort(
-            (a, b) => (b.is_homepage ? 1 : 0) - (a.is_homepage ? 1 : 0) || a.title.localeCompare(b.title)
-          )
+            (a, b) =>
+              (b.is_homepage ? 1 : 0) - (a.is_homepage ? 1 : 0) ||
+              a.title.localeCompare(b.title),
+          ),
         );
       }
       setIsNewDialogOpen(false);
       toast.success("Pagina aangemaakt");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Kon pagina niet aanmaken");
+      toast.error(
+        error instanceof Error ? error.message : "Kon pagina niet aanmaken",
+      );
     } finally {
       setSaving(false);
     }
@@ -169,9 +188,12 @@ export default function PagesPage() {
 
     setDeleting(true);
     try {
-      const response = await fetch(`/api/admin/content/pages/${deleteTarget.id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/admin/content/pages/${deleteTarget.id}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       if (!response.ok) throw new Error("Failed to delete");
 
@@ -188,9 +210,12 @@ export default function PagesPage() {
   const duplicatePage = async (page: Page) => {
     setDuplicating(page.id);
     try {
-      const response = await fetch(`/api/admin/content/pages/${page.id}/duplicate`, {
-        method: "POST",
-      });
+      const response = await fetch(
+        `/api/admin/content/pages/${page.id}/duplicate`,
+        {
+          method: "POST",
+        },
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -200,12 +225,16 @@ export default function PagesPage() {
       const newPage = await response.json();
       setPages((prev) =>
         [...prev, newPage].sort(
-          (a, b) => (b.is_homepage ? 1 : 0) - (a.is_homepage ? 1 : 0) || a.title.localeCompare(b.title)
-        )
+          (a, b) =>
+            (b.is_homepage ? 1 : 0) - (a.is_homepage ? 1 : 0) ||
+            a.title.localeCompare(b.title),
+        ),
       );
       toast.success("Pagina gedupliceerd");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Kon pagina niet dupliceren");
+      toast.error(
+        error instanceof Error ? error.message : "Kon pagina niet dupliceren",
+      );
     } finally {
       setDuplicating(null);
     }
@@ -214,12 +243,12 @@ export default function PagesPage() {
   // Header actions
   const headerActions = useMemo(
     () => (
-      <Button onClick={openNewDialog}>
+      <Button size="sm" onClick={openNewDialog}>
         <PlusIcon className="size-4" />
         Nieuwe pagina
       </Button>
     ),
-    [openNewDialog]
+    [openNewDialog],
   );
   useAdminHeaderActions(headerActions);
 
@@ -230,75 +259,89 @@ export default function PagesPage() {
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
         </div>
       ) : pages.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <FileTextIcon className="size-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-4">Nog geen pagina&apos;s</p>
-            <Button size="sm" onClick={openNewDialog}>
-              <PlusIcon className="size-4" />
-              Eerste pagina aanmaken
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-2">
-          {pages.map((page) => (
-            <Card key={page.id} className="hover:bg-muted/50 transition-colors">
-              <CardContent className="flex items-center gap-4 p-4">
-                {page.is_homepage ? (
-                  <HomeIcon className="size-5 text-primary shrink-0" />
-                ) : (
-                  <FileTextIcon className="size-5 text-muted-foreground shrink-0" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium truncate">{page.title}</p>
-                    {page.is_homepage && (
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                        Homepage
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {page.is_homepage ? "/" : `/${page.slug}`}
-                  </p>
-                </div>
-                <p className="text-sm text-muted-foreground shrink-0 hidden sm:block">
-                  {formatDateWithTime(page.updated_at)}
-                </p>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Button variant="ghost" size="icon" asChild>
-                    <Link href={`/admin/content/pages/${page.id}`}>
-                      <PencilIcon className="size-4" />
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => duplicatePage(page)}
-                    disabled={duplicating === page.id}
-                    title="Dupliceren"
-                  >
-                    {duplicating === page.id ? (
-                      <Loader2Icon className="size-4 animate-spin" />
-                    ) : (
-                      <CopyIcon className="size-4" />
-                    )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setDeleteTarget(page)}
-                    disabled={page.is_homepage}
-                    title={page.is_homepage ? "Homepage kan niet verwijderd worden" : undefined}
-                  >
-                    <Trash2Icon className="size-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="flex flex-col items-center justify-center py-12">
+          <FileTextIcon className="size-12 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground mb-4">Nog geen pagina&apos;s</p>
+          <Button size="sm" onClick={openNewDialog}>
+            <PlusIcon className="size-4" />
+            Eerste pagina aanmaken
+          </Button>
         </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-10"></TableHead>
+              <TableHead>Titel</TableHead>
+              <TableHead className="hidden sm:table-cell">URL</TableHead>
+              <TableHead className="hidden md:table-cell">
+                Laatst bewerkt
+              </TableHead>
+              <TableHead className="w-10"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {pages.map((page) => (
+              <TableRow
+                key={page.id}
+                className="cursor-pointer"
+                onClick={() => router.push(`/admin/content/pages/${page.id}`)}
+              >
+                <TableCell>
+                  {page.is_homepage && <HomeIcon className="size-4" />}
+                </TableCell>
+                <TableCell className="font-medium">{page.title}</TableCell>
+                <TableCell className="hidden sm:table-cell text-muted-foreground">
+                  {page.is_homepage ? "/" : `/${page.slug}`}
+                </TableCell>
+                <TableCell className="hidden md:table-cell text-muted-foreground">
+                  {formatDateWithTime(page.updated_at)}
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreHorizontalIcon className="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          duplicatePage(page);
+                        }}
+                        disabled={duplicating === page.id}
+                      >
+                        {duplicating === page.id ? (
+                          <Loader2Icon className="size-4 animate-spin" />
+                        ) : (
+                          <CopyIcon className="size-4" />
+                        )}
+                        Dupliceren
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTarget(page);
+                        }}
+                        disabled={page.is_homepage}
+                      >
+                        <Trash2Icon className="size-4" />
+                        Verwijderen
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
 
       {/* New Page Dialog */}
@@ -347,13 +390,14 @@ export default function PagesPage() {
           </div>
           <DialogFooter>
             <Button
+              size="sm"
               variant="outline"
               onClick={() => setIsNewDialogOpen(false)}
               disabled={saving}
             >
               Annuleren
             </Button>
-            <Button onClick={createPage} disabled={saving || !newTitle.trim()}>
+            <Button size="sm" onClick={createPage} disabled={saving || !newTitle.trim()}>
               {saving ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
@@ -368,13 +412,16 @@ export default function PagesPage() {
       </Dialog>
 
       {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={() => setDeleteTarget(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Pagina verwijderen?</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je &quot;{deleteTarget?.title}&quot; wilt verwijderen?
-              Dit kan niet ongedaan worden gemaakt.
+              Weet je zeker dat je &quot;{deleteTarget?.title}&quot; wilt
+              verwijderen? Dit kan niet ongedaan worden gemaakt.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

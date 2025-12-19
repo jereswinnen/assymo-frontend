@@ -249,7 +249,7 @@ export function DocumentEmbeddings() {
               </div>
             </div>
           </div>
-          <Button variant="destructive" size="sm" onClick={handleDeleteClick}>
+          <Button size="sm" variant="destructive" onClick={handleDeleteClick}>
             <Trash2Icon className="size-4" />
             Verwijder
           </Button>

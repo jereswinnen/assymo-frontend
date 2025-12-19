@@ -189,7 +189,7 @@ export function EmailDashboard() {
         </TabsList>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" asChild>
+          <Button size="sm" variant="outline" asChild>
             <a
               href="https://resend.com/audience"
               target="_blank"
@@ -199,7 +199,7 @@ export function EmailDashboard() {
               Resend
             </a>
           </Button>
-          <Button onClick={handleCreateNew} disabled={creating}>
+          <Button size="sm" onClick={handleCreateNew} disabled={creating}>
             {creating ? (
               <Loader2Icon className="size-4 animate-spin" />
             ) : (
@@ -306,12 +306,13 @@ export function EmailDashboard() {
             </DialogHeader>
             <DialogFooter>
               <Button
+                size="sm"
                 variant="outline"
                 onClick={() => setDeleteDialogOpen(false)}
               >
                 Annuleren
               </Button>
-              <Button variant="destructive" onClick={handleDeleteConfirm}>
+              <Button size="sm" variant="destructive" onClick={handleDeleteConfirm}>
                 <Trash2Icon className="size-4" />
                 Verwijderen
               </Button>

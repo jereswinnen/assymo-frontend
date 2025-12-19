@@ -309,13 +309,14 @@ export function CreateAppointmentForm({
 
           <DialogFooter>
             <Button
+              size="sm"
               type="button"
               variant="outline"
               onClick={() => handleOpenChange(false)}
             >
               Annuleren
             </Button>
-            <Button type="submit" disabled={saving || !isFormValid}>
+            <Button size="sm" type="submit" disabled={saving || !isFormValid}>
               {saving ? (
                 <Loader2Icon className="size-4 animate-spin" />
               ) : (

@@ -72,7 +72,7 @@ export function AppointmentsDashboard() {
 
         <div className="flex items-center gap-2">
           {activeTab === "overview" && (
-            <Button onClick={() => setCreateAppointmentOpen(true)}>
+            <Button size="sm" onClick={() => setCreateAppointmentOpen(true)}>
               <CalendarPlusIcon className="size-4" />
               Nieuwe afspraak
             </Button>
@@ -80,6 +80,7 @@ export function AppointmentsDashboard() {
 
           {activeTab === "opening-hours" && (
             <Button
+              size="sm"
               onClick={handleSaveSettings}
               disabled={settingsSaving || !settingsHasChanges}
             >
@@ -93,7 +94,7 @@ export function AppointmentsDashboard() {
           )}
 
           {activeTab === "overrides" && (
-            <Button onClick={() => setCreateOverrideOpen(true)}>
+            <Button size="sm" onClick={() => setCreateOverrideOpen(true)}>
               <ClockPlusIcon className="size-4" />
               Toevoegen
             </Button>

@@ -182,6 +182,7 @@ export function SecuritySettings() {
         )}
 
         <Button
+          size="sm"
           variant="secondary"
           onClick={handleAddPasskey}
           disabled={adding}
@@ -208,6 +209,7 @@ export function SecuritySettings() {
           </DialogHeader>
           <DialogFooter>
             <Button
+              size="sm"
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
               disabled={!!deletingId}
@@ -215,6 +217,7 @@ export function SecuritySettings() {
               Annuleren
             </Button>
             <Button
+              size="sm"
               variant="destructive"
               onClick={handleDeletePasskey}
               disabled={!!deletingId}

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, use, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,15 +17,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ImageUpload, ImageValue } from "@/components/admin/ImageUpload";
 import { SectionList } from "@/components/admin/SectionList";
 import { Section } from "@/types/sections";
 import { toast } from "sonner";
 import {
-  ArrowLeftIcon,
-  ExternalLinkIcon,
+  CheckIcon,
+  CompassIcon,
   Loader2Icon,
-  SaveIcon,
+  MoreHorizontalIcon,
   Trash2Icon,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -174,7 +179,7 @@ export default function PageEditorPage({
       toast.success("Pagina opgeslagen");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Kon pagina niet opslaan"
+        error instanceof Error ? error.message : "Kon pagina niet opslaan",
       );
     } finally {
       setSaving(false);
@@ -203,46 +208,44 @@ export default function PageEditorPage({
   const headerActions = useMemo(
     () => (
       <>
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/admin/content/pages">
-            <ArrowLeftIcon className="size-4" />
-          </Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <a
-            href={isHomepage ? "/" : `/${slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <ExternalLinkIcon className="size-4" />
-            Bekijken
-          </a>
-        </Button>
-        <Button
-          variant="destructive"
-          onClick={() => setShowDeleteDialog(true)}
-          disabled={isHomepage}
-          title={isHomepage ? "Homepage kan niet verwijderd worden" : undefined}
-        >
-          <Trash2Icon className="size-4" />
-          Verwijderen
-        </Button>
-        <Button onClick={savePage} disabled={saving || !hasChanges}>
+        <Button size="sm" onClick={savePage} disabled={saving || !hasChanges}>
           {saving ? (
-            <>
-              <Loader2Icon className="size-4 animate-spin" />
-              Opslaan...
-            </>
+            <Loader2Icon className="size-4 animate-spin" />
           ) : (
-            <>
-              <SaveIcon className="size-4" />
-              Opslaan
-            </>
+            <CheckIcon className="size-4" />
           )}
+          Opslaan
         </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <MoreHorizontalIcon className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <a
+                href={isHomepage ? "/" : `/${slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <CompassIcon className="size-4" />
+                Open in browser
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => setShowDeleteDialog(true)}
+              disabled={isHomepage}
+            >
+              <Trash2Icon className="size-4" />
+              Verwijderen
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </>
     ),
-    [isHomepage, slug, saving, hasChanges, savePage]
+    [isHomepage, slug, saving, hasChanges, savePage],
   );
   useAdminHeaderActions(headerActions);
 
@@ -372,8 +375,8 @@ export default function PageEditorPage({
           <AlertDialogHeader>
             <AlertDialogTitle>Pagina verwijderen?</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je &quot;{page.title}&quot; wilt verwijderen? Dit
-              kan niet ongedaan worden gemaakt.
+              Weet je zeker dat je &quot;{page.title}&quot; wilt verwijderen?
+              Dit kan niet ongedaan worden gemaakt.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -341,7 +341,7 @@ export default function SolutionsPage() {
   // Header actions
   const headerActions = useMemo(
     () => (
-      <Button onClick={openNewDialog}>
+      <Button size="sm" onClick={openNewDialog}>
         <PlusIcon className="size-4" />
         Nieuwe realisatie
       </Button>
@@ -426,13 +426,14 @@ export default function SolutionsPage() {
           </div>
           <DialogFooter>
             <Button
+              size="sm"
               variant="outline"
               onClick={() => setIsNewDialogOpen(false)}
               disabled={saving}
             >
               Annuleren
             </Button>
-            <Button onClick={createSolution} disabled={saving || !newName.trim()}>
+            <Button size="sm" onClick={createSolution} disabled={saving || !newName.trim()}>
               {saving ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />

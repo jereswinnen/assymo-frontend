@@ -519,12 +519,13 @@ export function DateOverrides({
 
           <DialogFooter>
             <Button
+              size="sm"
               variant="outline"
               onClick={() => onCreateDialogOpenChange(false)}
             >
               Annuleren
             </Button>
-            <Button onClick={handleCreate} disabled={saving}>
+            <Button size="sm" onClick={handleCreate} disabled={saving}>
               {saving && <Loader2Icon className="size-4 animate-spin" />}
               Toevoegen
             </Button>
@@ -549,10 +550,11 @@ export function DateOverrides({
             niet ongedaan worden gemaakt.
           </p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
+            <Button size="sm" variant="outline" onClick={() => setDeleteConfirmId(null)}>
               Annuleren
             </Button>
             <Button
+              size="sm"
               variant="destructive"
               onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
               disabled={deleting !== null}

@@ -202,13 +202,14 @@ export default function ImageDetailPage({
           </Link>
         </Button>
         <Button
+          size="sm"
           variant="destructive"
           onClick={() => setShowDeleteDialog(true)}
         >
           <Trash2Icon className="size-4" />
           Verwijderen
         </Button>
-        <Button onClick={saveImage} disabled={saving || !hasChanges}>
+        <Button size="sm" onClick={saveImage} disabled={saving || !hasChanges}>
           {saving ? (
             <>
               <Loader2Icon className="size-4 animate-spin" />

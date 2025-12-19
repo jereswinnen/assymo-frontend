@@ -345,10 +345,10 @@ export function AppointmentDialog({
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setEditing(false)}>
+              <Button size="sm" variant="outline" onClick={() => setEditing(false)}>
                 Annuleren
               </Button>
-              <Button onClick={handleSave} disabled={saving}>
+              <Button size="sm" onClick={handleSave} disabled={saving}>
                 {saving && <Loader2Icon className="size-4 animate-spin" />}
                 Opslaan
               </Button>
@@ -449,6 +449,7 @@ export function AppointmentDialog({
             <DialogFooter className="gap-2">
               {displayData.status !== "cancelled" && (
                 <Button
+                  size="sm"
                   variant="destructive"
                   onClick={() => setShowCancelConfirm(true)}
                   disabled={cancelling}
@@ -457,7 +458,7 @@ export function AppointmentDialog({
                   Annuleren
                 </Button>
               )}
-              <Button variant="outline" onClick={startEditing}>
+              <Button size="sm" variant="outline" onClick={startEditing}>
                 Bewerken
               </Button>
             </DialogFooter>
@@ -477,12 +478,14 @@ export function AppointmentDialog({
                 </p>
                 <DialogFooter>
                   <Button
+                    size="sm"
                     variant="outline"
                     onClick={() => setShowCancelConfirm(false)}
                   >
                     Terug
                   </Button>
                   <Button
+                    size="sm"
                     variant="destructive"
                     onClick={handleCancel}
                     disabled={cancelling}

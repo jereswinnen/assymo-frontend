@@ -532,7 +532,7 @@ export default function NavigationPage() {
   // Header actions
   const headerActions = useMemo(
     () => (
-      <Button onClick={openNewLinkDialog}>
+      <Button size="sm" onClick={openNewLinkDialog}>
         <PlusIcon className="size-4" />
         Nieuwe link
       </Button>
@@ -633,10 +633,10 @@ export default function NavigationPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLinkDialogOpen(false)}>
+            <Button size="sm" variant="outline" onClick={() => setLinkDialogOpen(false)}>
               Annuleren
             </Button>
-            <Button onClick={handleSaveLink} disabled={savingLink}>
+            <Button size="sm" onClick={handleSaveLink} disabled={savingLink}>
               {savingLink && <Loader2Icon className="size-4 animate-spin" />}
               {editingLink ? "Opslaan" : "Aanmaken"}
             </Button>

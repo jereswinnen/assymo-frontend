@@ -215,7 +215,7 @@ export default function MediaPage() {
   const headerActions = useMemo(
     () => (
       <label>
-        <Button disabled={uploading} asChild>
+        <Button size="sm" disabled={uploading} asChild>
           <span className="cursor-pointer">
             {uploading ? (
               <>

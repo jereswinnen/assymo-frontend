@@ -57,6 +57,7 @@ export default function SettingsPage() {
 
         {activeTab === "general" && (
           <Button
+            size="sm"
             onClick={handleSaveSettings}
             disabled={settingsSaving || !settingsHasChanges}
           >

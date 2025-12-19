@@ -2,7 +2,6 @@
 
 import { useState, useEffect, use, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,15 +18,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ImageUpload, ImageValue } from "@/components/admin/ImageUpload";
 import { SectionList } from "@/components/admin/SectionList";
 import { Section } from "@/types/sections";
 import { toast } from "sonner";
 import {
-  ArrowLeftIcon,
-  ExternalLinkIcon,
+  CheckIcon,
+  CompassIcon,
   Loader2Icon,
-  SaveIcon,
+  MoreHorizontalIcon,
   Trash2Icon,
 } from "lucide-react";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
@@ -243,38 +248,40 @@ export default function SolutionEditorPage({
   const headerActions = useMemo(
     () => (
       <>
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/admin/content/solutions">
-            <ArrowLeftIcon className="size-4" />
-          </Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <a
-            href={`/realisaties/${slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <ExternalLinkIcon className="size-4" />
-            Bekijken
-          </a>
-        </Button>
-        <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
-          <Trash2Icon className="size-4" />
-          Verwijderen
-        </Button>
-        <Button onClick={saveSolution} disabled={saving || !hasChanges}>
+        <Button size="sm" onClick={saveSolution} disabled={saving || !hasChanges}>
           {saving ? (
-            <>
-              <Loader2Icon className="size-4 animate-spin" />
-              Opslaan...
-            </>
+            <Loader2Icon className="size-4 animate-spin" />
           ) : (
-            <>
-              <SaveIcon className="size-4" />
-              Opslaan
-            </>
+            <CheckIcon className="size-4" />
           )}
+          Opslaan
         </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <MoreHorizontalIcon className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <a
+                href={`/realisaties/${slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <CompassIcon className="size-4" />
+                Open in browser
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              <Trash2Icon className="size-4" />
+              Verwijderen
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </>
     ),
     [slug, saving, hasChanges, saveSolution]
