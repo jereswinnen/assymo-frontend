@@ -5,8 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ExternalLinkIcon, Loader2Icon, UploadIcon, XIcon } from "lucide-react";
+import { ExternalLinkIcon, ImageIcon, Loader2Icon, UploadIcon, XIcon } from "lucide-react";
 import { toast } from "sonner";
+import { MediaLibraryDialog } from "./MediaLibraryDialog";
 
 export interface ImageValue {
   url: string;
@@ -23,6 +24,11 @@ export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [altText, setAltText] = useState<string | null>(null);
   const [loadingAlt, setLoadingAlt] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+
+  const handleSelectFromLibrary = (url: string) => {
+    onChange({ url });
+  };
 
   // Fetch alt text from media library when URL changes
   useEffect(() => {
@@ -148,33 +154,52 @@ export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
   }
 
   return (
-    <div className="space-y-2">
-      {label && <Label>{label}</Label>}
-      <label className="flex flex-col items-center justify-center gap-2 cursor-pointer border-2 border-dashed rounded-lg p-8 hover:border-primary hover:bg-muted/50 transition-colors">
-        {uploading ? (
-          <>
-            <Loader2Icon className="size-8 animate-spin text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Uploaden...</span>
-          </>
-        ) : (
-          <>
-            <UploadIcon className="size-8 text-muted-foreground" />
+    <>
+      <div className="space-y-2">
+        {label && <Label>{label}</Label>}
+        <div className="flex gap-3">
+          <label className="flex-1 flex flex-col items-center justify-center gap-2 cursor-pointer border-2 border-dashed rounded-lg p-6 hover:border-primary hover:bg-muted/50 transition-colors">
+            {uploading ? (
+              <>
+                <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Uploaden...</span>
+              </>
+            ) : (
+              <>
+                <UploadIcon className="size-6 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  Upload nieuw
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  PNG, JPG, WebP (max. 10MB)
+                </span>
+              </>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleUpload}
+              disabled={uploading}
+            />
+          </label>
+          <button
+            type="button"
+            onClick={() => setLibraryOpen(true)}
+            className="flex-1 flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-lg p-6 hover:border-primary hover:bg-muted/50 transition-colors"
+          >
+            <ImageIcon className="size-6 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
-              Klik om afbeelding te uploaden
+              Kies uit bibliotheek
             </span>
-            <span className="text-xs text-muted-foreground">
-              PNG, JPG, WebP (max. 10MB)
-            </span>
-          </>
-        )}
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleUpload}
-          disabled={uploading}
-        />
-      </label>
-    </div>
+          </button>
+        </div>
+      </div>
+      <MediaLibraryDialog
+        open={libraryOpen}
+        onOpenChange={setLibraryOpen}
+        onSelect={handleSelectFromLibrary}
+      />
+    </>
   );
 }
