@@ -34,8 +34,16 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   GripVerticalIcon,
+  LayoutPanelTopIcon,
   Trash2Icon,
 } from "lucide-react";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 import { Section, getSectionLabel } from "@/types/sections";
 import { AddSectionButton } from "./AddSectionButton";
 import { SectionForm } from "./SectionForm";
@@ -156,10 +164,18 @@ export function SectionList({ sections, onChange, showAddButton = true }: Sectio
   return (
     <div className="space-y-4">
       {sections.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          <p className="mb-4">Nog geen secties toegevoegd</p>
+        <Empty className="border py-12">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <LayoutPanelTopIcon />
+            </EmptyMedia>
+            <EmptyTitle>Geen secties</EmptyTitle>
+            <EmptyDescription>
+              Voeg secties toe om de inhoud van deze pagina op te bouwen.
+            </EmptyDescription>
+          </EmptyHeader>
           {showAddButton && <AddSectionButton onAdd={handleAdd} />}
-        </div>
+        </Empty>
       ) : (
         <>
           <DndContext
