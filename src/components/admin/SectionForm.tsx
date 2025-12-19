@@ -2,13 +2,17 @@
 
 import {
   Section,
+  PageHeaderSection,
   SlideshowSection,
   SolutionsScrollerSection,
+  SplitSectionSection,
   UspSectionSection,
   getSectionLabel,
 } from "@/types/sections";
+import { PageHeaderForm } from "./section-forms/PageHeaderForm";
 import { SlideshowForm } from "./section-forms/SlideshowForm";
 import { SolutionsScrollerForm } from "./section-forms/SolutionsScrollerForm";
+import { SplitSectionForm } from "./section-forms/SplitSectionForm";
 import { UspSectionForm } from "./section-forms/UspSectionForm";
 
 interface SectionFormProps {
@@ -18,6 +22,14 @@ interface SectionFormProps {
 
 export function SectionForm({ section, onChange }: SectionFormProps) {
   switch (section._type) {
+    case "pageHeader":
+      return (
+        <PageHeaderForm
+          section={section as PageHeaderSection}
+          onChange={onChange}
+        />
+      );
+
     case "solutionsScroller":
       return (
         <SolutionsScrollerForm
@@ -42,9 +54,15 @@ export function SectionForm({ section, onChange }: SectionFormProps) {
         />
       );
 
-    // Placeholder for forms coming in phases 14-16
-    case "pageHeader":
     case "splitSection":
+      return (
+        <SplitSectionForm
+          section={section as SplitSectionSection}
+          onChange={onChange}
+        />
+      );
+
+    // Placeholder for flexibleSection (Phase 16)
     case "flexibleSection":
     default:
       return (

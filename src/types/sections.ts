@@ -54,6 +54,7 @@ export interface SplitSectionItem {
   action?: {
     label?: string;
     icon?: string;
+    variant?: "primary" | "secondary";
   };
 }
 

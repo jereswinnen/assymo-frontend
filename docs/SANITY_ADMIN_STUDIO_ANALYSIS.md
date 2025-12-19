@@ -15,7 +15,7 @@
 - [x] Phase 11: Solutions List & Basic Editor
 - [x] Phase 12: Section Builder Core
 - [x] Phase 13: Simple Section Forms
-- [ ] Phase 14: Complex Section Forms
+- [x] Phase 14: Complex Section Forms
 - [ ] Phase 15: Rich Text Editor
 - [ ] Phase 16: FlexibleSection Form
 - [ ] Phase 17: Update Frontend Pages
@@ -756,7 +756,7 @@ export function SolutionsScrollerForm({ section, onChange }) {
 ---
 
 ## Phase 14: Complex Section Forms
-- [ ] Complete
+- [x] Complete
 
 **Time: 3-4 hours**
 
