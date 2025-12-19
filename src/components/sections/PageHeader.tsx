@@ -4,6 +4,7 @@ import { urlFor } from "@/sanity/imageUrl";
 import type { SanityImage } from "@/types/sanity";
 import Image from "next/image";
 import { PortableText } from "@portabletext/react";
+import { RichText } from "@/components/RichText";
 
 interface PageHeaderButton {
   label: string;
@@ -15,7 +16,7 @@ interface PageHeaderButton {
 interface PageHeaderProps {
   section: {
     title: string;
-    subtitle?: any[];
+    subtitle?: string | unknown[]; // HTML string (Tiptap) or Portable Text array (Sanity)
     background?: boolean;
     showImage?: boolean;
     showButtons?: boolean;
@@ -43,11 +44,15 @@ export default function PageHeader({ section, headerImage }: PageHeaderProps) {
           <h1 className={`mb-0! ${background ? "text-stone-800" : ""}`}>
             {title}
           </h1>
-          {subtitle && subtitle.length > 0 && (
+          {subtitle && (typeof subtitle === "string" ? subtitle : subtitle.length > 0) && (
             <div
               className={`font-[420] text-stone-600 ${!hasImage ? "text-lg md:text-xl" : "text-base md:text-lg"}`}
             >
-              <PortableText value={subtitle} />
+              {typeof subtitle === "string" ? (
+                <RichText html={subtitle} />
+              ) : (
+                <PortableText value={subtitle as any[]} />
+              )}
             </div>
           )}
         </div>
