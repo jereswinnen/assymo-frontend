@@ -23,7 +23,7 @@ interface FooterProps {
 
 export default async function Footer({ className }: FooterProps) {
   const [navLinks, settings] = await Promise.all([
-    getNavigation("footer"),
+    getNavigation("header"),
     getSiteParameters(),
   ]);
 
