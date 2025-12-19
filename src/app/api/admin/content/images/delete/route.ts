@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth-utils";
 import { deleteImage } from "@/lib/storage";
+import { neon } from "@neondatabase/serverless";
+
+const sql = neon(process.env.DATABASE_URL!);
 
 export async function POST(request: Request) {
   try {
@@ -19,7 +22,12 @@ export async function POST(request: Request) {
       );
     }
 
+    // Delete from Vercel Blob
     await deleteImage(url);
+
+    // Delete metadata from database
+    await sql`DELETE FROM image_metadata WHERE url = ${url}`;
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Image deletion failed:", error);
