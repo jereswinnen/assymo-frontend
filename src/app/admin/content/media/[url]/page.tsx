@@ -24,6 +24,7 @@ import {
   ArrowLeftIcon,
   Loader2Icon,
   SaveIcon,
+  SparklesIcon,
   Trash2Icon,
 } from "lucide-react";
 
@@ -62,6 +63,9 @@ export default function ImageDetailPage({
   // Delete confirmation
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Alt text generation
+  const [generating, setGenerating] = useState(false);
 
   // Track changes
   const [hasChanges, setHasChanges] = useState(false);
@@ -162,6 +166,35 @@ export default function ImageDetailPage({
     }
   };
 
+  const generateAltText = async () => {
+    setGenerating(true);
+    try {
+      const response = await fetch("/api/admin/content/media/generate-alt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: imageUrl }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate");
+      }
+
+      const { altText: newAltText } = await response.json();
+      setAltText(newAltText);
+
+      // Update image state so hasChanges reflects the new value
+      if (image) {
+        setImage({ ...image, altText: newAltText });
+      }
+
+      toast.success("Alt-tekst gegenereerd");
+    } catch {
+      toast.error("Kon alt-tekst niet genereren");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -239,7 +272,28 @@ export default function ImageDetailPage({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="altText">Alt tekst</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="altText">Alt tekst</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={generateAltText}
+                    disabled={generating}
+                  >
+                    {generating ? (
+                      <>
+                        <Loader2Icon className="size-3 animate-spin" />
+                        Genereren...
+                      </>
+                    ) : (
+                      <>
+                        <SparklesIcon className="size-3" />
+                        Genereer alt-tekst
+                      </>
+                    )}
+                  </Button>
+                </div>
                 <Textarea
                   id="altText"
                   value={altText}

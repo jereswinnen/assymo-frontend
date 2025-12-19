@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -58,8 +58,49 @@ export default function MediaPage() {
   const [deleteTarget, setDeleteTarget] = useState<MediaItem | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Track items pending alt text generation
+  const pendingAltTextUrls = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     fetchMedia();
+  }, []);
+
+  // Poll for alt text updates on items that don't have it yet
+  const pollForAltText = useCallback(async (urls: string[]) => {
+    if (urls.length === 0) return;
+
+    // Wait 3 seconds before first poll
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    for (const url of urls) {
+      try {
+        const response = await fetch(
+          `/api/admin/content/media/${encodeURIComponent(url)}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          if (data.altText) {
+            // Update the item in state
+            setMedia((prev) =>
+              prev.map((item) =>
+                item.url === url ? { ...item, altText: data.altText } : item
+              )
+            );
+            pendingAltTextUrls.current.delete(url);
+          }
+        }
+      } catch {
+        // Silently fail
+      }
+    }
+
+    // If there are still pending items, poll again after 2 more seconds
+    const stillPending = urls.filter((url) =>
+      pendingAltTextUrls.current.has(url)
+    );
+    if (stillPending.length > 0) {
+      setTimeout(() => pollForAltText(stillPending), 2000);
+    }
   }, []);
 
   const fetchMedia = async () => {
@@ -135,6 +176,11 @@ export default function MediaPage() {
       toast.success(
         `${uploadedItems.length} afbeelding${uploadedItems.length > 1 ? "en" : ""} geupload`
       );
+
+      // Track these URLs for polling
+      const newUrls = uploadedItems.map((item) => item.url);
+      newUrls.forEach((url) => pendingAltTextUrls.current.add(url));
+      pollForAltText(newUrls);
     }
     if (errorCount > 0) {
       toast.error(
@@ -270,6 +316,13 @@ export default function MediaPage() {
                       className="object-cover"
                       sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                     />
+                    {/* Alt text generating indicator */}
+                    {!item.altText && (
+                      <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+                        <Loader2Icon className="size-3 animate-spin" />
+                        <span>Alt-tekst</span>
+                      </div>
+                    )}
                     {/* Delete button in top-right corner */}
                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
