@@ -10,6 +10,7 @@ import {
   FieldGroup,
   FieldLabel,
   FieldSeparator,
+  FieldSet,
 } from "@/components/ui/field";
 import {
   AlertDialog,
@@ -288,37 +289,38 @@ export default function PageEditorPage({
         <div className="bg-muted rounded-lg p-4">
           <FieldGroup>
             {/* Algemeen */}
-            <Field>
-              <FieldLabel htmlFor="title">Titel</FieldLabel>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="Pagina titel"
-              />
-            </Field>
-            {!isHomepage && (
+            <FieldSet>
               <Field>
-                <FieldLabel htmlFor="slug">Slug</FieldLabel>
+                <FieldLabel htmlFor="title">Titel</FieldLabel>
                 <Input
-                  id="slug"
-                  value={slug}
-                  onChange={(e) => handleSlugChange(e.target.value)}
-                  placeholder="pagina-slug"
+                  id="title"
+                  value={title}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  placeholder="Pagina titel"
                 />
-                <FieldDescription>URL: /{slug || "..."}</FieldDescription>
               </Field>
-            )}
-            <Field orientation="horizontal">
-              <FieldLabel htmlFor="is_homepage">
-                Stel in als homepage
-              </FieldLabel>
-              <Switch
-                id="is_homepage"
-                checked={isHomepage}
-                onCheckedChange={setIsHomepage}
-              />
-            </Field>
+              {!isHomepage && (
+                <Field>
+                  <FieldLabel htmlFor="slug">URL</FieldLabel>
+                  <Input
+                    id="slug"
+                    value={slug}
+                    onChange={(e) => handleSlugChange(e.target.value)}
+                  />
+                  <FieldDescription>URL: /{slug || "..."}</FieldDescription>
+                </Field>
+              )}
+              <Field orientation="horizontal">
+                <FieldLabel htmlFor="is_homepage">
+                  Stel in als homepage
+                </FieldLabel>
+                <Switch
+                  id="is_homepage"
+                  checked={isHomepage}
+                  onCheckedChange={setIsHomepage}
+                />
+              </Field>
+            </FieldSet>
 
             <FieldSeparator />
 

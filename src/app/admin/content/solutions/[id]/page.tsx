@@ -4,10 +4,15 @@ import { useState, useEffect, use, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+  FieldSet,
+} from "@/components/ui/field";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ImageUpload, ImageValue } from "@/components/admin/ImageUpload";
 import { SectionList } from "@/components/admin/SectionList";
+import { AddSectionButton } from "@/components/admin/AddSectionButton";
 import { Section } from "@/types/sections";
 import { toast } from "sonner";
 import {
@@ -83,7 +89,9 @@ export default function SolutionEditorPage({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [solution, setSolution] = useState<SolutionData | null>(null);
-  const [filterCategories, setFilterCategories] = useState<FilterCategory[]>([]);
+  const [filterCategories, setFilterCategories] = useState<FilterCategory[]>(
+    [],
+  );
 
   // Form state
   const [name, setName] = useState("");
@@ -92,7 +100,9 @@ export default function SolutionEditorPage({
   const [autoSlug, setAutoSlug] = useState(false);
   const [headerImage, setHeaderImage] = useState<ImageValue | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
-  const [selectedFilterIds, setSelectedFilterIds] = useState<Set<string>>(new Set());
+  const [selectedFilterIds, setSelectedFilterIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   // Delete confirmation
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -123,7 +133,15 @@ export default function SolutionEditorPage({
       filtersChanged;
 
     setHasChanges(changed);
-  }, [name, subtitle, slug, headerImage, sections, selectedFilterIds, solution]);
+  }, [
+    name,
+    subtitle,
+    slug,
+    headerImage,
+    sections,
+    selectedFilterIds,
+    solution,
+  ]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -219,7 +237,7 @@ export default function SolutionEditorPage({
       toast.success("Realisatie opgeslagen");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Kon realisatie niet opslaan"
+        error instanceof Error ? error.message : "Kon realisatie niet opslaan",
       );
     } finally {
       setSaving(false);
@@ -248,7 +266,11 @@ export default function SolutionEditorPage({
   const headerActions = useMemo(
     () => (
       <>
-        <Button size="sm" onClick={saveSolution} disabled={saving || !hasChanges}>
+        <Button
+          size="sm"
+          onClick={saveSolution}
+          disabled={saving || !hasChanges}
+        >
           {saving ? (
             <Loader2Icon className="size-4 animate-spin" />
           ) : (
@@ -284,7 +306,7 @@ export default function SolutionEditorPage({
         </DropdownMenu>
       </>
     ),
-    [slug, saving, hasChanges, saveSolution]
+    [slug, saving, hasChanges, saveSolution],
   );
   useAdminHeaderActions(headerActions);
 
@@ -302,69 +324,76 @@ export default function SolutionEditorPage({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Basic fields */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Algemeen</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Naam</Label>
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* Main content - Sections */}
+        <div className="md:col-span-2">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium">Secties</h3>
+            <AddSectionButton
+              onAdd={(section) => setSections([...sections, section])}
+            />
+          </div>
+          <SectionList
+            sections={sections}
+            onChange={setSections}
+            showAddButton={false}
+          />
+        </div>
+
+        {/* Sidebar */}
+        <div className="bg-muted rounded-lg p-4">
+          <FieldGroup>
+            {/* Algemeen */}
+            <FieldSet>
+              <Field>
+                <FieldLabel htmlFor="name">Naam</FieldLabel>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => handleNameChange(e.target.value)}
                   placeholder="Realisatie naam"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="subtitle">Subtitel</Label>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="subtitle">Subtitel</FieldLabel>
                 <Input
                   id="subtitle"
                   value={subtitle}
                   onChange={(e) => setSubtitle(e.target.value)}
                   placeholder="Optionele subtitel"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="slug">Slug</Label>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="slug">URL</FieldLabel>
                 <Input
                   id="slug"
                   value={slug}
                   onChange={(e) => handleSlugChange(e.target.value)}
-                  placeholder="realisatie-slug"
                 />
-                <p className="text-xs text-muted-foreground">
-                  URL: /oplossingen/{slug || "..."}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+                <FieldDescription>
+                  URL: /realisaties/{slug || "..."}
+                </FieldDescription>
+              </Field>
+            </FieldSet>
 
-          {/* Filters */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Filters</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {filterCategories.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  Geen filter categorieën beschikbaar
-                </p>
-              ) : (
-                <div className="space-y-6">
+            <FieldSeparator />
+
+            {/* Filters */}
+            {filterCategories.length > 0 && (
+              <>
+                <div className="space-y-4">
+                  <FieldLabel>Filters</FieldLabel>
                   {filterCategories.map((category) => (
                     <div key={category.id}>
-                      <h4 className="font-medium mb-3">{category.name}</h4>
+                      <p className="text-sm font-medium mb-2">
+                        {category.name}
+                      </p>
                       {category.filters.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
                           Geen filters in deze categorie
                         </p>
                       ) : (
-                        <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="space-y-2">
                           {category.filters.map((filter) => (
                             <label
                               key={filter.id}
@@ -382,39 +411,20 @@ export default function SolutionEditorPage({
                     </div>
                   ))}
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                <FieldSeparator />
+              </>
+            )}
 
-          {/* Sections */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Secties</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SectionList sections={sections} onChange={setSections} />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Header image */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Header afbeelding</CardTitle>
-            </CardHeader>
-            <CardContent>
+            {/* Header image */}
+            <Field>
+              <FieldLabel>Header afbeelding</FieldLabel>
               <ImageUpload value={headerImage} onChange={setHeaderImage} />
-            </CardContent>
-          </Card>
+            </Field>
 
-          {/* Meta info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Informatie</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
+            <FieldSeparator />
+
+            {/* Meta info */}
+            <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Aangemaakt</span>
                 <span>
@@ -425,7 +435,6 @@ export default function SolutionEditorPage({
                   })}
                 </span>
               </div>
-              <Separator />
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Laatst bewerkt</span>
                 <span>
@@ -438,8 +447,8 @@ export default function SolutionEditorPage({
                   })}
                 </span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </FieldGroup>
         </div>
       </div>
 
