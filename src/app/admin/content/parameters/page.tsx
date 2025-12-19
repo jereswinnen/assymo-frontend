@@ -95,13 +95,7 @@ export default function SiteParametersPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Parameters</h1>
-          <p className="text-sm text-muted-foreground">
-            Algemene bedrijfsinformatie voor de website
-          </p>
-        </div>
+      <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving || !hasChanges}>
           {saving ? (
             <Loader2Icon className="size-4 animate-spin" />
@@ -110,7 +104,7 @@ export default function SiteParametersPage() {
           )}
           Opslaan
         </Button>
-      </header>
+      </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>

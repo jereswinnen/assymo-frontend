@@ -299,18 +299,12 @@ export default function SolutionsPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Realisaties</h1>
-          <p className="text-sm text-muted-foreground">
-            Beheer realisaties en projecten
-          </p>
-        </div>
-        <Button size="sm" onClick={openNewDialog}>
+      <div className="flex justify-end">
+        <Button onClick={openNewDialog}>
           <PlusIcon className="size-4" />
           Nieuwe realisatie
         </Button>
-      </header>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-12">

@@ -252,23 +252,16 @@ export default function SolutionEditorPage({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <header className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/admin/content/solutions">
-              <ArrowLeftIcon className="size-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold">{solution.name}</h1>
-            <p className="text-sm text-muted-foreground">Realisatie bewerken</p>
-          </div>
-        </div>
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="icon" asChild>
+          <Link href="/admin/content/solutions">
+            <ArrowLeftIcon className="size-4" />
+          </Link>
+        </Button>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" asChild>
             <a
-              href={`/oplossingen/${slug}`}
+              href={`/realisaties/${slug}`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -278,14 +271,12 @@ export default function SolutionEditorPage({
           </Button>
           <Button
             variant="destructive"
-            size="sm"
             onClick={() => setShowDeleteDialog(true)}
           >
             <Trash2Icon className="size-4" />
             Verwijderen
           </Button>
           <Button
-            size="sm"
             onClick={saveSolution}
             disabled={saving || !hasChanges}
           >
@@ -302,7 +293,7 @@ export default function SolutionEditorPage({
             )}
           </Button>
         </div>
-      </header>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main content */}

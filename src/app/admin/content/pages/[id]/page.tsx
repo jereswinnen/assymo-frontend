@@ -212,21 +212,14 @@ export default function PageEditorPage({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <header className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/admin/content/pages">
-              <ArrowLeftIcon className="size-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold">{page.title}</h1>
-            <p className="text-sm text-muted-foreground">Pagina bewerken</p>
-          </div>
-        </div>
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="icon" asChild>
+          <Link href="/admin/content/pages">
+            <ArrowLeftIcon className="size-4" />
+          </Link>
+        </Button>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" asChild>
             <a
               href={isHomepage ? "/" : `/${slug}`}
               target="_blank"
@@ -238,7 +231,6 @@ export default function PageEditorPage({
           </Button>
           <Button
             variant="destructive"
-            size="sm"
             onClick={() => setShowDeleteDialog(true)}
             disabled={isHomepage}
             title={isHomepage ? "Homepage kan niet verwijderd worden" : undefined}
@@ -247,7 +239,6 @@ export default function PageEditorPage({
             Verwijderen
           </Button>
           <Button
-            size="sm"
             onClick={savePage}
             disabled={saving || !hasChanges}
           >
@@ -264,7 +255,7 @@ export default function PageEditorPage({
             )}
           </Button>
         </div>
-      </header>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main content */}

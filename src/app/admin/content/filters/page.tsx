@@ -499,13 +499,6 @@ export default function FiltersPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Filters</h1>
-        <p className="text-sm text-muted-foreground">
-          Beheer filter categorieën en filters voor realisaties
-        </p>
-      </header>
-
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Categories */}
         <Card>

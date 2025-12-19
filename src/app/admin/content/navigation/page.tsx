@@ -530,18 +530,12 @@ export default function NavigationPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Navigatie</h1>
-          <p className="text-sm text-muted-foreground">
-            Beheer de hoofdnavigatie van de website
-          </p>
-        </div>
-        <Button size="sm" onClick={openNewLinkDialog}>
+      <div className="flex justify-end">
+        <Button onClick={openNewLinkDialog}>
           <PlusIcon className="size-4" />
           Nieuwe link
         </Button>
-      </header>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-12">

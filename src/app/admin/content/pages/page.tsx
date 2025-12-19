@@ -190,18 +190,12 @@ export default function PagesPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Pagina&apos;s</h1>
-          <p className="text-sm text-muted-foreground">
-            Beheer de pagina&apos;s van de website
-          </p>
-        </div>
-        <Button size="sm" onClick={openNewDialog}>
+      <div className="flex justify-end">
+        <Button onClick={openNewDialog}>
           <PlusIcon className="size-4" />
           Nieuwe pagina
         </Button>
-      </header>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-12">

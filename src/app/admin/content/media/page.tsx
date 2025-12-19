@@ -178,15 +178,9 @@ export default function MediaPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Media</h1>
-          <p className="text-sm text-muted-foreground">
-            Beheer afbeeldingen en bestanden
-          </p>
-        </div>
+      <div className="flex justify-end">
         <label>
-          <Button size="sm" disabled={uploading} asChild>
+          <Button disabled={uploading} asChild>
             <span className="cursor-pointer">
               {uploading ? (
                 <>
@@ -210,7 +204,7 @@ export default function MediaPage() {
             disabled={uploading}
           />
         </label>
-      </header>
+      </div>
 
       {/* Search */}
       <div className="relative max-w-sm">

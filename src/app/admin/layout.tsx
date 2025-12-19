@@ -16,6 +16,12 @@ const getRouteLabel = (pathname: string): string => {
     "/admin/emails": "E-mails",
     "/admin/conversations": "Conversaties",
     "/admin/settings": "Instellingen",
+    "/admin/content/pages": "Pagina's",
+    "/admin/content/solutions": "Realisaties",
+    "/admin/content/media": "Media",
+    "/admin/content/filters": "Filters",
+    "/admin/content/navigation": "Navigatie",
+    "/admin/content/parameters": "Parameters",
   };
 
   if (staticLabels[pathname]) {
@@ -25,6 +31,12 @@ const getRouteLabel = (pathname: string): string => {
   // Dynamic routes
   if (pathname.startsWith("/admin/emails/")) {
     return "Nieuwsbrief bewerken";
+  }
+  if (pathname.startsWith("/admin/content/pages/")) {
+    return "Pagina bewerken";
+  }
+  if (pathname.startsWith("/admin/content/solutions/")) {
+    return "Realisatie bewerken";
   }
 
   return "Admin";
