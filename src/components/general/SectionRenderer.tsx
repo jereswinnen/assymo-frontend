@@ -69,7 +69,10 @@ interface UspSectionType extends BaseSection {
     icon?: string;
     title: string;
     text?: string;
-    link?: string;
+    link?: {
+      label?: string;
+      url?: string;
+    };
   }[];
 }
 

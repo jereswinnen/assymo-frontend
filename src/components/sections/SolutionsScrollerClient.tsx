@@ -7,6 +7,7 @@ import { motion, useInView } from "motion/react";
 import { ChevronLeftIcon, ChevronRightIcon, InfoIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Action } from "../general/Action";
+import { RichText } from "@/components/RichText";
 
 // Animation tokens
 const SCROLL_INTERVAL = 4500;
@@ -178,9 +179,10 @@ export default function SolutionsScrollerClient({
         <div className="basis-full md:basis-auto flex flex-col gap-2">
           {heading && <h2 className="mb-0!">{heading}</h2>}
           {subtitle && (
-            <p className="md:max-w-[60%] text-lg text-stone-600 mb-0!">
-              {subtitle}
-            </p>
+            <RichText
+              html={subtitle}
+              className="md:max-w-[60%] text-lg text-stone-600 [&_p]:mb-0!"
+            />
           )}
         </div>
 

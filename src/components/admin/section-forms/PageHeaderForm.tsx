@@ -15,23 +15,7 @@ import {
 } from "@/components/ui/select";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { PageHeaderSection } from "@/types/sections";
-
-const ICON_OPTIONS = [
-  { label: "Geen", value: "" },
-  { label: "Arrow", value: "arrow" },
-  { label: "Calendar", value: "calendar" },
-  { label: "Chat", value: "chat" },
-  { label: "Download", value: "download" },
-  { label: "Eye", value: "eye" },
-  { label: "Hard Hat", value: "hardhat" },
-  { label: "Info", value: "info" },
-  { label: "Leaf", value: "leaf" },
-  { label: "List", value: "list" },
-  { label: "Mail", value: "mail" },
-  { label: "Phone", value: "phone" },
-  { label: "Ruler", value: "ruler" },
-  { label: "Warehouse", value: "warehouse" },
-];
+import { ICON_OPTIONS_WITH_NONE } from "@/lib/icons";
 
 interface ButtonItem {
   _key: string;
@@ -205,7 +189,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                             <SelectValue placeholder="Kies icoon" />
                           </SelectTrigger>
                           <SelectContent>
-                            {ICON_OPTIONS.map((opt) => (
+                            {ICON_OPTIONS_WITH_NONE.map((opt) => (
                               <SelectItem key={opt.value} value={opt.value || "none"}>
                                 {opt.label}
                               </SelectItem>

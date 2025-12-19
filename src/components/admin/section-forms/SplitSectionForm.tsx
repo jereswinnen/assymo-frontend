@@ -12,23 +12,7 @@ import {
 } from "@/components/ui/select";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { SplitSectionSection, SplitSectionItem } from "@/types/sections";
-
-const ICON_OPTIONS = [
-  { label: "Geen", value: "" },
-  { label: "Arrow", value: "arrow" },
-  { label: "Calendar", value: "calendar" },
-  { label: "Chat", value: "chat" },
-  { label: "Download", value: "download" },
-  { label: "Eye", value: "eye" },
-  { label: "Hard Hat", value: "hardhat" },
-  { label: "Info", value: "info" },
-  { label: "Leaf", value: "leaf" },
-  { label: "List", value: "list" },
-  { label: "Mail", value: "mail" },
-  { label: "Phone", value: "phone" },
-  { label: "Ruler", value: "ruler" },
-  { label: "Warehouse", value: "warehouse" },
-];
+import { ICON_OPTIONS_WITH_NONE } from "@/lib/icons";
 
 interface SplitSectionFormProps {
   section: SplitSectionSection;
@@ -124,7 +108,7 @@ export function SplitSectionForm({
                   <SelectValue placeholder="Kies icoon" />
                 </SelectTrigger>
                 <SelectContent>
-                  {ICON_OPTIONS.map((opt) => (
+                  {ICON_OPTIONS_WITH_NONE.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value || "none"}>
                       {opt.label}
                     </SelectItem>

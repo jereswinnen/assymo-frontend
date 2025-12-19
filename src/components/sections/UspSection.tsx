@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { iconMap } from "@/lib/icons";
-import { ArrowBigDownDashIcon, ArrowUpRightIcon } from "lucide-react";
+import { ArrowUpRightIcon } from "lucide-react";
+import { RichText } from "@/components/RichText";
 
 interface Usp {
   icon?: string;
   title: string;
   text?: string;
-  link?: string;
+  link?: {
+    label?: string;
+    url?: string;
+  };
 }
 
 interface UspSectionProps {
@@ -41,7 +45,7 @@ function UspCard({
           <p className="text-lg font-medium text-stone-800 mb-0!">
             {usp.title}
           </p>
-          {usp.text && <p className="text-base mb-0!">{usp.text}</p>}
+          {usp.text && <RichText html={usp.text} className="text-base [&_p]:mb-0!" />}
         </div>
       </div>
     );
@@ -52,15 +56,13 @@ function UspCard({
       {IconComponent && <IconComponent className="size-6 text-stone-600" />}
       <div className="flex flex-col gap-1">
         <p className="text-lg font-medium text-stone-800 mb-0!">{usp.title}</p>
-        {usp.text && <p className="text-sm mb-0!">{usp.text}</p>}
+        {usp.text && <RichText html={usp.text} className="text-sm [&_p]:mb-0!" />}
       </div>
     </>
   );
 
-  // Handle link as string or object with href/url property
-  const linkUrl = typeof usp.link === "string"
-    ? usp.link.trim()
-    : (usp.link?.href || usp.link?.url || "").trim();
+  // Get URL from link object
+  const linkUrl = (usp.link?.url || "").trim();
 
   if (variant === "cta" && linkUrl) {
     return (
@@ -71,7 +73,7 @@ function UspCard({
         </header>
         <div className="flex flex-col gap-1">
           <p className="text-lg font-medium mb-0!">{usp.title}</p>
-          {usp.text && <p className="text-sm opacity-70 mb-0!">{usp.text}</p>}
+          {usp.text && <RichText html={usp.text} className="text-sm opacity-70 [&_p]:mb-0!" />}
         </div>
       </Link>
     );

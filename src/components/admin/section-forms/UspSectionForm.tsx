@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import {
   Select,
   SelectContent,
@@ -14,22 +14,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { UspSectionSection, UspItem } from "@/types/sections";
-
-const ICON_OPTIONS = [
-  { label: "Arrow", value: "arrow" },
-  { label: "Calendar", value: "calendar" },
-  { label: "Chat", value: "chat" },
-  { label: "Download", value: "download" },
-  { label: "Eye", value: "eye" },
-  { label: "Hard Hat", value: "hardhat" },
-  { label: "Info", value: "info" },
-  { label: "Leaf", value: "leaf" },
-  { label: "List", value: "list" },
-  { label: "Mail", value: "mail" },
-  { label: "Phone", value: "phone" },
-  { label: "Ruler", value: "ruler" },
-  { label: "Warehouse", value: "warehouse" },
-];
+import { ICON_OPTIONS } from "@/lib/icons";
 
 interface UspSectionFormProps {
   section: UspSectionSection;
@@ -133,17 +118,12 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                     </Button>
                   </div>
 
-                  <div className="space-y-1">
-                    <Label className="text-xs">Tekst</Label>
-                    <Textarea
-                      value={usp.text || ""}
-                      onChange={(e) =>
-                        updateUsp(index, { text: e.target.value })
-                      }
-                      placeholder="Beschrijving van de USP"
-                      rows={2}
-                    />
-                  </div>
+                  <RichTextEditor
+                    label="Tekst"
+                    value={usp.text || ""}
+                    onChange={(value) => updateUsp(index, { text: value })}
+                    placeholder="Beschrijving van de USP"
+                  />
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-1">

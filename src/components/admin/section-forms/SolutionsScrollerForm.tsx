@@ -2,6 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { SolutionsScrollerSection } from "@/types/sections";
 
 interface SolutionsScrollerFormProps {
@@ -24,15 +25,12 @@ export function SolutionsScrollerForm({
           placeholder="Onze realisaties"
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="subtitle">Subtitel</Label>
-        <Input
-          id="subtitle"
-          value={section.subtitle || ""}
-          onChange={(e) => onChange({ ...section, subtitle: e.target.value })}
-          placeholder="Bekijk onze projecten"
-        />
-      </div>
+      <RichTextEditor
+        label="Subtitel"
+        value={section.subtitle || ""}
+        onChange={(value) => onChange({ ...section, subtitle: value })}
+        placeholder="Bekijk onze projecten"
+      />
       <p className="text-xs text-muted-foreground">
         Deze sectie toont automatisch alle realisaties in een horizontale
         scroller.

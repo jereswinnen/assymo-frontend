@@ -1,5 +1,5 @@
 // Shared icon map for all components
-// Add new icons here and they'll be available in all components that use iconMap
+// Add new icons here and they'll be available everywhere
 
 import {
   ArrowRightIcon,
@@ -18,18 +18,36 @@ import {
   WarehouseIcon,
 } from "lucide-react";
 
-export const iconMap: Record<string, LucideIcon> = {
-  arrow: ArrowRightIcon,
-  calendar: Calendar1Icon,
-  chat: MessagesSquareIcon,
-  download: DownloadIcon,
-  eye: EyeIcon,
-  hardhat: HardHatIcon,
-  info: InfoIcon,
-  leaf: LeafIcon,
-  list: ListTreeIcon,
-  mail: MailIcon,
-  phone: PhoneIcon,
-  ruler: RulerDimensionLineIcon,
-  warehouse: WarehouseIcon,
-};
+// Icon definitions with display labels
+// Add new icons here - they'll automatically appear in admin forms
+const iconDefinitions = {
+  arrow: { label: "Arrow", icon: ArrowRightIcon },
+  calendar: { label: "Calendar", icon: Calendar1Icon },
+  chat: { label: "Chat", icon: MessagesSquareIcon },
+  download: { label: "Download", icon: DownloadIcon },
+  eye: { label: "Eye", icon: EyeIcon },
+  hardhat: { label: "Hard Hat", icon: HardHatIcon },
+  info: { label: "Info", icon: InfoIcon },
+  leaf: { label: "Leaf", icon: LeafIcon },
+  list: { label: "List", icon: ListTreeIcon },
+  mail: { label: "Mail", icon: MailIcon },
+  phone: { label: "Phone", icon: PhoneIcon },
+  ruler: { label: "Ruler", icon: RulerDimensionLineIcon },
+  warehouse: { label: "Warehouse", icon: WarehouseIcon },
+} as const;
+
+// Icon map for rendering (used by components)
+export const iconMap: Record<string, LucideIcon> = Object.fromEntries(
+  Object.entries(iconDefinitions).map(([key, { icon }]) => [key, icon])
+);
+
+// Icon options for admin forms (derived from iconDefinitions)
+export const ICON_OPTIONS = Object.entries(iconDefinitions).map(
+  ([value, { label }]) => ({ label, value })
+);
+
+// Icon options with "None" option for optional icon fields
+export const ICON_OPTIONS_WITH_NONE = [
+  { label: "Geen", value: "" },
+  ...ICON_OPTIONS,
+];
