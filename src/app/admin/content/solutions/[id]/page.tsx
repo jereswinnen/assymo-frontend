@@ -20,6 +20,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ImageUpload, ImageValue } from "@/components/admin/ImageUpload";
+import { SectionList } from "@/components/admin/SectionList";
+import { Section } from "@/types/sections";
 import { toast } from "sonner";
 import {
   ArrowLeftIcon,
@@ -49,7 +51,7 @@ interface SolutionData {
   subtitle: string | null;
   slug: string;
   header_image: ImageValue | null;
-  sections: unknown[];
+  sections: Section[];
   filters: Filter[];
   created_at: string;
   updated_at: string;
@@ -83,6 +85,7 @@ export default function SolutionEditorPage({
   const [slug, setSlug] = useState("");
   const [autoSlug, setAutoSlug] = useState(false);
   const [headerImage, setHeaderImage] = useState<ImageValue | null>(null);
+  const [sections, setSections] = useState<Section[]>([]);
   const [selectedFilterIds, setSelectedFilterIds] = useState<Set<string>>(new Set());
 
   // Delete confirmation
@@ -110,10 +113,11 @@ export default function SolutionEditorPage({
       (subtitle || "") !== (solution.subtitle || "") ||
       slug !== solution.slug ||
       JSON.stringify(headerImage) !== JSON.stringify(solution.header_image) ||
+      JSON.stringify(sections) !== JSON.stringify(solution.sections) ||
       filtersChanged;
 
     setHasChanges(changed);
-  }, [name, subtitle, slug, headerImage, selectedFilterIds, solution]);
+  }, [name, subtitle, slug, headerImage, sections, selectedFilterIds, solution]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -143,6 +147,7 @@ export default function SolutionEditorPage({
       setSubtitle(solutionData.subtitle || "");
       setSlug(solutionData.slug);
       setHeaderImage(solutionData.header_image);
+      setSections(solutionData.sections || []);
       setSelectedFilterIds(new Set(solutionData.filters.map((f) => f.id)));
     } catch {
       toast.error("Kon gegevens niet ophalen");
@@ -191,7 +196,7 @@ export default function SolutionEditorPage({
           subtitle: subtitle.trim() || null,
           slug: slug.trim(),
           header_image: headerImage,
-          sections: solution?.sections || [],
+          sections,
           filter_ids: [...selectedFilterIds],
         }),
       });
@@ -203,6 +208,7 @@ export default function SolutionEditorPage({
 
       const updatedSolution = await response.json();
       setSolution(updatedSolution);
+      setSections(updatedSolution.sections || []);
       setHasChanges(false);
       toast.success("Realisatie opgeslagen");
     } catch (error) {
@@ -382,17 +388,13 @@ export default function SolutionEditorPage({
             </CardContent>
           </Card>
 
-          {/* Sections placeholder */}
+          {/* Sections */}
           <Card>
             <CardHeader>
               <CardTitle>Secties</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                {solution.sections.length === 0
-                  ? "Deze realisatie heeft nog geen secties."
-                  : `${solution.sections.length} sectie(s) - Section builder komt in een volgende fase.`}
-              </p>
+              <SectionList sections={sections} onChange={setSections} />
             </CardContent>
           </Card>
         </div>

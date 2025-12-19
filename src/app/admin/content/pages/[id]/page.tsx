@@ -19,6 +19,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ImageUpload, ImageValue } from "@/components/admin/ImageUpload";
+import { SectionList } from "@/components/admin/SectionList";
+import { Section } from "@/types/sections";
 import { toast } from "sonner";
 import {
   ArrowLeftIcon,
@@ -33,7 +35,7 @@ interface PageData {
   title: string;
   slug: string;
   header_image: ImageValue | null;
-  sections: unknown[];
+  sections: Section[];
   created_at: string;
   updated_at: string;
 }
@@ -64,6 +66,7 @@ export default function PageEditorPage({
   const [slug, setSlug] = useState("");
   const [autoSlug, setAutoSlug] = useState(false);
   const [headerImage, setHeaderImage] = useState<ImageValue | null>(null);
+  const [sections, setSections] = useState<Section[]>([]);
 
   // Delete confirmation
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -83,10 +86,11 @@ export default function PageEditorPage({
     const changed =
       title !== page.title ||
       slug !== page.slug ||
-      JSON.stringify(headerImage) !== JSON.stringify(page.header_image);
+      JSON.stringify(headerImage) !== JSON.stringify(page.header_image) ||
+      JSON.stringify(sections) !== JSON.stringify(page.sections);
 
     setHasChanges(changed);
-  }, [title, slug, headerImage, page]);
+  }, [title, slug, headerImage, sections, page]);
 
   const fetchPage = async () => {
     setLoading(true);
@@ -105,6 +109,7 @@ export default function PageEditorPage({
       setTitle(data.title);
       setSlug(data.slug);
       setHeaderImage(data.header_image);
+      setSections(data.sections || []);
     } catch {
       toast.error("Kon pagina niet ophalen");
     } finally {
@@ -139,7 +144,7 @@ export default function PageEditorPage({
           title: title.trim(),
           slug: slug.trim(),
           header_image: headerImage,
-          sections: page?.sections || [],
+          sections,
         }),
       });
 
@@ -150,6 +155,7 @@ export default function PageEditorPage({
 
       const updatedPage = await response.json();
       setPage(updatedPage);
+      setSections(updatedPage.sections || []);
       setHasChanges(false);
       toast.success("Pagina opgeslagen");
     } catch (error) {
@@ -278,17 +284,13 @@ export default function PageEditorPage({
             </CardContent>
           </Card>
 
-          {/* Sections placeholder */}
+          {/* Sections */}
           <Card>
             <CardHeader>
               <CardTitle>Secties</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                {page.sections.length === 0
-                  ? "Deze pagina heeft nog geen secties."
-                  : `${page.sections.length} sectie(s) - Section builder komt in een volgende fase.`}
-              </p>
+              <SectionList sections={sections} onChange={setSections} />
             </CardContent>
           </Card>
         </div>
