@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
@@ -264,83 +263,69 @@ export default function PageEditorPage({
   return (
     <div className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Basic fields */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Algemeen</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="is_homepage">Homepage</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Dit is de hoofdpagina van de website
-                  </p>
-                </div>
-                <Switch
-                  id="is_homepage"
-                  checked={isHomepage}
-                  onCheckedChange={setIsHomepage}
-                />
-              </div>
-              <Separator />
-              <div className="space-y-2">
-                <Label htmlFor="title">Titel</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => handleTitleChange(e.target.value)}
-                  placeholder="Pagina titel"
-                />
-              </div>
-              {!isHomepage && (
-                <div className="space-y-2">
-                  <Label htmlFor="slug">Slug</Label>
-                  <Input
-                    id="slug"
-                    value={slug}
-                    onChange={(e) => handleSlugChange(e.target.value)}
-                    placeholder="pagina-slug"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    URL: /{slug || "..."}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Sections */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Secties</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SectionList sections={sections} onChange={setSections} />
-            </CardContent>
-          </Card>
+        {/* Main content - Sections */}
+        <div className="lg:col-span-2">
+          <h3 className="text-sm font-medium mb-3">Secties</h3>
+          <SectionList sections={sections} onChange={setSections} />
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="bg-muted rounded-lg p-4 space-y-4">
+          {/* Algemeen */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium">Algemeen</h3>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="is_homepage">Homepage</Label>
+                <p className="text-xs text-muted-foreground">
+                  Dit is de hoofdpagina van de website
+                </p>
+              </div>
+              <Switch
+                id="is_homepage"
+                checked={isHomepage}
+                onCheckedChange={setIsHomepage}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="title">Titel</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                placeholder="Pagina titel"
+              />
+            </div>
+            {!isHomepage && (
+              <div className="space-y-2">
+                <Label htmlFor="slug">Slug</Label>
+                <Input
+                  id="slug"
+                  value={slug}
+                  onChange={(e) => handleSlugChange(e.target.value)}
+                  placeholder="pagina-slug"
+                />
+                <p className="text-xs text-muted-foreground">
+                  URL: /{slug || "..."}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
           {/* Header image */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Header afbeelding</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ImageUpload value={headerImage} onChange={setHeaderImage} />
-            </CardContent>
-          </Card>
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium">Header afbeelding</h3>
+            <ImageUpload value={headerImage} onChange={setHeaderImage} />
+          </div>
+
+          <Separator />
 
           {/* Meta info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Informatie</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium">Informatie</h3>
+            <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Aangemaakt</span>
                 <span>
@@ -351,7 +336,6 @@ export default function PageEditorPage({
                   })}
                 </span>
               </div>
-              <Separator />
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Laatst bewerkt</span>
                 <span>
@@ -364,8 +348,8 @@ export default function PageEditorPage({
                   })}
                 </span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
 
