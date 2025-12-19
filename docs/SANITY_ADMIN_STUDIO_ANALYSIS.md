@@ -16,7 +16,7 @@
 - [x] Phase 12: Section Builder Core
 - [x] Phase 13: Simple Section Forms
 - [x] Phase 14: Complex Section Forms
-- [ ] Phase 15: Rich Text Editor
+- [x] Phase 15: Rich Text Editor
 - [ ] Phase 16: FlexibleSection Form
 - [ ] Phase 17: Update Frontend Pages
 - [ ] Phase 18: Update Image References
@@ -775,38 +775,85 @@ export function SolutionsScrollerForm({ section, onChange }) {
 
 ---
 
-## Phase 15: Rich Text Editor
-- [ ] Complete
+## Phase 15: Rich Text Editor (Tiptap)
+- [x] Complete
 
 **Time: 2-3 hours**
 
+**Decision:** Using Tiptap instead of Portable Text for a cleaner break from Sanity.
+
 Install:
 ```bash
-pnpm add @portabletext/editor
+pnpm add @tiptap/react @tiptap/starter-kit @tiptap/extension-link dompurify
+pnpm add -D @types/dompurify
 ```
 
-Create wrapper:
+Create editor component:
 ```typescript
 // src/components/admin/RichTextEditor.tsx
 'use client';
-import { PortableTextEditor } from '@portabletext/editor';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
 import { Label } from '@/components/ui/label';
+import { Toggle } from '@/components/ui/toggle';
+import { Bold, Italic, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
 
-export function RichTextEditor({ label, value, onChange }) {
+interface RichTextEditorProps {
+  label?: string;
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export function RichTextEditor({ label, value, onChange }: RichTextEditorProps) {
+  const editor = useEditor({
+    extensions: [StarterKit, Link.configure({ openOnClick: false })],
+    content: value,
+    onUpdate: ({ editor }) => onChange(editor.getHTML()),
+  });
+
+  if (!editor) return null;
+
   return (
-    <div>
-      <Label>{label}</Label>
-      <div className="border rounded-md p-2 min-h-[100px]">
-        <PortableTextEditor value={value || []} onChange={onChange} />
+    <div className="space-y-2">
+      {label && <Label>{label}</Label>}
+      <div className="border rounded-md">
+        <div className="flex gap-1 p-2 border-b bg-muted/50">
+          <Toggle pressed={editor.isActive('bold')} onPressedChange={() => editor.chain().focus().toggleBold().run()}>
+            <Bold className="h-4 w-4" />
+          </Toggle>
+          <Toggle pressed={editor.isActive('italic')} onPressedChange={() => editor.chain().focus().toggleItalic().run()}>
+            <Italic className="h-4 w-4" />
+          </Toggle>
+          <Toggle pressed={editor.isActive('bulletList')} onPressedChange={() => editor.chain().focus().toggleBulletList().run()}>
+            <List className="h-4 w-4" />
+          </Toggle>
+          <Toggle pressed={editor.isActive('orderedList')} onPressedChange={() => editor.chain().focus().toggleOrderedList().run()}>
+            <ListOrdered className="h-4 w-4" />
+          </Toggle>
+        </div>
+        <EditorContent editor={editor} className="prose prose-sm max-w-none p-3 min-h-[100px] focus:outline-none" />
       </div>
     </div>
   );
 }
 ```
 
+Update frontend to render HTML (sanitized):
+```typescript
+// src/components/RichText.tsx
+import DOMPurify from 'dompurify';
+
+export function RichText({ html }: { html: string }) {
+  return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }} />;
+}
+```
+
 Use in PageHeaderForm for subtitle, and FlexibleSection text blocks.
 
-**Deliverable:** Rich text editing works
+**Migration note:** Update section types to use `string` (HTML) instead of `unknown[]` (Portable Text).
+
+**Deliverable:** Rich text editing works with Tiptap
 
 ---
 
@@ -851,7 +898,14 @@ Replace Sanity fetches with new data layer:
 | `src/components/layout/Header.tsx` | `getNavigation('header')` |
 | `src/components/layout/Footer.tsx` | `getNavigation('footer')` + `getSiteParameters()` |
 
-**Deliverable:** Site reads from Postgres
+**Rich text rendering update (Tiptap):**
+
+Replace `<PortableText>` with `<RichText>` component in:
+- `src/components/sections/PageHeader.tsx` (subtitle)
+- `src/components/sections/FlexibleSection/blocks/TextBlock.tsx` (text)
+- `src/app/(site)/over-ons/page.tsx` (page body)
+
+**Deliverable:** Site reads from Postgres, renders HTML instead of Portable Text
 
 ---
 
@@ -940,11 +994,11 @@ Update remaining references.
 # - @vercel/blob (Phase 2)
 # - @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities (Phase 6)
 
-# Still to add:
-pnpm add @portabletext/editor
+# Already added (Phase 15):
+# - @tiptap/react @tiptap/starter-kit @tiptap/extension-link dompurify
 
 # Remove (Phase 19)
-pnpm remove @sanity/client @sanity/image-url next-sanity
+pnpm remove @sanity/client @sanity/image-url next-sanity @portabletext/react
 ```
 
 ### What You're Reusing

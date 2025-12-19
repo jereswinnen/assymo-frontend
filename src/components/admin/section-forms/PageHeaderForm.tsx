@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import {
   Select,
   SelectContent,
@@ -70,29 +70,6 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
     onChange({ ...section, buttons: buttons.filter((_, i) => i !== index) });
   };
 
-  // Get subtitle as plain text for now (rich text comes in Phase 15)
-  const getSubtitleText = () => {
-    if (!section.subtitle || !Array.isArray(section.subtitle)) return "";
-    // Extract text from portable text blocks
-    return (section.subtitle as { children?: { text?: string }[] }[])
-      .map((block) =>
-        block.children?.map((child) => child.text || "").join("") || ""
-      )
-      .join("\n");
-  };
-
-  const setSubtitleText = (text: string) => {
-    // Convert plain text to simple portable text format
-    const blocks = text.split("\n").map((line) => ({
-      _type: "block",
-      _key: crypto.randomUUID(),
-      style: "normal",
-      markDefs: [],
-      children: [{ _type: "span", _key: crypto.randomUUID(), text: line, marks: [] }],
-    }));
-    onChange({ ...section, subtitle: blocks });
-  };
-
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -105,19 +82,11 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="subtitle">Subtitel</Label>
-        <Textarea
-          id="subtitle"
-          value={getSubtitleText()}
-          onChange={(e) => setSubtitleText(e.target.value)}
-          placeholder="Optionele subtitel tekst"
-          rows={3}
-        />
-        <p className="text-xs text-muted-foreground">
-          Rich text editor komt in een volgende fase
-        </p>
-      </div>
+      <RichTextEditor
+        label="Subtitel"
+        value={section.subtitle || ""}
+        onChange={(value) => onChange({ ...section, subtitle: value })}
+      />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="flex items-center justify-between sm:flex-col sm:items-start sm:gap-2">

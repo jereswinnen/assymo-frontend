@@ -16,7 +16,7 @@ export interface BaseSection {
 export interface PageHeaderSection extends BaseSection {
   _type: "pageHeader";
   title?: string;
-  subtitle?: unknown[]; // Portable Text
+  subtitle?: string; // HTML from Tiptap
   background?: boolean;
   showImage?: boolean;
   showButtons?: boolean;
@@ -97,7 +97,7 @@ export interface FlexTextBlock {
   _type: "flexTextBlock";
   heading?: string;
   headingLevel?: "h2" | "h3" | "h4";
-  text?: unknown[]; // Portable Text
+  text?: string; // HTML from Tiptap
   button?: {
     label?: string;
     url?: string;
@@ -196,6 +196,7 @@ export function createSection(type: SectionType): Section {
         _key,
         _type: "pageHeader",
         title: "",
+        subtitle: "",
         background: false,
         showImage: true,
         showButtons: false,
