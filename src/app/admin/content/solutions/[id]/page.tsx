@@ -326,9 +326,9 @@ export default function SolutionEditorPage({
     <div className="space-y-6">
       <div className="grid gap-6 md:grid-cols-3">
         {/* Main content - Sections */}
-        <div className="md:col-span-2">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium">Secties</h3>
+        <div className="space-y-4 md:col-span-2">
+          <div className="flex items-center justify-between">
+            <h3 className="mb-0! text-sm font-medium">Secties</h3>
             <AddSectionButton
               onAdd={(section) => setSections([...sections, section])}
             />

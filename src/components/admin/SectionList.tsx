@@ -31,10 +31,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  BlocksIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   GripVerticalIcon,
-  LayoutPanelTopIcon,
   Trash2Icon,
 } from "lucide-react";
 import {
@@ -122,14 +122,18 @@ interface SectionListProps {
   showAddButton?: boolean;
 }
 
-export function SectionList({ sections, onChange, showAddButton = true }: SectionListProps) {
+export function SectionList({
+  sections,
+  onChange,
+  showAddButton = true,
+}: SectionListProps) {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -167,7 +171,7 @@ export function SectionList({ sections, onChange, showAddButton = true }: Sectio
         <Empty className="border py-12">
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <LayoutPanelTopIcon />
+              <BlocksIcon />
             </EmptyMedia>
             <EmptyTitle>Geen secties</EmptyTitle>
             <EmptyDescription>
