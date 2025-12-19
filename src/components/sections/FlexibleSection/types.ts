@@ -1,4 +1,8 @@
-import type { SanityImage } from "@/types/sanity";
+// Simple image type with direct URL
+interface ImageWithUrl {
+  url: string;
+  alt?: string;
+}
 
 // Base block interface
 interface BaseBlock {
@@ -11,7 +15,7 @@ export interface FlexTextBlock extends BaseBlock {
   _type: "flexTextBlock";
   heading?: string;
   headingLevel?: "h2" | "h3" | "h4";
-  content?: any[];
+  content?: string; // HTML string from Tiptap
   showButton?: boolean;
   button?: {
     label: string;
@@ -25,7 +29,7 @@ export interface FlexTextBlock extends BaseBlock {
 // Image Block
 export interface FlexImageBlock extends BaseBlock {
   _type: "flexImageBlock";
-  image: SanityImage;
+  image: ImageWithUrl;
 }
 
 // Map Block (no config, just renders the embed)

@@ -26,6 +26,16 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
 }
 
 /**
+ * Get the homepage
+ */
+export async function getHomepage(): Promise<Page | null> {
+  const rows = await sql`
+    SELECT * FROM pages WHERE is_homepage = true LIMIT 1
+  `;
+  return (rows[0] as Page) || null;
+}
+
+/**
  * Get all pages (list view)
  */
 export async function getAllPages(): Promise<PageListItem[]> {

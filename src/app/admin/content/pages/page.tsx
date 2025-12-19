@@ -26,16 +26,19 @@ import {
 import { toast } from "sonner";
 import {
   FileTextIcon,
+  HomeIcon,
   Loader2Icon,
   PencilIcon,
   PlusIcon,
   Trash2Icon,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface Page {
   id: string;
   title: string;
-  slug: string;
+  slug: string | null;
+  is_homepage: boolean;
   updated_at: string;
 }
 
@@ -66,6 +69,7 @@ export default function PagesPage() {
   const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newSlug, setNewSlug] = useState("");
+  const [newIsHomepage, setNewIsHomepage] = useState(false);
   const [autoSlug, setAutoSlug] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -106,13 +110,19 @@ export default function PagesPage() {
   const openNewDialog = () => {
     setNewTitle("");
     setNewSlug("");
+    setNewIsHomepage(false);
     setAutoSlug(true);
     setIsNewDialogOpen(true);
   };
 
   const createPage = async () => {
-    if (!newTitle.trim() || !newSlug.trim()) {
-      toast.error("Titel en slug zijn verplicht");
+    if (!newTitle.trim()) {
+      toast.error("Titel is verplicht");
+      return;
+    }
+
+    if (!newIsHomepage && !newSlug.trim()) {
+      toast.error("Slug is verplicht voor niet-homepage pagina's");
       return;
     }
 
@@ -123,7 +133,8 @@ export default function PagesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: newTitle.trim(),
-          slug: newSlug.trim(),
+          slug: newIsHomepage ? null : newSlug.trim(),
+          is_homepage: newIsHomepage,
         }),
       });
 
@@ -133,7 +144,20 @@ export default function PagesPage() {
       }
 
       const newPage = await response.json();
-      setPages((prev) => [...prev, newPage].sort((a, b) => a.title.localeCompare(b.title)));
+      // If new page is homepage, update other pages' is_homepage to false
+      if (newPage.is_homepage) {
+        setPages((prev) =>
+          [...prev.map((p) => ({ ...p, is_homepage: false })), newPage].sort(
+            (a, b) => (b.is_homepage ? 1 : 0) - (a.is_homepage ? 1 : 0) || a.title.localeCompare(b.title)
+          )
+        );
+      } else {
+        setPages((prev) =>
+          [...prev, newPage].sort(
+            (a, b) => (b.is_homepage ? 1 : 0) - (a.is_homepage ? 1 : 0) || a.title.localeCompare(b.title)
+          )
+        );
+      }
       setIsNewDialogOpen(false);
       toast.success("Pagina aangemaakt");
     } catch (error) {
@@ -199,11 +223,22 @@ export default function PagesPage() {
           {pages.map((page) => (
             <Card key={page.id} className="hover:bg-muted/50 transition-colors">
               <CardContent className="flex items-center gap-4 p-4">
-                <FileTextIcon className="size-5 text-muted-foreground shrink-0" />
+                {page.is_homepage ? (
+                  <HomeIcon className="size-5 text-primary shrink-0" />
+                ) : (
+                  <FileTextIcon className="size-5 text-muted-foreground shrink-0" />
+                )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{page.title}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium truncate">{page.title}</p>
+                    {page.is_homepage && (
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                        Homepage
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground truncate">
-                    /{page.slug}
+                    {page.is_homepage ? "/" : `/${page.slug}`}
                   </p>
                 </div>
                 <p className="text-sm text-muted-foreground shrink-0 hidden sm:block">
@@ -219,6 +254,8 @@ export default function PagesPage() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setDeleteTarget(page)}
+                    disabled={page.is_homepage}
+                    title={page.is_homepage ? "Homepage kan niet verwijderd worden" : undefined}
                   >
                     <Trash2Icon className="size-4" />
                   </Button>
@@ -236,6 +273,19 @@ export default function PagesPage() {
             <DialogTitle>Nieuwe pagina</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="is_homepage">Homepage</Label>
+                <p className="text-xs text-muted-foreground">
+                  Dit is de hoofdpagina van de website
+                </p>
+              </div>
+              <Switch
+                id="is_homepage"
+                checked={newIsHomepage}
+                onCheckedChange={setNewIsHomepage}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="title">Titel</Label>
               <Input
@@ -245,18 +295,20 @@ export default function PagesPage() {
                 placeholder="Pagina titel"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug</Label>
-              <Input
-                id="slug"
-                value={newSlug}
-                onChange={(e) => handleSlugChange(e.target.value)}
-                placeholder="pagina-slug"
-              />
-              <p className="text-xs text-muted-foreground">
-                URL: /{newSlug || "..."}
-              </p>
-            </div>
+            {!newIsHomepage && (
+              <div className="space-y-2">
+                <Label htmlFor="slug">Slug</Label>
+                <Input
+                  id="slug"
+                  value={newSlug}
+                  onChange={(e) => handleSlugChange(e.target.value)}
+                  placeholder="pagina-slug"
+                />
+                <p className="text-xs text-muted-foreground">
+                  URL: /{newSlug || "..."}
+                </p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button

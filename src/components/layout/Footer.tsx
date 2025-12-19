@@ -1,35 +1,14 @@
 import Link from "next/link";
 import Logo from "./Logo";
 import { cn } from "@/lib/utils";
-import { client } from "@/sanity/client";
+import { getNavigation, getSiteParameters } from "@/lib/content";
 import { PhoneIcon, InstagramIcon, FacebookIcon, MailIcon } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { NewsletterForm } from "../forms/NewsletterForm";
-import { CookieSettingsButton } from "../cookies/CookieSettingsButton";
-
-const NAV_QUERY = `*[_type == "navigation"][0]{
-  links[]{
-    title,
-    slug,
-    subItems[]->{
-      name,
-      slug
-    }
-  }
-}`;
-
-const PARAMETERS_QUERY = `*[_type == "siteParameters"][0]{
-  address,
-  phone,
-  email,
-  vatNumber,
-  instagram,
-  facebook
-}`;
 
 type SubItem = {
   name: string;
-  slug: { current: string };
+  slug: string;
 };
 
 type NavLink = {
@@ -38,26 +17,27 @@ type NavLink = {
   subItems?: SubItem[];
 };
 
-type SiteSettings = {
-  address?: string;
-  phone?: string;
-  email?: string;
-  vatNumber?: string;
-  instagram?: string;
-  facebook?: string;
-};
-
 interface FooterProps {
   className?: string;
 }
 
 export default async function Footer({ className }: FooterProps) {
-  const [nav, settings] = await Promise.all([
-    client.fetch<{ links: NavLink[] }>(NAV_QUERY),
-    client.fetch<SiteSettings>(PARAMETERS_QUERY),
+  const [navLinks, settings] = await Promise.all([
+    getNavigation("footer"),
+    getSiteParameters(),
   ]);
 
-  const links = nav?.links || [];
+  // Transform navigation links to match expected format
+  const links: NavLink[] = navLinks.map((link) => ({
+    title: link.title,
+    slug: link.slug,
+    subItems: link.sub_items
+      ?.filter((item) => item.solution)
+      .map((item) => ({
+        name: item.solution!.name,
+        slug: item.solution!.slug,
+      })),
+  }));
 
   return (
     <footer className={cn("py-10 md:py-14 bg-stone-100", className)}>
@@ -145,9 +125,9 @@ export default async function Footer({ className }: FooterProps) {
                 {link.subItems && link.subItems.length > 0 && (
                   <ul className="flex flex-col gap-0.5">
                     {link.subItems.map((item) => (
-                      <li key={item.slug.current}>
+                      <li key={item.slug}>
                         <Link
-                          href={`/realisaties/${item.slug.current}`}
+                          href={`/realisaties/${item.slug}`}
                           className="text-lg font-medium text-stone-800 hover:text-stone-600 transition-colors duration-300"
                         >
                           {item.name}
@@ -177,10 +157,10 @@ export default async function Footer({ className }: FooterProps) {
                 <CookieSettingsButton />
               </li>*/}
               <Separator orientation="vertical" className="h-3! bg-stone-300" />
-              {settings?.vatNumber && (
-                <li className="mb-0!">{settings.vatNumber}</li>
+              {settings?.vat_number && (
+                <li className="mb-0!">{settings.vat_number}</li>
               )}
-              {settings?.vatNumber && (
+              {settings?.vat_number && (
                 <Separator
                   orientation="vertical"
                   className="h-3! bg-stone-300"

@@ -1,45 +1,45 @@
-import { client } from "@/sanity/client";
+import { getNavigation, getSiteParameters } from "@/lib/content";
 import HeaderClient from "./HeaderClient";
-
-const NAV_QUERY = `*[_type == "navigation"][0]{
-  links[]{
-    title,
-    slug,
-    submenuHeading,
-    subItems[]->{
-      name,
-      slug,
-      headerImage{
-        asset,
-        hotspot,
-        alt
-      }
-    }
-  }
-}`;
-
-const PARAMETERS_QUERY = `*[_type == "siteParameters"][0]{
-  address,
-  phone,
-  email,
-  instagram,
-  facebook
-}`;
 
 interface HeaderProps {
   className?: string;
 }
 
 export default async function Header({ className }: HeaderProps) {
-  const [nav, parameters] = await Promise.all([
-    client.fetch(NAV_QUERY),
-    client.fetch(PARAMETERS_QUERY),
+  const [navLinks, parameters] = await Promise.all([
+    getNavigation("header"),
+    getSiteParameters(),
   ]);
+
+  // Transform navigation links to match HeaderClient's expected format
+  const links = navLinks.map((link) => ({
+    title: link.title,
+    slug: link.slug,
+    submenuHeading: link.submenu_heading ?? undefined,
+    subItems: link.sub_items
+      ?.filter((item) => item.solution)
+      .map((item) => ({
+        name: item.solution!.name,
+        slug: item.solution!.slug,
+        headerImage: item.solution!.header_image ?? undefined,
+      })),
+  }));
+
+  // Transform site parameters to convert null to undefined
+  const settings = parameters
+    ? {
+        address: parameters.address ?? undefined,
+        phone: parameters.phone ?? undefined,
+        email: parameters.email ?? undefined,
+        instagram: parameters.instagram ?? undefined,
+        facebook: parameters.facebook ?? undefined,
+      }
+    : undefined;
 
   return (
     <HeaderClient
-      links={nav?.links || []}
-      settings={parameters}
+      links={links}
+      settings={settings}
       className={className}
     />
   );

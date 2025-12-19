@@ -47,32 +47,48 @@ export async function PUT(
     }
 
     const { id } = await params;
-    const { title, slug, header_image, sections } = await request.json();
+    const { title, slug, is_homepage, header_image, sections } = await request.json();
 
-    if (!title || !slug) {
+    if (!title) {
       return NextResponse.json(
-        { error: "Title and slug are required" },
+        { error: "Title is required" },
         { status: 400 }
       );
     }
 
-    // Check if slug already exists for another page
-    const existing = await sql`
-      SELECT id FROM pages WHERE slug = ${slug} AND id != ${id}
-    `;
-
-    if (existing.length > 0) {
+    // Homepage doesn't need a slug
+    if (!is_homepage && !slug) {
       return NextResponse.json(
-        { error: "A page with this slug already exists" },
-        { status: 409 }
+        { error: "Slug is required for non-homepage pages" },
+        { status: 400 }
       );
+    }
+
+    // Check if slug already exists for another page (only if slug is provided)
+    if (slug) {
+      const existing = await sql`
+        SELECT id FROM pages WHERE slug = ${slug} AND id != ${id}
+      `;
+
+      if (existing.length > 0) {
+        return NextResponse.json(
+          { error: "A page with this slug already exists" },
+          { status: 409 }
+        );
+      }
+    }
+
+    // If setting as homepage, unset any existing homepage
+    if (is_homepage) {
+      await sql`UPDATE pages SET is_homepage = false WHERE is_homepage = true AND id != ${id}`;
     }
 
     const rows = await sql`
       UPDATE pages
       SET
         title = ${title},
-        slug = ${slug},
+        slug = ${slug || null},
+        is_homepage = ${is_homepage || false},
         header_image = ${header_image ? JSON.stringify(header_image) : null}::jsonb,
         sections = ${JSON.stringify(sections || [])}::jsonb,
         updated_at = NOW()

@@ -1,10 +1,13 @@
 import { Action } from "@/components/general/Action";
 import { iconMap } from "@/lib/icons";
-import { urlFor } from "@/sanity/imageUrl";
-import type { SanityImage } from "@/types/sanity";
 import Image from "next/image";
 import { PortableText } from "@portabletext/react";
 import { RichText } from "@/components/RichText";
+
+interface ImageWithUrl {
+  url: string;
+  alt?: string;
+}
 
 interface PageHeaderButton {
   label: string;
@@ -22,7 +25,7 @@ interface PageHeaderProps {
     showButtons?: boolean;
     buttons?: PageHeaderButton[];
   };
-  headerImage?: SanityImage;
+  headerImage?: ImageWithUrl;
 }
 
 export default function PageHeader({ section, headerImage }: PageHeaderProps) {
@@ -73,10 +76,10 @@ export default function PageHeader({ section, headerImage }: PageHeaderProps) {
           </div>
         )}
       </div>
-      {hasImage && (
+      {hasImage && headerImage?.url && (
         <div className="col-span-full md:col-span-5 relative aspect-5/3">
           <Image
-            src={urlFor(headerImage).url()}
+            src={headerImage.url}
             alt={headerImage.alt || ""}
             fill
             className="object-cover"

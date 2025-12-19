@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { client } from "@/sanity/client";
+import { getSiteParameters } from "@/lib/content";
 import { AppointmentView } from "./AppointmentView";
 import Link from "next/link";
 import { MailIcon, PhoneIcon } from "lucide-react";
@@ -16,18 +16,6 @@ interface AppointmentTokenPageProps {
   searchParams: Promise<{ status?: string }>;
 }
 
-const PARAMETERS_QUERY = `*[_type == "siteParameters"][0]{
-  address,
-  phone,
-  email,
-}`;
-
-type SiteSettings = {
-  address?: string;
-  phone?: string;
-  email?: string;
-};
-
 export default async function AppointmentTokenPage({
   params,
   searchParams,
@@ -35,7 +23,7 @@ export default async function AppointmentTokenPage({
   const [{ token }, { status }, settings] = await Promise.all([
     params,
     searchParams,
-    client.fetch<SiteSettings>(PARAMETERS_QUERY),
+    getSiteParameters(),
   ]);
 
   return (

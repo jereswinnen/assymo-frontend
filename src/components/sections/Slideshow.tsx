@@ -1,10 +1,8 @@
 import SlideshowComponent from "@/components/general/Slideshow";
 
 interface SlideshowImage {
-  _type: "image";
-  asset: { _ref: string; _type: "reference" };
-  hotspot?: { x: number; y: number };
-  alt: string;
+  url: string;
+  alt?: string;
   caption?: string;
 }
 
@@ -28,8 +26,7 @@ export default function Slideshow({ section }: SlideshowProps) {
           ) : (
             <div className="p-4 bg-yellow-100 text-center rounded-lg">
               <h3 className="font-semibold mb-2">Slideshow Section</h3>
-              <p>Images need to be added in Sanity CMS</p>
-              <p className="text-sm mt-1">Section type: {section._type}</p>
+              <p>No images added yet</p>
             </div>
           )}
         </div>
@@ -44,8 +41,7 @@ export default function Slideshow({ section }: SlideshowProps) {
       ) : (
         <div className="p-4 bg-yellow-100 text-center rounded-lg">
           <h3 className="font-semibold mb-2">Slideshow Section</h3>
-          <p>Images need to be added in Sanity CMS</p>
-          <p className="text-sm mt-1">Section type: {section._type}</p>
+          <p>No images added yet</p>
         </div>
       )}
     </section>

@@ -26,7 +26,7 @@ const translateVertical = 8;
 
 type SubItem = {
   name: string;
-  slug: { current: string };
+  slug: string;
 };
 
 type NavLink = {
@@ -343,9 +343,9 @@ export default function MobileMenu({
                     <nav className="flex-1">
                       <ul className="flex flex-col gap-4">
                         {currentPage.subItems?.map((item) => (
-                          <li key={item.slug.current}>
+                          <li key={item.slug}>
                             <Link
-                              href={`/realisaties/${item.slug.current}`}
+                              href={`/realisaties/${item.slug}`}
                               className="cursor-pointer block text-xl font-medium text-stone-600 transition-colors hover:text-stone-900"
                             >
                               {item.name}

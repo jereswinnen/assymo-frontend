@@ -1,5 +1,4 @@
-import { client } from "@/sanity/client";
-import { sectionsFragment } from "@/sanity/fragments";
+import { getPageBySlug, getSiteParameters } from "@/lib/content";
 import SectionRenderer from "@/components/general/SectionRenderer";
 import { BookingForm } from "@/components/appointments/BookingForm";
 import Link from "next/link";
@@ -12,41 +11,19 @@ export const metadata = {
   description: "Breng een bezoekje aan onze toonzaal.",
 };
 
-const PAGE_QUERY = `*[
-  _type == "page" && slug.current == "afspraak"
-][0]{
-  _id,
-  title,
-  body,
-  headerImage,
-  ${sectionsFragment}
-}`;
-
-const PARAMETERS_QUERY = `*[_type == "siteParameters"][0]{
-  address,
-  phone,
-  email,
-}`;
-
-type SiteSettings = {
-  address?: string;
-  phone?: string;
-  email?: string;
-};
-
 export default async function AppointmentPage() {
   const [page, settings] = await Promise.all([
-    client.fetch(PAGE_QUERY),
-    client.fetch<SiteSettings>(PARAMETERS_QUERY),
+    getPageBySlug("afspraak"),
+    getSiteParameters(),
   ]);
+
+  const sections = (page?.sections || []) as any[];
+  const headerImage = page?.header_image as any;
 
   return (
     <section className="col-span-full grid grid-cols-subgrid gap-y-14">
-      {page?.sections && page.sections.length > 0 && (
-        <SectionRenderer
-          sections={page.sections}
-          headerImage={page.headerImage}
-        />
+      {sections.length > 0 && (
+        <SectionRenderer sections={sections} headerImage={headerImage} />
       )}
       <section className="col-span-full grid grid-cols-subgrid gap-y-14">
         <BookingForm className="col-span-full md:col-span-6" />

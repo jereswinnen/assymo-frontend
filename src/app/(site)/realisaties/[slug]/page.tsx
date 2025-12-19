@@ -1,24 +1,12 @@
 export const dynamic = "force-dynamic";
 
-import { client } from "@/sanity/client";
-import { sectionsFragment } from "@/sanity/fragments";
+import { getSolutionBySlug } from "@/lib/content";
 import { notFound } from "next/navigation";
 import SectionRenderer from "@/components/general/SectionRenderer";
 
-const SOLUTIONS_QUERY = `*[
-  _type == "solution" && slug.current == $slug
-][0]{
-  _id,
-  name,
-  slug,
-  headerImage,
-  body,
-  ${sectionsFragment}
-}`;
-
 export async function generateMetadata({ params }: any) {
   const { slug } = await params;
-  const solution = await client.fetch(SOLUTIONS_QUERY, { slug });
+  const solution = await getSolutionBySlug(slug);
 
   if (!solution) {
     return {
@@ -34,19 +22,19 @@ export async function generateMetadata({ params }: any) {
 
 export default async function SolutionPage({ params }: any) {
   const { slug } = await params;
-  const solution = await client.fetch(SOLUTIONS_QUERY, { slug });
+  const solution = await getSolutionBySlug(slug);
 
   if (!solution) {
     notFound();
   }
 
+  const sections = (solution.sections || []) as any[];
+  const headerImage = solution.header_image as any;
+
   return (
     <section className="col-span-full grid grid-cols-subgrid gap-y-14! md:gap-y-24!">
-      {solution.sections && solution.sections.length > 0 && (
-        <SectionRenderer
-          sections={solution.sections}
-          headerImage={solution.headerImage}
-        />
+      {sections.length > 0 && (
+        <SectionRenderer sections={sections} headerImage={headerImage} />
       )}
     </section>
   );

@@ -13,9 +13,9 @@ export async function GET() {
     }
 
     const rows = await sql`
-      SELECT id, title, slug, updated_at
+      SELECT id, title, slug, is_homepage, updated_at
       FROM pages
-      ORDER BY title
+      ORDER BY is_homepage DESC, title
     `;
 
     return NextResponse.json(rows);
@@ -36,30 +36,45 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { title, slug } = await request.json();
+    const { title, slug, is_homepage } = await request.json();
 
-    if (!title || !slug) {
+    if (!title) {
       return NextResponse.json(
-        { error: "Title and slug are required" },
+        { error: "Title is required" },
         { status: 400 }
       );
     }
 
-    // Check if slug already exists
-    const existing = await sql`
-      SELECT id FROM pages WHERE slug = ${slug}
-    `;
-
-    if (existing.length > 0) {
+    // Homepage doesn't need a slug
+    if (!is_homepage && !slug) {
       return NextResponse.json(
-        { error: "A page with this slug already exists" },
-        { status: 409 }
+        { error: "Slug is required for non-homepage pages" },
+        { status: 400 }
       );
     }
 
+    // Check if slug already exists (only if slug is provided)
+    if (slug) {
+      const existing = await sql`
+        SELECT id FROM pages WHERE slug = ${slug}
+      `;
+
+      if (existing.length > 0) {
+        return NextResponse.json(
+          { error: "A page with this slug already exists" },
+          { status: 409 }
+        );
+      }
+    }
+
+    // If setting as homepage, unset any existing homepage
+    if (is_homepage) {
+      await sql`UPDATE pages SET is_homepage = false WHERE is_homepage = true`;
+    }
+
     const rows = await sql`
-      INSERT INTO pages (title, slug, sections)
-      VALUES (${title}, ${slug}, '[]'::jsonb)
+      INSERT INTO pages (title, slug, is_homepage, sections)
+      VALUES (${title}, ${slug || null}, ${is_homepage || false}, '[]'::jsonb)
       RETURNING *
     `;
 

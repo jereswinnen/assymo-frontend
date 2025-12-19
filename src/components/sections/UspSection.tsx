@@ -57,9 +57,14 @@ function UspCard({
     </>
   );
 
-  if (variant === "cta" && usp.link) {
+  // Handle link as string or object with href/url property
+  const linkUrl = typeof usp.link === "string"
+    ? usp.link.trim()
+    : (usp.link?.href || usp.link?.url || "").trim();
+
+  if (variant === "cta" && linkUrl) {
     return (
-      <Link href={usp.link} className={`${baseClasses} ${variantClasses.cta}`}>
+      <Link href={linkUrl} className={`${baseClasses} ${variantClasses.cta}`}>
         <header className="flex items-center justify-between text-accent-light">
           {IconComponent && <IconComponent className="size-6" />}
           <ArrowUpRightIcon className="size-6 opacity-0 -translate-x-1.5 translate-y-1.5 ease-circ duration-400 transition-all group-hover:opacity-100 group-hover:translate-0" />

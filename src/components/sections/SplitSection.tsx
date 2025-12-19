@@ -3,17 +3,8 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { urlFor } from "@/sanity/imageUrl";
 import { Action } from "../general/Action";
 import { iconMap } from "@/lib/icons";
-
-interface SanityImage {
-  _type: "image";
-  asset: {
-    _ref: string;
-    _type: "reference";
-  };
-}
 
 interface SplitItemAction {
   label: string;
@@ -22,7 +13,10 @@ interface SplitItemAction {
 }
 
 interface SplitItem {
-  image: SanityImage;
+  image?: {
+    url: string;
+    alt?: string;
+  };
   title: string;
   subtitle?: string;
   href: string;
@@ -59,13 +53,15 @@ export function SplitSection({ section, className }: SplitSectionProps) {
             className="group flex flex-col gap-3 md:basis-1/2 overflow-hidden md:transition-[flex-basis] duration-700 ease-circ md:group-hover/split:hover:basis-[54%] md:group-hover/split:not-[&:hover]:basis-[46%] cursor-pointer"
           >
             <div className="relative h-[220px] md:h-[400px] overflow-hidden">
-              <Image
-                src={urlFor(item.image).width(1200).quality(80).url()}
-                alt={item.title}
-                fill
-                className="object-cover"
-                sizes="50vw"
-              />
+              {item.image?.url && (
+                <Image
+                  src={item.image.url}
+                  alt={item.image.alt || item.title}
+                  fill
+                  className="object-cover"
+                  sizes="50vw"
+                />
+              )}
               {item.action && (
                 <div className="absolute inset-0 flex items-center justify-center bg-accent-dark/60 opacity-0 transition-opacity duration-500 ease-circ group-hover:opacity-100">
                   <Action

@@ -12,16 +12,16 @@ import {
 } from "@/components/ui/popover";
 
 interface FilterOption {
-  _id: string;
+  id: string;
   name: string;
-  slug: { current: string };
+  slug: string;
 }
 
 interface CategoryWithOptions {
-  _id: string;
+  id: string;
   name: string;
-  slug: { current: string };
-  options: FilterOption[];
+  slug: string;
+  filters: FilterOption[];
 }
 
 interface FilterBarProps {
@@ -32,9 +32,9 @@ interface FilterBarProps {
 
 interface CategoryFilterProps {
   category: {
-    _id: string;
+    id: string;
     name: string;
-    slug: { current: string };
+    slug: string;
   };
   options: FilterOption[];
   selectedOptions: string[];
@@ -53,18 +53,18 @@ function CategoryFilter({
     const newSelection = selectedOptions.includes(optionSlug)
       ? selectedOptions.filter((s) => s !== optionSlug)
       : [...selectedOptions, optionSlug];
-    onSelectionChange(category.slug.current, newSelection);
+    onSelectionChange(category.slug, newSelection);
     setOpen(false);
   };
 
   const handleClear = () => {
-    onSelectionChange(category.slug.current, []);
+    onSelectionChange(category.slug, []);
   };
 
   const selectedCount = selectedOptions.length;
 
   const selectedNames = options
-    .filter((opt) => selectedOptions.includes(opt.slug.current))
+    .filter((opt) => selectedOptions.includes(opt.slug))
     .map((opt) => opt.name);
 
   return (
@@ -90,17 +90,17 @@ function CategoryFilter({
         <div className="p-2 max-h-60 overflow-y-auto">
           {options.map((option) => (
             <div
-              key={option._id}
+              key={option.id}
               className="flex items-center gap-2 p-2 rounded-md hover:bg-accent cursor-pointer"
-              onClick={() => handleToggle(option.slug.current)}
+              onClick={() => handleToggle(option.slug)}
             >
               <Checkbox
-                id={option._id}
-                checked={selectedOptions.includes(option.slug.current)}
-                onCheckedChange={() => handleToggle(option.slug.current)}
+                id={option.id}
+                checked={selectedOptions.includes(option.slug)}
+                onCheckedChange={() => handleToggle(option.slug)}
               />
               <Label
-                htmlFor={option._id}
+                htmlFor={option.id}
                 className="cursor-pointer flex-1 font-normal"
               >
                 {option.name}
@@ -148,8 +148,8 @@ export function FilterBar({
     (options) => options.length > 0,
   );
 
-  // Only show categories that have options
-  const visibleCategories = categories.filter((cat) => cat.options.length > 0);
+  // Only show categories that have filters
+  const visibleCategories = categories.filter((cat) => cat.filters.length > 0);
 
   if (visibleCategories.length === 0) {
     return null;
@@ -161,10 +161,10 @@ export function FilterBar({
       <div className="flex flex-wrap items-center gap-3">
         {visibleCategories.map((category) => (
           <CategoryFilter
-            key={category._id}
+            key={category.id}
             category={category}
-            options={category.options}
-            selectedOptions={selectedFilters[category.slug.current] || []}
+            options={category.filters}
+            selectedOptions={selectedFilters[category.slug] || []}
             onSelectionChange={handleCategoryChange}
           />
         ))}

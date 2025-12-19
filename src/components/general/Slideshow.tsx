@@ -1,6 +1,5 @@
 "use client";
 
-import { urlFor } from "@/sanity/imageUrl";
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, type PanInfo } from "motion/react";
@@ -12,10 +11,8 @@ const TRANSITION_DURATION = 0.4;
 const SWIPE_THRESHOLD = 50;
 
 interface SlideshowImage {
-  _type: "image";
-  asset: { _ref: string; _type: "reference" };
-  hotspot?: { x: number; y: number };
-  alt: string;
+  url: string;
+  alt?: string;
   caption?: string;
 }
 
@@ -102,7 +99,7 @@ export default function Slideshow({
             className="absolute inset-0"
           >
             <Image
-              src={urlFor(currentImage).url()}
+              src={currentImage.url}
               alt={currentImage.alt || "Slideshow image"}
               fill
               className="object-cover pointer-events-none select-none"
@@ -118,7 +115,7 @@ export default function Slideshow({
           <link
             rel="preload"
             as="image"
-            href={urlFor(nextImage).url()}
+            href={nextImage.url}
           />
         )}
 

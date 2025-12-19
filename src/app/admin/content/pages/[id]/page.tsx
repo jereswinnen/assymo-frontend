@@ -29,11 +29,13 @@ import {
   SaveIcon,
   Trash2Icon,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface PageData {
   id: string;
   title: string;
-  slug: string;
+  slug: string | null;
+  is_homepage: boolean;
   header_image: ImageValue | null;
   sections: Section[];
   created_at: string;
@@ -64,6 +66,7 @@ export default function PageEditorPage({
   // Form state
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
+  const [isHomepage, setIsHomepage] = useState(false);
   const [autoSlug, setAutoSlug] = useState(false);
   const [headerImage, setHeaderImage] = useState<ImageValue | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
@@ -85,12 +88,13 @@ export default function PageEditorPage({
 
     const changed =
       title !== page.title ||
-      slug !== page.slug ||
+      slug !== (page.slug || "") ||
+      isHomepage !== page.is_homepage ||
       JSON.stringify(headerImage) !== JSON.stringify(page.header_image) ||
       JSON.stringify(sections) !== JSON.stringify(page.sections);
 
     setHasChanges(changed);
-  }, [title, slug, headerImage, sections, page]);
+  }, [title, slug, isHomepage, headerImage, sections, page]);
 
   const fetchPage = async () => {
     setLoading(true);
@@ -107,7 +111,8 @@ export default function PageEditorPage({
       const data: PageData = await response.json();
       setPage(data);
       setTitle(data.title);
-      setSlug(data.slug);
+      setSlug(data.slug || "");
+      setIsHomepage(data.is_homepage);
       setHeaderImage(data.header_image);
       setSections(data.sections || []);
     } catch {
@@ -130,8 +135,13 @@ export default function PageEditorPage({
   };
 
   const savePage = async () => {
-    if (!title.trim() || !slug.trim()) {
-      toast.error("Titel en slug zijn verplicht");
+    if (!title.trim()) {
+      toast.error("Titel is verplicht");
+      return;
+    }
+
+    if (!isHomepage && !slug.trim()) {
+      toast.error("Slug is verplicht voor niet-homepage pagina's");
       return;
     }
 
@@ -142,7 +152,8 @@ export default function PageEditorPage({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: title.trim(),
-          slug: slug.trim(),
+          slug: isHomepage ? null : slug.trim(),
+          is_homepage: isHomepage,
           header_image: headerImage,
           sections,
         }),
@@ -155,6 +166,8 @@ export default function PageEditorPage({
 
       const updatedPage = await response.json();
       setPage(updatedPage);
+      setSlug(updatedPage.slug || "");
+      setIsHomepage(updatedPage.is_homepage);
       setSections(updatedPage.sections || []);
       setHasChanges(false);
       toast.success("Pagina opgeslagen");
@@ -215,7 +228,7 @@ export default function PageEditorPage({
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" asChild>
             <a
-              href={`/${slug}`}
+              href={isHomepage ? "/" : `/${slug}`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -227,6 +240,8 @@ export default function PageEditorPage({
             variant="destructive"
             size="sm"
             onClick={() => setShowDeleteDialog(true)}
+            disabled={isHomepage}
+            title={isHomepage ? "Homepage kan niet verwijderd worden" : undefined}
           >
             <Trash2Icon className="size-4" />
             Verwijderen
@@ -260,6 +275,20 @@ export default function PageEditorPage({
               <CardTitle>Algemeen</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="is_homepage">Homepage</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Dit is de hoofdpagina van de website
+                  </p>
+                </div>
+                <Switch
+                  id="is_homepage"
+                  checked={isHomepage}
+                  onCheckedChange={setIsHomepage}
+                />
+              </div>
+              <Separator />
               <div className="space-y-2">
                 <Label htmlFor="title">Titel</Label>
                 <Input
@@ -269,18 +298,20 @@ export default function PageEditorPage({
                   placeholder="Pagina titel"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="slug">Slug</Label>
-                <Input
-                  id="slug"
-                  value={slug}
-                  onChange={(e) => handleSlugChange(e.target.value)}
-                  placeholder="pagina-slug"
-                />
-                <p className="text-xs text-muted-foreground">
-                  URL: /{slug || "..."}
-                </p>
-              </div>
+              {!isHomepage && (
+                <div className="space-y-2">
+                  <Label htmlFor="slug">Slug</Label>
+                  <Input
+                    id="slug"
+                    value={slug}
+                    onChange={(e) => handleSlugChange(e.target.value)}
+                    placeholder="pagina-slug"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    URL: /{slug || "..."}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

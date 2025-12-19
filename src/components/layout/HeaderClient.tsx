@@ -16,7 +16,6 @@ import { Separator } from "../ui/separator";
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
 import { createPortal, flushSync } from "react-dom";
-import { urlFor } from "@/sanity/imageUrl";
 import MobileMenu, { HamburgerIcon } from "./MobileMenu";
 
 // Animation tokens
@@ -34,11 +33,9 @@ const carouselTransitionDuration = 0.4;
 
 type SubItem = {
   name: string;
-  slug: { current: string };
+  slug: string;
   headerImage?: {
-    _type: "image";
-    asset: { _ref: string; _type: "reference" };
-    hotspot?: { x: number; y: number };
+    url: string;
     alt?: string;
   };
 };
@@ -332,10 +329,10 @@ export default function HeaderClient({
                   >
                     <figure className="w-2xs h-96 relative overflow-hidden">
                       <AnimatePresence>
-                        {currentImage && (
+                        {currentImage?.url && (
                           <motion.img
                             key={currentIndex}
-                            src={urlFor(currentImage).url()}
+                            src={currentImage.url}
                             alt={currentImage.alt || ""}
                             className="absolute inset-0 w-full h-full object-cover"
                             initial={{ opacity: 0 }}
@@ -361,10 +358,10 @@ export default function HeaderClient({
                       >
                         {activeLink?.subItems?.map((item, index) => (
                           <li
-                            key={item.slug.current}
+                            key={item.slug}
                             onMouseEnter={() => handleItemHover(index)}
                           >
-                            <Link href={`/realisaties/${item.slug.current}`}>
+                            <Link href={`/realisaties/${item.slug}`}>
                               {item.name}
                             </Link>
                           </li>

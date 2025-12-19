@@ -3,42 +3,40 @@
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import Image from "next/image";
-import { urlFor } from "@/sanity/imageUrl";
 import { FilterBar } from "@/components/forms/FilterBar";
 import { Action } from "./Action";
 import { InfoIcon } from "lucide-react";
 
 interface SolutionFilter {
-  _id: string;
+  id: string;
   name: string;
-  slug: { current: string };
-  category: {
-    _id: string;
-    name: string;
-    slug: { current: string };
-  };
+  slug: string;
+  category_id: string;
 }
 
 interface Solution {
-  _id: string;
+  id: string;
   name: string;
   subtitle?: string;
-  slug: { current: string };
-  headerImage?: any;
+  slug: string;
+  header_image?: {
+    url: string;
+    alt?: string;
+  };
   filters?: SolutionFilter[];
 }
 
 interface FilterOption {
-  _id: string;
+  id: string;
   name: string;
-  slug: { current: string };
+  slug: string;
 }
 
 interface CategoryWithOptions {
-  _id: string;
+  id: string;
   name: string;
-  slug: { current: string };
-  options: FilterOption[];
+  slug: string;
+  filters: FilterOption[];
 }
 
 interface ProjectsGridProps {
@@ -55,9 +53,9 @@ export function ProjectsGrid({ solutions, categories }: ProjectsGridProps) {
   const selectedFilters = useMemo(() => {
     const filters: Record<string, string[]> = {};
     categories.forEach((category) => {
-      const param = searchParams.get(category.slug.current);
+      const param = searchParams.get(category.slug);
       if (param) {
-        filters[category.slug.current] = param.split(",").filter(Boolean);
+        filters[category.slug] = param.split(",").filter(Boolean);
       }
     });
     return filters;
@@ -82,6 +80,15 @@ export function ProjectsGrid({ solutions, categories }: ProjectsGridProps) {
     [router, pathname],
   );
 
+  // Build a map of category_id to category_slug for filtering
+  const categoryIdToSlug = useMemo(() => {
+    const map: Record<string, string> = {};
+    categories.forEach((cat) => {
+      map[cat.id] = cat.slug;
+    });
+    return map;
+  }, [categories]);
+
   // Filter solutions based on selected filters
   // Logic: OR within categories, AND between categories
   const filteredSolutions = useMemo(() => {
@@ -99,12 +106,12 @@ export function ProjectsGrid({ solutions, categories }: ProjectsGridProps) {
         // Must match ANY selected option in this category (OR within category)
         return solution.filters?.some(
           (filter) =>
-            filter.category.slug.current === categorySlug &&
-            selectedOptions.includes(filter.slug.current),
+            categoryIdToSlug[filter.category_id] === categorySlug &&
+            selectedOptions.includes(filter.slug),
         );
       });
     });
-  }, [solutions, selectedFilters]);
+  }, [solutions, selectedFilters, categoryIdToSlug]);
 
   const hasActiveFilters = Object.values(selectedFilters).some(
     (options) => options.length > 0,
@@ -137,20 +144,20 @@ export function ProjectsGrid({ solutions, categories }: ProjectsGridProps) {
         {filteredSolutions.length > 0 ? (
           filteredSolutions.map((solution, index) => (
             <div
-              key={`${solution._id}-${filterKey}`}
+              key={`${solution.id}-${filterKey}`}
               className="group relative w-full flex flex-col gap-4 p-4 cursor-pointer transition-all ease-circ duration-400 animate-in fade-in slide-in-from-bottom-4"
               style={{
                 animationDelay: `${index * 60}ms`,
                 animationFillMode: "backwards",
               }}
-              onClick={() => router.push(`/realisaties/${solution.slug.current}`)}
+              onClick={() => router.push(`/realisaties/${solution.slug}`)}
             >
               {/* Image */}
               <div className="relative aspect-5/3 overflow-hidden bg-stone-100">
-                {solution.headerImage && (
+                {solution.header_image?.url && (
                   <Image
-                    src={urlFor(solution.headerImage).url()}
-                    alt={solution.headerImage.alt || solution.name}
+                    src={solution.header_image.url}
+                    alt={solution.header_image.alt || solution.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-700"
                     sizes="(max-width: 768px) 100vw, 33vw"
@@ -173,7 +180,7 @@ export function ProjectsGrid({ solutions, categories }: ProjectsGridProps) {
               {/* Action */}
               <Action
                 className="mt-auto opacity-0 translate-y-1.5 blur-xs transition-all duration-600 ease-circ group-hover:opacity-100 group-hover:translate-y-0 group-hover:blur-none"
-                href={`/realisaties/${solution.slug.current}`}
+                href={`/realisaties/${solution.slug}`}
                 icon={<InfoIcon />}
                 label="Meer informatie"
                 variant="secondary"

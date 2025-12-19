@@ -4,8 +4,13 @@ import { SplitSection } from "../sections/SplitSection";
 import UspSection from "../sections/UspSection";
 import SolutionsScroller from "../sections/SolutionsScroller";
 import FlexibleSection from "../sections/FlexibleSection";
-import type { SanityImage } from "@/types/sanity";
 import type { FlexibleSectionData } from "../sections/FlexibleSection/types";
+
+// Image type with direct URL
+interface ImageWithUrl {
+  url: string;
+  alt?: string;
+}
 
 // Section type definitions using discriminated unions
 // Each section has a _type field that narrows the type in the switch
@@ -14,10 +19,8 @@ interface BaseSection {
 }
 
 interface SlideshowImage {
-  _type: "image";
-  asset: { _ref: string; _type: "reference" };
-  hotspot?: { x: number; y: number };
-  alt: string;
+  url: string;
+  alt?: string;
   caption?: string;
 }
 
@@ -30,7 +33,7 @@ interface SlideshowSection extends BaseSection {
 interface PageHeaderSection extends BaseSection {
   _type: "pageHeader";
   title: string;
-  subtitle?: any[];
+  subtitle?: string | any[]; // HTML string (Tiptap) or Portable Text array (legacy)
   background?: boolean;
   showImage?: boolean;
   showButtons?: boolean;
@@ -42,13 +45,8 @@ interface PageHeaderSection extends BaseSection {
   }[];
 }
 
-interface SplitImage {
-  _type: "image";
-  asset: { _ref: string; _type: "reference" };
-}
-
 interface SplitItem {
-  image: SplitImage;
+  image?: ImageWithUrl;
   title: string;
   subtitle?: string;
   href: string;
@@ -93,7 +91,7 @@ type Section =
 
 interface SectionRendererProps {
   sections: Section[];
-  headerImage?: SanityImage;
+  headerImage?: ImageWithUrl;
 }
 
 export default function SectionRenderer({

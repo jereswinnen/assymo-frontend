@@ -1,6 +1,6 @@
 "use client";
 
-import { PortableText } from "@portabletext/react";
+import { RichText } from "@/components/RichText";
 import { Action, actionVariants } from "@/components/general/Action";
 import { iconMap } from "@/lib/icons";
 import { cn } from "@/lib/utils";
@@ -38,7 +38,7 @@ export default function TextBlock({ block }: TextBlockProps) {
         {renderHeading()}
         {content && (
           <div className="font-[420] text-stone-600 text-base md:text-lg">
-            <PortableText value={content} />
+            <RichText html={content} />
           </div>
         )}
       </div>
