@@ -1,7 +1,6 @@
 import { Action } from "@/components/general/Action";
 import { iconMap } from "@/lib/icons";
 import Image from "next/image";
-import { PortableText } from "@portabletext/react";
 import { RichText } from "@/components/RichText";
 
 interface ImageWithUrl {
@@ -19,7 +18,7 @@ interface PageHeaderButton {
 interface PageHeaderProps {
   section: {
     title: string;
-    subtitle?: string | unknown[]; // HTML string (Tiptap) or Portable Text array (Sanity)
+    subtitle?: string;
     background?: boolean;
     showImage?: boolean;
     showButtons?: boolean;
@@ -47,15 +46,11 @@ export default function PageHeader({ section, headerImage }: PageHeaderProps) {
           <h1 className={`mb-0! ${background ? "text-stone-800" : ""}`}>
             {title}
           </h1>
-          {subtitle && (typeof subtitle === "string" ? subtitle : subtitle.length > 0) && (
+          {subtitle && (
             <div
               className={`font-[420] text-stone-600 ${!hasImage ? "text-lg md:text-xl" : "text-base md:text-lg"}`}
             >
-              {typeof subtitle === "string" ? (
-                <RichText html={subtitle} />
-              ) : (
-                <PortableText value={subtitle as any[]} />
-              )}
+              <RichText html={subtitle} />
             </div>
           )}
         </div>

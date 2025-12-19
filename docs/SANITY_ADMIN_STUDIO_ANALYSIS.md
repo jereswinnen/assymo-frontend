@@ -18,9 +18,9 @@
 - [x] Phase 14: Complex Section Forms
 - [x] Phase 15: Rich Text Editor
 - [x] Phase 16: FlexibleSection Form
-- [ ] Phase 17: Update Frontend Pages
-- [ ] Phase 18: Update Image References
-- [ ] Phase 19: Cleanup
+- [x] Phase 17: Update Frontend Pages
+- [x] Phase 18: Update Image References
+- [x] Phase 19: Cleanup
 
 ---
 
@@ -881,7 +881,7 @@ Block forms:
 ---
 
 ## Phase 17: Update Frontend Pages
-- [ ] Complete
+- [x] Complete
 
 **Time: 2-3 hours**
 
@@ -910,7 +910,7 @@ Replace `<PortableText>` with `<RichText>` component in:
 ---
 
 ## Phase 18: Update Image References
-- [ ] Complete
+- [x] Complete
 
 **Time: 1-2 hours**
 
@@ -939,7 +939,7 @@ Files to update:
 ---
 
 ## Phase 19: Cleanup
-- [ ] Complete
+- [x] Complete
 
 **Time: 1-2 hours**
 

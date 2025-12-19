@@ -33,7 +33,7 @@ interface SlideshowSection extends BaseSection {
 interface PageHeaderSection extends BaseSection {
   _type: "pageHeader";
   title: string;
-  subtitle?: string | any[]; // HTML string (Tiptap) or Portable Text array (legacy)
+  subtitle?: string;
   background?: boolean;
   showImage?: boolean;
   showButtons?: boolean;
