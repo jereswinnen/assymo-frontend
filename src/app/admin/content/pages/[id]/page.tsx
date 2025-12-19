@@ -4,8 +4,13 @@ import { useState, useEffect, use, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from "@/components/ui/field";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -263,9 +268,9 @@ export default function PageEditorPage({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-3">
         {/* Main content - Sections */}
-        <div className="lg:col-span-2">
+        <div className="md:col-span-2">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium">Secties</h3>
             <AddSectionButton
@@ -280,61 +285,55 @@ export default function PageEditorPage({
         </div>
 
         {/* Sidebar */}
-        <div className="bg-muted rounded-lg p-4 space-y-4">
-          {/* Algemeen */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium">Algemeen</h3>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="is_homepage">Homepage</Label>
-                <p className="text-xs text-muted-foreground">
-                  Dit is de hoofdpagina van de website
-                </p>
-              </div>
-              <Switch
-                id="is_homepage"
-                checked={isHomepage}
-                onCheckedChange={setIsHomepage}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="title">Titel</Label>
+        <div className="bg-muted rounded-lg p-4">
+          <FieldGroup>
+            {/* Algemeen */}
+            <Field>
+              <FieldLabel htmlFor="title">Titel</FieldLabel>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => handleTitleChange(e.target.value)}
                 placeholder="Pagina titel"
               />
-            </div>
+            </Field>
             {!isHomepage && (
-              <div className="space-y-2">
-                <Label htmlFor="slug">Slug</Label>
+              <Field>
+                <FieldLabel htmlFor="slug">Slug</FieldLabel>
                 <Input
                   id="slug"
                   value={slug}
                   onChange={(e) => handleSlugChange(e.target.value)}
                   placeholder="pagina-slug"
                 />
-                <p className="text-xs text-muted-foreground">
-                  URL: /{slug || "..."}
-                </p>
-              </div>
+                <FieldDescription>URL: /{slug || "..."}</FieldDescription>
+              </Field>
             )}
-          </div>
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="is_homepage">
+                Homepage
+                <FieldDescription>
+                  Dit is de hoofdpagina van de website
+                </FieldDescription>
+              </FieldLabel>
+              <Switch
+                id="is_homepage"
+                checked={isHomepage}
+                onCheckedChange={setIsHomepage}
+              />
+            </Field>
 
-          <Separator />
+            <FieldSeparator />
 
-          {/* Header image */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium">Header afbeelding</h3>
-            <ImageUpload value={headerImage} onChange={setHeaderImage} />
-          </div>
+            {/* Header image */}
+            <Field>
+              <FieldLabel>Header afbeelding</FieldLabel>
+              <ImageUpload value={headerImage} onChange={setHeaderImage} />
+            </Field>
 
-          <Separator />
+            <FieldSeparator />
 
-          {/* Meta info */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium">Informatie</h3>
+            {/* Meta info */}
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Aangemaakt</span>
@@ -359,7 +358,7 @@ export default function PageEditorPage({
                 </span>
               </div>
             </div>
-          </div>
+          </FieldGroup>
         </div>
       </div>
 
