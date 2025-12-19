@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import {
   DndContext,
   closestCenter,
@@ -358,13 +359,13 @@ export default function NavigationPage() {
   };
 
   // Link handlers
-  const openNewLinkDialog = () => {
+  const openNewLinkDialog = useCallback(() => {
     setEditingLink(null);
     setLinkTitle("");
     setLinkSlug("");
     setLinkSubmenuHeading("");
     setLinkDialogOpen(true);
-  };
+  }, []);
 
   const openEditLinkDialog = (link: NavigationLink) => {
     setEditingLink(link);
@@ -528,15 +529,20 @@ export default function NavigationPage() {
     }
   };
 
+  // Header actions
+  const headerActions = useMemo(
+    () => (
+      <Button onClick={openNewLinkDialog}>
+        <PlusIcon className="size-4" />
+        Nieuwe link
+      </Button>
+    ),
+    [openNewLinkDialog]
+  );
+  useAdminHeaderActions(headerActions);
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
-        <Button onClick={openNewLinkDialog}>
-          <PlusIcon className="size-4" />
-          Nieuwe link
-        </Button>
-      </div>
-
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />

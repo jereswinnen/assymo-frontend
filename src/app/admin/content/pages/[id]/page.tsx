@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 
 interface PageData {
   id: string;
@@ -134,7 +135,7 @@ export default function PageEditorPage({
     setAutoSlug(false);
   };
 
-  const savePage = async () => {
+  const savePage = useCallback(async () => {
     if (!title.trim()) {
       toast.error("Titel is verplicht");
       return;
@@ -178,7 +179,7 @@ export default function PageEditorPage({
     } finally {
       setSaving(false);
     }
-  };
+  }, [id, title, slug, isHomepage, headerImage, sections]);
 
   const deletePage = async () => {
     setDeleting(true);
@@ -198,6 +199,53 @@ export default function PageEditorPage({
     }
   };
 
+  // Header actions
+  const headerActions = useMemo(
+    () => (
+      <>
+        <Button variant="ghost" size="icon" asChild>
+          <Link href="/admin/content/pages">
+            <ArrowLeftIcon className="size-4" />
+          </Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <a
+            href={isHomepage ? "/" : `/${slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ExternalLinkIcon className="size-4" />
+            Bekijken
+          </a>
+        </Button>
+        <Button
+          variant="destructive"
+          onClick={() => setShowDeleteDialog(true)}
+          disabled={isHomepage}
+          title={isHomepage ? "Homepage kan niet verwijderd worden" : undefined}
+        >
+          <Trash2Icon className="size-4" />
+          Verwijderen
+        </Button>
+        <Button onClick={savePage} disabled={saving || !hasChanges}>
+          {saving ? (
+            <>
+              <Loader2Icon className="size-4 animate-spin" />
+              Opslaan...
+            </>
+          ) : (
+            <>
+              <SaveIcon className="size-4" />
+              Opslaan
+            </>
+          )}
+        </Button>
+      </>
+    ),
+    [isHomepage, slug, saving, hasChanges, savePage]
+  );
+  useAdminHeaderActions(headerActions);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -212,51 +260,6 @@ export default function PageEditorPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/admin/content/pages">
-            <ArrowLeftIcon className="size-4" />
-          </Link>
-        </Button>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" asChild>
-            <a
-              href={isHomepage ? "/" : `/${slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ExternalLinkIcon className="size-4" />
-              Bekijken
-            </a>
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => setShowDeleteDialog(true)}
-            disabled={isHomepage}
-            title={isHomepage ? "Homepage kan niet verwijderd worden" : undefined}
-          >
-            <Trash2Icon className="size-4" />
-            Verwijderen
-          </Button>
-          <Button
-            onClick={savePage}
-            disabled={saving || !hasChanges}
-          >
-            {saving ? (
-              <>
-                <Loader2Icon className="size-4 animate-spin" />
-                Opslaan...
-              </>
-            ) : (
-              <>
-                <SaveIcon className="size-4" />
-                Opslaan
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main content */}
         <div className="lg:col-span-2 space-y-6">

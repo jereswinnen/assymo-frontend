@@ -4,6 +4,10 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import {
+  AdminHeaderProvider,
+  AdminHeaderActions,
+} from "@/components/admin/AdminHeaderContext";
+import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
@@ -64,15 +68,20 @@ export default function AdminLayout({
   const currentLabel = getRouteLabel(pathname);
 
   return (
-    <SidebarProvider>
-      <AdminSidebar />
-      <SidebarInset>
-        <header className="p-4 flex shrink-0 items-center gap-3 border-b">
-          <SidebarTrigger />
-          <span className="font-medium">{currentLabel}</span>
-        </header>
-        <div className="flex-1 p-4">{children}</div>
-      </SidebarInset>
-    </SidebarProvider>
+    <AdminHeaderProvider>
+      <SidebarProvider>
+        <AdminSidebar />
+        <SidebarInset>
+          <header className="p-4 flex shrink-0 items-center gap-3 border-b">
+            <SidebarTrigger />
+            <span className="font-medium">{currentLabel}</span>
+            <div className="ml-auto flex items-center gap-2">
+              <AdminHeaderActions />
+            </div>
+          </header>
+          <div className="flex-1 p-4">{children}</div>
+        </SidebarInset>
+      </SidebarProvider>
+    </AdminHeaderProvider>
   );
 }

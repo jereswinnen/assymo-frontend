@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ import {
   SaveIcon,
   Trash2Icon,
 } from "lucide-react";
+import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 
 interface Filter {
   id: string;
@@ -180,7 +181,7 @@ export default function SolutionEditorPage({
     });
   };
 
-  const saveSolution = async () => {
+  const saveSolution = useCallback(async () => {
     if (!name.trim() || !slug.trim()) {
       toast.error("Naam en slug zijn verplicht");
       return;
@@ -218,7 +219,7 @@ export default function SolutionEditorPage({
     } finally {
       setSaving(false);
     }
-  };
+  }, [id, name, subtitle, slug, headerImage, sections, selectedFilterIds]);
 
   const deleteSolution = async () => {
     setDeleting(true);
@@ -238,6 +239,48 @@ export default function SolutionEditorPage({
     }
   };
 
+  // Header actions
+  const headerActions = useMemo(
+    () => (
+      <>
+        <Button variant="ghost" size="icon" asChild>
+          <Link href="/admin/content/solutions">
+            <ArrowLeftIcon className="size-4" />
+          </Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <a
+            href={`/realisaties/${slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ExternalLinkIcon className="size-4" />
+            Bekijken
+          </a>
+        </Button>
+        <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+          <Trash2Icon className="size-4" />
+          Verwijderen
+        </Button>
+        <Button onClick={saveSolution} disabled={saving || !hasChanges}>
+          {saving ? (
+            <>
+              <Loader2Icon className="size-4 animate-spin" />
+              Opslaan...
+            </>
+          ) : (
+            <>
+              <SaveIcon className="size-4" />
+              Opslaan
+            </>
+          )}
+        </Button>
+      </>
+    ),
+    [slug, saving, hasChanges, saveSolution]
+  );
+  useAdminHeaderActions(headerActions);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -252,49 +295,6 @@ export default function SolutionEditorPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/admin/content/solutions">
-            <ArrowLeftIcon className="size-4" />
-          </Link>
-        </Button>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" asChild>
-            <a
-              href={`/realisaties/${slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ExternalLinkIcon className="size-4" />
-              Bekijken
-            </a>
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => setShowDeleteDialog(true)}
-          >
-            <Trash2Icon className="size-4" />
-            Verwijderen
-          </Button>
-          <Button
-            onClick={saveSolution}
-            disabled={saving || !hasChanges}
-          >
-            {saving ? (
-              <>
-                <Loader2Icon className="size-4 animate-spin" />
-                Opslaan...
-              </>
-            ) : (
-              <>
-                <SaveIcon className="size-4" />
-                Opslaan
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main content */}
         <div className="lg:col-span-2 space-y-6">

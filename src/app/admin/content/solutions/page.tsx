@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -52,6 +52,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { formatDateShort } from "@/lib/format";
+import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 
 interface Solution {
   id: string;
@@ -221,12 +222,12 @@ export default function SolutionsPage() {
     setAutoSlug(false);
   };
 
-  const openNewDialog = () => {
+  const openNewDialog = useCallback(() => {
     setNewName("");
     setNewSlug("");
     setAutoSlug(true);
     setIsNewDialogOpen(true);
-  };
+  }, []);
 
   const createSolution = async () => {
     if (!newName.trim() || !newSlug.trim()) {
@@ -337,15 +338,20 @@ export default function SolutionsPage() {
     }
   };
 
+  // Header actions
+  const headerActions = useMemo(
+    () => (
+      <Button onClick={openNewDialog}>
+        <PlusIcon className="size-4" />
+        Nieuwe realisatie
+      </Button>
+    ),
+    [openNewDialog]
+  );
+  useAdminHeaderActions(headerActions);
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
-        <Button onClick={openNewDialog}>
-          <PlusIcon className="size-4" />
-          Nieuwe realisatie
-        </Button>
-      </div>
-
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />

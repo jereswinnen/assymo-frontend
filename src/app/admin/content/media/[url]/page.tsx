@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,6 +28,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { formatFileSize } from "@/lib/format";
+import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 
 interface ImageData {
   url: string;
@@ -109,7 +110,7 @@ export default function ImageDetailPage({
     }
   };
 
-  const saveImage = async () => {
+  const saveImage = useCallback(async () => {
     setSaving(true);
     try {
       const response = await fetch(
@@ -137,7 +138,7 @@ export default function ImageDetailPage({
     } finally {
       setSaving(false);
     }
-  };
+  }, [imageUrl, displayName, altText]);
 
   const deleteImage = async () => {
     setDeleting(true);
@@ -191,6 +192,41 @@ export default function ImageDetailPage({
     }
   };
 
+  // Header actions
+  const headerActions = useMemo(
+    () => (
+      <>
+        <Button variant="ghost" size="icon" asChild>
+          <Link href="/admin/content/media">
+            <ArrowLeftIcon className="size-4" />
+          </Link>
+        </Button>
+        <Button
+          variant="destructive"
+          onClick={() => setShowDeleteDialog(true)}
+        >
+          <Trash2Icon className="size-4" />
+          Verwijderen
+        </Button>
+        <Button onClick={saveImage} disabled={saving || !hasChanges}>
+          {saving ? (
+            <>
+              <Loader2Icon className="size-4 animate-spin" />
+              Opslaan...
+            </>
+          ) : (
+            <>
+              <SaveIcon className="size-4" />
+              Opslaan
+            </>
+          )}
+        </Button>
+      </>
+    ),
+    [saving, hasChanges, saveImage]
+  );
+  useAdminHeaderActions(headerActions);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -205,36 +241,6 @@ export default function ImageDetailPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/admin/content/media">
-            <ArrowLeftIcon className="size-4" />
-          </Link>
-        </Button>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="destructive"
-            onClick={() => setShowDeleteDialog(true)}
-          >
-            <Trash2Icon className="size-4" />
-            Verwijderen
-          </Button>
-          <Button onClick={saveImage} disabled={saving || !hasChanges}>
-            {saving ? (
-              <>
-                <Loader2Icon className="size-4 animate-spin" />
-                Opslaan...
-              </>
-            ) : (
-              <>
-                <SaveIcon className="size-4" />
-                Opslaan
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Image preview */}
         <Card>

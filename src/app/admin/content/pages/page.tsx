@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { formatDateWithTime } from "@/lib/format";
+import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 
 interface Page {
   id: string;
@@ -103,13 +104,13 @@ export default function PagesPage() {
     setAutoSlug(false);
   };
 
-  const openNewDialog = () => {
+  const openNewDialog = useCallback(() => {
     setNewTitle("");
     setNewSlug("");
     setNewIsHomepage(false);
     setAutoSlug(true);
     setIsNewDialogOpen(true);
-  };
+  }, []);
 
   const createPage = async () => {
     if (!newTitle.trim()) {
@@ -210,15 +211,20 @@ export default function PagesPage() {
     }
   };
 
+  // Header actions
+  const headerActions = useMemo(
+    () => (
+      <Button onClick={openNewDialog}>
+        <PlusIcon className="size-4" />
+        Nieuwe pagina
+      </Button>
+    ),
+    [openNewDialog]
+  );
+  useAdminHeaderActions(headerActions);
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
-        <Button onClick={openNewDialog}>
-          <PlusIcon className="size-4" />
-          Nieuwe pagina
-        </Button>
-      </div>
-
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />

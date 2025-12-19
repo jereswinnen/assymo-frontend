@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import {
   UploadIcon,
 } from "lucide-react";
 import { formatFileSize, formatDateShort } from "@/lib/format";
+import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 
 interface MediaItem {
   url: string;
@@ -105,7 +106,7 @@ export default function MediaPage() {
     }
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -175,7 +176,7 @@ export default function MediaPage() {
         `${errorCount} afbeelding${errorCount > 1 ? "en" : ""} mislukt`
       );
     }
-  };
+  }, [pollForAltText]);
 
   const deleteMedia = async () => {
     if (!deleteTarget) return;
@@ -210,36 +211,41 @@ export default function MediaPage() {
     );
   });
 
+  // Header actions
+  const headerActions = useMemo(
+    () => (
+      <label>
+        <Button disabled={uploading} asChild>
+          <span className="cursor-pointer">
+            {uploading ? (
+              <>
+                <Loader2Icon className="size-4 animate-spin" />
+                Uploaden...
+              </>
+            ) : (
+              <>
+                <UploadIcon className="size-4" />
+                Upload
+              </>
+            )}
+          </span>
+        </Button>
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={handleUpload}
+          disabled={uploading}
+        />
+      </label>
+    ),
+    [uploading, handleUpload]
+  );
+  useAdminHeaderActions(headerActions);
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
-        <label>
-          <Button disabled={uploading} asChild>
-            <span className="cursor-pointer">
-              {uploading ? (
-                <>
-                  <Loader2Icon className="size-4 animate-spin" />
-                  Uploaden...
-                </>
-              ) : (
-                <>
-                  <UploadIcon className="size-4" />
-                  Upload
-                </>
-              )}
-            </span>
-          </Button>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={handleUpload}
-            disabled={uploading}
-          />
-        </label>
-      </div>
-
       {/* Search */}
       <div className="relative max-w-sm">
         <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -56,7 +57,7 @@ export default function SiteParametersPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     setSaving(true);
     try {
       const response = await fetch("/api/admin/content/site-parameters", {
@@ -77,13 +78,29 @@ export default function SiteParametersPage() {
     } finally {
       setSaving(false);
     }
-  };
+  }, [params]);
 
   const updateField = (field: keyof SiteParams) => (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     setParams((prev) => ({ ...prev, [field]: e.target.value }));
   };
+
+  // Header actions
+  const headerActions = useMemo(
+    () => (
+      <Button onClick={handleSave} disabled={saving || !hasChanges}>
+        {saving ? (
+          <Loader2Icon className="size-4 animate-spin" />
+        ) : (
+          <CheckIcon className="size-4" />
+        )}
+        Opslaan
+      </Button>
+    ),
+    [saving, hasChanges, handleSave]
+  );
+  useAdminHeaderActions(headerActions);
 
   if (loading) {
     return (
@@ -95,16 +112,6 @@ export default function SiteParametersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={saving || !hasChanges}>
-          {saving ? (
-            <Loader2Icon className="size-4 animate-spin" />
-          ) : (
-            <CheckIcon className="size-4" />
-          )}
-          Opslaan
-        </Button>
-      </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
