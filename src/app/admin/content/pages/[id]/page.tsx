@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ImageUpload, ImageValue } from "@/components/admin/ImageUpload";
 import { SectionList } from "@/components/admin/SectionList";
+import { AddSectionButton } from "@/components/admin/AddSectionButton";
 import { Section } from "@/types/sections";
 import { toast } from "sonner";
 import {
@@ -262,11 +263,20 @@ export default function PageEditorPage({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2">
         {/* Main content - Sections */}
         <div className="lg:col-span-2">
-          <h3 className="text-sm font-medium mb-3">Secties</h3>
-          <SectionList sections={sections} onChange={setSections} />
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium">Secties</h3>
+            <AddSectionButton
+              onAdd={(section) => setSections([...sections, section])}
+            />
+          </div>
+          <SectionList
+            sections={sections}
+            onChange={setSections}
+            showAddButton={false}
+          />
         </div>
 
         {/* Sidebar */}

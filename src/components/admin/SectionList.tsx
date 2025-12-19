@@ -111,9 +111,10 @@ function SortableSection({
 interface SectionListProps {
   sections: Section[];
   onChange: (sections: Section[]) => void;
+  showAddButton?: boolean;
 }
 
-export function SectionList({ sections, onChange }: SectionListProps) {
+export function SectionList({ sections, onChange, showAddButton = true }: SectionListProps) {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -157,7 +158,7 @@ export function SectionList({ sections, onChange }: SectionListProps) {
       {sections.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           <p className="mb-4">Nog geen secties toegevoegd</p>
-          <AddSectionButton onAdd={handleAdd} />
+          {showAddButton && <AddSectionButton onAdd={handleAdd} />}
         </div>
       ) : (
         <>
@@ -182,7 +183,7 @@ export function SectionList({ sections, onChange }: SectionListProps) {
               </div>
             </SortableContext>
           </DndContext>
-          <AddSectionButton onAdd={handleAdd} />
+          {showAddButton && <AddSectionButton onAdd={handleAdd} />}
         </>
       )}
 
