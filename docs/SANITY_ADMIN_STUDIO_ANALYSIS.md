@@ -17,7 +17,7 @@
 - [x] Phase 13: Simple Section Forms
 - [x] Phase 14: Complex Section Forms
 - [x] Phase 15: Rich Text Editor
-- [ ] Phase 16: FlexibleSection Form
+- [x] Phase 16: FlexibleSection Form
 - [ ] Phase 17: Update Frontend Pages
 - [ ] Phase 18: Update Image References
 - [ ] Phase 19: Cleanup
@@ -858,7 +858,7 @@ Use in PageHeaderForm for subtitle, and FlexibleSection text blocks.
 ---
 
 ## Phase 16: FlexibleSection Form
-- [ ] Complete
+- [x] Complete
 
 **Time: 3-4 hours**
 

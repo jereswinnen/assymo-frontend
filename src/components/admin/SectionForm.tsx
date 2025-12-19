@@ -7,13 +7,14 @@ import {
   SolutionsScrollerSection,
   SplitSectionSection,
   UspSectionSection,
-  getSectionLabel,
+  FlexibleSectionSection,
 } from "@/types/sections";
 import { PageHeaderForm } from "./section-forms/PageHeaderForm";
 import { SlideshowForm } from "./section-forms/SlideshowForm";
 import { SolutionsScrollerForm } from "./section-forms/SolutionsScrollerForm";
 import { SplitSectionForm } from "./section-forms/SplitSectionForm";
 import { UspSectionForm } from "./section-forms/UspSectionForm";
+import { FlexibleSectionForm } from "./section-forms/FlexibleSectionForm";
 
 interface SectionFormProps {
   section: Section;
@@ -62,14 +63,20 @@ export function SectionForm({ section, onChange }: SectionFormProps) {
         />
       );
 
-    // Placeholder for flexibleSection (Phase 16)
     case "flexibleSection":
-    default:
+      return (
+        <FlexibleSectionForm
+          section={section as FlexibleSectionSection}
+          onChange={onChange}
+        />
+      );
+
+    default: {
+      const unknownSection = section as { _type: string };
       return (
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            {getSectionLabel(section._type)} formulier wordt toegevoegd in een
-            volgende fase.
+            Onbekend sectietype: {unknownSection._type}
           </p>
           <details className="text-xs">
             <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
@@ -81,5 +88,6 @@ export function SectionForm({ section, onChange }: SectionFormProps) {
           </details>
         </div>
       );
+    }
   }
 }
