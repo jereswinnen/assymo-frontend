@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   DndContext,
@@ -23,7 +23,20 @@ import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -47,7 +60,7 @@ import {
   GripVerticalIcon,
   ImageIcon,
   Loader2Icon,
-  PencilIcon,
+  MoreHorizontalIcon,
   PlusIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -74,15 +87,15 @@ function slugify(text: string): string {
 }
 
 
-function SortableSolutionItem({
+function SortableSolutionRow({
   solution,
-  onEdit,
+  onRowClick,
   onDuplicate,
   onDelete,
   duplicating,
 }: {
   solution: Solution;
-  onEdit: () => void;
+  onRowClick: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
   duplicating: boolean;
@@ -103,71 +116,92 @@ function SortableSolutionItem({
   };
 
   return (
-    <Card ref={setNodeRef} style={style} className="hover:bg-muted/50 transition-colors">
-      <CardContent className="flex items-center gap-4 p-4">
+    <TableRow
+      ref={setNodeRef}
+      style={style}
+      className="cursor-pointer"
+      onClick={onRowClick}
+    >
+      <TableCell className="w-10">
         <button
           {...attributes}
           {...listeners}
           className="cursor-grab touch-none text-muted-foreground hover:text-foreground"
+          onClick={(e) => e.stopPropagation()}
         >
-          <GripVerticalIcon className="size-5" />
+          <GripVerticalIcon className="size-4" />
         </button>
-
+      </TableCell>
+      <TableCell className="w-12">
         {solution.header_image?.url ? (
-          <div className="relative size-12 shrink-0 overflow-hidden rounded">
+          <div className="relative size-10 shrink-0 overflow-hidden rounded">
             <Image
               src={solution.header_image.url}
               alt={solution.header_image.alt || solution.name}
               fill
               className="object-cover"
-              sizes="48px"
+              sizes="40px"
             />
           </div>
         ) : (
-          <div className="flex size-12 shrink-0 items-center justify-center rounded bg-muted">
-            <ImageIcon className="size-5 text-muted-foreground" />
+          <div className="flex size-10 shrink-0 items-center justify-center rounded bg-muted">
+            <ImageIcon className="size-4 text-muted-foreground" />
           </div>
         )}
-
-        <div className="flex-1 min-w-0">
-          <p className="font-medium truncate">{solution.name}</p>
-          <p className="text-sm text-muted-foreground truncate">
-            /{solution.slug}
-            {solution.subtitle && ` • ${solution.subtitle}`}
-          </p>
-        </div>
-
-        <p className="text-sm text-muted-foreground shrink-0 hidden sm:block">
-          {formatDateShort(solution.updated_at)}
-        </p>
-
-        <div className="flex items-center gap-1 shrink-0">
-          <Button variant="ghost" size="icon" onClick={onEdit}>
-            <PencilIcon className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onDuplicate}
-            disabled={duplicating}
-            title="Dupliceren"
-          >
-            {duplicating ? (
-              <Loader2Icon className="size-4 animate-spin" />
-            ) : (
-              <CopyIcon className="size-4" />
-            )}
-          </Button>
-          <Button variant="ghost" size="icon" onClick={onDelete}>
-            <Trash2Icon className="size-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      </TableCell>
+      <TableCell className="font-medium">{solution.name}</TableCell>
+      <TableCell className="hidden sm:table-cell text-muted-foreground">
+        /realisaties/{solution.slug}
+      </TableCell>
+      <TableCell className="hidden md:table-cell text-muted-foreground">
+        {formatDateShort(solution.updated_at)}
+      </TableCell>
+      <TableCell>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreHorizontalIcon className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onDuplicate();
+              }}
+              disabled={duplicating}
+            >
+              {duplicating ? (
+                <Loader2Icon className="size-4 animate-spin" />
+              ) : (
+                <CopyIcon className="size-4" />
+              )}
+              Dupliceren
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+            >
+              <Trash2Icon className="size-4" />
+              Verwijderen
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TableCell>
+    </TableRow>
   );
 }
 
 export default function SolutionsPage() {
+  const router = useRouter();
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -357,16 +391,14 @@ export default function SolutionsPage() {
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
         </div>
       ) : solutions.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <ImageIcon className="size-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-4">Nog geen realisaties</p>
-            <Button size="sm" onClick={openNewDialog}>
-              <PlusIcon className="size-4" />
-              Eerste realisatie aanmaken
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center py-12">
+          <ImageIcon className="size-12 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground mb-4">Nog geen realisaties</p>
+          <Button size="sm" onClick={openNewDialog}>
+            <PlusIcon className="size-4" />
+            Eerste realisatie aanmaken
+          </Button>
+        </div>
       ) : (
         <DndContext
           sensors={sensors}
@@ -377,20 +409,30 @@ export default function SolutionsPage() {
             items={solutions.map((s) => s.id)}
             strategy={verticalListSortingStrategy}
           >
-            <div className="space-y-2">
-              {solutions.map((solution) => (
-                <SortableSolutionItem
-                  key={solution.id}
-                  solution={solution}
-                  onEdit={() => {
-                    window.location.href = `/admin/content/solutions/${solution.id}`;
-                  }}
-                  onDuplicate={() => duplicateSolution(solution)}
-                  onDelete={() => setDeleteTarget(solution)}
-                  duplicating={duplicating === solution.id}
-                />
-              ))}
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10"></TableHead>
+                  <TableHead className="w-12"></TableHead>
+                  <TableHead>Naam</TableHead>
+                  <TableHead className="hidden sm:table-cell">URL</TableHead>
+                  <TableHead className="hidden md:table-cell">Laatst bewerkt</TableHead>
+                  <TableHead className="w-10"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {solutions.map((solution) => (
+                  <SortableSolutionRow
+                    key={solution.id}
+                    solution={solution}
+                    onRowClick={() => router.push(`/admin/content/solutions/${solution.id}`)}
+                    onDuplicate={() => duplicateSolution(solution)}
+                    onDelete={() => setDeleteTarget(solution)}
+                    duplicating={duplicating === solution.id}
+                  />
+                ))}
+              </TableBody>
+            </Table>
           </SortableContext>
         </DndContext>
       )}
