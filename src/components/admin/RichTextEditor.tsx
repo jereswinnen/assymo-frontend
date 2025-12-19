@@ -30,6 +30,7 @@ export function RichTextEditor({
   placeholder,
 }: RichTextEditorProps) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: false, // Keep it simple - no headings in rich text fields
