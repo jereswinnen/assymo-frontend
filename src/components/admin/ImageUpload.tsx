@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ExternalLinkIcon, ImageIcon, Loader2Icon, UploadIcon, XIcon } from "lucide-react";
+import { ImageIcon, Loader2Icon, UploadIcon, XIcon } from "lucide-react";
 import { toast } from "sonner";
 import { MediaLibraryDialog } from "./MediaLibraryDialog";
 
@@ -22,40 +21,11 @@ interface ImageUploadProps {
 
 export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
-  const [altText, setAltText] = useState<string | null>(null);
-  const [loadingAlt, setLoadingAlt] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
 
   const handleSelectFromLibrary = (url: string) => {
     onChange({ url });
   };
-
-  // Fetch alt text from media library when URL changes
-  useEffect(() => {
-    if (!value?.url) {
-      setAltText(null);
-      return;
-    }
-
-    const fetchAltText = async () => {
-      setLoadingAlt(true);
-      try {
-        const response = await fetch(
-          `/api/admin/content/media/${encodeURIComponent(value.url)}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setAltText(data.altText || null);
-        }
-      } catch {
-        // Silently fail - alt text is optional
-      } finally {
-        setLoadingAlt(false);
-      }
-    };
-
-    fetchAltText();
-  }, [value?.url]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,13 +78,13 @@ export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
 
   if (value?.url) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-2">
         {label && <Label>{label}</Label>}
         <div className="relative w-fit">
           <div className="relative h-[200px] w-[300px] overflow-hidden rounded-lg border">
             <Image
               src={value.url}
-              alt={altText || ""}
+              alt=""
               fill
               className="object-cover"
               sizes="300px"
@@ -129,25 +99,6 @@ export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
           >
             <XIcon className="size-4" />
           </Button>
-        </div>
-        <div className="max-w-[300px] space-y-1">
-          <Label className="text-sm text-muted-foreground">Alt tekst</Label>
-          {loadingAlt ? (
-            <p className="text-sm text-muted-foreground">Laden...</p>
-          ) : altText ? (
-            <p className="text-sm">{altText}</p>
-          ) : (
-            <p className="text-sm text-muted-foreground italic">
-              Geen alt tekst ingesteld
-            </p>
-          )}
-          <Link
-            href={`/admin/content/media/${encodeURIComponent(value.url)}`}
-            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-          >
-            <ExternalLinkIcon className="size-3" />
-            Bewerken in mediabibliotheek
-          </Link>
         </div>
       </div>
     );

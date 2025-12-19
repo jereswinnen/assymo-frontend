@@ -25,11 +25,13 @@ import {
   UploadIcon,
 } from "lucide-react";
 
-interface BlobItem {
+interface MediaItem {
   url: string;
   pathname: string;
   size: number;
   uploadedAt: string;
+  displayName: string | null;
+  altText: string | null;
 }
 
 function formatFileSize(bytes: number): string {
@@ -47,13 +49,13 @@ function formatDate(dateString: string): string {
 }
 
 export default function MediaPage() {
-  const [blobs, setBlobs] = useState<BlobItem[]>([]);
+  const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Delete confirmation
-  const [deleteTarget, setDeleteTarget] = useState<BlobItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<MediaItem | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -66,7 +68,7 @@ export default function MediaPage() {
       const response = await fetch("/api/admin/content/media");
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
-      setBlobs(data);
+      setMedia(data);
     } catch {
       toast.error("Kon media niet ophalen");
     } finally {
@@ -79,7 +81,7 @@ export default function MediaPage() {
     if (!files || files.length === 0) return;
 
     setUploading(true);
-    const uploadedBlobs: BlobItem[] = [];
+    const uploadedItems: MediaItem[] = [];
     let errorCount = 0;
 
     for (const file of Array.from(files)) {
@@ -107,11 +109,13 @@ export default function MediaPage() {
         if (response.ok) {
           const { url, filename } = await response.json();
           // Add to uploaded list with file info
-          uploadedBlobs.push({
+          uploadedItems.push({
             url,
             pathname: filename,
             size: file.size,
             uploadedAt: new Date().toISOString(),
+            displayName: filename,
+            altText: null, // Alt text generated in background
           });
         } else {
           errorCount++;
@@ -125,11 +129,11 @@ export default function MediaPage() {
     e.target.value = "";
     setUploading(false);
 
-    // Add uploaded blobs to state (newest first)
-    if (uploadedBlobs.length > 0) {
-      setBlobs((prev) => [...uploadedBlobs, ...prev]);
+    // Add uploaded items to state (newest first)
+    if (uploadedItems.length > 0) {
+      setMedia((prev) => [...uploadedItems, ...prev]);
       toast.success(
-        `${uploadedBlobs.length} afbeelding${uploadedBlobs.length > 1 ? "en" : ""} geupload`
+        `${uploadedItems.length} afbeelding${uploadedItems.length > 1 ? "en" : ""} geupload`
       );
     }
     if (errorCount > 0) {
@@ -152,7 +156,7 @@ export default function MediaPage() {
 
       if (!response.ok) throw new Error("Failed to delete");
 
-      setBlobs((prev) => prev.filter((b) => b.url !== deleteTarget.url));
+      setMedia((prev) => prev.filter((m) => m.url !== deleteTarget.url));
       setDeleteTarget(null);
       toast.success("Afbeelding verwijderd");
     } catch {
@@ -162,10 +166,15 @@ export default function MediaPage() {
     }
   };
 
-  // Filter blobs by search query
-  const filteredBlobs = blobs.filter((blob) =>
-    blob.pathname.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter media by search query (search in displayName, pathname, and altText)
+  const filteredMedia = media.filter((item) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      item.pathname.toLowerCase().includes(query) ||
+      item.displayName?.toLowerCase().includes(query) ||
+      item.altText?.toLowerCase().includes(query)
+    );
+  });
 
   return (
     <div className="space-y-6">
@@ -212,7 +221,7 @@ export default function MediaPage() {
         <div className="flex items-center justify-center py-12">
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
         </div>
-      ) : filteredBlobs.length === 0 ? (
+      ) : filteredMedia.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <ImageIcon className="size-12 text-muted-foreground mb-4" />
@@ -242,54 +251,54 @@ export default function MediaPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {filteredBlobs.map((blob) => (
-            <Card
-              key={blob.url}
-              className="group overflow-hidden hover:ring-2 hover:ring-primary transition-all"
-            >
-              <Link
-                href={`/admin/content/media/${encodeURIComponent(blob.url)}`}
-                className="block"
+          {filteredMedia.map((item) => {
+            const name = item.displayName || item.pathname;
+            return (
+              <Card
+                key={item.url}
+                className="group overflow-hidden hover:ring-2 hover:ring-primary transition-all"
               >
-                <div className="relative aspect-square">
-                  <Image
-                    src={blob.url}
-                    alt={blob.pathname}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                  />
-                  {/* Delete button in top-right corner */}
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      size="icon"
-                      variant="destructive"
-                      className="size-8"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setDeleteTarget(blob);
-                      }}
-                      title="Verwijderen"
-                    >
-                      <Trash2Icon className="size-4" />
-                    </Button>
+                <Link
+                  href={`/admin/content/media/${encodeURIComponent(item.url)}`}
+                  className="block"
+                >
+                  <div className="relative aspect-square">
+                    <Image
+                      src={item.url}
+                      alt={item.altText || name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                    />
+                    {/* Delete button in top-right corner */}
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        className="size-8"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setDeleteTarget(item);
+                        }}
+                        title="Verwijderen"
+                      >
+                        <Trash2Icon className="size-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <CardContent className="p-2">
-                  <p
-                    className="text-xs font-medium truncate"
-                    title={blob.pathname}
-                  >
-                    {blob.pathname}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatFileSize(blob.size)} • {formatDate(blob.uploadedAt)}
-                  </p>
-                </CardContent>
-              </Link>
-            </Card>
-          ))}
+                  <CardContent className="p-2">
+                    <p className="text-xs font-medium truncate" title={name}>
+                      {name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatFileSize(item.size)} • {formatDate(item.uploadedAt)}
+                    </p>
+                  </CardContent>
+                </Link>
+              </Card>
+            );
+          })}
         </div>
       )}
 
@@ -302,7 +311,7 @@ export default function MediaPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Afbeelding verwijderen?</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je &quot;{deleteTarget?.pathname}&quot; wilt
+              Weet je zeker dat je &quot;{deleteTarget?.displayName || deleteTarget?.pathname}&quot; wilt
               verwijderen? Dit kan niet ongedaan worden gemaakt.
             </AlertDialogDescription>
           </AlertDialogHeader>
