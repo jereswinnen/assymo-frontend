@@ -23,16 +23,19 @@ export async function POST(request: Request) {
     }
 
     // Check if image is in use
+    const likePattern = `%${url}%`;
     const references = await sql`
       SELECT 'page' as type, id, title as name FROM pages
-      WHERE header_image::text LIKE ${"%" + url + "%"}
-         OR sections::text LIKE ${"%" + url + "%"}
+      WHERE header_image::text LIKE ${likePattern}
+         OR sections::text LIKE ${likePattern}
       UNION ALL
       SELECT 'solution' as type, id, name FROM solutions
-      WHERE header_image::text LIKE ${"%" + url + "%"}
-         OR sections::text LIKE ${"%" + url + "%"}
+      WHERE header_image::text LIKE ${likePattern}
+         OR sections::text LIKE ${likePattern}
       LIMIT 1
     `;
+
+    console.log("Checking references for URL:", url, "Found:", references.length);
 
     if (references.length > 0) {
       return NextResponse.json(

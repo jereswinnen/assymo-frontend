@@ -151,15 +151,18 @@ export default function ImageDetailPage({
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to delete");
+        toast.error(data.error || "Kon afbeelding niet verwijderen");
+        return;
       }
 
       toast.success("Afbeelding verwijderd");
       router.push("/admin/content/media");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Kon afbeelding niet verwijderen");
+      console.error("Delete failed:", error);
+      toast.error("Kon afbeelding niet verwijderen");
     } finally {
       setDeleting(false);
       setShowDeleteDialog(false);

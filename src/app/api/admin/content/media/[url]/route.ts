@@ -110,18 +110,23 @@ export async function DELETE(
 
     const { url: encodedUrl } = await params;
     const url = decodeURIComponent(encodedUrl);
+    const likePattern = `%${url}%`;
+
+    console.log("Checking references for URL:", url);
 
     // Check if image is in use
     const references = await sql`
       SELECT 'page' as type, id, title as name FROM pages
-      WHERE header_image::text LIKE ${"%" + url + "%"}
-         OR sections::text LIKE ${"%" + url + "%"}
+      WHERE header_image::text LIKE ${likePattern}
+         OR sections::text LIKE ${likePattern}
       UNION ALL
       SELECT 'solution' as type, id, name FROM solutions
-      WHERE header_image::text LIKE ${"%" + url + "%"}
-         OR sections::text LIKE ${"%" + url + "%"}
+      WHERE header_image::text LIKE ${likePattern}
+         OR sections::text LIKE ${likePattern}
       LIMIT 1
     `;
+
+    console.log("References found:", references.length, references);
 
     if (references.length > 0) {
       return NextResponse.json(

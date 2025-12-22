@@ -190,15 +190,18 @@ export default function MediaPage() {
         body: JSON.stringify({ url: deleteTarget.url }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to delete");
+        toast.error(data.error || "Kon afbeelding niet verwijderen");
+        return;
       }
 
       setMedia((prev) => prev.filter((m) => m.url !== deleteTarget.url));
       toast.success("Afbeelding verwijderd");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Kon afbeelding niet verwijderen");
+      console.error("Delete failed:", error);
+      toast.error("Kon afbeelding niet verwijderen");
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
