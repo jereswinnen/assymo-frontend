@@ -22,15 +22,17 @@ export async function GET(
     }
 
     const { url: urlParam } = await params;
-    // Next.js already decodes the route param once
-    const url = urlParam;
+    // urlParam is decoded once by Next.js, giving us the URL with %20 encoding (as stored in DB)
+    const dbUrl = urlParam;
+    // Decode again for Vercel Blob operations
+    const blobUrl = decodeURIComponent(urlParam);
 
-    // Get blob info from Vercel Blob
-    const blobInfo = await getBlobInfo(url);
+    // Get blob info from Vercel Blob (needs decoded URL)
+    const blobInfo = await getBlobInfo(blobUrl);
 
-    // Get metadata from database
+    // Get metadata from database (uses encoded URL as stored)
     const metadataRows = await sql`
-      SELECT url, alt_text, display_name FROM image_metadata WHERE url = ${url}
+      SELECT url, alt_text, display_name FROM image_metadata WHERE url = ${dbUrl}
     ` as ImageMetadataRow[];
 
     const metadata = metadataRows[0];
@@ -63,25 +65,27 @@ export async function PUT(
     }
 
     const { url: urlParam } = await params;
-    // Next.js already decodes the route param once
-    const url = urlParam;
+    // urlParam is decoded once by Next.js, giving us the URL with %20 encoding (as stored in DB)
+    const dbUrl = urlParam;
+    // Decode again for Vercel Blob operations
+    const blobUrl = decodeURIComponent(urlParam);
     const body = await request.json();
 
     const altText = body.altText || "";
     const displayName = body.displayName || "";
 
-    // Upsert metadata in database
+    // Upsert metadata in database (uses encoded URL as stored)
     await sql`
       INSERT INTO image_metadata (url, alt_text, display_name)
-      VALUES (${url}, ${altText}, ${displayName})
+      VALUES (${dbUrl}, ${altText}, ${displayName})
       ON CONFLICT (url) DO UPDATE SET
         alt_text = ${altText},
         display_name = ${displayName},
         updated_at = NOW()
     `;
 
-    // Get blob info from Vercel Blob
-    const blobInfo = await getBlobInfo(url);
+    // Get blob info from Vercel Blob (needs decoded URL)
+    const blobInfo = await getBlobInfo(blobUrl);
 
     return NextResponse.json({
       url: blobInfo.url,
@@ -111,11 +115,13 @@ export async function DELETE(
     }
 
     const { url: urlParam } = await params;
-    // Next.js already decodes the route param once
-    const url = urlParam;
-    const likePattern = `%${url}%`;
+    // urlParam is decoded once by Next.js, giving us the URL with %20 encoding (as stored in DB)
+    const dbUrl = urlParam;
+    // Decode again for Vercel Blob operations (needs actual spaces)
+    const blobUrl = decodeURIComponent(urlParam);
+    const likePattern = `%${dbUrl}%`;
 
-    console.log("Checking references for URL:", url);
+    console.log("Checking references for URL:", dbUrl);
 
     // Check if image is in use
     const references = await sql`
@@ -138,11 +144,11 @@ export async function DELETE(
       );
     }
 
-    // Delete from Vercel Blob
-    await deleteImage(url);
+    // Delete from Vercel Blob (needs decoded URL)
+    await deleteImage(blobUrl);
 
-    // Delete metadata from database
-    await sql`DELETE FROM image_metadata WHERE url = ${url}`;
+    // Delete metadata from database (uses encoded URL as stored)
+    await sql`DELETE FROM image_metadata WHERE url = ${dbUrl}`;
 
     return NextResponse.json({ success: true });
   } catch (error) {

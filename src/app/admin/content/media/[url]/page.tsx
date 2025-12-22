@@ -46,9 +46,11 @@ export default function ImageDetailPage({
   params: Promise<{ url: string }>;
 }) {
   const { url: urlParam } = use(params);
-  // Next.js already decodes the route param once, so urlParam contains the actual URL
-  // (with %20 for spaces as stored in the database)
-  const imageUrl = urlParam;
+  // urlParam is the URL as stored in database (with %20 for spaces)
+  // Decode for display and Vercel Blob operations
+  const imageUrl = decodeURIComponent(urlParam);
+  // Use encoded version for database queries (matches how it's stored)
+  const encodedUrl = urlParam;
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
@@ -146,8 +148,9 @@ export default function ImageDetailPage({
     e.preventDefault();
     setDeleting(true);
     try {
+      // Use encodedUrl to match the format stored in database
       const response = await fetch(
-        `/api/admin/content/media/${encodeURIComponent(imageUrl)}`,
+        `/api/admin/content/media/${encodeURIComponent(encodedUrl)}`,
         {
           method: "DELETE",
         }
