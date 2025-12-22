@@ -30,6 +30,8 @@ import {
   Trash2Icon,
   FileTextIcon,
   type LucideIcon,
+  TextInitialIcon,
+  FormInputIcon,
 } from "lucide-react";
 import {
   FlexibleSectionSection,
@@ -60,10 +62,10 @@ const BLOCK_TYPES: {
   label: string;
   icon: LucideIcon;
 }[] = [
-  { type: "flexTextBlock", label: "Tekst", icon: TextIcon },
+  { type: "flexTextBlock", label: "Tekst", icon: TextInitialIcon },
   { type: "flexImageBlock", label: "Afbeelding", icon: ImageIcon },
   { type: "flexMapBlock", label: "Kaart", icon: MapPinIcon },
-  { type: "flexFormBlock", label: "Formulier", icon: FileTextIcon },
+  { type: "flexFormBlock", label: "Formulier", icon: F },
 ];
 
 interface FlexibleSectionFormProps {
@@ -181,28 +183,28 @@ function BlockList({ blocks, onChange, title }: BlockListProps) {
             const blockInfo = getBlockInfo(block._type);
             const Icon = blockInfo?.icon;
             return (
-            <div key={block._key} className="p-4 space-y-6 border rounded-lg">
-              <header className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-sm font-medium">
-                  {Icon && <Icon className="size-4" />}
-                  {blockInfo?.label || block._type}
-                </span>
-                <Button
-                  className="text-destructive"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => removeBlock(index)}
-                >
-                  <Trash2Icon className="size-4" />
-                  Blok verwijderen
-                </Button>
-              </header>
-              <BlockForm
-                block={block}
-                onChange={(b) => updateBlock(index, b)}
-              />
-            </div>
-          );
+              <div key={block._key} className="p-4 space-y-6 border rounded-lg">
+                <header className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-sm font-medium">
+                    {Icon && <Icon className="size-4" />}
+                    {blockInfo?.label || block._type}
+                  </span>
+                  <Button
+                    className="text-destructive"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => removeBlock(index)}
+                  >
+                    <Trash2Icon className="size-4" />
+                    Blok verwijderen
+                  </Button>
+                </header>
+                <BlockForm
+                  block={block}
+                  onChange={(b) => updateBlock(index, b)}
+                />
+              </div>
+            );
           })}
         </div>
       )}
