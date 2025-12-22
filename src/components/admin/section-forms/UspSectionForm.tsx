@@ -2,11 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { Card, CardContent } from "@/components/ui/card";
 import { IconSelect } from "@/components/admin/IconSelect";
@@ -18,10 +14,13 @@ interface UspSectionFormProps {
   onChange: (section: UspSectionSection) => void;
 }
 
+const MAX_ITEMS = 5;
+
 export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
   const usps = section.usps || [];
 
   const addUsp = () => {
+    if (usps.length >= MAX_ITEMS) return;
     const newUsp: UspItem = {
       _key: crypto.randomUUID(),
       icon: "",
@@ -44,7 +43,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="heading">Heading</FieldLabel>
+        <FieldLabel htmlFor="heading">Titel</FieldLabel>
         <Input
           id="heading"
           value={section.heading || ""}
@@ -53,12 +52,18 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
         />
       </Field>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <FieldLabel>USPs</FieldLabel>
-          <Button type="button" variant="outline" size="sm" onClick={addUsp}>
+          <FieldLabel>Items</FieldLabel>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addUsp}
+            disabled={usps.length >= MAX_ITEMS}
+          >
             <PlusIcon className="size-4" />
-            USP toevoegen
+            Item toevoegen
           </Button>
         </div>
 
@@ -67,7 +72,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
             Nog geen USPs toegevoegd
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {usps.map((usp, index) => (
               <Card key={usp._key}>
                 <CardContent className="pt-4 space-y-3">

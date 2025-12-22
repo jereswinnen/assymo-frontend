@@ -81,7 +81,11 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
 
   if (value?.url) {
     return (
-      <Item variant="muted" size="sm" className="bg-white p-2">
+      <Item
+        variant="muted"
+        size="sm"
+        className="p-2 bg-white border border-border"
+      >
         <ItemMedia variant="image" className="relative size-12">
           <Image
             src={value.url}

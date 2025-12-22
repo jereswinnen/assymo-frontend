@@ -139,7 +139,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
               Nog geen knoppen toegevoegd
             </p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {buttons.map((button, index) => (
                 <div
                   key={button._key}
