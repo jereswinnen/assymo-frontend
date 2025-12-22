@@ -19,15 +19,15 @@ interface BaseSection {
 }
 
 interface SlideshowImage {
-  url: string;
-  alt?: string;
+  _key: string;
+  image: { url: string; alt?: string };
   caption?: string;
 }
 
 interface SlideshowSection extends BaseSection {
   _type: "slideshow";
   background?: boolean;
-  images: SlideshowImage[];
+  images?: SlideshowImage[];
 }
 
 interface PageHeaderSection extends BaseSection {
