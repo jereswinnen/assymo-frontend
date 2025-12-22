@@ -129,8 +129,8 @@ export function SplitSectionForm({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="primary">Primary</SelectItem>
-                    <SelectItem value="secondary">Secondary</SelectItem>
+                    <SelectItem value="primary">Primair</SelectItem>
+                    <SelectItem value="secondary">Secundair</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
