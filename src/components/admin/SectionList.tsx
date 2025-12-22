@@ -19,12 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import {
   Sheet,
   SheetContent,
@@ -42,11 +37,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  BlocksIcon,
-  GripVerticalIcon,
-  Trash2Icon,
-} from "lucide-react";
+import { BlocksIcon, GripVerticalIcon, Trash2Icon } from "lucide-react";
 import {
   Empty,
   EmptyHeader,
@@ -91,11 +82,11 @@ function SortableSectionRow({
       className="group cursor-pointer"
       onClick={onEdit}
     >
-      <TableCell className="w-10">
+      <TableCell className="w-10 text-center">
         <button
           {...attributes}
           {...listeners}
-          className="cursor-grab touch-none text-muted-foreground hover:text-foreground"
+          className="cursor-grab touch-none align-text-bottom text-muted-foreground hover:text-foreground"
           onClick={(e) => e.stopPropagation()}
         >
           <GripVerticalIcon className="size-4" />
@@ -222,8 +213,11 @@ export function SectionList({
         open={!!editingSection}
         onOpenChange={(open) => !open && setEditingSection(null)}
       >
-        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader>
+        <SheetContent
+          side="right"
+          className="px-4 w-full sm:max-w-xl overflow-y-auto"
+        >
+          <SheetHeader className="px-0">
             <SheetTitle>
               {editingSection && getSectionLabel(editingSection._type)}
             </SheetTitle>
