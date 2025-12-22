@@ -336,6 +336,8 @@ export default function SolutionEditorPage({
           <SectionList
             sections={sections}
             onChange={setSections}
+            onSave={saveSolution}
+            saving={saving}
             showAddButton={false}
           />
         </div>

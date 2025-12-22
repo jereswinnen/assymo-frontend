@@ -23,6 +23,7 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import {
   Sheet,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetDescription,
@@ -37,7 +38,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { BlocksIcon, GripVerticalIcon, Trash2Icon } from "lucide-react";
+import {
+  BlocksIcon,
+  GripVerticalIcon,
+  Loader2Icon,
+  Trash2Icon,
+} from "lucide-react";
 import {
   Empty,
   EmptyHeader,
@@ -115,12 +121,16 @@ function SortableSectionRow({
 interface SectionListProps {
   sections: Section[];
   onChange: (sections: Section[]) => void;
+  onSave?: () => void;
+  saving?: boolean;
   showAddButton?: boolean;
 }
 
 export function SectionList({
   sections,
   onChange,
+  onSave,
+  saving = false,
   showAddButton = true,
 }: SectionListProps) {
   const [editingSection, setEditingSection] = useState<Section | null>(null);
@@ -160,6 +170,13 @@ export function SectionList({
     if (!deleteTarget) return;
     onChange(sections.filter((s) => s._key !== deleteTarget));
     setDeleteTarget(null);
+  };
+
+  const handleSave = async () => {
+    if (onSave) {
+      await onSave();
+      setEditingSection(null);
+    }
   };
 
   const sectionToDelete = sections.find((s) => s._key === deleteTarget);
@@ -230,6 +247,20 @@ export function SectionList({
               <SectionForm section={editingSection} onChange={handleUpdate} />
             )}
           </div>
+          {onSave && (
+            <SheetFooter>
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? (
+                  <>
+                    <Loader2Icon className="size-4 animate-spin" />
+                    Opslaan...
+                  </>
+                ) : (
+                  "Opslaan"
+                )}
+              </Button>
+            </SheetFooter>
+          )}
         </SheetContent>
       </Sheet>
 
