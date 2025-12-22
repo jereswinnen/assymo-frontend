@@ -22,7 +22,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PlusIcon, Trash2Icon } from "lucide-react";
+import {
+  ImageIcon,
+  MapPinIcon,
+  PlusIcon,
+  TextIcon,
+  Trash2Icon,
+  FileTextIcon,
+  type LucideIcon,
+} from "lucide-react";
 import {
   FlexibleSectionSection,
   FlexibleSectionLayout,
@@ -47,12 +55,16 @@ const VERTICAL_ALIGN_OPTIONS = [
   { value: "bottom", label: "Onder" },
 ];
 
-const BLOCK_TYPES = [
-  { type: "flexTextBlock", label: "Tekst blok" },
-  { type: "flexImageBlock", label: "Afbeelding blok" },
-  { type: "flexMapBlock", label: "Kaart blok" },
-  { type: "flexFormBlock", label: "Formulier blok" },
-] as const;
+const BLOCK_TYPES: {
+  type: FlexibleBlock["_type"];
+  label: string;
+  icon: LucideIcon;
+}[] = [
+  { type: "flexTextBlock", label: "Tekst", icon: TextIcon },
+  { type: "flexImageBlock", label: "Afbeelding", icon: ImageIcon },
+  { type: "flexMapBlock", label: "Kaart", icon: MapPinIcon },
+  { type: "flexFormBlock", label: "Formulier", icon: FileTextIcon },
+];
 
 interface FlexibleSectionFormProps {
   section: FlexibleSectionSection;
@@ -73,8 +85,8 @@ function createBlock(type: FlexibleBlock["_type"]): FlexibleBlock {
   }
 }
 
-function getBlockLabel(type: FlexibleBlock["_type"]): string {
-  return BLOCK_TYPES.find((b) => b.type === type)?.label || type;
+function getBlockInfo(type: FlexibleBlock["_type"]) {
+  return BLOCK_TYPES.find((b) => b.type === type);
 }
 
 function BlockForm({
@@ -149,8 +161,9 @@ function BlockList({ blocks, onChange, title }: BlockListProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {BLOCK_TYPES.map(({ type, label }) => (
+            {BLOCK_TYPES.map(({ type, label, icon: Icon }) => (
               <DropdownMenuItem key={type} onClick={() => addBlock(type)}>
+                <Icon className="size-4" />
                 {label}
               </DropdownMenuItem>
             ))}
@@ -164,11 +177,15 @@ function BlockList({ blocks, onChange, title }: BlockListProps) {
         </p>
       ) : (
         <div className="space-y-6">
-          {blocks.map((block, index) => (
+          {blocks.map((block, index) => {
+            const blockInfo = getBlockInfo(block._type);
+            const Icon = blockInfo?.icon;
+            return (
             <div key={block._key} className="p-4 space-y-6 border rounded-lg">
               <header className="flex items-center justify-between">
-                <span className="text-sm font-medium">
-                  {getBlockLabel(block._type)}
+                <span className="flex items-center gap-2 text-sm font-medium">
+                  {Icon && <Icon className="size-4" />}
+                  {blockInfo?.label || block._type}
                 </span>
                 <Button
                   className="text-destructive"
@@ -185,7 +202,8 @@ function BlockList({ blocks, onChange, title }: BlockListProps) {
                 onChange={(b) => updateBlock(index, b)}
               />
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
     </div>
