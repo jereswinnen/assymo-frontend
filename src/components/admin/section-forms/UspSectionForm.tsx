@@ -2,10 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { Card, CardContent } from "@/components/ui/card";
 import { IconSelect } from "@/components/admin/IconSelect";
+import { Separator } from "@/components/ui/separator";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { UspSectionSection, UspItem } from "@/types/sections";
 
@@ -116,32 +118,50 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                     placeholder="Beschrijving van de USP"
                   />
 
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Field>
-                      <FieldLabel>Link label (optioneel)</FieldLabel>
-                      <Input
-                        value={usp.link?.label || ""}
-                        onChange={(e) =>
-                          updateUsp(index, {
-                            link: { ...usp.link, label: e.target.value },
-                          })
+                  <Separator />
+
+                  <Field orientation="horizontal">
+                    <FieldLabel>Actie</FieldLabel>
+                    <Switch
+                      checked={!!usp.link}
+                      onCheckedChange={(checked) => {
+                        if (!checked) {
+                          updateUsp(index, { link: undefined });
+                        } else {
+                          updateUsp(index, { link: { label: "", url: "" } });
                         }
-                        placeholder="Meer info"
-                      />
-                    </Field>
-                    <Field>
-                      <FieldLabel>Link URL (optioneel)</FieldLabel>
-                      <Input
-                        value={usp.link?.url || ""}
-                        onChange={(e) =>
-                          updateUsp(index, {
-                            link: { ...usp.link, url: e.target.value },
-                          })
-                        }
-                        placeholder="/contact"
-                      />
-                    </Field>
-                  </div>
+                      }}
+                    />
+                  </Field>
+
+                  {usp.link && (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field>
+                        <FieldLabel>Link label</FieldLabel>
+                        <Input
+                          value={usp.link?.label || ""}
+                          onChange={(e) =>
+                            updateUsp(index, {
+                              link: { ...usp.link, label: e.target.value },
+                            })
+                          }
+                          placeholder="Meer info"
+                        />
+                      </Field>
+                      <Field>
+                        <FieldLabel>Link URL</FieldLabel>
+                        <Input
+                          value={usp.link?.url || ""}
+                          onChange={(e) =>
+                            updateUsp(index, {
+                              link: { ...usp.link, url: e.target.value },
+                            })
+                          }
+                          placeholder="/contact"
+                        />
+                      </Field>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
