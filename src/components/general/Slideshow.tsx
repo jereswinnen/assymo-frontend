@@ -23,10 +23,13 @@ interface SlideshowProps {
 }
 
 export default function Slideshow({
-  images,
+  images: rawImages,
   className = "",
   variant = "default",
 }: SlideshowProps) {
+  // Filter out images without valid URLs
+  const images = rawImages.filter((img) => img.url);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
@@ -59,7 +62,7 @@ export default function Slideshow({
     return () => clearInterval(interval);
   }, [images.length, goToNext, isPaused]);
 
-  if (!images?.length) return null;
+  if (!images.length) return null;
 
   const currentImage = images[currentIndex];
   const nextIndex = (currentIndex + 1) % images.length;
