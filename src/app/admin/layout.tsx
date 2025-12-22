@@ -12,6 +12,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 
 const getRouteLabel = (pathname: string): string => {
   const staticLabels: Record<string, string> = {
@@ -62,7 +63,12 @@ export default function AdminLayout({
 
   // Auth pages render without sidebar
   if (isAuthRoute) {
-    return children;
+    return (
+      <>
+        {children}
+        <Toaster />
+      </>
+    );
   }
 
   const currentLabel = getRouteLabel(pathname);
@@ -82,6 +88,7 @@ export default function AdminLayout({
           <div className="flex-1 p-4">{children}</div>
         </SidebarInset>
       </SidebarProvider>
+      <Toaster />
     </AdminHeaderProvider>
   );
 }
