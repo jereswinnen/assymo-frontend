@@ -178,7 +178,8 @@ export default function MediaPage() {
     }
   }, [pollForAltText]);
 
-  const deleteMedia = async () => {
+  const deleteMedia = async (e: React.MouseEvent) => {
+    e.preventDefault();
     if (!deleteTarget) return;
 
     setDeleting(true);
@@ -195,12 +196,12 @@ export default function MediaPage() {
       }
 
       setMedia((prev) => prev.filter((m) => m.url !== deleteTarget.url));
-      setDeleteTarget(null);
       toast.success("Afbeelding verwijderd");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Kon afbeelding niet verwijderen");
     } finally {
       setDeleting(false);
+      setDeleteTarget(null);
     }
   };
 

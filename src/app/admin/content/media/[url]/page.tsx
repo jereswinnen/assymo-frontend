@@ -140,7 +140,8 @@ export default function ImageDetailPage({
     }
   }, [imageUrl, displayName, altText]);
 
-  const deleteImage = async () => {
+  const deleteImage = async (e: React.MouseEvent) => {
+    e.preventDefault();
     setDeleting(true);
     try {
       const response = await fetch(
@@ -161,6 +162,7 @@ export default function ImageDetailPage({
       toast.error(error instanceof Error ? error.message : "Kon afbeelding niet verwijderen");
     } finally {
       setDeleting(false);
+      setShowDeleteDialog(false);
     }
   };
 
