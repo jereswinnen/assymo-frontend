@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
+  CloudUploadIcon,
   ImageIcon,
   Loader2Icon,
   SearchIcon,
@@ -45,6 +46,10 @@ export default function MediaPage() {
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<MediaItem | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Drag and drop
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
 
   // Track items pending alt text generation
   const pendingAltTextUrls = useRef<Set<string>>(new Set());
@@ -120,16 +125,16 @@ export default function MediaPage() {
     }
   };
 
-  const handleUpload = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (!files || files.length === 0) return;
+  // Core upload function that can be called from input change or drag-drop
+  const uploadFiles = useCallback(
+    async (files: File[]) => {
+      if (files.length === 0) return;
 
       setUploading(true);
       const uploadedItems: MediaItem[] = [];
       let errorCount = 0;
 
-      for (const file of Array.from(files)) {
+      for (const file of files) {
         // Validate file type
         if (!file.type.startsWith("image/")) {
           errorCount++;
@@ -170,8 +175,6 @@ export default function MediaPage() {
         }
       }
 
-      // Reset input
-      e.target.value = "";
       setUploading(false);
 
       // Add uploaded items to state (newest first)
@@ -194,6 +197,62 @@ export default function MediaPage() {
     },
     [pollForAltText],
   );
+
+  const handleUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
+      uploadFiles(Array.from(files));
+      e.target.value = "";
+    },
+    [uploadFiles],
+  );
+
+  // Drag and drop handlers
+  useEffect(() => {
+    const handleDragEnter = (e: DragEvent) => {
+      e.preventDefault();
+      if (e.dataTransfer?.types.includes("Files")) {
+        dragCounter.current++;
+        setIsDragging(true);
+      }
+    };
+
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+    };
+
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      dragCounter.current--;
+      if (dragCounter.current === 0) {
+        setIsDragging(false);
+      }
+    };
+
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      dragCounter.current = 0;
+      setIsDragging(false);
+
+      const files = e.dataTransfer?.files;
+      if (files && files.length > 0) {
+        uploadFiles(Array.from(files));
+      }
+    };
+
+    document.addEventListener("dragenter", handleDragEnter);
+    document.addEventListener("dragover", handleDragOver);
+    document.addEventListener("dragleave", handleDragLeave);
+    document.addEventListener("drop", handleDrop);
+
+    return () => {
+      document.removeEventListener("dragenter", handleDragEnter);
+      document.removeEventListener("dragover", handleDragOver);
+      document.removeEventListener("dragleave", handleDragLeave);
+      document.removeEventListener("drop", handleDrop);
+    };
+  }, [uploadFiles]);
 
   const deleteMedia = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -371,6 +430,18 @@ export default function MediaPage() {
               </Link>
             );
           })}
+        </div>
+      )}
+
+      {/* Drag and drop overlay */}
+      {isDragging && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-muted/80 animate-in fade-in duration-150">
+          <div className="flex flex-col items-center gap-1 animate-in zoom-in-95 duration-150">
+            <CloudUploadIcon className="size-6 animate-pulse" />
+            <p className="text-sm text-muted-foreground">
+              Laat los om te uploaden...
+            </p>
+          </div>
         </div>
       )}
 
