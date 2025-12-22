@@ -46,11 +46,8 @@ export default function ImageDetailPage({
   params: Promise<{ url: string }>;
 }) {
   const { url: urlParam } = use(params);
-  // urlParam is the URL as stored in database (with %20 for spaces)
-  // Decode for display and Vercel Blob operations
+  // Decode the URL param for display and API operations
   const imageUrl = decodeURIComponent(urlParam);
-  // Use encoded version for database queries (matches how it's stored)
-  const encodedUrl = urlParam;
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);

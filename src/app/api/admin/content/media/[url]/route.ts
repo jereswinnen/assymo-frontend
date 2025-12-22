@@ -121,8 +121,6 @@ export async function DELETE(
     const blobUrl = decodeURIComponent(urlParam);
     const likePattern = `%${dbUrl}%`;
 
-    console.log("Checking references for URL:", dbUrl);
-
     // Check if image is in use
     const references = await sql`
       SELECT 'page' as type, id, title as name FROM pages
@@ -134,8 +132,6 @@ export async function DELETE(
          OR sections::text LIKE ${likePattern}
       LIMIT 1
     `;
-
-    console.log("References found:", references.length, references);
 
     if (references.length > 0) {
       return NextResponse.json(

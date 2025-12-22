@@ -35,8 +35,6 @@ export async function POST(request: Request) {
       LIMIT 1
     `;
 
-    console.log("Checking references for URL:", url, "Found:", references.length);
-
     if (references.length > 0) {
       return NextResponse.json(
         { error: "Afbeelding is nog in gebruik. Verwijder eerst de referenties." },
