@@ -45,7 +45,6 @@ import {
 import {
   BlocksIcon,
   GripVerticalIcon,
-  PencilIcon,
   Trash2Icon,
 } from "lucide-react";
 import {
@@ -89,7 +88,7 @@ function SortableSectionRow({
     <TableRow
       ref={setNodeRef}
       style={style}
-      className="cursor-pointer"
+      className="group cursor-pointer"
       onClick={onEdit}
     >
       <TableCell className="w-10">
@@ -105,31 +104,18 @@ function SortableSectionRow({
       <TableCell className="font-medium">
         {getSectionLabel(section._type)}
       </TableCell>
-      <TableCell className="w-20">
-        <div className="flex items-center gap-1">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="size-8"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-          >
-            <PencilIcon className="size-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="size-8 text-destructive hover:text-destructive"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-          >
-            <Trash2Icon className="size-4" />
-          </Button>
-        </div>
+      <TableCell className="w-10">
+        <Button
+          size="icon"
+          variant="ghost"
+          className="size-8 text-destructive hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+        >
+          <Trash2Icon className="size-4" />
+        </Button>
       </TableCell>
     </TableRow>
   );
