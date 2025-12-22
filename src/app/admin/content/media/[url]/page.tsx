@@ -45,8 +45,10 @@ export default function ImageDetailPage({
 }: {
   params: Promise<{ url: string }>;
 }) {
-  const { url: encodedUrl } = use(params);
-  const imageUrl = decodeURIComponent(encodedUrl);
+  const { url: urlParam } = use(params);
+  // Next.js already decodes the route param once, so urlParam contains the actual URL
+  // (with %20 for spaces as stored in the database)
+  const imageUrl = urlParam;
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);

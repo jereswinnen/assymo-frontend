@@ -21,8 +21,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { url: encodedUrl } = await params;
-    const url = decodeURIComponent(encodedUrl);
+    const { url: urlParam } = await params;
+    // Next.js already decodes the route param once
+    const url = urlParam;
 
     // Get blob info from Vercel Blob
     const blobInfo = await getBlobInfo(url);
@@ -61,8 +62,9 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { url: encodedUrl } = await params;
-    const url = decodeURIComponent(encodedUrl);
+    const { url: urlParam } = await params;
+    // Next.js already decodes the route param once
+    const url = urlParam;
     const body = await request.json();
 
     const altText = body.altText || "";
@@ -108,8 +110,9 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { url: encodedUrl } = await params;
-    const url = decodeURIComponent(encodedUrl);
+    const { url: urlParam } = await params;
+    // Next.js already decodes the route param once
+    const url = urlParam;
     const likePattern = `%${url}%`;
 
     console.log("Checking references for URL:", url);
