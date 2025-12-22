@@ -16,8 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { IconSelect } from "@/components/admin/IconSelect";
 import { SplitSectionSection, SplitSectionItem } from "@/types/sections";
-import { ICON_OPTIONS_WITH_NONE } from "@/lib/icons";
 
 interface SplitSectionFormProps {
   section: SplitSectionSection;
@@ -102,25 +102,15 @@ export function SplitSectionForm({
               </Field>
               <Field>
                 <FieldLabel className="text-muted-foreground">Icoon</FieldLabel>
-                <Select
+                <IconSelect
                   value={item.action?.icon || ""}
                   onValueChange={(value) =>
                     updateItem(index, {
                       action: { ...item.action, icon: value || undefined },
                     })
                   }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Kies icoon" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ICON_OPTIONS_WITH_NONE.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value || "none"}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  allowNone
+                />
               </Field>
               <Field>
                 <FieldLabel className="text-muted-foreground">Variant</FieldLabel>

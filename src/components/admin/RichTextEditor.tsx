@@ -46,7 +46,7 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm max-w-none p-3 min-h-[100px] focus:outline-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4",
+          "text-base max-w-none p-3 min-h-[150px] focus:outline-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4",
       },
     },
     onUpdate: ({ editor }) => {
@@ -87,7 +87,7 @@ export function RichTextEditor({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       {label && <Label>{label}</Label>}
       <div className="border rounded-md overflow-hidden">
         <div className="flex gap-1 p-2 border-b bg-muted/50">
@@ -95,22 +95,22 @@ export function RichTextEditor({
             type="button"
             variant="ghost"
             size="sm"
-            className={cn("h-8 w-8 p-0", editor.isActive("bold") && "bg-muted")}
+            className={cn("size-8 p-0", editor.isActive("bold") && "bg-muted")}
             onClick={() => editor.chain().focus().toggleBold().run()}
           >
-            <Bold className="h-4 w-4" />
+            <Bold className="size-4" />
           </Button>
           <Button
             type="button"
             variant="ghost"
             size="sm"
             className={cn(
-              "h-8 w-8 p-0",
-              editor.isActive("italic") && "bg-muted"
+              "size-8 p-0",
+              editor.isActive("italic") && "bg-muted",
             )}
             onClick={() => editor.chain().focus().toggleItalic().run()}
           >
-            <Italic className="h-4 w-4" />
+            <Italic className="size-4" />
           </Button>
           <div className="w-px bg-border mx-1" />
           <Button
@@ -118,44 +118,44 @@ export function RichTextEditor({
             variant="ghost"
             size="sm"
             className={cn(
-              "h-8 w-8 p-0",
-              editor.isActive("bulletList") && "bg-muted"
+              "size-8 p-0",
+              editor.isActive("bulletList") && "bg-muted",
             )}
             onClick={() => editor.chain().focus().toggleBulletList().run()}
           >
-            <List className="h-4 w-4" />
+            <List className="size-4" />
           </Button>
           <Button
             type="button"
             variant="ghost"
             size="sm"
             className={cn(
-              "h-8 w-8 p-0",
-              editor.isActive("orderedList") && "bg-muted"
+              "size-8 p-0",
+              editor.isActive("orderedList") && "bg-muted",
             )}
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
           >
-            <ListOrdered className="h-4 w-4" />
+            <ListOrdered className="size-4" />
           </Button>
           <div className="w-px bg-border mx-1" />
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className={cn("h-8 w-8 p-0", editor.isActive("link") && "bg-muted")}
+            className={cn("size-8 p-0", editor.isActive("link") && "bg-muted")}
             onClick={setLink}
           >
-            <LinkIcon className="h-4 w-4" />
+            <LinkIcon className="size-4" />
           </Button>
           {editor.isActive("link") && (
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0"
+              className="size-8 p-0"
               onClick={() => editor.chain().focus().unsetLink().run()}
             >
-              <Unlink className="h-4 w-4" />
+              <Unlink className="size-4" />
             </Button>
           )}
         </div>

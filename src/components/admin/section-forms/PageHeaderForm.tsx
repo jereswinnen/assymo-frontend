@@ -18,9 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { IconSelect } from "@/components/admin/IconSelect";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { PageHeaderSection } from "@/types/sections";
-import { ICON_OPTIONS_WITH_NONE } from "@/lib/icons";
+import { Separator } from "@/components/ui/separator";
 
 interface ButtonItem {
   _key: string;
@@ -77,12 +78,11 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
         onChange={(value) => onChange({ ...section, subtitle: value })}
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Field orientation="horizontal" className="sm:flex-col sm:items-start">
-          <FieldLabel htmlFor="background">
-            Achtergrond
-            <FieldDescription>Grijze achtergrond</FieldDescription>
-          </FieldLabel>
+      <Separator />
+
+      <div className="space-y-4">
+        <Field orientation="horizontal">
+          <FieldLabel htmlFor="background">Toon achtergrond</FieldLabel>
           <Switch
             id="background"
             checked={section.background || false}
@@ -92,11 +92,8 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
           />
         </Field>
 
-        <Field orientation="horizontal" className="sm:flex-col sm:items-start">
-          <FieldLabel htmlFor="showImage">
-            Toon afbeelding
-            <FieldDescription>Header afbeelding</FieldDescription>
-          </FieldLabel>
+        <Field orientation="horizontal">
+          <FieldLabel htmlFor="showImage">Toon afbeelding</FieldLabel>
           <Switch
             id="showImage"
             checked={section.showImage || false}
@@ -106,11 +103,8 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
           />
         </Field>
 
-        <Field orientation="horizontal" className="sm:flex-col sm:items-start">
-          <FieldLabel htmlFor="showButtons">
-            Toon knoppen
-            <FieldDescription>CTA knoppen</FieldDescription>
-          </FieldLabel>
+        <Field orientation="horizontal">
+          <FieldLabel htmlFor="showButtons">Toon acties</FieldLabel>
           <Switch
             id="showButtons"
             checked={section.showButtons || false}
@@ -121,10 +115,12 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
         </Field>
       </div>
 
+      <Separator />
+
       {section.showButtons && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <FieldLabel>Knoppen (max. 2)</FieldLabel>
+        <div className="space-y-4">
+          <header className="flex items-center justify-between">
+            <FieldLabel>Acties</FieldLabel>
             {buttons.length < 2 && (
               <Button
                 type="button"
@@ -136,94 +132,84 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                 Knop toevoegen
               </Button>
             )}
-          </div>
+          </header>
 
           {buttons.length === 0 ? (
             <p className="text-sm text-muted-foreground py-2 text-center">
               Nog geen knoppen toegevoegd
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {buttons.map((button, index) => (
-                <Card key={button._key}>
-                  <CardContent className="pt-4 space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 grid gap-3 sm:grid-cols-2">
-                        <Field>
-                          <FieldLabel>Label</FieldLabel>
-                          <Input
-                            value={button.label || ""}
-                            onChange={(e) =>
-                              updateButton(index, { label: e.target.value })
-                            }
-                            placeholder="Knop tekst"
-                          />
-                        </Field>
-                        <Field>
-                          <FieldLabel>URL</FieldLabel>
-                          <Input
-                            value={button.url || ""}
-                            onChange={(e) =>
-                              updateButton(index, { url: e.target.value })
-                            }
-                            placeholder="/contact"
-                          />
-                        </Field>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="shrink-0"
-                        onClick={() => removeButton(index)}
-                      >
-                        <Trash2Icon className="size-4" />
-                      </Button>
-                    </div>
+                <div
+                  key={button._key}
+                  className="p-4 space-y-4 border rounded-lg"
+                >
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Field>
+                      <FieldLabel>Label</FieldLabel>
+                      <Input
+                        value={button.label || ""}
+                        onChange={(e) =>
+                          updateButton(index, { label: e.target.value })
+                        }
+                        placeholder="Knop tekst"
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel>URL</FieldLabel>
+                      <Input
+                        value={button.url || ""}
+                        onChange={(e) =>
+                          updateButton(index, { url: e.target.value })
+                        }
+                        placeholder="/contact"
+                      />
+                    </Field>
+                  </div>
 
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <Field>
-                        <FieldLabel>Icoon</FieldLabel>
-                        <Select
-                          value={button.icon || ""}
-                          onValueChange={(value) =>
-                            updateButton(index, { icon: value || undefined })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Kies icoon" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {ICON_OPTIONS_WITH_NONE.map((opt) => (
-                              <SelectItem key={opt.value} value={opt.value || "none"}>
-                                {opt.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                      <Field>
-                        <FieldLabel>Variant</FieldLabel>
-                        <Select
-                          value={button.variant || "primary"}
-                          onValueChange={(value) =>
-                            updateButton(index, {
-                              variant: value as "primary" | "secondary",
-                            })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="primary">Primary</SelectItem>
-                            <SelectItem value="secondary">Secondary</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    </div>
-                  </CardContent>
-                </Card>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Field>
+                      <FieldLabel>Icoon</FieldLabel>
+                      <IconSelect
+                        value={button.icon || ""}
+                        onValueChange={(value) =>
+                          updateButton(index, { icon: value || undefined })
+                        }
+                        allowNone
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel>Variant</FieldLabel>
+                      <Select
+                        value={button.variant || "primary"}
+                        onValueChange={(value) =>
+                          updateButton(index, {
+                            variant: value as "primary" | "secondary",
+                          })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="primary">Primary</SelectItem>
+                          <SelectItem value="secondary">Secondary</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  </div>
+
+                  <Button
+                    className="text-destructive"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => removeButton(index)}
+                  >
+                    <Trash2Icon className="size-4" />
+                    Knop verwijderen
+                  </Button>
+                </div>
               ))}
             </div>
           )}

@@ -43,11 +43,12 @@ export const iconMap: Record<string, LucideIcon> = Object.fromEntries(
 
 // Icon options for admin forms (derived from iconDefinitions)
 export const ICON_OPTIONS = Object.entries(iconDefinitions).map(
-  ([value, { label }]) => ({ label, value })
+  ([value, { label, icon }]) => ({ label, value, icon })
 );
 
 // Icon options with "None" option for optional icon fields
-export const ICON_OPTIONS_WITH_NONE = [
-  { label: "Geen", value: "" },
-  ...ICON_OPTIONS,
-];
+export const ICON_OPTIONS_WITH_NONE: Array<{
+  label: string;
+  value: string;
+  icon?: LucideIcon;
+}> = [{ label: "Geen", value: "" }, ...ICON_OPTIONS];

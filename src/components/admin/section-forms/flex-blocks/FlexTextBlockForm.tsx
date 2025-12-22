@@ -10,8 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { IconSelect } from "@/components/admin/IconSelect";
 import { FlexTextBlock } from "@/types/sections";
-import { ICON_OPTIONS_WITH_NONE } from "@/lib/icons";
 
 interface FlexTextBlockFormProps {
   block: FlexTextBlock;
@@ -89,7 +89,7 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Icoon</Label>
-            <Select
+            <IconSelect
               value={block.button?.icon || ""}
               onValueChange={(value) =>
                 onChange({
@@ -97,18 +97,8 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
                   button: { ...block.button, icon: value || undefined },
                 })
               }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Kies icoon" />
-              </SelectTrigger>
-              <SelectContent>
-                {ICON_OPTIONS_WITH_NONE.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value || "none"}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              allowNone
+            />
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Variant</Label>

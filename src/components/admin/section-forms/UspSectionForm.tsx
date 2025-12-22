@@ -8,17 +8,10 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+import { IconSelect } from "@/components/admin/IconSelect";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { UspSectionSection, UspItem } from "@/types/sections";
-import { ICON_OPTIONS } from "@/lib/icons";
 
 interface UspSectionFormProps {
   section: UspSectionSection;
@@ -82,23 +75,12 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                     <div className="flex-1 grid gap-3 sm:grid-cols-2">
                       <Field>
                         <FieldLabel>Icoon</FieldLabel>
-                        <Select
+                        <IconSelect
                           value={usp.icon || ""}
                           onValueChange={(value) =>
                             updateUsp(index, { icon: value })
                           }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Kies icoon" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {ICON_OPTIONS.map((opt) => (
-                              <SelectItem key={opt.value} value={opt.value}>
-                                {opt.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        />
                       </Field>
                       <Field>
                         <FieldLabel>Titel</FieldLabel>
