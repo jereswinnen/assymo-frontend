@@ -152,7 +152,7 @@ export default function ImageDetailPage({
       const response = await fetch("/api/admin/content/images/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: encodedUrl }),
+        body: JSON.stringify({ url: imageUrl }),
       });
 
       const data = await response.json();
