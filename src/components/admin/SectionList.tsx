@@ -23,8 +23,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import {
@@ -216,13 +214,6 @@ export function SectionList({
               strategy={verticalListSortingStrategy}
             >
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10"></TableHead>
-                    <TableHead>Sectietype</TableHead>
-                    <TableHead className="w-20"></TableHead>
-                  </TableRow>
-                </TableHeader>
                 <TableBody>
                   {sections.map((section) => (
                     <SortableSectionRow
