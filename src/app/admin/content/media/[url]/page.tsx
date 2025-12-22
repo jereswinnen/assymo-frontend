@@ -6,9 +6,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+  FieldSet,
+} from "@/components/ui/field";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,7 +44,6 @@ interface ImageData {
   altText: string | null;
   displayName: string | null;
 }
-
 
 export default function ImageDetailPage({
   params,
@@ -88,7 +93,7 @@ export default function ImageDetailPage({
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/admin/content/media/${encodeURIComponent(imageUrl)}`
+        `/api/admin/content/media/${encodeURIComponent(imageUrl)}`,
       );
 
       if (!response.ok) {
@@ -123,7 +128,7 @@ export default function ImageDetailPage({
             displayName,
             altText,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -234,7 +239,7 @@ export default function ImageDetailPage({
         </Button>
       </>
     ),
-    [saving, hasChanges, saveImage]
+    [saving, hasChanges, saveImage],
   );
   useAdminHeaderActions(headerActions);
 
@@ -252,41 +257,37 @@ export default function ImageDetailPage({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-3">
         {/* Image preview */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-muted">
-              <Image
-                src={image.url}
-                alt={altText || image.pathname}
-                fill
-                className="object-contain"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="md:col-span-2">
+          <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-muted">
+            <Image
+              src={image.url}
+              alt={altText || image.pathname}
+              fill
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, 66vw"
+            />
+          </div>
+        </div>
 
-        {/* Details form */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="displayName">Bestandsnaam</Label>
+        {/* Sidebar */}
+        <div className="bg-muted rounded-lg p-4">
+          <FieldGroup>
+            {/* Details */}
+            <FieldSet>
+              <Field>
+                <FieldLabel htmlFor="displayName">Bestandsnaam</FieldLabel>
                 <Input
                   id="displayName"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Bestandsnaam"
                 />
-              </div>
-              <div className="space-y-2">
+              </Field>
+              <Field>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="altText">Alt tekst</Label>
+                  <FieldLabel htmlFor="altText">Alt tekst</FieldLabel>
                   <Button
                     type="button"
                     variant="outline"
@@ -302,7 +303,7 @@ export default function ImageDetailPage({
                     ) : (
                       <>
                         <SparklesIcon className="size-3" />
-                        Genereer alt-tekst
+                        Genereer
                       </>
                     )}
                   </Button>
@@ -314,18 +315,16 @@ export default function ImageDetailPage({
                   placeholder="Beschrijving van de afbeelding voor toegankelijkheid"
                   rows={4}
                 />
-                <p className="text-xs text-muted-foreground">
+                <FieldDescription>
                   Alt tekst wordt gebruikt voor toegankelijkheid en SEO
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+                </FieldDescription>
+              </Field>
+            </FieldSet>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Informatie</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
+            <FieldSeparator />
+
+            {/* Meta info */}
+            <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Bestandsgrootte</span>
                 <span>{formatFileSize(image.size)}</span>
@@ -335,20 +334,15 @@ export default function ImageDetailPage({
                 <span>
                   {new Date(image.uploadedAt).toLocaleDateString("nl-NL", {
                     year: "numeric",
-                    month: "long",
+                    month: "short",
                     day: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
                 </span>
               </div>
-              <div className="pt-2">
-                <span className="text-muted-foreground text-xs break-all">
-                  {image.url}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </FieldGroup>
         </div>
       </div>
 
@@ -358,8 +352,8 @@ export default function ImageDetailPage({
           <AlertDialogHeader>
             <AlertDialogTitle>Afbeelding verwijderen?</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je deze afbeelding wilt verwijderen? Dit kan niet
-              ongedaan worden gemaakt.
+              Weet je zeker dat je deze afbeelding wilt verwijderen? Dit kan
+              niet ongedaan worden gemaakt.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -36,7 +36,6 @@ interface MediaItem {
   altText: string | null;
 }
 
-
 export default function MediaPage() {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,7 +71,7 @@ export default function MediaPage() {
     for (const url of urls) {
       try {
         const response = await fetch(
-          `/api/admin/content/media/${encodeURIComponent(url)}`
+          `/api/admin/content/media/${encodeURIComponent(url)}`,
         );
         if (response.ok) {
           const data = await response.json();
@@ -80,8 +79,8 @@ export default function MediaPage() {
             // Update the item in state
             setMedia((prev) =>
               prev.map((item) =>
-                item.url === url ? { ...item, altText: data.altText } : item
-              )
+                item.url === url ? { ...item, altText: data.altText } : item,
+              ),
             );
             pendingAltTextUrls.current.delete(url);
           }
@@ -93,9 +92,13 @@ export default function MediaPage() {
 
     // If there are still pending items and we haven't exceeded max attempts, poll again
     const stillPending = urls.filter((url) =>
-      pendingAltTextUrls.current.has(url)
+      pendingAltTextUrls.current.has(url),
     );
-    if (stillPending.length > 0 && attempt < MAX_POLL_ATTEMPTS && isMountedRef.current) {
+    if (
+      stillPending.length > 0 &&
+      attempt < MAX_POLL_ATTEMPTS &&
+      isMountedRef.current
+    ) {
       pollForAltText(stillPending, attempt + 1);
     } else if (stillPending.length > 0) {
       // Clear remaining pending URLs after max attempts
@@ -117,77 +120,80 @@ export default function MediaPage() {
     }
   };
 
-  const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  const handleUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
 
-    setUploading(true);
-    const uploadedItems: MediaItem[] = [];
-    let errorCount = 0;
+      setUploading(true);
+      const uploadedItems: MediaItem[] = [];
+      let errorCount = 0;
 
-    for (const file of Array.from(files)) {
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        errorCount++;
-        continue;
-      }
+      for (const file of Array.from(files)) {
+        // Validate file type
+        if (!file.type.startsWith("image/")) {
+          errorCount++;
+          continue;
+        }
 
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        errorCount++;
-        continue;
-      }
+        // Validate file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          errorCount++;
+          continue;
+        }
 
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
+        try {
+          const formData = new FormData();
+          formData.append("file", file);
 
-        const response = await fetch("/api/admin/content/images/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (response.ok) {
-          const { url, filename } = await response.json();
-          // Add to uploaded list with file info
-          uploadedItems.push({
-            url,
-            pathname: filename,
-            size: file.size,
-            uploadedAt: new Date().toISOString(),
-            displayName: filename,
-            altText: null, // Alt text generated in background
+          const response = await fetch("/api/admin/content/images/upload", {
+            method: "POST",
+            body: formData,
           });
-        } else {
+
+          if (response.ok) {
+            const { url, filename } = await response.json();
+            // Add to uploaded list with file info
+            uploadedItems.push({
+              url,
+              pathname: filename,
+              size: file.size,
+              uploadedAt: new Date().toISOString(),
+              displayName: filename,
+              altText: null, // Alt text generated in background
+            });
+          } else {
+            errorCount++;
+          }
+        } catch {
           errorCount++;
         }
-      } catch {
-        errorCount++;
       }
-    }
 
-    // Reset input
-    e.target.value = "";
-    setUploading(false);
+      // Reset input
+      e.target.value = "";
+      setUploading(false);
 
-    // Add uploaded items to state (newest first)
-    if (uploadedItems.length > 0) {
-      setMedia((prev) => [...uploadedItems, ...prev]);
-      toast.success(
-        `${uploadedItems.length} afbeelding${uploadedItems.length > 1 ? "en" : ""} geupload`
-      );
+      // Add uploaded items to state (newest first)
+      if (uploadedItems.length > 0) {
+        setMedia((prev) => [...uploadedItems, ...prev]);
+        toast.success(
+          `${uploadedItems.length} afbeelding${uploadedItems.length > 1 ? "en" : ""} geupload`,
+        );
 
-      // Track these URLs for polling
-      const newUrls = uploadedItems.map((item) => item.url);
-      newUrls.forEach((url) => pendingAltTextUrls.current.add(url));
-      pollForAltText(newUrls);
-    }
-    if (errorCount > 0) {
-      toast.error(
-        `${errorCount} afbeelding${errorCount > 1 ? "en" : ""} mislukt`
-      );
-    }
-  }, [pollForAltText]);
+        // Track these URLs for polling
+        const newUrls = uploadedItems.map((item) => item.url);
+        newUrls.forEach((url) => pendingAltTextUrls.current.add(url));
+        pollForAltText(newUrls);
+      }
+      if (errorCount > 0) {
+        toast.error(
+          `${errorCount} afbeelding${errorCount > 1 ? "en" : ""} mislukt`,
+        );
+      }
+    },
+    [pollForAltText],
+  );
 
   const deleteMedia = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -261,7 +267,7 @@ export default function MediaPage() {
         />
       </label>
     ),
-    [uploading, handleUpload]
+    [uploading, handleUpload],
   );
   useAdminHeaderActions(headerActions);
 
@@ -311,60 +317,58 @@ export default function MediaPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {filteredMedia.map((item) => {
             const name = item.displayName || item.pathname;
             return (
-              <Card
+              <Link
                 key={item.url}
-                className="group overflow-hidden hover:ring-2 hover:ring-primary transition-all"
+                href={`/admin/content/media/${encodeURIComponent(item.url)}`}
+                className="group relative aspect-square overflow-hidden rounded-lg shadow-sm transition-all duration-300 ease-in-out hover:scale-103 will-change-transform"
               >
-                <Link
-                  href={`/admin/content/media/${encodeURIComponent(item.url)}`}
-                  className="block"
-                >
-                  <div className="relative aspect-square">
-                    <Image
-                      src={item.url}
-                      alt={item.altText || name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                    />
-                    {/* Alt text generating indicator */}
-                    {!item.altText && (
-                      <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-                        <Loader2Icon className="size-3 animate-spin" />
-                        <span>Alt-tekst</span>
-                      </div>
-                    )}
-                    {/* Delete button in top-right corner */}
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        className="size-8"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setDeleteTarget(item);
-                        }}
-                        title="Verwijderen"
-                      >
-                        <Trash2Icon className="size-4" />
-                      </Button>
-                    </div>
+                <Image
+                  src={item.url}
+                  alt={item.altText || name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+                />
+                {/* Alt text generating indicator */}
+                {!item.altText && (
+                  <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+                    <Loader2Icon className="size-3 animate-spin" />
+                    <span>Alt-tekst</span>
                   </div>
-                  <CardContent className="p-2">
-                    <p className="text-xs font-medium truncate" title={name}>
-                      {name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatFileSize(item.size)} • {formatDateShort(item.uploadedAt)}
-                    </p>
-                  </CardContent>
-                </Link>
-              </Card>
+                )}
+                {/* Delete button in top-right corner */}
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setDeleteTarget(item);
+                    }}
+                    title="Verwijderen"
+                  >
+                    <Trash2Icon className="size-4" />
+                  </Button>
+                </div>
+                {/* Overlay info at bottom */}
+                <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/90 to-transparent p-3 pt-6">
+                  <p
+                    className="mb-1! text-xs font-medium text-white truncate"
+                    title={name}
+                  >
+                    {name}
+                  </p>
+                  <p className="text-xs text-white/80">
+                    {formatFileSize(item.size)} •{" "}
+                    {formatDateShort(item.uploadedAt)}
+                  </p>
+                </div>
+              </Link>
             );
           })}
         </div>
@@ -379,7 +383,8 @@ export default function MediaPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Afbeelding verwijderen?</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je &quot;{deleteTarget?.displayName || deleteTarget?.pathname}&quot; wilt
+              Weet je zeker dat je &quot;
+              {deleteTarget?.displayName || deleteTarget?.pathname}&quot; wilt
               verwijderen? Dit kan niet ongedaan worden gemaakt.
             </AlertDialogDescription>
           </AlertDialogHeader>
