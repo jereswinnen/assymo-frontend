@@ -25,15 +25,15 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
     <FieldGroup>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field>
-          <FieldLabel>Heading</FieldLabel>
+          <FieldLabel>Titel</FieldLabel>
           <Input
             value={block.heading || ""}
             onChange={(e) => onChange({ ...block, heading: e.target.value })}
-            placeholder="Optionele heading"
+            placeholder="Optionele titel"
           />
         </Field>
         <Field>
-          <FieldLabel>Heading niveau</FieldLabel>
+          <FieldLabel>Titel niveau</FieldLabel>
           <Select
             value={block.headingLevel || "h2"}
             onValueChange={(value) =>
@@ -61,7 +61,7 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
       <Separator />
 
       <Field orientation="horizontal">
-        <FieldLabel>Knop</FieldLabel>
+        <FieldLabel>Actie</FieldLabel>
         <Switch
           checked={!!block.button}
           onCheckedChange={(checked) => {
@@ -87,7 +87,7 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
                     button: { ...block.button, label: e.target.value },
                   })
                 }
-                placeholder="Knop tekst"
+                placeholder="Maak een afspraak"
               />
             </Field>
             <Field>

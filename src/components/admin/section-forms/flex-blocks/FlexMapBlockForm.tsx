@@ -11,8 +11,7 @@ interface FlexMapBlockFormProps {
 
 export function FlexMapBlockForm({ block, onChange }: FlexMapBlockFormProps) {
   return (
-    <FieldDescription className="flex items-center gap-3 py-2">
-      <MapPinIcon className="size-5 shrink-0" />
+    <FieldDescription>
       Dit blok toont automatisch de Google Maps kaart met de bedrijfslocatie.
     </FieldDescription>
   );

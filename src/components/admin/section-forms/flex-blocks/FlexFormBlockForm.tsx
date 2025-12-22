@@ -1,7 +1,13 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { FlexFormBlock } from "@/types/sections";
 
 interface FlexFormBlockFormProps {
@@ -9,10 +15,7 @@ interface FlexFormBlockFormProps {
   onChange: (block: FlexFormBlock) => void;
 }
 
-export function FlexFormBlockForm({
-  block,
-  onChange,
-}: FlexFormBlockFormProps) {
+export function FlexFormBlockForm({ block, onChange }: FlexFormBlockFormProps) {
   return (
     <FieldGroup>
       <FieldDescription>
@@ -28,14 +31,12 @@ export function FlexFormBlockForm({
         />
       </Field>
 
-      <Field>
-        <FieldLabel>Subtitel</FieldLabel>
-        <Input
-          value={block.subtitle || ""}
-          onChange={(e) => onChange({ ...block, subtitle: e.target.value })}
-          placeholder="Optionele subtitel"
-        />
-      </Field>
+      <RichTextEditor
+        label="Subtitel"
+        value={block.subtitle || ""}
+        onChange={(value) => onChange({ ...block, subtitle: value })}
+        placeholder="Optioneel"
+      />
     </FieldGroup>
   );
 }

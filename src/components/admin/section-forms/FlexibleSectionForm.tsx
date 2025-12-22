@@ -2,13 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -23,15 +17,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  FormIcon,
   ImageIcon,
-  MapPinIcon,
+  MapIcon,
   PlusIcon,
-  TextIcon,
-  Trash2Icon,
-  FileTextIcon,
-  type LucideIcon,
   TextInitialIcon,
-  FormInputIcon,
+  Trash2Icon,
+  type LucideIcon,
 } from "lucide-react";
 import {
   FlexibleSectionSection,
@@ -64,8 +56,8 @@ const BLOCK_TYPES: {
 }[] = [
   { type: "flexTextBlock", label: "Tekst", icon: TextInitialIcon },
   { type: "flexImageBlock", label: "Afbeelding", icon: ImageIcon },
-  { type: "flexMapBlock", label: "Kaart", icon: MapPinIcon },
-  { type: "flexFormBlock", label: "Formulier", icon: F },
+  { type: "flexMapBlock", label: "Kaart", icon: MapIcon },
+  { type: "flexFormBlock", label: "Formulier", icon: FormIcon },
 ];
 
 interface FlexibleSectionFormProps {
