@@ -1,5 +1,6 @@
 "use client";
 
+import { Field, FieldLabel } from "@/components/ui/field";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { FlexImageBlock } from "@/types/sections";
 
@@ -13,9 +14,12 @@ export function FlexImageBlockForm({
   onChange,
 }: FlexImageBlockFormProps) {
   return (
-    <ImageUpload
-      value={block.image || null}
-      onChange={(value) => onChange({ ...block, image: value || undefined })}
-    />
+    <Field>
+      <FieldLabel>Afbeelding</FieldLabel>
+      <ImageUpload
+        value={block.image || null}
+        onChange={(value) => onChange({ ...block, image: value || undefined })}
+      />
+    </Field>
   );
 }

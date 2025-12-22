@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { FlexFormBlock } from "@/types/sections";
 
 interface FlexFormBlockFormProps {
@@ -14,26 +14,28 @@ export function FlexFormBlockForm({
   onChange,
 }: FlexFormBlockFormProps) {
   return (
-    <div className="space-y-3">
-      <p className="text-xs text-muted-foreground">
+    <FieldGroup>
+      <FieldDescription>
         Dit blok toont het contactformulier met een optionele titel en subtitel.
-      </p>
-      <div className="space-y-1">
-        <Label className="text-xs">Titel</Label>
+      </FieldDescription>
+
+      <Field>
+        <FieldLabel>Titel</FieldLabel>
         <Input
           value={block.title || ""}
           onChange={(e) => onChange({ ...block, title: e.target.value })}
           placeholder="Formulier titel"
         />
-      </div>
-      <div className="space-y-1">
-        <Label className="text-xs">Subtitel</Label>
+      </Field>
+
+      <Field>
+        <FieldLabel>Subtitel</FieldLabel>
         <Input
           value={block.subtitle || ""}
           onChange={(e) => onChange({ ...block, subtitle: e.target.value })}
           placeholder="Optionele subtitel"
         />
-      </div>
-    </div>
+      </Field>
+    </FieldGroup>
   );
 }

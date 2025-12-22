@@ -1,7 +1,8 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { IconSelect } from "@/components/admin/IconSelect";
+import { Separator } from "@/components/ui/separator";
 import { FlexTextBlock } from "@/types/sections";
 
 interface FlexTextBlockFormProps {
@@ -20,18 +22,18 @@ interface FlexTextBlockFormProps {
 
 export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
   return (
-    <div className="space-y-4">
+    <FieldGroup>
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Label className="text-xs">Heading</Label>
+        <Field>
+          <FieldLabel>Heading</FieldLabel>
           <Input
             value={block.heading || ""}
             onChange={(e) => onChange({ ...block, heading: e.target.value })}
             placeholder="Optionele heading"
           />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Heading niveau</Label>
+        </Field>
+        <Field>
+          <FieldLabel>Heading niveau</FieldLabel>
           <Select
             value={block.headingLevel || "h2"}
             onValueChange={(value) =>
@@ -47,7 +49,7 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
               <SelectItem value="h4">H4</SelectItem>
             </SelectContent>
           </Select>
-        </div>
+        </Field>
       </div>
 
       <RichTextEditor
@@ -56,75 +58,92 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
         onChange={(value) => onChange({ ...block, text: value })}
       />
 
-      <div className="space-y-2 pt-2 border-t">
-        <Label className="text-xs font-medium">Knop (optioneel)</Label>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Label</Label>
-            <Input
-              value={block.button?.label || ""}
-              onChange={(e) =>
-                onChange({
-                  ...block,
-                  button: { ...block.button, label: e.target.value },
-                })
-              }
-              placeholder="Knop tekst"
-            />
+      <Separator />
+
+      <Field orientation="horizontal">
+        <FieldLabel>Knop</FieldLabel>
+        <Switch
+          checked={!!block.button}
+          onCheckedChange={(checked) => {
+            if (!checked) {
+              onChange({ ...block, button: undefined });
+            } else {
+              onChange({ ...block, button: { label: "", url: "" } });
+            }
+          }}
+        />
+      </Field>
+
+      {block.button && (
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field>
+              <FieldLabel>Label</FieldLabel>
+              <Input
+                value={block.button?.label || ""}
+                onChange={(e) =>
+                  onChange({
+                    ...block,
+                    button: { ...block.button, label: e.target.value },
+                  })
+                }
+                placeholder="Knop tekst"
+              />
+            </Field>
+            <Field>
+              <FieldLabel>URL</FieldLabel>
+              <Input
+                value={block.button?.url || ""}
+                onChange={(e) =>
+                  onChange({
+                    ...block,
+                    button: { ...block.button, url: e.target.value },
+                  })
+                }
+                placeholder="/contact"
+              />
+            </Field>
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">URL</Label>
-            <Input
-              value={block.button?.url || ""}
-              onChange={(e) =>
-                onChange({
-                  ...block,
-                  button: { ...block.button, url: e.target.value },
-                })
-              }
-              placeholder="/contact"
-            />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field>
+              <FieldLabel>Icoon</FieldLabel>
+              <IconSelect
+                value={block.button?.icon || ""}
+                onValueChange={(value) =>
+                  onChange({
+                    ...block,
+                    button: { ...block.button, icon: value || undefined },
+                  })
+                }
+                allowNone
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Variant</FieldLabel>
+              <Select
+                value={block.button?.variant || "primary"}
+                onValueChange={(value) =>
+                  onChange({
+                    ...block,
+                    button: {
+                      ...block.button,
+                      variant: value as "primary" | "secondary",
+                    },
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="primary">Primair</SelectItem>
+                  <SelectItem value="secondary">Secundair</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
           </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Icoon</Label>
-            <IconSelect
-              value={block.button?.icon || ""}
-              onValueChange={(value) =>
-                onChange({
-                  ...block,
-                  button: { ...block.button, icon: value || undefined },
-                })
-              }
-              allowNone
-            />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Variant</Label>
-            <Select
-              value={block.button?.variant || "primary"}
-              onValueChange={(value) =>
-                onChange({
-                  ...block,
-                  button: {
-                    ...block.button,
-                    variant: value as "primary" | "secondary",
-                  },
-                })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="primary">Primair</SelectItem>
-                <SelectItem value="secondary">Secundair</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-    </div>
+      )}
+    </FieldGroup>
   );
 }
