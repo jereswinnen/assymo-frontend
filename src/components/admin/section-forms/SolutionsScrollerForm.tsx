@@ -22,7 +22,7 @@ export function SolutionsScrollerForm({
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="heading">Heading</FieldLabel>
+        <FieldLabel htmlFor="heading">Titel</FieldLabel>
         <Input
           id="heading"
           value={section.heading || ""}
@@ -36,10 +36,6 @@ export function SolutionsScrollerForm({
         onChange={(value) => onChange({ ...section, subtitle: value })}
         placeholder="Bekijk onze projecten"
       />
-      <FieldDescription>
-        Deze sectie toont automatisch alle realisaties in een horizontale
-        scroller.
-      </FieldDescription>
     </FieldGroup>
   );
 }

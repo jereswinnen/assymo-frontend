@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
-import { Card, CardContent } from "@/components/ui/card";
 import { IconSelect } from "@/components/admin/IconSelect";
 import { Separator } from "@/components/ui/separator";
 import { PlusIcon, Trash2Icon } from "lucide-react";
@@ -55,7 +54,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
       </Field>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <header className="flex items-center justify-between">
           <FieldLabel>Items</FieldLabel>
           <Button
             type="button"
@@ -67,103 +66,102 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
             <PlusIcon className="size-4" />
             Item toevoegen
           </Button>
-        </div>
+        </header>
 
         {usps.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4 text-center">
             Nog geen USPs toegevoegd
           </p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {usps.map((usp, index) => (
-              <Card key={usp._key}>
-                <CardContent className="pt-4 space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 grid gap-3 sm:grid-cols-2">
-                      <Field>
-                        <FieldLabel>Icoon</FieldLabel>
-                        <IconSelect
-                          value={usp.icon || ""}
-                          onValueChange={(value) =>
-                            updateUsp(index, { icon: value })
-                          }
-                        />
-                      </Field>
-                      <Field>
-                        <FieldLabel>Titel</FieldLabel>
-                        <Input
-                          value={usp.title || ""}
-                          onChange={(e) =>
-                            updateUsp(index, { title: e.target.value })
-                          }
-                          placeholder="USP titel"
-                        />
-                      </Field>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="shrink-0"
-                      onClick={() => removeUsp(index)}
-                    >
-                      <Trash2Icon className="size-4" />
-                    </Button>
-                  </div>
-
-                  <RichTextEditor
-                    label="Tekst"
-                    value={usp.text || ""}
-                    onChange={(value) => updateUsp(index, { text: value })}
-                    placeholder="Beschrijving van de USP"
-                  />
-
-                  <Separator />
-
-                  <Field orientation="horizontal">
-                    <FieldLabel>Actie</FieldLabel>
-                    <Switch
-                      checked={!!usp.link}
-                      onCheckedChange={(checked) => {
-                        if (!checked) {
-                          updateUsp(index, { link: undefined });
-                        } else {
-                          updateUsp(index, { link: { label: "", url: "" } });
-                        }
-                      }}
+              <div key={usp._key} className="p-4 space-y-4 border rounded-lg">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Field>
+                    <FieldLabel>Titel</FieldLabel>
+                    <Input
+                      value={usp.title || ""}
+                      onChange={(e) =>
+                        updateUsp(index, { title: e.target.value })
+                      }
+                      placeholder="Titel"
                     />
                   </Field>
+                  <Field>
+                    <FieldLabel>Icoon</FieldLabel>
+                    <IconSelect
+                      value={usp.icon || ""}
+                      onValueChange={(value) =>
+                        updateUsp(index, { icon: value })
+                      }
+                    />
+                  </Field>
+                </div>
 
-                  {usp.link && (
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <Field>
-                        <FieldLabel>Link label</FieldLabel>
-                        <Input
-                          value={usp.link?.label || ""}
-                          onChange={(e) =>
-                            updateUsp(index, {
-                              link: { ...usp.link, label: e.target.value },
-                            })
-                          }
-                          placeholder="Meer info"
-                        />
-                      </Field>
-                      <Field>
-                        <FieldLabel>Link URL</FieldLabel>
-                        <Input
-                          value={usp.link?.url || ""}
-                          onChange={(e) =>
-                            updateUsp(index, {
-                              link: { ...usp.link, url: e.target.value },
-                            })
-                          }
-                          placeholder="/contact"
-                        />
-                      </Field>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                <RichTextEditor
+                  label="Tekst"
+                  value={usp.text || ""}
+                  onChange={(value) => updateUsp(index, { text: value })}
+                  placeholder="Beschrijving"
+                />
+
+                <Separator />
+
+                <Field orientation="horizontal">
+                  <FieldLabel>Actie</FieldLabel>
+                  <Switch
+                    checked={!!usp.link}
+                    onCheckedChange={(checked) => {
+                      if (!checked) {
+                        updateUsp(index, { link: undefined });
+                      } else {
+                        updateUsp(index, { link: { label: "", url: "" } });
+                      }
+                    }}
+                  />
+                </Field>
+
+                {usp.link && (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Field>
+                      <FieldLabel>Label</FieldLabel>
+                      <Input
+                        value={usp.link?.label || ""}
+                        onChange={(e) =>
+                          updateUsp(index, {
+                            link: { ...usp.link, label: e.target.value },
+                          })
+                        }
+                        placeholder="Meer info"
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel>URL</FieldLabel>
+                      <Input
+                        value={usp.link?.url || ""}
+                        onChange={(e) =>
+                          updateUsp(index, {
+                            link: { ...usp.link, url: e.target.value },
+                          })
+                        }
+                        placeholder="/contact"
+                      />
+                    </Field>
+                  </div>
+                )}
+
+                <Separator />
+
+                <Button
+                  className="text-destructive"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => removeUsp(index)}
+                >
+                  <Trash2Icon className="size-4" />
+                  Item verwijderen
+                </Button>
+              </div>
             ))}
           </div>
         )}
