@@ -22,6 +22,25 @@ export async function POST(request: Request) {
       );
     }
 
+    // Check if image is in use
+    const references = await sql`
+      SELECT 'page' as type, id, title as name FROM pages
+      WHERE header_image::text LIKE ${"%" + url + "%"}
+         OR sections::text LIKE ${"%" + url + "%"}
+      UNION ALL
+      SELECT 'solution' as type, id, name FROM solutions
+      WHERE header_image::text LIKE ${"%" + url + "%"}
+         OR sections::text LIKE ${"%" + url + "%"}
+      LIMIT 1
+    `;
+
+    if (references.length > 0) {
+      return NextResponse.json(
+        { error: "Afbeelding is nog in gebruik. Verwijder eerst de referenties." },
+        { status: 400 }
+      );
+    }
+
     // Delete from Vercel Blob
     await deleteImage(url);
 
