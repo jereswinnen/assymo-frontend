@@ -49,17 +49,25 @@ export default function MediaPage() {
 
   // Track items pending alt text generation
   const pendingAltTextUrls = useRef<Set<string>>(new Set());
+  const isMountedRef = useRef(true);
+  const MAX_POLL_ATTEMPTS = 10;
 
   useEffect(() => {
     fetchMedia();
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   // Poll for alt text updates on items that don't have it yet
-  const pollForAltText = useCallback(async (urls: string[]) => {
-    if (urls.length === 0) return;
+  const pollForAltText = useCallback(async (urls: string[], attempt = 1) => {
+    if (urls.length === 0 || !isMountedRef.current) return;
 
-    // Wait 3 seconds before first poll
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    // Wait 3 seconds before first poll, 2 seconds for subsequent
+    const delay = attempt === 1 ? 3000 : 2000;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+
+    if (!isMountedRef.current) return;
 
     for (const url of urls) {
       try {
@@ -83,12 +91,15 @@ export default function MediaPage() {
       }
     }
 
-    // If there are still pending items, poll again after 2 more seconds
+    // If there are still pending items and we haven't exceeded max attempts, poll again
     const stillPending = urls.filter((url) =>
       pendingAltTextUrls.current.has(url)
     );
-    if (stillPending.length > 0) {
-      setTimeout(() => pollForAltText(stillPending), 2000);
+    if (stillPending.length > 0 && attempt < MAX_POLL_ATTEMPTS && isMountedRef.current) {
+      pollForAltText(stillPending, attempt + 1);
+    } else if (stillPending.length > 0) {
+      // Clear remaining pending URLs after max attempts
+      stillPending.forEach((url) => pendingAltTextUrls.current.delete(url));
     }
   }, []);
 
