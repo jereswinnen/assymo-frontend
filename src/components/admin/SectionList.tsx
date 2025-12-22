@@ -18,8 +18,22 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,9 +46,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   BlocksIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
   GripVerticalIcon,
+  PencilIcon,
   Trash2Icon,
 } from "lucide-react";
 import {
@@ -48,18 +61,17 @@ import { Section, getSectionLabel } from "@/types/sections";
 import { AddSectionButton } from "./AddSectionButton";
 import { SectionForm } from "./SectionForm";
 
-interface SortableSectionProps {
+interface SortableSectionRowProps {
   section: Section;
-  onUpdate: (section: Section) => void;
+  onEdit: () => void;
   onDelete: () => void;
 }
 
-function SortableSection({
+function SortableSectionRow({
   section,
-  onUpdate,
+  onEdit,
   onDelete,
-}: SortableSectionProps) {
-  const [expanded, setExpanded] = useState(false);
+}: SortableSectionRowProps) {
   const {
     attributes,
     listeners,
@@ -76,43 +88,52 @@ function SortableSection({
   };
 
   return (
-    <Card ref={setNodeRef} style={style} className="overflow-hidden">
-      <div className="flex items-center gap-2 p-3 border-b border-transparent hover:bg-muted/50">
+    <TableRow
+      ref={setNodeRef}
+      style={style}
+      className="cursor-pointer"
+      onClick={onEdit}
+    >
+      <TableCell className="w-10">
         <button
           {...attributes}
           {...listeners}
           className="cursor-grab touch-none text-muted-foreground hover:text-foreground"
+          onClick={(e) => e.stopPropagation()}
         >
           <GripVerticalIcon className="size-4" />
         </button>
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          {expanded ? (
-            <ChevronDownIcon className="size-4" />
-          ) : (
-            <ChevronRightIcon className="size-4" />
-          )}
-        </button>
-        <span className="font-medium flex-1 text-sm">
-          {getSectionLabel(section._type)}
-        </span>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="size-8"
-          onClick={onDelete}
-        >
-          <Trash2Icon className="size-4" />
-        </Button>
-      </div>
-      {expanded && (
-        <div className="p-4 border-t bg-muted/30">
-          <SectionForm section={section} onChange={onUpdate} />
+      </TableCell>
+      <TableCell className="font-medium">
+        {getSectionLabel(section._type)}
+      </TableCell>
+      <TableCell className="w-20">
+        <div className="flex items-center gap-1">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+          >
+            <PencilIcon className="size-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8 text-destructive hover:text-destructive"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+          >
+            <Trash2Icon className="size-4" />
+          </Button>
         </div>
-      )}
-    </Card>
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -127,6 +148,7 @@ export function SectionList({
   onChange,
   showAddButton = true,
 }: SectionListProps) {
+  const [editingSection, setEditingSection] = useState<Section | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -151,10 +173,12 @@ export function SectionList({
     onChange([...sections, section]);
   };
 
-  const handleUpdate = (index: number, section: Section) => {
-    const newSections = [...sections];
-    newSections[index] = section;
+  const handleUpdate = (updatedSection: Section) => {
+    const newSections = sections.map((s) =>
+      s._key === updatedSection._key ? updatedSection : s,
+    );
     onChange(newSections);
+    setEditingSection(updatedSection);
   };
 
   const handleDelete = () => {
@@ -191,21 +215,52 @@ export function SectionList({
               items={sections.map((s) => s._key)}
               strategy={verticalListSortingStrategy}
             >
-              <div className="space-y-2">
-                {sections.map((section, index) => (
-                  <SortableSection
-                    key={section._key}
-                    section={section}
-                    onUpdate={(updated) => handleUpdate(index, updated)}
-                    onDelete={() => setDeleteTarget(section._key)}
-                  />
-                ))}
-              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10"></TableHead>
+                    <TableHead>Sectietype</TableHead>
+                    <TableHead className="w-20"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sections.map((section) => (
+                    <SortableSectionRow
+                      key={section._key}
+                      section={section}
+                      onEdit={() => setEditingSection(section)}
+                      onDelete={() => setDeleteTarget(section._key)}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
             </SortableContext>
           </DndContext>
           {showAddButton && <AddSectionButton onAdd={handleAdd} />}
         </>
       )}
+
+      {/* Edit Section Sheet */}
+      <Sheet
+        open={!!editingSection}
+        onOpenChange={(open) => !open && setEditingSection(null)}
+      >
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>
+              {editingSection && getSectionLabel(editingSection._type)}
+            </SheetTitle>
+            <SheetDescription>
+              Bewerk de inhoud van deze sectie.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="py-4">
+            {editingSection && (
+              <SectionForm section={editingSection} onChange={handleUpdate} />
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Delete confirmation */}
       <AlertDialog
