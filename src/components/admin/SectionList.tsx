@@ -123,6 +123,7 @@ interface SectionListProps {
   onChange: (sections: Section[]) => void;
   onSave?: () => void;
   saving?: boolean;
+  hasChanges?: boolean;
   showAddButton?: boolean;
 }
 
@@ -131,6 +132,7 @@ export function SectionList({
   onChange,
   onSave,
   saving = false,
+  hasChanges = false,
   showAddButton = true,
 }: SectionListProps) {
   const [editingSection, setEditingSection] = useState<Section | null>(null);
@@ -174,7 +176,7 @@ export function SectionList({
 
   const handleSave = async () => {
     if (onSave) {
-      await onSave();
+      onSave();
       setEditingSection(null);
     }
   };
@@ -242,14 +244,12 @@ export function SectionList({
               Bewerk de inhoud van deze sectie.
             </SheetDescription>
           </SheetHeader>
-          <div className="py-4">
-            {editingSection && (
-              <SectionForm section={editingSection} onChange={handleUpdate} />
-            )}
-          </div>
+          {editingSection && (
+            <SectionForm section={editingSection} onChange={handleUpdate} />
+          )}
           {onSave && (
-            <SheetFooter>
-              <Button onClick={handleSave} disabled={saving}>
+            <SheetFooter className="px-0">
+              <Button onClick={handleSave} disabled={saving || !hasChanges}>
                 {saving ? (
                   <>
                     <Loader2Icon className="size-4 animate-spin" />

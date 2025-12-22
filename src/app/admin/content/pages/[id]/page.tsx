@@ -283,6 +283,7 @@ export default function PageEditorPage({
             onChange={setSections}
             onSave={savePage}
             saving={saving}
+            hasChanges={hasChanges}
             showAddButton={false}
           />
         </div>
