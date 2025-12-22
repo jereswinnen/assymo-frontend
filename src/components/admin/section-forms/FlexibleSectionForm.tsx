@@ -22,20 +22,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PlusIcon, Trash2Icon, GripVertical } from "lucide-react";
+import { PlusIcon, Trash2Icon } from "lucide-react";
 import {
   FlexibleSectionSection,
   FlexibleSectionLayout,
   FlexibleBlock,
-  FlexTextBlock,
-  FlexImageBlock,
-  FlexMapBlock,
-  FlexFormBlock,
 } from "@/types/sections";
 import { FlexTextBlockForm } from "./flex-blocks/FlexTextBlockForm";
 import { FlexImageBlockForm } from "./flex-blocks/FlexImageBlockForm";
 import { FlexMapBlockForm } from "./flex-blocks/FlexMapBlockForm";
 import { FlexFormBlockForm } from "./flex-blocks/FlexFormBlockForm";
+import { Separator } from "@/components/ui/separator";
 
 const LAYOUT_OPTIONS: { value: FlexibleSectionLayout; label: string }[] = [
   { value: "1-col", label: "1 kolom" },
@@ -140,30 +137,14 @@ function BlockList({ blocks, onChange, title }: BlockListProps) {
     onChange(blocks.filter((_, i) => i !== index));
   };
 
-  const moveBlock = (index: number, direction: "up" | "down") => {
-    if (
-      (direction === "up" && index === 0) ||
-      (direction === "down" && index === blocks.length - 1)
-    ) {
-      return;
-    }
-    const newBlocks = [...blocks];
-    const newIndex = direction === "up" ? index - 1 : index + 1;
-    [newBlocks[index], newBlocks[newIndex]] = [
-      newBlocks[newIndex],
-      newBlocks[index],
-    ];
-    onChange(newBlocks);
-  };
-
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <FieldLabel>{title}</FieldLabel>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button type="button" variant="outline" size="sm">
-              <PlusIcon className="size-4 mr-1" />
+              <PlusIcon className="size-4" />
               Blok toevoegen
             </Button>
           </DropdownMenuTrigger>
@@ -182,54 +163,28 @@ function BlockList({ blocks, onChange, title }: BlockListProps) {
           Geen blokken toegevoegd
         </p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-6">
           {blocks.map((block, index) => (
-            <Card key={block._key}>
-              <CardHeader className="pb-2 pt-3 px-3">
-                <div className="flex items-center gap-2">
-                  <div className="flex flex-col gap-0.5">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-5 w-5"
-                      disabled={index === 0}
-                      onClick={() => moveBlock(index, "up")}
-                    >
-                      <GripVertical className="size-3 rotate-90" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-5 w-5"
-                      disabled={index === blocks.length - 1}
-                      onClick={() => moveBlock(index, "down")}
-                    >
-                      <GripVertical className="size-3 rotate-90" />
-                    </Button>
-                  </div>
-                  <CardTitle className="text-sm flex-1">
-                    {getBlockLabel(block._type)}
-                  </CardTitle>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => removeBlock(index)}
-                  >
-                    <Trash2Icon className="size-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3 px-3">
-                <BlockForm
-                  block={block}
-                  onChange={(b) => updateBlock(index, b)}
-                />
-              </CardContent>
-            </Card>
+            <div key={block._key} className="p-4 space-y-6 border rounded-lg">
+              <header className="flex items-center justify-between">
+                <span className="text-sm font-medium">
+                  {getBlockLabel(block._type)}
+                </span>
+                <Button
+                  className="text-destructive"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => removeBlock(index)}
+                >
+                  <Trash2Icon className="size-4" />
+                  Blok verwijderen
+                </Button>
+              </header>
+              <BlockForm
+                block={block}
+                onChange={(b) => updateBlock(index, b)}
+              />
+            </div>
           ))}
         </div>
       )}
@@ -246,7 +201,7 @@ export function FlexibleSectionForm({
 
   return (
     <FieldGroup>
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field>
           <FieldLabel>Layout</FieldLabel>
           <Select
@@ -291,24 +246,23 @@ export function FlexibleSectionForm({
             </SelectContent>
           </Select>
         </Field>
-
-        <Field orientation="horizontal" className="sm:flex-col sm:items-start">
-          <FieldLabel htmlFor="background">
-            Achtergrond
-            <FieldDescription>Grijze achtergrond</FieldDescription>
-          </FieldLabel>
-          <Switch
-            id="background"
-            checked={section.background || false}
-            onCheckedChange={(checked) =>
-              onChange({ ...section, background: checked })
-            }
-          />
-        </Field>
       </div>
 
+      <Field orientation="horizontal">
+        <FieldLabel htmlFor="background">Achtergrond</FieldLabel>
+        <Switch
+          id="background"
+          checked={section.background || false}
+          onCheckedChange={(checked) =>
+            onChange({ ...section, background: checked })
+          }
+        />
+      </Field>
+
+      <Separator />
+
       {isTwoColumn ? (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="space-y-6">
           <BlockList
             title="Linker kolom"
             blocks={section.blockLeft || []}

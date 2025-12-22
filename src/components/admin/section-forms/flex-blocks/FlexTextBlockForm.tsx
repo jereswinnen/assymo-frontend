@@ -20,7 +20,7 @@ interface FlexTextBlockFormProps {
 
 export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1">
           <Label className="text-xs">Heading</Label>

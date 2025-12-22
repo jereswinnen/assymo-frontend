@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   BlocksIcon,
+  CheckIcon,
   GripVerticalIcon,
   Loader2Icon,
   Trash2Icon,
@@ -256,7 +257,10 @@ export function SectionList({
                     Opslaan...
                   </>
                 ) : (
-                  "Opslaan"
+                  <>
+                    <CheckIcon className="size-4" />
+                    Opslaan
+                  </>
                 )}
               </Button>
             </SheetFooter>
