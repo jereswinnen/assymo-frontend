@@ -148,13 +148,12 @@ export default function ImageDetailPage({
     e.preventDefault();
     setDeleting(true);
     try {
-      // Use encodedUrl to match the format stored in database
-      const response = await fetch(
-        `/api/admin/content/media/${encodeURIComponent(encodedUrl)}`,
-        {
-          method: "DELETE",
-        }
-      );
+      // POST with URL in body (like thumbnail delete) to avoid encoding issues
+      const response = await fetch("/api/admin/content/images/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: encodedUrl }),
+      });
 
       const data = await response.json();
 
