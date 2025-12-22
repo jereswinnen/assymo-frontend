@@ -192,6 +192,10 @@ export default function MediaPage() {
 
       const data = await response.json();
 
+      // Close dialog first
+      setDeleting(false);
+      setDeleteTarget(null);
+
       if (!response.ok) {
         toast.error(data.error || "Kon afbeelding niet verwijderen");
         return;
@@ -201,10 +205,9 @@ export default function MediaPage() {
       toast.success("Afbeelding verwijderd");
     } catch (error) {
       console.error("Delete failed:", error);
-      toast.error("Kon afbeelding niet verwijderen");
-    } finally {
       setDeleting(false);
       setDeleteTarget(null);
+      toast.error("Kon afbeelding niet verwijderen");
     }
   };
 

@@ -157,6 +157,10 @@ export default function ImageDetailPage({
 
       const data = await response.json();
 
+      // Close dialog first
+      setDeleting(false);
+      setShowDeleteDialog(false);
+
       if (!response.ok) {
         toast.error(data.error || "Kon afbeelding niet verwijderen");
         return;
@@ -166,10 +170,9 @@ export default function ImageDetailPage({
       router.push("/admin/content/media");
     } catch (error) {
       console.error("Delete failed:", error);
-      toast.error("Kon afbeelding niet verwijderen");
-    } finally {
       setDeleting(false);
       setShowDeleteDialog(false);
+      toast.error("Kon afbeelding niet verwijderen");
     }
   };
 
