@@ -1,7 +1,6 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { IconSelect } from "@/components/admin/IconSelect";
+import { Separator } from "@/components/ui/separator";
 import { SplitSectionSection, SplitSectionItem } from "@/types/sections";
 
 interface SplitSectionFormProps {
@@ -44,101 +44,99 @@ export function SplitSectionForm({
   };
 
   const renderItemForm = (item: SplitSectionItem, index: 0 | 1) => (
-    <Card key={item._key}>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Item {index + 1}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <FieldGroup>
-          <Field>
-            <FieldLabel>Afbeelding</FieldLabel>
-            <ImageUpload
-              value={item.image || null}
-              onChange={(value) => updateItem(index, { image: value || undefined })}
-            />
-          </Field>
+    <div key={item._key} className="p-4 space-y-4 border rounded-lg">
+      <FieldLabel className="font-medium">Item {index + 1}</FieldLabel>
 
+      <Field>
+        <FieldLabel>Afbeelding</FieldLabel>
+        <ImageUpload
+          value={item.image || null}
+          onChange={(value) => updateItem(index, { image: value || undefined })}
+        />
+      </Field>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field>
+          <FieldLabel>Titel</FieldLabel>
+          <Input
+            value={item.title || ""}
+            onChange={(e) => updateItem(index, { title: e.target.value })}
+            placeholder="Item titel"
+          />
+        </Field>
+        <Field>
+          <FieldLabel>Subtitel</FieldLabel>
+          <Input
+            value={item.subtitle || ""}
+            onChange={(e) => updateItem(index, { subtitle: e.target.value })}
+            placeholder="Optionele subtitel"
+          />
+        </Field>
+      </div>
+
+      <Field>
+        <FieldLabel>Link URL</FieldLabel>
+        <Input
+          value={item.href || ""}
+          onChange={(e) => updateItem(index, { href: e.target.value })}
+          placeholder="/pagina"
+        />
+      </Field>
+
+      <Separator />
+
+      <div className="space-y-3">
+        <FieldLabel>Actie knop (optioneel)</FieldLabel>
+        <div className="grid gap-3 sm:grid-cols-3">
           <Field>
-            <FieldLabel>Titel</FieldLabel>
+            <FieldLabel className="text-muted-foreground">Label</FieldLabel>
             <Input
-              value={item.title || ""}
-              onChange={(e) => updateItem(index, { title: e.target.value })}
-              placeholder="Item titel"
+              value={item.action?.label || ""}
+              onChange={(e) =>
+                updateItem(index, {
+                  action: { ...item.action, label: e.target.value },
+                })
+              }
+              placeholder="Bekijk meer"
             />
           </Field>
-
           <Field>
-            <FieldLabel>Subtitel</FieldLabel>
-            <Input
-              value={item.subtitle || ""}
-              onChange={(e) => updateItem(index, { subtitle: e.target.value })}
-              placeholder="Optionele subtitel"
+            <FieldLabel className="text-muted-foreground">Icoon</FieldLabel>
+            <IconSelect
+              value={item.action?.icon || ""}
+              onValueChange={(value) =>
+                updateItem(index, {
+                  action: { ...item.action, icon: value || undefined },
+                })
+              }
+              allowNone
             />
           </Field>
-
           <Field>
-            <FieldLabel>Link URL</FieldLabel>
-            <Input
-              value={item.href || ""}
-              onChange={(e) => updateItem(index, { href: e.target.value })}
-              placeholder="/pagina"
-            />
+            <FieldLabel className="text-muted-foreground">Variant</FieldLabel>
+            <Select
+              value={item.action?.variant || "secondary"}
+              onValueChange={(value) =>
+                updateItem(index, {
+                  action: {
+                    ...item.action,
+                    variant: value as "primary" | "secondary",
+                  },
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="primary">Primair</SelectItem>
+                <SelectItem value="secondary">Secundair</SelectItem>
+              </SelectContent>
+            </Select>
           </Field>
-
-          <div className="space-y-3 pt-2 border-t">
-            <FieldLabel>Actie knop (optioneel)</FieldLabel>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Field>
-                <FieldLabel className="text-muted-foreground">Label</FieldLabel>
-                <Input
-                  value={item.action?.label || ""}
-                  onChange={(e) =>
-                    updateItem(index, {
-                      action: { ...item.action, label: e.target.value },
-                    })
-                  }
-                  placeholder="Bekijk meer"
-                />
-              </Field>
-              <Field>
-                <FieldLabel className="text-muted-foreground">Icoon</FieldLabel>
-                <IconSelect
-                  value={item.action?.icon || ""}
-                  onValueChange={(value) =>
-                    updateItem(index, {
-                      action: { ...item.action, icon: value || undefined },
-                    })
-                  }
-                  allowNone
-                />
-              </Field>
-              <Field>
-                <FieldLabel className="text-muted-foreground">Variant</FieldLabel>
-                <Select
-                  value={item.action?.variant || "secondary"}
-                  onValueChange={(value) =>
-                    updateItem(index, {
-                      action: {
-                        ...item.action,
-                        variant: value as "primary" | "secondary",
-                      },
-                    })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="primary">Primair</SelectItem>
-                    <SelectItem value="secondary">Secundair</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Field>
-            </div>
-          </div>
-        </FieldGroup>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </div>
   );
 
   return (
@@ -146,7 +144,7 @@ export function SplitSectionForm({
       <FieldDescription>
         Split Section toont twee items naast elkaar op desktop.
       </FieldDescription>
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="space-y-4">
         {renderItemForm(items[0], 0)}
         {renderItemForm(items[1], 1)}
       </div>
