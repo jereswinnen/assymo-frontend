@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -87,7 +88,7 @@ export function EmailDashboard() {
     }
   };
 
-  const handleCreateNew = async () => {
+  const handleCreateNew = useCallback(async () => {
     setCreating(true);
     try {
       const response = await fetch("/api/admin/newsletters", {
@@ -111,7 +112,35 @@ export function EmailDashboard() {
     } finally {
       setCreating(false);
     }
-  };
+  }, [router]);
+
+  // Header actions
+  const headerActions = useMemo(
+    () => (
+      <>
+        <Button size="sm" variant="outline" asChild>
+          <a
+            href="https://resend.com/audiences"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ExternalLinkIcon className="size-4" />
+            Resend
+          </a>
+        </Button>
+        <Button size="sm" onClick={handleCreateNew} disabled={creating}>
+          {creating ? (
+            <Loader2Icon className="size-4 animate-spin" />
+          ) : (
+            <MailPlusIcon className="size-4" />
+          )}
+          Nieuwe nieuwsbrief
+        </Button>
+      </>
+    ),
+    [creating, handleCreateNew],
+  );
+  useAdminHeaderActions(headerActions);
 
   const handleSelectNewsletter = (newsletter: Newsletter) => {
     // Only allow selecting drafts for editing
@@ -176,39 +205,16 @@ export function EmailDashboard() {
 
   return (
     <Tabs defaultValue="newsletter" className="space-y-4" id="email-tabs">
-      <header className="flex items-center justify-between">
-        <TabsList>
-          <TabsTrigger value="newsletter">
-            <MailIcon className="size-4" />
-            Nieuwsbrieven
-          </TabsTrigger>
-          <TabsTrigger value="templates">
-            <TextSelectIcon className="size-4" />
-            Templates
-          </TabsTrigger>
-        </TabsList>
-
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" asChild>
-            <a
-              href="https://resend.com/audience"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ExternalLinkIcon className="size-4" />
-              Resend
-            </a>
-          </Button>
-          <Button size="sm" onClick={handleCreateNew} disabled={creating}>
-            {creating ? (
-              <Loader2Icon className="size-4 animate-spin" />
-            ) : (
-              <MailPlusIcon className="size-4" />
-            )}
-            Nieuwe nieuwsbrief
-          </Button>
-        </div>
-      </header>
+      <TabsList>
+        <TabsTrigger value="newsletter">
+          <MailIcon className="size-4" />
+          Nieuwsbrieven
+        </TabsTrigger>
+        <TabsTrigger value="templates">
+          <TextSelectIcon className="size-4" />
+          Templates
+        </TabsTrigger>
+      </TabsList>
 
       <TabsContent value="newsletter" className="space-y-6">
         {/* Newsletter table */}
