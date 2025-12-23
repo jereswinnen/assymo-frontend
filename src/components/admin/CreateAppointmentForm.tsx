@@ -2,19 +2,25 @@
 
 import { useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
-import { Loader2Icon, CalendarPlusIcon, CheckIcon } from "lucide-react";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+  FieldSet,
+} from "@/components/ui/field";
+import { Loader2Icon, CheckIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface CreateAppointmentFormProps {
@@ -60,9 +66,7 @@ export function CreateAppointmentForm({
     setSendConfirmation(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     // Basic validation
     if (!formData.appointment_date || !formData.appointment_time) {
       toast.error("Selecteer een datum en tijd");
@@ -123,7 +127,6 @@ export function CreateAppointmentForm({
     onOpenChange(isOpen);
   };
 
-
   // Check if required fields are filled
   const isFormValid =
     formData.appointment_date &&
@@ -136,197 +139,207 @@ export function CreateAppointmentForm({
     formData.customer_city.trim();
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <CalendarPlusIcon className="size-4" />
-            Nieuwe afspraak
-          </DialogTitle>
-        </DialogHeader>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetContent className="flex flex-col overflow-hidden sm:max-w-xl">
+        <SheetHeader>
+          <SheetTitle>Nieuwe afspraak</SheetTitle>
+          <SheetDescription>
+            Maak handmatig een nieuwe afspraak aan voor een klant.
+          </SheetDescription>
+        </SheetHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Date and Time */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date">Datum *</Label>
-              <Input
-                id="date"
-                type="date"
-                value={formData.appointment_date}
-                onChange={(e) =>
-                  setFormData({ ...formData, appointment_date: e.target.value })
-                }
-                required
-                className="[&::-webkit-calendar-picker-indicator]:hidden"
+        <div className="flex-1 overflow-y-auto px-4">
+          <FieldGroup>
+            {/* Date and Time */}
+            <FieldSet>
+              <div className="grid grid-cols-2 gap-4">
+                <Field>
+                  <FieldLabel htmlFor="date">Datum</FieldLabel>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={formData.appointment_date}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        appointment_date: e.target.value,
+                      })
+                    }
+                    className="[&::-webkit-calendar-picker-indicator]:hidden"
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="time">Tijd</FieldLabel>
+                  <Input
+                    id="time"
+                    type="time"
+                    value={formData.appointment_time}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        appointment_time: e.target.value,
+                      })
+                    }
+                    className="[&::-webkit-calendar-picker-indicator]:hidden"
+                  />
+                </Field>
+              </div>
+            </FieldSet>
+
+            <FieldSeparator />
+
+            {/* Customer info and address */}
+            <FieldSet>
+              <Field>
+                <FieldLabel htmlFor="name">Naam</FieldLabel>
+                <Input
+                  id="name"
+                  value={formData.customer_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, customer_name: e.target.value })
+                  }
+                  placeholder="Volledige naam"
+                />
+              </Field>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Field>
+                  <FieldLabel htmlFor="email">E-mail</FieldLabel>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.customer_email}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        customer_email: e.target.value,
+                      })
+                    }
+                    placeholder="email@voorbeeld.be"
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="phone">Telefoon</FieldLabel>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.customer_phone}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        customer_phone: e.target.value,
+                      })
+                    }
+                    placeholder="0412 34 56 78"
+                  />
+                </Field>
+              </div>
+
+              <Field>
+                <FieldLabel htmlFor="street">Straat en huisnummer</FieldLabel>
+                <Input
+                  id="street"
+                  value={formData.customer_street}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      customer_street: e.target.value,
+                    })
+                  }
+                  placeholder="Straatnaam 123"
+                />
+              </Field>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Field>
+                  <FieldLabel htmlFor="postal">Postcode</FieldLabel>
+                  <Input
+                    id="postal"
+                    value={formData.customer_postal_code}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        customer_postal_code: e.target.value,
+                      })
+                    }
+                    placeholder="1234"
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="city">Plaats</FieldLabel>
+                  <Input
+                    id="city"
+                    value={formData.customer_city}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        customer_city: e.target.value,
+                      })
+                    }
+                    placeholder="Plaatsnaam"
+                  />
+                </Field>
+              </div>
+            </FieldSet>
+
+            <FieldSeparator />
+
+            {/* Optional notes */}
+            <FieldSet>
+              <Field>
+                <FieldLabel htmlFor="remarks">Opmerkingen klant</FieldLabel>
+                <Textarea
+                  id="remarks"
+                  value={formData.remarks}
+                  onChange={(e) =>
+                    setFormData({ ...formData, remarks: e.target.value })
+                  }
+                  rows={2}
+                  placeholder="Eventuele opmerkingen van de klant..."
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="admin_notes">Interne notities</FieldLabel>
+                <Textarea
+                  id="admin_notes"
+                  value={formData.admin_notes}
+                  onChange={(e) =>
+                    setFormData({ ...formData, admin_notes: e.target.value })
+                  }
+                  rows={2}
+                  placeholder="Alleen zichtbaar voor beheerders..."
+                />
+              </Field>
+            </FieldSet>
+
+            <FieldSeparator />
+
+            {/* Email option */}
+            <Field orientation="horizontal">
+              <Checkbox
+                id="send_confirmation"
+                checked={sendConfirmation}
+                onCheckedChange={(checked) => setSendConfirmation(!!checked)}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="time">Tijd *</Label>
-              <Input
-                id="time"
-                type="time"
-                value={formData.appointment_time}
-                onChange={(e) =>
-                  setFormData({ ...formData, appointment_time: e.target.value })
-                }
-                required
-                className="[&::-webkit-calendar-picker-indicator]:hidden"
-              />
-            </div>
-          </div>
+              <FieldLabel htmlFor="send_confirmation">
+                Bevestigingsmail naar klant sturen
+              </FieldLabel>
+            </Field>
+          </FieldGroup>
+        </div>
 
-          <Separator />
-
-          {/* Customer info */}
-          <div className="space-y-2">
-            <Label htmlFor="name">Naam *</Label>
-            <Input
-              id="name"
-              value={formData.customer_name}
-              onChange={(e) =>
-                setFormData({ ...formData, customer_name: e.target.value })
-              }
-              placeholder="Volledige naam"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">E-mail *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.customer_email}
-                onChange={(e) =>
-                  setFormData({ ...formData, customer_email: e.target.value })
-                }
-                placeholder="email@voorbeeld.be"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Telefoon *</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.customer_phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, customer_phone: e.target.value })
-                }
-                placeholder="0412 34 56 78"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="street">Straat en huisnummer *</Label>
-            <Input
-              id="street"
-              value={formData.customer_street}
-              onChange={(e) =>
-                setFormData({ ...formData, customer_street: e.target.value })
-              }
-              placeholder="Straatnaam 123"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="postal">Postcode *</Label>
-              <Input
-                id="postal"
-                value={formData.customer_postal_code}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    customer_postal_code: e.target.value,
-                  })
-                }
-                placeholder="1234"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="city">Plaats *</Label>
-              <Input
-                id="city"
-                value={formData.customer_city}
-                onChange={(e) =>
-                  setFormData({ ...formData, customer_city: e.target.value })
-                }
-                placeholder="Plaatsnaam"
-                required
-              />
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Optional fields */}
-          <div className="space-y-2">
-            <Label htmlFor="remarks">Opmerkingen klant</Label>
-            <Textarea
-              id="remarks"
-              value={formData.remarks}
-              onChange={(e) =>
-                setFormData({ ...formData, remarks: e.target.value })
-              }
-              rows={2}
-              placeholder="Eventuele opmerkingen van de klant..."
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="admin_notes">Interne notities</Label>
-            <Textarea
-              id="admin_notes"
-              value={formData.admin_notes}
-              onChange={(e) =>
-                setFormData({ ...formData, admin_notes: e.target.value })
-              }
-              rows={2}
-              placeholder="Alleen zichtbaar voor beheerders..."
-            />
-          </div>
-
-          <Separator />
-
-          {/* Email option */}
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="send_confirmation"
-              checked={sendConfirmation}
-              onCheckedChange={(checked) => setSendConfirmation(!!checked)}
-            />
-            <Label htmlFor="send_confirmation" className="text-sm">
-              Bevestigingsmail naar klant sturen
-            </Label>
-          </div>
-
-          <DialogFooter>
-            <Button
-              size="sm"
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-            >
-              Annuleren
-            </Button>
-            <Button size="sm" type="submit" disabled={saving || !isFormValid}>
-              {saving ? (
-                <Loader2Icon className="size-4 animate-spin" />
-              ) : (
-                <CheckIcon className="size-4" />
-              )}
-              Afspraak aanmaken
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <SheetFooter>
+          <Button onClick={handleSubmit} disabled={saving || !isFormValid}>
+            {saving ? (
+              <Loader2Icon className="size-4 animate-spin" />
+            ) : (
+              <CheckIcon className="size-4" />
+            )}
+            Opslaan
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
