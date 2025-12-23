@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import {
   Field,
   FieldGroup,
@@ -129,15 +130,11 @@ export default function SiteParametersPage() {
           <AtSignIcon className="size-4 opacity-80" />
           Contactgegevens
         </FieldLegend>
-        <Field>
-          <FieldLabel htmlFor="address">Adres</FieldLabel>
-          <Input
-            id="address"
-            value={params.address}
-            onChange={updateField("address")}
-            placeholder="Straat 123, 1234 AB Plaats"
-          />
-        </Field>
+        <RichTextEditor
+          label="Adres"
+          value={params.address}
+          onChange={(value) => setParams((prev) => ({ ...prev, address: value }))}
+        />
         <Field>
           <FieldLabel htmlFor="phone">Telefoonnummer</FieldLabel>
           <Input
