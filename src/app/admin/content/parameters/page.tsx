@@ -12,7 +12,13 @@ import {
   FieldLegend,
 } from "@/components/ui/field";
 import { toast } from "sonner";
-import { CheckIcon, Loader2Icon } from "lucide-react";
+import {
+  AtSignIcon,
+  Building2Icon,
+  CheckIcon,
+  Loader2Icon,
+  Share2Icon,
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 interface SiteParams {
@@ -119,7 +125,10 @@ export default function SiteParametersPage() {
   return (
     <FieldGroup className="max-w-2xl">
       <FieldSet>
-        <FieldLegend className="font-semibold">Contactgegevens</FieldLegend>
+        <FieldLegend className="flex items-center gap-1.5 font-semibold">
+          <AtSignIcon className="size-4 opacity-80" />
+          Contactgegevens
+        </FieldLegend>
         <Field>
           <FieldLabel htmlFor="address">Adres</FieldLabel>
           <Input
@@ -130,7 +139,7 @@ export default function SiteParametersPage() {
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="phone">Telefoon</FieldLabel>
+          <FieldLabel htmlFor="phone">Telefoonnummer</FieldLabel>
           <Input
             id="phone"
             value={params.phone}
@@ -139,7 +148,7 @@ export default function SiteParametersPage() {
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="email">E-mail</FieldLabel>
+          <FieldLabel htmlFor="email">E-mailadres</FieldLabel>
           <Input
             id="email"
             type="email"
@@ -153,7 +162,10 @@ export default function SiteParametersPage() {
       <Separator />
 
       <FieldSet>
-        <FieldLegend className="font-semibold">Sociale media</FieldLegend>
+        <FieldLegend className="flex items-center gap-1.5 font-semibold">
+          <Share2Icon className="size-4 opacity-80" />
+          Sociale media
+        </FieldLegend>
         <Field>
           <FieldLabel htmlFor="instagram">Instagram URL</FieldLabel>
           <Input
@@ -179,9 +191,12 @@ export default function SiteParametersPage() {
       <Separator />
 
       <FieldSet>
-        <FieldLegend className="font-semibold">Bedrijfsgegevens</FieldLegend>
+        <FieldLegend className="flex items-center gap-1.5 font-semibold">
+          <Building2Icon className="size-4 opacity-80" />
+          Bedrijfsgegevens
+        </FieldLegend>
         <Field>
-          <FieldLabel htmlFor="vat_number">BTW Nummer</FieldLabel>
+          <FieldLabel htmlFor="vat_number">BTW-nummer</FieldLabel>
           <Input
             id="vat_number"
             value={params.vat_number}
