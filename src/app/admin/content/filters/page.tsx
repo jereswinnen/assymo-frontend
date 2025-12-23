@@ -693,14 +693,16 @@ function SortableRow({
       onClick={onClick}
     >
       <TableCell className="w-10">
-        <button
-          {...attributes}
-          {...listeners}
-          className="cursor-grab touch-none text-muted-foreground hover:text-foreground"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <GripVerticalIcon className="size-4" />
-        </button>
+        <div className="flex items-center justify-center">
+          <button
+            {...attributes}
+            {...listeners}
+            className="cursor-grab touch-none text-muted-foreground hover:text-foreground"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVerticalIcon className="size-4" />
+          </button>
+        </div>
       </TableCell>
       {children}
       <TableCell className="w-10">

@@ -27,6 +27,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import {
   CopyIcon,
@@ -220,7 +225,16 @@ export default function PagesPage() {
                 onClick={() => router.push(`/admin/content/pages/${page.id}`)}
               >
                 <TableCell>
-                  {page.is_homepage && <HomeIcon className="size-4" />}
+                  <div className="flex items-center justify-center">
+                    {page.is_homepage && (
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <HomeIcon className="size-4  opacity-80" />
+                        </TooltipTrigger>
+                        <TooltipContent>Homepage</TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className="font-medium">{page.title}</TableCell>
                 <TableCell className="hidden sm:table-cell text-muted-foreground">

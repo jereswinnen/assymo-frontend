@@ -89,15 +89,17 @@ function SortableSectionRow({
       className="group cursor-pointer"
       onClick={onEdit}
     >
-      <TableCell className="w-10 text-center">
-        <button
-          {...attributes}
-          {...listeners}
-          className="cursor-grab touch-none align-text-bottom text-muted-foreground hover:text-foreground"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <GripVerticalIcon className="size-4" />
-        </button>
+      <TableCell className="w-10">
+        <div className="flex items-center justify-center">
+          <button
+            {...attributes}
+            {...listeners}
+            className="cursor-grab touch-none align-text-bottom text-muted-foreground hover:text-foreground"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVerticalIcon className="size-4" />
+          </button>
+        </div>
       </TableCell>
       <TableCell className="font-medium">
         {getSectionLabel(section._type)}

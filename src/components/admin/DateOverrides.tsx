@@ -22,6 +22,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -248,81 +253,80 @@ export function DateOverrides({
         <div className="space-y-6">
           {/* Upcoming/recurring overrides */}
           {upcomingOverrides.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                Actief & Aankomend
-              </h4>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Datum</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Reden</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10"></TableHead>
+                  <TableHead>Datum</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Reden</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {upcomingOverrides.map((override) => (
+                  <TableRow key={override.id} className="group">
+                    <TableCell>
+                      <div className="flex items-center justify-center">
+                        {override.show_on_website && (
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <GlobeIcon className="size-4 opacity-80" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              Zichtbaar op website
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <span>{formatDateRange(override)}</span>
+                        {override.is_recurring && (
+                          <Badge
+                            variant="outline"
+                            className="w-fit text-xs gap-1"
+                          >
+                            <RefreshCwIcon className="size-3" />
+                            Jaarlijks
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          override.is_closed ? "destructive" : "secondary"
+                        }
+                      >
+                        {override.is_closed
+                          ? "Gesloten"
+                          : `${override.open_time?.substring(0, 5)} - ${override.close_time?.substring(0, 5)}`}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {override.reason || "-"}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                        onClick={() => confirmDelete(override.id)}
+                        disabled={deleting === override.id}
+                      >
+                        {deleting === override.id ? (
+                          <Loader2Icon className="size-4 animate-spin" />
+                        ) : (
+                          <Trash2Icon className="size-4" />
+                        )}
+                      </Button>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {upcomingOverrides.map((override) => (
-                    <TableRow key={override.id}>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <span>{formatDateRange(override)}</span>
-                          <div className="flex gap-1">
-                            {override.is_recurring && (
-                              <Badge
-                                variant="outline"
-                                className="text-xs gap-1"
-                              >
-                                <RefreshCwIcon className="size-3" />
-                                Jaarlijks
-                              </Badge>
-                            )}
-                            {override.show_on_website && (
-                              <Badge
-                                variant="outline"
-                                className="text-xs gap-1 border-green-500 text-green-600"
-                              >
-                                <GlobeIcon className="size-3" />
-                                Website
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            override.is_closed ? "destructive" : "secondary"
-                          }
-                        >
-                          {override.is_closed
-                            ? "Gesloten"
-                            : `${override.open_time?.substring(0, 5)} - ${override.close_time?.substring(0, 5)}`}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {override.reason || "-"}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => confirmDelete(override.id)}
-                          disabled={deleting === override.id}
-                        >
-                          {deleting === override.id ? (
-                            <Loader2Icon className="size-4 animate-spin" />
-                          ) : (
-                            <Trash2Icon className="size-4" />
-                          )}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+              </TableBody>
+            </Table>
           )}
 
           {/* Past overrides */}
@@ -550,7 +554,11 @@ export function DateOverrides({
             niet ongedaan worden gemaakt.
           </p>
           <DialogFooter>
-            <Button size="sm" variant="outline" onClick={() => setDeleteConfirmId(null)}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setDeleteConfirmId(null)}
+            >
               Annuleren
             </Button>
             <Button
