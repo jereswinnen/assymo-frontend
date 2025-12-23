@@ -375,7 +375,7 @@ export function DateOverrides({
 
       {/* Create Sheet */}
       <Sheet open={createDialogOpen} onOpenChange={onCreateDialogOpenChange}>
-        <SheetContent className="flex flex-col overflow-hidden sm:max-w-xl">
+        <SheetContent className="flex flex-col overflow-hidden w-full md:max-w-xl">
           <SheetHeader>
             <SheetTitle>Uitzondering toevoegen</SheetTitle>
             <SheetDescription>

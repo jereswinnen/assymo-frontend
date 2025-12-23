@@ -140,7 +140,7 @@ export function CreateAppointmentForm({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent className="flex flex-col overflow-hidden sm:max-w-xl">
+      <SheetContent className="flex flex-col overflow-hidden w-full md:max-w-xl">
         <SheetHeader>
           <SheetTitle>Nieuwe afspraak</SheetTitle>
           <SheetDescription>

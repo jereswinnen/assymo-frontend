@@ -510,7 +510,7 @@ export default function NavigationPage() {
       <Sheet open={sheetOpen} onOpenChange={(open) => !open && closeSheet()}>
         <SheetContent
           side="right"
-          className="px-4 w-full sm:max-w-xl overflow-y-auto"
+          className="px-4 w-full md:max-w-xl overflow-y-auto"
         >
           <SheetHeader className="px-0">
             <SheetTitle>

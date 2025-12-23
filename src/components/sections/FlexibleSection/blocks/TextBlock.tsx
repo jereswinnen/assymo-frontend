@@ -11,7 +11,7 @@ interface TextBlockProps {
 }
 
 export default function TextBlock({ block }: TextBlockProps) {
-  const { heading, headingLevel = "h2", content, showButton, button } = block;
+  const { heading, headingLevel = "h2", text, showButton, button } = block;
 
   const IconComponent =
     button?.icon && button.icon in iconMap ? iconMap[button.icon] : null;
@@ -36,9 +36,9 @@ export default function TextBlock({ block }: TextBlockProps) {
     <div className="flex flex-col gap-4 md:gap-6">
       <div className="flex flex-col gap-2">
         {renderHeading()}
-        {content && (
+        {text && (
           <div className="font-[420] text-stone-600 text-base md:text-lg">
-            <RichText html={content} />
+            <RichText html={text} />
           </div>
         )}
       </div>

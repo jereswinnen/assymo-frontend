@@ -15,7 +15,7 @@ export interface FlexTextBlock extends BaseBlock {
   _type: "flexTextBlock";
   heading?: string;
   headingLevel?: "h2" | "h3" | "h4";
-  content?: string; // HTML string from Tiptap
+  text?: string; // HTML string from Tiptap
   showButton?: boolean;
   button?: {
     label: string;
