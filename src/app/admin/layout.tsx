@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
@@ -12,10 +14,24 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Toaster } from "@/components/ui/sonner";
+import { Separator } from "@/components/ui/separator";
 
-const getRouteLabel = (pathname: string): string => {
-  const staticLabels: Record<string, string> = {
+interface BreadcrumbSegment {
+  label: string;
+  href?: string;
+}
+
+const getBreadcrumbs = (pathname: string): BreadcrumbSegment[] => {
+  const routes: Record<string, string> = {
     "/admin/appointments": "Afspraken",
     "/admin/emails": "E-mails",
     "/admin/conversations": "Conversaties",
@@ -28,25 +44,38 @@ const getRouteLabel = (pathname: string): string => {
     "/admin/content/parameters": "Parameters",
   };
 
-  if (staticLabels[pathname]) {
-    return staticLabels[pathname];
+  // Static routes - single breadcrumb
+  if (routes[pathname]) {
+    return [{ label: routes[pathname] }];
   }
 
-  // Dynamic routes
+  // Dynamic routes - parent + current
   if (pathname.startsWith("/admin/emails/")) {
-    return "Nieuwsbrief bewerken";
+    return [
+      { label: "E-mails", href: "/admin/emails" },
+      { label: "Nieuwsbrief bewerken" },
+    ];
   }
   if (pathname.startsWith("/admin/content/pages/")) {
-    return "Pagina bewerken";
+    return [
+      { label: "Pagina's", href: "/admin/content/pages" },
+      { label: "Pagina bewerken" },
+    ];
   }
   if (pathname.startsWith("/admin/content/solutions/")) {
-    return "Realisatie bewerken";
+    return [
+      { label: "Realisaties", href: "/admin/content/solutions" },
+      { label: "Realisatie bewerken" },
+    ];
   }
   if (pathname.startsWith("/admin/content/media/")) {
-    return "Afbeelding bewerken";
+    return [
+      { label: "Media", href: "/admin/content/media" },
+      { label: "Afbeelding bekijken" },
+    ];
   }
 
-  return "Admin";
+  return [{ label: "Admin" }];
 };
 
 export default function AdminLayout({
@@ -71,16 +100,37 @@ export default function AdminLayout({
     );
   }
 
-  const currentLabel = getRouteLabel(pathname);
+  const breadcrumbs = getBreadcrumbs(pathname);
 
   return (
     <AdminHeaderProvider>
       <SidebarProvider>
         <AdminSidebar />
         <SidebarInset>
-          <header className="p-4 flex shrink-0 items-center gap-3 border-b">
-            <SidebarTrigger />
-            <span className="font-medium">{currentLabel}</span>
+          <header className="px-4 flex h-16 shrink-0 items-center gap-2 border-b">
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4"
+            />
+            <Breadcrumb>
+              <BreadcrumbList>
+                {breadcrumbs.map((crumb, index) => (
+                  <React.Fragment key={index}>
+                    {index > 0 && <BreadcrumbSeparator />}
+                    <BreadcrumbItem>
+                      {crumb.href ? (
+                        <BreadcrumbLink asChild>
+                          <Link href={crumb.href}>{crumb.label}</Link>
+                        </BreadcrumbLink>
+                      ) : (
+                        <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                      )}
+                    </BreadcrumbItem>
+                  </React.Fragment>
+                ))}
+              </BreadcrumbList>
+            </Breadcrumb>
             <div className="ml-auto flex items-center gap-2">
               <AdminHeaderActions />
             </div>

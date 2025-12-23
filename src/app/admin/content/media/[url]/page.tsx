@@ -3,7 +3,6 @@
 import { useState, useEffect, use, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,7 +26,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
-  ArrowLeftIcon,
   Loader2Icon,
   SaveIcon,
   SparklesIcon,
@@ -211,11 +209,6 @@ export default function ImageDetailPage({
   const headerActions = useMemo(
     () => (
       <>
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/admin/content/media">
-            <ArrowLeftIcon className="size-4" />
-          </Link>
-        </Button>
         <Button
           size="sm"
           variant="destructive"
