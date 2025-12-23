@@ -3,11 +3,17 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+  FieldLegend,
+} from "@/components/ui/field";
 import { toast } from "sonner";
 import { CheckIcon, Loader2Icon } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 interface SiteParams {
   address: string;
@@ -29,7 +35,8 @@ const defaultParams: SiteParams = {
 
 export default function SiteParametersPage() {
   const [params, setParams] = useState<SiteParams>(defaultParams);
-  const [originalParams, setOriginalParams] = useState<SiteParams>(defaultParams);
+  const [originalParams, setOriginalParams] =
+    useState<SiteParams>(defaultParams);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -80,11 +87,10 @@ export default function SiteParametersPage() {
     }
   }, [params]);
 
-  const updateField = (field: keyof SiteParams) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setParams((prev) => ({ ...prev, [field]: e.target.value }));
-  };
+  const updateField =
+    (field: keyof SiteParams) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setParams((prev) => ({ ...prev, [field]: e.target.value }));
+    };
 
   // Header actions
   const headerActions = useMemo(
@@ -98,7 +104,7 @@ export default function SiteParametersPage() {
         Opslaan
       </Button>
     ),
-    [saving, hasChanges, handleSave]
+    [saving, hasChanges, handleSave],
   );
   useAdminHeaderActions(headerActions);
 
@@ -111,90 +117,79 @@ export default function SiteParametersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <FieldGroup className="max-w-2xl">
+      <FieldSet>
+        <FieldLegend className="font-semibold">Contactgegevens</FieldLegend>
+        <Field>
+          <FieldLabel htmlFor="address">Adres</FieldLabel>
+          <Input
+            id="address"
+            value={params.address}
+            onChange={updateField("address")}
+            placeholder="Straat 123, 1234 AB Plaats"
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="phone">Telefoon</FieldLabel>
+          <Input
+            id="phone"
+            value={params.phone}
+            onChange={updateField("phone")}
+            placeholder="+32 123 45 67 89"
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="email">E-mail</FieldLabel>
+          <Input
+            id="email"
+            type="email"
+            value={params.email}
+            onChange={updateField("email")}
+            placeholder="info@assymo.be"
+          />
+        </Field>
+      </FieldSet>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Contactgegevens</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="address">Adres</Label>
-              <Input
-                id="address"
-                value={params.address}
-                onChange={updateField("address")}
-                placeholder="Straat 123, 1234 AB Plaats"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Telefoon</Label>
-              <Input
-                id="phone"
-                value={params.phone}
-                onChange={updateField("phone")}
-                placeholder="+32 123 45 67 89"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                type="email"
-                value={params.email}
-                onChange={updateField("email")}
-                placeholder="info@assymo.be"
-              />
-            </div>
-          </CardContent>
-        </Card>
+      <Separator />
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Social Media</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="instagram">Instagram URL</Label>
-              <Input
-                id="instagram"
-                type="url"
-                value={params.instagram}
-                onChange={updateField("instagram")}
-                placeholder="https://instagram.com/assymo"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="facebook">Facebook URL</Label>
-              <Input
-                id="facebook"
-                type="url"
-                value={params.facebook}
-                onChange={updateField("facebook")}
-                placeholder="https://facebook.com/assymo"
-              />
-            </div>
-          </CardContent>
-        </Card>
+      <FieldSet>
+        <FieldLegend className="font-semibold">Sociale media</FieldLegend>
+        <Field>
+          <FieldLabel htmlFor="instagram">Instagram URL</FieldLabel>
+          <Input
+            id="instagram"
+            type="url"
+            value={params.instagram}
+            onChange={updateField("instagram")}
+            placeholder="https://instagram.com/assymo"
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="facebook">Facebook URL</FieldLabel>
+          <Input
+            id="facebook"
+            type="url"
+            value={params.facebook}
+            onChange={updateField("facebook")}
+            placeholder="https://facebook.com/assymo"
+          />
+        </Field>
+      </FieldSet>
 
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-base">Bedrijfsgegevens</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 max-w-md">
-              <Label htmlFor="vat_number">BTW Nummer</Label>
-              <Input
-                id="vat_number"
-                value={params.vat_number}
-                onChange={updateField("vat_number")}
-                placeholder="BE 0123.456.789"
-              />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+      <Separator />
+
+      <FieldSet>
+        <FieldLegend className="font-semibold">Bedrijfsgegevens</FieldLegend>
+        <Field>
+          <FieldLabel htmlFor="vat_number">BTW Nummer</FieldLabel>
+          <Input
+            id="vat_number"
+            value={params.vat_number}
+            onChange={updateField("vat_number")}
+            placeholder="BE 0123.456.789"
+          />
+        </Field>
+      </FieldSet>
+    </FieldGroup>
   );
 }
