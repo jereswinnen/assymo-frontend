@@ -81,7 +81,9 @@ export function AdminSidebar({
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader className="py-4 flex items-start">
-        <Logo className="w-auto h-6" />
+        <Link href="/admin/appointments">
+          <Logo className="w-auto h-6" />
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
