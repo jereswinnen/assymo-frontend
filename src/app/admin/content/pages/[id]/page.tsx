@@ -310,7 +310,10 @@ export default function PageEditorPage({
                     value={slug}
                     onChange={(e) => handleSlugChange(e.target.value)}
                   />
-                  <FieldDescription>URL: /{slug || "..."}</FieldDescription>
+                  <FieldDescription>
+                    {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}/
+                    {slug || "..."}
+                  </FieldDescription>
                 </Field>
               )}
               <Field orientation="horizontal">

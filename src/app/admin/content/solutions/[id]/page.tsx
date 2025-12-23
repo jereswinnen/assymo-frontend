@@ -374,7 +374,8 @@ export default function SolutionEditorPage({
                   onChange={(e) => handleSlugChange(e.target.value)}
                 />
                 <FieldDescription>
-                  URL: /realisaties/{slug || "..."}
+                  {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
+                  /realisaties/{slug || "..."}
                 </FieldDescription>
               </Field>
             </FieldSet>

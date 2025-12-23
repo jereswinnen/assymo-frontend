@@ -21,8 +21,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -37,13 +35,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -76,16 +67,6 @@ interface Solution {
   order_rank: number;
   updated_at: string;
 }
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 
 function SortableSolutionRow({
   solution,
@@ -204,13 +185,7 @@ export default function SolutionsPage() {
   const router = useRouter();
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // New solution dialog
-  const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [newSlug, setNewSlug] = useState("");
-  const [autoSlug, setAutoSlug] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<Solution | null>(null);
@@ -223,7 +198,7 @@ export default function SolutionsPage() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   useEffect(() => {
@@ -244,39 +219,15 @@ export default function SolutionsPage() {
     }
   };
 
-  const handleNameChange = (value: string) => {
-    setNewName(value);
-    if (autoSlug) {
-      setNewSlug(slugify(value));
-    }
-  };
-
-  const handleSlugChange = (value: string) => {
-    setNewSlug(value);
-    setAutoSlug(false);
-  };
-
-  const openNewDialog = useCallback(() => {
-    setNewName("");
-    setNewSlug("");
-    setAutoSlug(true);
-    setIsNewDialogOpen(true);
-  }, []);
-
-  const createSolution = async () => {
-    if (!newName.trim() || !newSlug.trim()) {
-      toast.error("Naam en slug zijn verplicht");
-      return;
-    }
-
-    setSaving(true);
+  const createSolution = useCallback(async () => {
+    setCreating(true);
     try {
       const response = await fetch("/api/admin/content/solutions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: newName.trim(),
-          slug: newSlug.trim(),
+          name: "Nieuwe realisatie",
+          slug: `nieuwe-realisatie-${Date.now()}`,
         }),
       });
 
@@ -286,17 +237,14 @@ export default function SolutionsPage() {
       }
 
       const newSolution = await response.json();
-      setSolutions((prev) => [...prev, newSolution]);
-      setIsNewDialogOpen(false);
-      toast.success("Realisatie aangemaakt");
+      router.push(`/admin/content/solutions/${newSolution.id}`);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Kon realisatie niet aanmaken"
+        error instanceof Error ? error.message : "Kon realisatie niet aanmaken",
       );
-    } finally {
-      setSaving(false);
+      setCreating(false);
     }
-  };
+  }, [router]);
 
   const deleteSolution = async () => {
     if (!deleteTarget) return;
@@ -305,7 +253,7 @@ export default function SolutionsPage() {
     try {
       const response = await fetch(
         `/api/admin/content/solutions/${deleteTarget.id}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
 
       if (!response.ok) throw new Error("Failed to delete");
@@ -325,7 +273,7 @@ export default function SolutionsPage() {
     try {
       const response = await fetch(
         `/api/admin/content/solutions/${solution.id}/duplicate`,
-        { method: "POST" }
+        { method: "POST" },
       );
 
       if (!response.ok) {
@@ -338,7 +286,9 @@ export default function SolutionsPage() {
       toast.success("Realisatie gedupliceerd");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Kon realisatie niet dupliceren"
+        error instanceof Error
+          ? error.message
+          : "Kon realisatie niet dupliceren",
       );
     } finally {
       setDuplicating(null);
@@ -375,12 +325,16 @@ export default function SolutionsPage() {
   // Header actions
   const headerActions = useMemo(
     () => (
-      <Button size="sm" onClick={openNewDialog}>
-        <PlusIcon className="size-4" />
+      <Button size="sm" onClick={createSolution} disabled={creating}>
+        {creating ? (
+          <Loader2Icon className="size-4 animate-spin" />
+        ) : (
+          <PlusIcon className="size-4" />
+        )}
         Nieuwe realisatie
       </Button>
     ),
-    [openNewDialog]
+    [createSolution, creating],
   );
   useAdminHeaderActions(headerActions);
 
@@ -394,8 +348,12 @@ export default function SolutionsPage() {
         <div className="flex flex-col items-center justify-center py-12">
           <ImageIcon className="size-12 text-muted-foreground mb-4" />
           <p className="text-muted-foreground mb-4">Nog geen realisaties</p>
-          <Button size="sm" onClick={openNewDialog}>
-            <PlusIcon className="size-4" />
+          <Button size="sm" onClick={createSolution} disabled={creating}>
+            {creating ? (
+              <Loader2Icon className="size-4 animate-spin" />
+            ) : (
+              <PlusIcon className="size-4" />
+            )}
             Eerste realisatie aanmaken
           </Button>
         </div>
@@ -416,7 +374,9 @@ export default function SolutionsPage() {
                   <TableHead className="w-12"></TableHead>
                   <TableHead>Naam</TableHead>
                   <TableHead className="hidden sm:table-cell">URL</TableHead>
-                  <TableHead className="hidden md:table-cell">Laatst bewerkt</TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Laatst bewerkt
+                  </TableHead>
                   <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -425,7 +385,9 @@ export default function SolutionsPage() {
                   <SortableSolutionRow
                     key={solution.id}
                     solution={solution}
-                    onRowClick={() => router.push(`/admin/content/solutions/${solution.id}`)}
+                    onRowClick={() =>
+                      router.push(`/admin/content/solutions/${solution.id}`)
+                    }
                     onDuplicate={() => duplicateSolution(solution)}
                     onDelete={() => setDeleteTarget(solution)}
                     duplicating={duplicating === solution.id}
@@ -437,60 +399,11 @@ export default function SolutionsPage() {
         </DndContext>
       )}
 
-      {/* New Solution Dialog */}
-      <Dialog open={isNewDialogOpen} onOpenChange={setIsNewDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Nieuwe realisatie</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Naam</Label>
-              <Input
-                id="name"
-                value={newName}
-                onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="Realisatie naam"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug</Label>
-              <Input
-                id="slug"
-                value={newSlug}
-                onChange={(e) => handleSlugChange(e.target.value)}
-                placeholder="realisatie-slug"
-              />
-              <p className="text-xs text-muted-foreground">
-                {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}/oplossingen/{newSlug || "..."}
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsNewDialogOpen(false)}
-              disabled={saving}
-            >
-              Annuleren
-            </Button>
-            <Button size="sm" onClick={createSolution} disabled={saving || !newName.trim()}>
-              {saving ? (
-                <>
-                  <Loader2Icon className="size-4 animate-spin" />
-                  Aanmaken...
-                </>
-              ) : (
-                "Aanmaken"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={() => setDeleteTarget(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Realisatie verwijderen?</AlertDialogTitle>

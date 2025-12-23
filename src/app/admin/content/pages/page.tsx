@@ -3,8 +3,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -19,13 +17,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,7 +37,6 @@ import {
   PlusIcon,
   Trash2Icon,
 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
 import { formatDateWithTime } from "@/lib/format";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 
@@ -58,27 +48,11 @@ interface Page {
   updated_at: string;
 }
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 export default function PagesPage() {
   const router = useRouter();
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // New page dialog
-  const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
-  const [newSlug, setNewSlug] = useState("");
-  const [newIsHomepage, setNewIsHomepage] = useState(false);
-  const [autoSlug, setAutoSlug] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<Page | null>(null);
@@ -105,46 +79,16 @@ export default function PagesPage() {
     }
   };
 
-  const handleTitleChange = (value: string) => {
-    setNewTitle(value);
-    if (autoSlug) {
-      setNewSlug(slugify(value));
-    }
-  };
-
-  const handleSlugChange = (value: string) => {
-    setNewSlug(value);
-    setAutoSlug(false);
-  };
-
-  const openNewDialog = useCallback(() => {
-    setNewTitle("");
-    setNewSlug("");
-    setNewIsHomepage(false);
-    setAutoSlug(true);
-    setIsNewDialogOpen(true);
-  }, []);
-
-  const createPage = async () => {
-    if (!newTitle.trim()) {
-      toast.error("Titel is verplicht");
-      return;
-    }
-
-    if (!newIsHomepage && !newSlug.trim()) {
-      toast.error("Slug is verplicht voor niet-homepage pagina's");
-      return;
-    }
-
-    setSaving(true);
+  const createPage = useCallback(async () => {
+    setCreating(true);
     try {
       const response = await fetch("/api/admin/content/pages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: newTitle.trim(),
-          slug: newIsHomepage ? null : newSlug.trim(),
-          is_homepage: newIsHomepage,
+          title: "Nieuwe pagina",
+          slug: `nieuwe-pagina-${Date.now()}`,
+          is_homepage: false,
         }),
       });
 
@@ -154,34 +98,14 @@ export default function PagesPage() {
       }
 
       const newPage = await response.json();
-      // If new page is homepage, update other pages' is_homepage to false
-      if (newPage.is_homepage) {
-        setPages((prev) =>
-          [...prev.map((p) => ({ ...p, is_homepage: false })), newPage].sort(
-            (a, b) =>
-              (b.is_homepage ? 1 : 0) - (a.is_homepage ? 1 : 0) ||
-              a.title.localeCompare(b.title),
-          ),
-        );
-      } else {
-        setPages((prev) =>
-          [...prev, newPage].sort(
-            (a, b) =>
-              (b.is_homepage ? 1 : 0) - (a.is_homepage ? 1 : 0) ||
-              a.title.localeCompare(b.title),
-          ),
-        );
-      }
-      setIsNewDialogOpen(false);
-      toast.success("Pagina aangemaakt");
+      router.push(`/admin/content/pages/${newPage.id}`);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Kon pagina niet aanmaken",
       );
-    } finally {
-      setSaving(false);
+      setCreating(false);
     }
-  };
+  }, [router]);
 
   const deletePage = async () => {
     if (!deleteTarget) return;
@@ -243,12 +167,16 @@ export default function PagesPage() {
   // Header actions
   const headerActions = useMemo(
     () => (
-      <Button size="sm" onClick={openNewDialog}>
-        <PlusIcon className="size-4" />
+      <Button size="sm" onClick={createPage} disabled={creating}>
+        {creating ? (
+          <Loader2Icon className="size-4 animate-spin" />
+        ) : (
+          <PlusIcon className="size-4" />
+        )}
         Nieuwe pagina
       </Button>
     ),
-    [openNewDialog],
+    [createPage, creating],
   );
   useAdminHeaderActions(headerActions);
 
@@ -262,8 +190,12 @@ export default function PagesPage() {
         <div className="flex flex-col items-center justify-center py-12">
           <FileTextIcon className="size-12 text-muted-foreground mb-4" />
           <p className="text-muted-foreground mb-4">Nog geen pagina&apos;s</p>
-          <Button size="sm" onClick={openNewDialog}>
-            <PlusIcon className="size-4" />
+          <Button size="sm" onClick={createPage} disabled={creating}>
+            {creating ? (
+              <Loader2Icon className="size-4 animate-spin" />
+            ) : (
+              <PlusIcon className="size-4" />
+            )}
             Eerste pagina aanmaken
           </Button>
         </div>
@@ -343,73 +275,6 @@ export default function PagesPage() {
           </TableBody>
         </Table>
       )}
-
-      {/* New Page Dialog */}
-      <Dialog open={isNewDialogOpen} onOpenChange={setIsNewDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Nieuwe pagina</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="is_homepage">Homepage</Label>
-                <p className="text-xs text-muted-foreground">
-                  Dit is de hoofdpagina van de website
-                </p>
-              </div>
-              <Switch
-                id="is_homepage"
-                checked={newIsHomepage}
-                onCheckedChange={setNewIsHomepage}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="title">Titel</Label>
-              <Input
-                id="title"
-                value={newTitle}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="Pagina titel"
-              />
-            </div>
-            {!newIsHomepage && (
-              <div className="space-y-2">
-                <Label htmlFor="slug">Slug</Label>
-                <Input
-                  id="slug"
-                  value={newSlug}
-                  onChange={(e) => handleSlugChange(e.target.value)}
-                  placeholder="pagina-slug"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}/{newSlug || "..."}
-                </p>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsNewDialogOpen(false)}
-              disabled={saving}
-            >
-              Annuleren
-            </Button>
-            <Button size="sm" onClick={createPage} disabled={saving || !newTitle.trim()}>
-              {saving ? (
-                <>
-                  <Loader2Icon className="size-4 animate-spin" />
-                  Aanmaken...
-                </>
-              ) : (
-                "Aanmaken"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Delete Confirmation */}
       <AlertDialog
