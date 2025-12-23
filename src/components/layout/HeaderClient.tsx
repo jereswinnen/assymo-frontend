@@ -375,9 +375,10 @@ export default function HeaderClient({
                       <div className="flex flex-col gap-6">
                         <ul className="flex flex-col gap-3 text-base font-medium">
                           {settings?.address && (
-                            <li className="whitespace-pre-line">
-                              {settings.address}
-                            </li>
+                            <li
+                              className="[&_p]:mb-0! [&_p+p]:mt-0.5 [&_a]:underline [&_a]:hover:text-stone-700"
+                              dangerouslySetInnerHTML={{ __html: settings.address }}
+                            />
                           )}
                           {settings?.phone && (
                             <li>
