@@ -56,7 +56,10 @@ export default async function Footer({ className }: FooterProps) {
 
             <ul className="flex flex-col gap-3 text-base font-medium">
               {settings?.address && (
-                <li className="whitespace-pre-line">{settings.address}</li>
+                <li
+                  className="[&_p]:mb-0! [&_p+p]:mt-0.5 [&_a]:underline [&_a]:hover:text-stone-700"
+                  dangerouslySetInnerHTML={{ __html: settings.address }}
+                />
               )}
               {settings?.phone && (
                 <li>
