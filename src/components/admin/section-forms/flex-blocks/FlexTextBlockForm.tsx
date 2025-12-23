@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -102,6 +102,10 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
                 }
                 placeholder="/contact"
               />
+              <FieldDescription>
+                {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
+                {block.button?.url || "/..."}
+              </FieldDescription>
             </Field>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">

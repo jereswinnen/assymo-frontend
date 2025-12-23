@@ -78,6 +78,10 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
             onChange={(e) => updateItem(index, { href: e.target.value })}
             placeholder="/pagina"
           />
+          <FieldDescription>
+            {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
+            {item.href || "/..."}
+          </FieldDescription>
         </Field>
 
         <Separator />

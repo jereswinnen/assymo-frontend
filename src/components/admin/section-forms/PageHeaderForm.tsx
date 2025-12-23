@@ -165,6 +165,10 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                         }
                         placeholder="/contact"
                       />
+                      <FieldDescription>
+                        {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
+                        {button.url || "/..."}
+                      </FieldDescription>
                     </Field>
                   </div>
 

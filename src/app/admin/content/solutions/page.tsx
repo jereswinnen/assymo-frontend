@@ -462,7 +462,7 @@ export default function SolutionsPage() {
                 placeholder="realisatie-slug"
               />
               <p className="text-xs text-muted-foreground">
-                URL: /oplossingen/{newSlug || "..."}
+                {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}/oplossingen/{newSlug || "..."}
               </p>
             </div>
           </div>

@@ -21,15 +21,30 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+  FieldLegend,
+} from "@/components/ui/field";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,15 +64,13 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import {
-  ChevronDownIcon,
-  ChevronRightIcon,
+  CheckIcon,
   GripVerticalIcon,
   Loader2Icon,
-  PencilIcon,
   PlusIcon,
   Trash2Icon,
-  XIcon,
 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 interface Solution {
   id: string;
@@ -91,228 +104,25 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-// Sortable Navigation Link Item
-function SortableLinkItem({
-  link,
-  isExpanded,
-  onToggleExpand,
-  onEdit,
-  onDelete,
-  onAddSubitem,
-  onDeleteSubitem,
-  onReorderSubitems,
-  solutions,
-}: {
-  link: NavigationLink;
-  isExpanded: boolean;
-  onToggleExpand: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  onAddSubitem: (solutionId: string) => void;
-  onDeleteSubitem: (subitemId: string) => void;
-  onReorderSubitems: (orderedIds: string[]) => void;
-  solutions: Solution[];
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: link.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleSubitemDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      const oldIndex = link.sub_items.findIndex((s) => s.id === active.id);
-      const newIndex = link.sub_items.findIndex((s) => s.id === over.id);
-      const newOrder = arrayMove(link.sub_items, oldIndex, newIndex);
-      onReorderSubitems(newOrder.map((s) => s.id));
-    }
-  };
-
-  // Filter out solutions already added as subitems
-  const availableSolutions = solutions.filter(
-    (s) => !link.sub_items.some((sub) => sub.solution_id === s.id)
-  );
-
-  return (
-    <Card ref={setNodeRef} style={style} className="mb-2">
-      <div className="flex items-center gap-2 p-3">
-        <button
-          {...attributes}
-          {...listeners}
-          className="cursor-grab active:cursor-grabbing touch-none"
-        >
-          <GripVerticalIcon className="size-4 text-muted-foreground" />
-        </button>
-        <button onClick={onToggleExpand} className="p-1">
-          {isExpanded ? (
-            <ChevronDownIcon className="size-4" />
-          ) : (
-            <ChevronRightIcon className="size-4" />
-          )}
-        </button>
-        <div className="flex-1 min-w-0">
-          <p className="font-medium truncate">{link.title}</p>
-          <p className="text-xs text-muted-foreground">
-            /{link.slug} · {link.sub_items.length} subitem
-            {link.sub_items.length !== 1 && "s"}
-          </p>
-        </div>
-        <Button size="icon" variant="ghost" className="size-8" onClick={onEdit}>
-          <PencilIcon className="size-4" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="size-8 text-destructive hover:text-destructive"
-          onClick={onDelete}
-        >
-          <Trash2Icon className="size-4" />
-        </Button>
-      </div>
-
-      {isExpanded && (
-        <CardContent className="pt-0 pb-3 border-t">
-          <div className="space-y-3 mt-3">
-            {link.submenu_heading && (
-              <p className="text-sm text-muted-foreground">
-                Submenu heading: <span className="font-medium">{link.submenu_heading}</span>
-              </p>
-            )}
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm">Subitems (solutions)</Label>
-                {availableSolutions.length > 0 && (
-                  <Select onValueChange={onAddSubitem}>
-                    <SelectTrigger className="w-[200px] h-8">
-                      <SelectValue placeholder="Voeg solution toe..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableSolutions.map((solution) => (
-                        <SelectItem key={solution.id} value={solution.id}>
-                          {solution.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
-
-              {link.sub_items.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-2">
-                  Nog geen subitems
-                </p>
-              ) : (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleSubitemDragEnd}
-                >
-                  <SortableContext
-                    items={link.sub_items.map((s) => s.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <div className="space-y-1">
-                      {link.sub_items.map((subitem) => (
-                        <SortableSubitem
-                          key={subitem.id}
-                          subitem={subitem}
-                          onDelete={() => onDeleteSubitem(subitem.id)}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      )}
-    </Card>
-  );
-}
-
-// Sortable Subitem
-function SortableSubitem({
-  subitem,
-  onDelete,
-}: {
-  subitem: NavigationSubitem;
-  onDelete: () => void;
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: subitem.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="flex items-center gap-2 p-2 bg-muted/50 rounded-md"
-    >
-      <button
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing touch-none"
-      >
-        <GripVerticalIcon className="size-3 text-muted-foreground" />
-      </button>
-      <span className="flex-1 text-sm truncate">
-        {subitem.solution?.name || "Unknown solution"}
-      </span>
-      <Button
-        size="icon"
-        variant="ghost"
-        className="size-6 text-muted-foreground hover:text-destructive"
-        onClick={onDelete}
-      >
-        <XIcon className="size-3" />
-      </Button>
-    </div>
-  );
-}
-
 export default function NavigationPage() {
   const [links, setLinks] = useState<NavigationLink[]>([]);
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedLinkId, setExpandedLinkId] = useState<string | null>(null);
 
-  // Link dialog state
-  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  // Sheet state
   const [editingLink, setEditingLink] = useState<NavigationLink | null>(null);
+  const [isNewLink, setIsNewLink] = useState(false);
   const [linkTitle, setLinkTitle] = useState("");
   const [linkSlug, setLinkSlug] = useState("");
   const [linkSubmenuHeading, setLinkSubmenuHeading] = useState("");
   const [savingLink, setSavingLink] = useState(false);
+
+  // Track original values for change detection
+  const [originalValues, setOriginalValues] = useState({
+    title: "",
+    slug: "",
+    submenuHeading: "",
+  });
 
   // Delete confirmation state
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -324,7 +134,14 @@ export default function NavigationPage() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
+  );
+
+  const subitemSensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   useEffect(() => {
@@ -346,7 +163,9 @@ export default function NavigationPage() {
   const fetchLinks = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/admin/content/navigation?location=header");
+      const response = await fetch(
+        "/api/admin/content/navigation?location=header",
+      );
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setLinks(data);
@@ -358,21 +177,44 @@ export default function NavigationPage() {
     }
   };
 
-  // Link handlers
-  const openNewLinkDialog = useCallback(() => {
+  // Check if form has changes
+  const hasChanges = useMemo(() => {
+    if (isNewLink) {
+      return linkTitle.trim().length > 0;
+    }
+    return (
+      linkTitle !== originalValues.title ||
+      linkSlug !== originalValues.slug ||
+      linkSubmenuHeading !== originalValues.submenuHeading
+    );
+  }, [isNewLink, linkTitle, linkSlug, linkSubmenuHeading, originalValues]);
+
+  // Sheet handlers
+  const openNewLinkSheet = useCallback(() => {
     setEditingLink(null);
+    setIsNewLink(true);
     setLinkTitle("");
     setLinkSlug("");
     setLinkSubmenuHeading("");
-    setLinkDialogOpen(true);
+    setOriginalValues({ title: "", slug: "", submenuHeading: "" });
   }, []);
 
-  const openEditLinkDialog = (link: NavigationLink) => {
+  const openEditLinkSheet = (link: NavigationLink) => {
     setEditingLink(link);
+    setIsNewLink(false);
     setLinkTitle(link.title);
     setLinkSlug(link.slug);
     setLinkSubmenuHeading(link.submenu_heading || "");
-    setLinkDialogOpen(true);
+    setOriginalValues({
+      title: link.title,
+      slug: link.slug,
+      submenuHeading: link.submenu_heading || "",
+    });
+  };
+
+  const closeSheet = () => {
+    setEditingLink(null);
+    setIsNewLink(false);
   };
 
   const handleSaveLink = async () => {
@@ -396,7 +238,7 @@ export default function NavigationPage() {
               slug,
               submenu_heading: linkSubmenuHeading || null,
             }),
-          }
+          },
         );
         if (!response.ok) throw new Error("Failed to update");
         toast.success("Link bijgewerkt");
@@ -415,7 +257,7 @@ export default function NavigationPage() {
         toast.success("Link aangemaakt");
       }
 
-      setLinkDialogOpen(false);
+      closeSheet();
       fetchLinks();
     } catch (error) {
       console.error("Failed to save link:", error);
@@ -431,7 +273,7 @@ export default function NavigationPage() {
     try {
       const response = await fetch(
         `/api/admin/content/navigation/${deleteTarget.id}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
       if (!response.ok) throw new Error("Failed to delete");
 
@@ -470,19 +312,35 @@ export default function NavigationPage() {
   };
 
   // Subitem handlers
-  const handleAddSubitem = async (linkId: string, solutionId: string) => {
+  const handleAddSubitem = async (solutionId: string) => {
+    if (!editingLink) return;
+
     try {
       const response = await fetch(
-        `/api/admin/content/navigation/${linkId}/subitems`,
+        `/api/admin/content/navigation/${editingLink.id}/subitems`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ solution_id: solutionId }),
-        }
+        },
       );
       if (!response.ok) throw new Error("Failed to add");
       toast.success("Subitem toegevoegd");
-      fetchLinks();
+
+      // Refresh and update editing link
+      const linksResponse = await fetch(
+        "/api/admin/content/navigation?location=header",
+      );
+      if (linksResponse.ok) {
+        const data = await linksResponse.json();
+        setLinks(data);
+        const updatedLink = data.find(
+          (l: NavigationLink) => l.id === editingLink.id,
+        );
+        if (updatedLink) {
+          setEditingLink(updatedLink);
+        }
+      }
     } catch (error) {
       console.error("Failed to add subitem:", error);
       toast.error("Kon subitem niet toevoegen");
@@ -490,34 +348,56 @@ export default function NavigationPage() {
   };
 
   const handleDeleteSubitem = async (subitemId: string) => {
+    if (!editingLink) return;
+
     try {
       const response = await fetch(
         `/api/admin/content/navigation/subitems/${subitemId}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
       if (!response.ok) throw new Error("Failed to delete");
       toast.success("Subitem verwijderd");
-      fetchLinks();
+
+      // Update local state
+      setEditingLink({
+        ...editingLink,
+        sub_items: editingLink.sub_items.filter((s) => s.id !== subitemId),
+      });
+      setLinks((prev) =>
+        prev.map((link) =>
+          link.id === editingLink.id
+            ? {
+                ...link,
+                sub_items: link.sub_items.filter((s) => s.id !== subitemId),
+              }
+            : link,
+        ),
+      );
     } catch (error) {
       console.error("Failed to delete subitem:", error);
       toast.error("Kon subitem niet verwijderen");
     }
   };
 
-  const handleReorderSubitems = async (linkId: string, orderedIds: string[]) => {
+  const handleReorderSubitems = async (orderedIds: string[]) => {
+    if (!editingLink) return;
+
     // Optimistic update
+    const reorderedSubitems = orderedIds
+      .map((id) => editingLink.sub_items.find((s) => s.id === id))
+      .filter(Boolean) as NavigationSubitem[];
+
+    setEditingLink({ ...editingLink, sub_items: reorderedSubitems });
     setLinks((prev) =>
-      prev.map((link) => {
-        if (link.id !== linkId) return link;
-        const reorderedSubitems = orderedIds
-          .map((id) => link.sub_items.find((s) => s.id === id))
-          .filter(Boolean) as NavigationSubitem[];
-        return { ...link, sub_items: reorderedSubitems };
-      })
+      prev.map((link) =>
+        link.id === editingLink.id
+          ? { ...link, sub_items: reorderedSubitems }
+          : link,
+      ),
     );
 
     try {
-      await fetch(`/api/admin/content/navigation/${linkId}/subitems`, {
+      await fetch(`/api/admin/content/navigation/${editingLink.id}/subitems`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderedIds }),
@@ -529,17 +409,40 @@ export default function NavigationPage() {
     }
   };
 
+  const handleSubitemDragEnd = (event: DragEndEvent) => {
+    if (!editingLink) return;
+
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = editingLink.sub_items.findIndex(
+        (s) => s.id === active.id,
+      );
+      const newIndex = editingLink.sub_items.findIndex((s) => s.id === over.id);
+      const newOrder = arrayMove(editingLink.sub_items, oldIndex, newIndex);
+      handleReorderSubitems(newOrder.map((s) => s.id));
+    }
+  };
+
+  // Filter out solutions already added as subitems
+  const availableSolutions = editingLink
+    ? solutions.filter(
+        (s) => !editingLink.sub_items.some((sub) => sub.solution_id === s.id),
+      )
+    : solutions;
+
   // Header actions
   const headerActions = useMemo(
     () => (
-      <Button size="sm" onClick={openNewLinkDialog}>
+      <Button size="sm" onClick={openNewLinkSheet}>
         <PlusIcon className="size-4" />
         Nieuwe link
       </Button>
     ),
-    [openNewLinkDialog]
+    [openNewLinkSheet],
   );
   useAdminHeaderActions(headerActions);
+
+  const sheetOpen = !!editingLink || isNewLink;
 
   return (
     <div className="space-y-6">
@@ -548,9 +451,13 @@ export default function NavigationPage() {
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
         </div>
       ) : links.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-8 text-center">
-          Nog geen navigatie links
-        </p>
+        <div className="flex flex-col items-center justify-center py-12">
+          <p className="text-muted-foreground mb-4">Nog geen navigatie links</p>
+          <Button size="sm" onClick={openNewLinkSheet}>
+            <PlusIcon className="size-4" />
+            Eerste link aanmaken
+          </Button>
+        </div>
       ) : (
         <DndContext
           sensors={sensors}
@@ -561,88 +468,178 @@ export default function NavigationPage() {
             items={links.map((l) => l.id)}
             strategy={verticalListSortingStrategy}
           >
-            {links.map((link) => (
-              <SortableLinkItem
-                key={link.id}
-                link={link}
-                isExpanded={expandedLinkId === link.id}
-                onToggleExpand={() =>
-                  setExpandedLinkId(expandedLinkId === link.id ? null : link.id)
-                }
-                onEdit={() => openEditLinkDialog(link)}
-                onDelete={() =>
-                  setDeleteTarget({ id: link.id, title: link.title })
-                }
-                onAddSubitem={(solutionId) =>
-                  handleAddSubitem(link.id, solutionId)
-                }
-                onDeleteSubitem={handleDeleteSubitem}
-                onReorderSubitems={(orderedIds) =>
-                  handleReorderSubitems(link.id, orderedIds)
-                }
-                solutions={solutions}
-              />
-            ))}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10"></TableHead>
+                  <TableHead>Titel</TableHead>
+                  <TableHead className="hidden sm:table-cell">URL</TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Subitems
+                  </TableHead>
+                  <TableHead className="w-10"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {links.map((link) => (
+                  <SortableRow
+                    key={link.id}
+                    id={link.id}
+                    onClick={() => openEditLinkSheet(link)}
+                    onDelete={() =>
+                      setDeleteTarget({ id: link.id, title: link.title })
+                    }
+                  >
+                    <TableCell className="font-medium">{link.title}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-muted-foreground">
+                      /{link.slug}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-muted-foreground">
+                      {link.sub_items.length} subitem
+                      {link.sub_items.length !== 1 && "s"}
+                    </TableCell>
+                  </SortableRow>
+                ))}
+              </TableBody>
+            </Table>
           </SortableContext>
         </DndContext>
       )}
 
-      {/* Link Dialog */}
-      <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
+      {/* Edit/Create Sheet */}
+      <Sheet open={sheetOpen} onOpenChange={(open) => !open && closeSheet()}>
+        <SheetContent
+          side="right"
+          className="px-4 w-full sm:max-w-xl overflow-y-auto"
+        >
+          <SheetHeader className="px-0">
+            <SheetTitle>
               {editingLink ? "Link bewerken" : "Nieuwe link"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="link-title">Titel</Label>
-              <Input
-                id="link-title"
-                value={linkTitle}
-                onChange={(e) => {
-                  setLinkTitle(e.target.value);
-                  if (!editingLink) {
-                    setLinkSlug(slugify(e.target.value));
-                  }
-                }}
-                placeholder="Bijv. Producten"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="link-slug">Slug (URL)</Label>
-              <Input
-                id="link-slug"
-                value={linkSlug}
-                onChange={(e) => setLinkSlug(e.target.value)}
-                placeholder="bijv-producten"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="link-submenu">Submenu heading (optioneel)</Label>
-              <Input
-                id="link-submenu"
-                value={linkSubmenuHeading}
-                onChange={(e) => setLinkSubmenuHeading(e.target.value)}
-                placeholder="Bijv. Onze producten"
-              />
-              <p className="text-xs text-muted-foreground">
-                Wordt getoond boven de subitems in het dropdown menu
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button size="sm" variant="outline" onClick={() => setLinkDialogOpen(false)}>
-              Annuleren
+            </SheetTitle>
+            <SheetDescription>
+              {editingLink
+                ? "Bewerk de navigatie link en bijbehorende subitems."
+                : "Maak een nieuwe navigatie link aan."}
+            </SheetDescription>
+          </SheetHeader>
+
+          <FieldGroup>
+            <FieldSet>
+              <Field>
+                <FieldLabel htmlFor="link-title">Label</FieldLabel>
+                <Input
+                  id="link-title"
+                  value={linkTitle}
+                  onChange={(e) => {
+                    setLinkTitle(e.target.value);
+                    if (!editingLink) {
+                      setLinkSlug(slugify(e.target.value));
+                    }
+                  }}
+                  placeholder="Bijv. Producten"
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="link-slug">URL</FieldLabel>
+                <Input
+                  id="link-slug"
+                  value={linkSlug}
+                  onChange={(e) => setLinkSlug(e.target.value)}
+                  placeholder="bijv-producten"
+                />
+                <FieldDescription>
+                  {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}/{linkSlug || "..."}
+                </FieldDescription>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="link-submenu">Submenu heading</FieldLabel>
+                <Input
+                  id="link-submenu"
+                  value={linkSubmenuHeading}
+                  onChange={(e) => setLinkSubmenuHeading(e.target.value)}
+                  placeholder="Ontdek"
+                />
+                <FieldDescription>
+                  Enkel invullen indien er subitems aanwezig zijn voor deze
+                  link.
+                </FieldDescription>
+              </Field>
+            </FieldSet>
+
+            <Separator />
+
+            {/* Subitems section - only show when editing existing link */}
+            {editingLink && (
+              <FieldSet>
+                <FieldLegend variant="label">Subitems</FieldLegend>
+
+                {availableSolutions.length > 0 && (
+                  <Select onValueChange={handleAddSubitem} value="">
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Voeg solution toe..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableSolutions.map((solution) => (
+                        <SelectItem key={solution.id} value={solution.id}>
+                          {solution.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+
+                {editingLink.sub_items.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-2">
+                    Nog geen subitems
+                  </p>
+                ) : (
+                  <DndContext
+                    sensors={subitemSensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleSubitemDragEnd}
+                  >
+                    <SortableContext
+                      items={editingLink.sub_items.map((s) => s.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-1">
+                        {editingLink.sub_items.map((subitem) => (
+                          <SortableSubitem
+                            key={subitem.id}
+                            subitem={subitem}
+                            onDelete={() => handleDeleteSubitem(subitem.id)}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                )}
+              </FieldSet>
+            )}
+          </FieldGroup>
+
+          <SheetFooter className="px-0">
+            <Button
+              onClick={handleSaveLink}
+              disabled={savingLink || !hasChanges}
+            >
+              {savingLink ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin" />
+                  Opslaan...
+                </>
+              ) : (
+                <>
+                  <CheckIcon className="size-4" />
+                  {editingLink ? "Opslaan" : "Aanmaken"}
+                </>
+              )}
             </Button>
-            <Button size="sm" onClick={handleSaveLink} disabled={savingLink}>
-              {savingLink && <Loader2Icon className="size-4 animate-spin" />}
-              {editingLink ? "Opslaan" : "Aanmaken"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
 
       {/* Delete Confirmation */}
       <AlertDialog
@@ -653,8 +650,8 @@ export default function NavigationPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Link verwijderen?</AlertDialogTitle>
             <AlertDialogDescription>
-              &quot;{deleteTarget?.title}&quot; en alle bijbehorende subitems worden
-              permanent verwijderd.
+              &quot;{deleteTarget?.title}&quot; en alle bijbehorende subitems
+              worden permanent verwijderd.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -668,6 +665,119 @@ export default function NavigationPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+
+// Reusable sortable row component
+function SortableRow({
+  id,
+  onClick,
+  onDelete,
+  children,
+}: {
+  id: string;
+  onClick: () => void;
+  onDelete: () => void;
+  children: React.ReactNode;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <TableRow
+      ref={setNodeRef}
+      style={style}
+      className="group cursor-pointer"
+      onClick={onClick}
+    >
+      <TableCell className="w-10">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab touch-none text-muted-foreground hover:text-foreground"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVerticalIcon className="size-4" />
+        </button>
+      </TableCell>
+      {children}
+      <TableCell className="w-10">
+        <Button
+          size="icon"
+          variant="ghost"
+          className="size-8 text-destructive hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+        >
+          <Trash2Icon className="size-4" />
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+// Sortable subitem component
+function SortableSubitem({
+  subitem,
+  onDelete,
+}: {
+  subitem: NavigationSubitem;
+  onDelete: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: subitem.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="group flex items-center gap-2 p-2 bg-muted/50 rounded-md"
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing touch-none"
+      >
+        <GripVerticalIcon className="size-3 text-muted-foreground" />
+      </button>
+      <span className="flex-1 text-sm truncate">
+        {subitem.solution?.name || "Unknown solution"}
+      </span>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="size-6 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={onDelete}
+      >
+        <Trash2Icon className="size-3" />
+      </Button>
     </div>
   );
 }

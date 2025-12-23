@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { IconSelect } from "@/components/admin/IconSelect";
 import { Separator } from "@/components/ui/separator";
@@ -146,6 +146,10 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                         }
                         placeholder="/contact"
                       />
+                      <FieldDescription>
+                        {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
+                        {usp.link?.url || "/..."}
+                      </FieldDescription>
                     </Field>
                   </div>
                 )}

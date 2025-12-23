@@ -383,7 +383,7 @@ export default function PagesPage() {
                   placeholder="pagina-slug"
                 />
                 <p className="text-xs text-muted-foreground">
-                  URL: /{newSlug || "..."}
+                  {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}/{newSlug || "..."}
                 </p>
               </div>
             )}
