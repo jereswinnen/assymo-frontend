@@ -1,6 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Field,
   FieldDescription,
@@ -71,18 +72,33 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
           />
         </Field>
 
-        <Field>
-          <FieldLabel>Link URL</FieldLabel>
-          <Input
-            value={item.href || ""}
-            onChange={(e) => updateItem(index, { href: e.target.value })}
-            placeholder="/pagina"
+        <Field orientation="horizontal">
+          <FieldLabel>Open chatbot</FieldLabel>
+          <Switch
+            checked={item.actionType === "openChatbot"}
+            onCheckedChange={(checked) =>
+              updateItem(index, {
+                actionType: checked ? "openChatbot" : "link",
+                href: checked ? undefined : item.href,
+              })
+            }
           />
-          <FieldDescription>
-            {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
-            {item.href || "/..."}
-          </FieldDescription>
         </Field>
+
+        {item.actionType !== "openChatbot" && (
+          <Field>
+            <FieldLabel>Link URL</FieldLabel>
+            <Input
+              value={item.href || ""}
+              onChange={(e) => updateItem(index, { href: e.target.value })}
+              placeholder="/pagina"
+            />
+            <FieldDescription>
+              {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
+              {item.href || "/..."}
+            </FieldDescription>
+          </Field>
+        )}
 
         <Separator />
 

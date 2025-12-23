@@ -1,7 +1,10 @@
-import { Action } from "@/components/general/Action";
+"use client";
+
+import { Action, actionVariants } from "@/components/general/Action";
 import { iconMap } from "@/lib/icons";
 import Image from "next/image";
 import { RichText } from "@/components/RichText";
+import { cn } from "@/lib/utils";
 
 interface ImageWithUrl {
   url: string;
@@ -10,9 +13,10 @@ interface ImageWithUrl {
 
 interface PageHeaderButton {
   label: string;
-  url: string;
-  icon: string;
-  variant: "primary" | "secondary";
+  action?: "link" | "openChatbot";
+  url?: string;
+  icon?: string;
+  variant?: "primary" | "secondary";
 }
 
 interface PageHeaderProps {
@@ -57,11 +61,27 @@ export default function PageHeader({ section, headerImage }: PageHeaderProps) {
         {showButtons && buttons && buttons.length > 0 && (
           <div className="flex items-center gap-4">
             {buttons.map((button, index) => {
-              const IconComponent = iconMap[button.icon];
+              const IconComponent = button.icon ? iconMap[button.icon] : null;
+
+              if (button.action === "openChatbot") {
+                return (
+                  <button
+                    key={index}
+                    onClick={() =>
+                      window.dispatchEvent(new CustomEvent("openChatbot"))
+                    }
+                    className={cn(actionVariants({ variant: button.variant }))}
+                  >
+                    {IconComponent && <IconComponent />}
+                    {button.label}
+                  </button>
+                );
+              }
+
               return (
                 <Action
                   key={index}
-                  href={button.url}
+                  href={button.url || "#"}
                   icon={IconComponent ? <IconComponent /> : undefined}
                   label={button.label}
                   variant={button.variant}

@@ -26,7 +26,8 @@ import { Separator } from "@/components/ui/separator";
 interface ButtonItem {
   _key: string;
   label: string;
-  url: string;
+  action?: "link" | "openChatbot";
+  url?: string;
   icon?: string;
   variant?: "primary" | "secondary";
 }
@@ -145,6 +146,19 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                   key={button._key}
                   className="p-4 space-y-4 border rounded-lg"
                 >
+                  <Field orientation="horizontal">
+                    <FieldLabel>Open chatbot</FieldLabel>
+                    <Switch
+                      checked={button.action === "openChatbot"}
+                      onCheckedChange={(checked) =>
+                        updateButton(index, {
+                          action: checked ? "openChatbot" : "link",
+                          url: checked ? undefined : button.url,
+                        })
+                      }
+                    />
+                  </Field>
+
                   <div className="grid gap-3 sm:grid-cols-2">
                     <Field>
                       <FieldLabel>Label</FieldLabel>
@@ -153,23 +167,29 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                         onChange={(e) =>
                           updateButton(index, { label: e.target.value })
                         }
-                        placeholder="Knop tekst"
-                      />
-                    </Field>
-                    <Field>
-                      <FieldLabel>URL</FieldLabel>
-                      <Input
-                        value={button.url || ""}
-                        onChange={(e) =>
-                          updateButton(index, { url: e.target.value })
+                        placeholder={
+                          button.action === "openChatbot"
+                            ? "Stel een vraag"
+                            : "Knop tekst"
                         }
-                        placeholder="/contact"
                       />
-                      <FieldDescription>
-                        {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
-                        {button.url || "/..."}
-                      </FieldDescription>
                     </Field>
+                    {button.action !== "openChatbot" && (
+                      <Field>
+                        <FieldLabel>URL</FieldLabel>
+                        <Input
+                          value={button.url || ""}
+                          onChange={(e) =>
+                            updateButton(index, { url: e.target.value })
+                          }
+                          placeholder="/contact"
+                        />
+                        <FieldDescription>
+                          {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
+                          {button.url || "/..."}
+                        </FieldDescription>
+                      </Field>
+                    )}
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-2">

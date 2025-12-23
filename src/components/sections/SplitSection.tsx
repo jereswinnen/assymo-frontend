@@ -19,7 +19,8 @@ interface SplitItem {
   };
   title: string;
   subtitle?: string;
-  href: string;
+  actionType?: "link" | "openChatbot";
+  href?: string;
   action?: SplitItemAction;
 }
 
@@ -33,6 +34,14 @@ interface SplitSectionProps {
 export function SplitSection({ section, className }: SplitSectionProps) {
   const router = useRouter();
   const { items } = section;
+
+  const handleItemClick = (item: SplitItem) => {
+    if (item.actionType === "openChatbot") {
+      window.dispatchEvent(new CustomEvent("openChatbot"));
+    } else if (item.href) {
+      router.push(item.href);
+    }
+  };
 
   return (
     <section
@@ -49,7 +58,7 @@ export function SplitSection({ section, className }: SplitSectionProps) {
         return (
           <div
             key={index}
-            onClick={() => router.push(item.href)}
+            onClick={() => handleItemClick(item)}
             className="group flex flex-col gap-3 md:basis-1/2 overflow-hidden md:transition-[flex-basis] duration-700 ease-circ md:group-hover/split:hover:basis-[54%] md:group-hover/split:not-[&:hover]:basis-[46%] cursor-pointer"
           >
             <div className="relative h-[220px] md:h-[400px] overflow-hidden">
@@ -66,10 +75,18 @@ export function SplitSection({ section, className }: SplitSectionProps) {
                 <div className="absolute inset-0 flex items-center justify-center bg-accent-dark/60 opacity-0 transition-opacity duration-500 ease-circ group-hover:opacity-100">
                   <Action
                     className="translate-y-1.5 blur-xs transition-all duration-600 ease-circ group-hover:translate-y-0 group-hover:blur-none"
-                    href={item.href}
+                    href={item.actionType === "openChatbot" ? "#" : item.href || "#"}
                     icon={IconComponent ? <IconComponent /> : undefined}
                     label={item.action.label}
                     variant={item.action.variant || "secondary"}
+                    onClick={
+                      item.actionType === "openChatbot"
+                        ? (e) => {
+                            e.preventDefault();
+                            window.dispatchEvent(new CustomEvent("openChatbot"));
+                          }
+                        : undefined
+                    }
                   />
                 </div>
               )}

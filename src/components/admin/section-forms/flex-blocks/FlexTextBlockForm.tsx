@@ -76,6 +76,23 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
 
       {block.button && (
         <div className="space-y-4">
+          <Field orientation="horizontal">
+            <FieldLabel>Open chatbot</FieldLabel>
+            <Switch
+              checked={block.button?.action === "openChatbot"}
+              onCheckedChange={(checked) =>
+                onChange({
+                  ...block,
+                  button: {
+                    ...block.button,
+                    action: checked ? "openChatbot" : "link",
+                    url: checked ? undefined : block.button?.url,
+                  },
+                })
+              }
+            />
+          </Field>
+
           <div className="grid gap-3 sm:grid-cols-2">
             <Field>
               <FieldLabel>Label</FieldLabel>
@@ -87,26 +104,32 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
                     button: { ...block.button, label: e.target.value },
                   })
                 }
-                placeholder="Maak een afspraak"
-              />
-            </Field>
-            <Field>
-              <FieldLabel>URL</FieldLabel>
-              <Input
-                value={block.button?.url || ""}
-                onChange={(e) =>
-                  onChange({
-                    ...block,
-                    button: { ...block.button, url: e.target.value },
-                  })
+                placeholder={
+                  block.button?.action === "openChatbot"
+                    ? "Stel een vraag"
+                    : "Maak een afspraak"
                 }
-                placeholder="/contact"
               />
-              <FieldDescription>
-                {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
-                {block.button?.url || "/..."}
-              </FieldDescription>
             </Field>
+            {block.button?.action !== "openChatbot" && (
+              <Field>
+                <FieldLabel>URL</FieldLabel>
+                <Input
+                  value={block.button?.url || ""}
+                  onChange={(e) =>
+                    onChange({
+                      ...block,
+                      button: { ...block.button, url: e.target.value },
+                    })
+                  }
+                  placeholder="/contact"
+                />
+                <FieldDescription>
+                  {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
+                  {block.button?.url || "/..."}
+                </FieldDescription>
+              </Field>
+            )}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <Field>
