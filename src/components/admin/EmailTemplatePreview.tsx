@@ -84,28 +84,31 @@ export function EmailTemplatePreview() {
 
   return (
     <>
-      <div className="flex flex-col gap-4 min-h-[calc(100vh-150px)]">
-        <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-          <SelectTrigger className="w-[280px]">
-            <SelectValue placeholder="Selecteer een template" />
-          </SelectTrigger>
-          <SelectContent>
-            {templates.map((template) => (
-              <SelectItem key={template.id} value={template.id}>
-                {template.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="relative min-h-[calc(100vh-150px)] rounded-lg border bg-muted/30">
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : html ? (
+          <>
+            <div className="z-10 px-2 absolute top-2 w-full flex items-center justify-between">
+              <Select
+                value={selectedTemplate}
+                onValueChange={setSelectedTemplate}
+              >
+                <SelectTrigger className="w-[280px] bg-white">
+                  <SelectValue placeholder="Selecteer een template" />
+                </SelectTrigger>
+                <SelectContent>
+                  {templates.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-        <div className="relative flex-1 rounded-lg border bg-muted/30">
-          {loading ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : html ? (
-            <>
-              <div className="absolute right-2 top-2 z-10 flex gap-1">
+              <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -122,18 +125,18 @@ export function EmailTemplatePreview() {
                   <MaximizeIcon className="size-4" />
                 </Button>
               </div>
-              <iframe
-                srcDoc={html}
-                className="absolute inset-0 size-full rounded-lg bg-white"
-                title="Email preview"
-              />
-            </>
-          ) : (
-            <div className="flex items-center justify-center py-16 text-muted-foreground">
-              Selecteer een template om de preview te bekijken
             </div>
-          )}
-        </div>
+            <iframe
+              srcDoc={html}
+              className="absolute inset-0 size-full rounded-lg bg-white"
+              title="Email preview"
+            />
+          </>
+        ) : (
+          <div className="flex items-center justify-center py-16 text-muted-foreground">
+            Selecteer een template om de preview te bekijken
+          </div>
+        )}
       </div>
 
       {/* Fullscreen modal */}
