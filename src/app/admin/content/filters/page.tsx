@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import {
   DndContext,
   closestCenter,
@@ -20,15 +21,29 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+  FieldLegend,
+} from "@/components/ui/field";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,17 +56,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
+  CheckIcon,
+  FilterIcon,
   GripVerticalIcon,
   Loader2Icon,
-  PencilIcon,
   PlusIcon,
   Trash2Icon,
 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 interface Filter {
   id: string;
   name: string;
   slug: string;
+  order_rank: number;
 }
 
 interface FilterCategory {
@@ -71,165 +89,28 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-// Sortable Category Item
-function SortableCategoryItem({
-  category,
-  isSelected,
-  onSelect,
-  onEdit,
-  onDelete,
-}: {
-  category: FilterCategory;
-  isSelected: boolean;
-  onSelect: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: category.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-colors ${
-        isSelected ? "bg-accent" : "hover:bg-muted"
-      }`}
-      onClick={onSelect}
-    >
-      <button
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing touch-none"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <GripVerticalIcon className="size-4 text-muted-foreground" />
-      </button>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium truncate">{category.name}</p>
-        <p className="text-xs text-muted-foreground">
-          {category.filters.length} filter
-          {category.filters.length !== 1 && "s"}
-        </p>
-      </div>
-      <Button
-        size="icon"
-        variant="ghost"
-        className="size-8"
-        onClick={(e) => {
-          e.stopPropagation();
-          onEdit();
-        }}
-      >
-        <PencilIcon className="size-4" />
-      </Button>
-      <Button
-        size="icon"
-        variant="ghost"
-        className="size-8 text-destructive hover:text-destructive"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-      >
-        <Trash2Icon className="size-4" />
-      </Button>
-    </div>
-  );
-}
-
-// Sortable Filter Item
-function SortableFilterItem({
-  filter,
-  onEdit,
-  onDelete,
-}: {
-  filter: Filter;
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: filter.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="flex items-center gap-2 p-2 rounded-md hover:bg-muted"
-    >
-      <button
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing touch-none"
-      >
-        <GripVerticalIcon className="size-4 text-muted-foreground" />
-      </button>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium truncate">{filter.name}</p>
-        <p className="text-xs text-muted-foreground">{filter.slug}</p>
-      </div>
-      <Button
-        size="icon"
-        variant="ghost"
-        className="size-8"
-        onClick={onEdit}
-      >
-        <PencilIcon className="size-4" />
-      </Button>
-      <Button
-        size="icon"
-        variant="ghost"
-        className="size-8 text-destructive hover:text-destructive"
-        onClick={onDelete}
-      >
-        <Trash2Icon className="size-4" />
-      </Button>
-    </div>
-  );
-}
-
 export default function FiltersPage() {
   const [categories, setCategories] = useState<FilterCategory[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Category dialog state
-  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<FilterCategory | null>(null);
+  // Sheet state
+  const [editingCategory, setEditingCategory] = useState<FilterCategory | null>(
+    null,
+  );
+  const [isNewCategory, setIsNewCategory] = useState(false);
   const [categoryName, setCategoryName] = useState("");
   const [categorySlug, setCategorySlug] = useState("");
   const [savingCategory, setSavingCategory] = useState(false);
 
-  // Filter dialog state
-  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-  const [editingFilter, setEditingFilter] = useState<Filter | null>(null);
-  const [filterName, setFilterName] = useState("");
-  const [filterSlug, setFilterSlug] = useState("");
-  const [savingFilter, setSavingFilter] = useState(false);
+  // Track original values for change detection
+  const [originalValues, setOriginalValues] = useState({
+    name: "",
+    slug: "",
+  });
+
+  // New filter state
+  const [newFilterName, setNewFilterName] = useState("");
+  const [addingFilter, setAddingFilter] = useState(false);
 
   // Delete confirmation state
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -237,14 +118,20 @@ export default function FiltersPage() {
     id: string;
     name: string;
   } | null>(null);
-
-  const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
+  const [deleting, setDeleting] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
+  );
+
+  const filterSensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   useEffect(() => {
@@ -257,9 +144,6 @@ export default function FiltersPage() {
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setCategories(data);
-      if (data.length > 0 && !selectedCategoryId) {
-        setSelectedCategoryId(data[0].id);
-      }
     } catch (error) {
       console.error("Failed to fetch categories:", error);
       toast.error("Kon categorieën niet laden");
@@ -268,19 +152,42 @@ export default function FiltersPage() {
     }
   };
 
-  // Category handlers
-  const openNewCategoryDialog = () => {
+  // Check if form has changes
+  const hasChanges = useMemo(() => {
+    if (isNewCategory) {
+      return categoryName.trim().length > 0;
+    }
+    return (
+      categoryName !== originalValues.name ||
+      categorySlug !== originalValues.slug
+    );
+  }, [isNewCategory, categoryName, categorySlug, originalValues]);
+
+  // Sheet handlers
+  const openNewCategorySheet = useCallback(() => {
     setEditingCategory(null);
+    setIsNewCategory(true);
     setCategoryName("");
     setCategorySlug("");
-    setCategoryDialogOpen(true);
-  };
+    setOriginalValues({ name: "", slug: "" });
+    setNewFilterName("");
+  }, []);
 
-  const openEditCategoryDialog = (category: FilterCategory) => {
+  const openEditCategorySheet = (category: FilterCategory) => {
     setEditingCategory(category);
+    setIsNewCategory(false);
     setCategoryName(category.name);
     setCategorySlug(category.slug);
-    setCategoryDialogOpen(true);
+    setOriginalValues({
+      name: category.name,
+      slug: category.slug,
+    });
+    setNewFilterName("");
+  };
+
+  const closeSheet = () => {
+    setEditingCategory(null);
+    setIsNewCategory(false);
   };
 
   const handleSaveCategory = async () => {
@@ -304,7 +211,7 @@ export default function FiltersPage() {
               slug,
               order_rank: editingCategory.order_rank,
             }),
-          }
+          },
         );
         if (!response.ok) throw new Error("Failed to update");
         toast.success("Categorie bijgewerkt");
@@ -318,7 +225,7 @@ export default function FiltersPage() {
         toast.success("Categorie aangemaakt");
       }
 
-      setCategoryDialogOpen(false);
+      closeSheet();
       fetchCategories();
     } catch (error) {
       console.error("Failed to save category:", error);
@@ -331,22 +238,24 @@ export default function FiltersPage() {
   const handleDeleteCategory = async () => {
     if (!deleteTarget || deleteTarget.type !== "category") return;
 
+    setDeleting(true);
     try {
       const response = await fetch(
         `/api/admin/content/filter-categories/${deleteTarget.id}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
       if (!response.ok) throw new Error("Failed to delete");
 
       toast.success("Categorie verwijderd");
-      if (selectedCategoryId === deleteTarget.id) {
-        setSelectedCategoryId(null);
+      if (editingCategory?.id === deleteTarget.id) {
+        closeSheet();
       }
       fetchCategories();
     } catch (error) {
       console.error("Failed to delete category:", error);
       toast.error("Kon categorie niet verwijderen");
     } finally {
+      setDeleting(false);
       setDeleteTarget(null);
     }
   };
@@ -376,100 +285,96 @@ export default function FiltersPage() {
   };
 
   // Filter handlers
-  const openNewFilterDialog = () => {
-    if (!selectedCategoryId) return;
-    setEditingFilter(null);
-    setFilterName("");
-    setFilterSlug("");
-    setFilterDialogOpen(true);
-  };
+  const handleAddFilter = async () => {
+    if (!editingCategory || !newFilterName.trim()) return;
 
-  const openEditFilterDialog = (filter: Filter) => {
-    setEditingFilter(filter);
-    setFilterName(filter.name);
-    setFilterSlug(filter.slug);
-    setFilterDialogOpen(true);
-  };
-
-  const handleSaveFilter = async () => {
-    if (!filterName.trim()) {
-      toast.error("Naam is verplicht");
-      return;
-    }
-
-    setSavingFilter(true);
+    setAddingFilter(true);
     try {
-      const slug = filterSlug || slugify(filterName);
+      const slug = slugify(newFilterName);
+      const response = await fetch("/api/admin/content/filters", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newFilterName,
+          slug,
+          category_id: editingCategory.id,
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to create");
 
-      if (editingFilter) {
-        const response = await fetch(
-          `/api/admin/content/filters/${editingFilter.id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: filterName, slug }),
-          }
-        );
-        if (!response.ok) throw new Error("Failed to update");
-        toast.success("Filter bijgewerkt");
-      } else {
-        const response = await fetch("/api/admin/content/filters", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: filterName,
-            slug,
-            category_id: selectedCategoryId,
-          }),
-        });
-        if (!response.ok) throw new Error("Failed to create");
-        toast.success("Filter aangemaakt");
-      }
+      const newFilter = await response.json();
+      toast.success("Filter toegevoegd");
+      setNewFilterName("");
 
-      setFilterDialogOpen(false);
-      fetchCategories();
+      // Update local state
+      const updatedCategory = {
+        ...editingCategory,
+        filters: [...editingCategory.filters, newFilter],
+      };
+      setEditingCategory(updatedCategory);
+      setCategories((prev) =>
+        prev.map((c) => (c.id === editingCategory.id ? updatedCategory : c)),
+      );
     } catch (error) {
-      console.error("Failed to save filter:", error);
-      toast.error("Kon filter niet opslaan");
+      console.error("Failed to add filter:", error);
+      toast.error("Kon filter niet toevoegen");
     } finally {
-      setSavingFilter(false);
+      setAddingFilter(false);
     }
   };
 
   const handleDeleteFilter = async () => {
     if (!deleteTarget || deleteTarget.type !== "filter") return;
 
+    setDeleting(true);
     try {
       const response = await fetch(
         `/api/admin/content/filters/${deleteTarget.id}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
       if (!response.ok) throw new Error("Failed to delete");
 
       toast.success("Filter verwijderd");
-      fetchCategories();
+
+      // Update local state
+      if (editingCategory) {
+        const updatedFilters = editingCategory.filters.filter(
+          (f) => f.id !== deleteTarget.id,
+        );
+        const updatedCategory = { ...editingCategory, filters: updatedFilters };
+        setEditingCategory(updatedCategory);
+        setCategories((prev) =>
+          prev.map((c) => (c.id === editingCategory.id ? updatedCategory : c)),
+        );
+      }
     } catch (error) {
       console.error("Failed to delete filter:", error);
       toast.error("Kon filter niet verwijderen");
     } finally {
+      setDeleting(false);
       setDeleteTarget(null);
     }
   };
 
   const handleFilterDragEnd = async (event: DragEndEvent) => {
+    if (!editingCategory) return;
+
     const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = editingCategory.filters.findIndex(
+        (f) => f.id === active.id,
+      );
+      const newIndex = editingCategory.filters.findIndex(
+        (f) => f.id === over.id,
+      );
 
-    if (over && active.id !== over.id && selectedCategory) {
-      const oldIndex = selectedCategory.filters.findIndex((f) => f.id === active.id);
-      const newIndex = selectedCategory.filters.findIndex((f) => f.id === over.id);
+      const newFilters = arrayMove(editingCategory.filters, oldIndex, newIndex);
 
-      const newFilters = arrayMove(selectedCategory.filters, oldIndex, newIndex);
-
-      // Update local state
+      // Optimistic update
+      const updatedCategory = { ...editingCategory, filters: newFilters };
+      setEditingCategory(updatedCategory);
       setCategories((prev) =>
-        prev.map((c) =>
-          c.id === selectedCategoryId ? { ...c, filters: newFilters } : c
-        )
+        prev.map((c) => (c.id === editingCategory.id ? updatedCategory : c)),
       );
 
       try {
@@ -477,7 +382,7 @@ export default function FiltersPage() {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            categoryId: selectedCategoryId,
+            categoryId: editingCategory.id,
             orderedIds: newFilters.map((f) => f.id),
           }),
         });
@@ -489,6 +394,20 @@ export default function FiltersPage() {
     }
   };
 
+  // Header actions
+  const headerActions = useMemo(
+    () => (
+      <Button size="sm" onClick={openNewCategorySheet}>
+        <PlusIcon className="size-4" />
+        Nieuwe categorie
+      </Button>
+    ),
+    [openNewCategorySheet],
+  );
+  useAdminHeaderActions(headerActions);
+
+  const sheetOpen = !!editingCategory || isNewCategory;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -499,211 +418,200 @@ export default function FiltersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Categories */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-base">Categorieën</CardTitle>
-            <Button size="sm" onClick={openNewCategoryDialog}>
-              <PlusIcon className="size-4" />
-              Nieuw
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {categories.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                Nog geen categorieën
-              </p>
-            ) : (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleCategoryDragEnd}
-              >
-                <SortableContext
-                  items={categories.map((c) => c.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-1">
-                    {categories.map((category) => (
-                      <SortableCategoryItem
-                        key={category.id}
-                        category={category}
-                        isSelected={selectedCategoryId === category.id}
-                        onSelect={() => setSelectedCategoryId(category.id)}
-                        onEdit={() => openEditCategoryDialog(category)}
-                        onDelete={() =>
-                          setDeleteTarget({
-                            type: "category",
-                            id: category.id,
-                            name: category.name,
-                          })
-                        }
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            )}
-          </CardContent>
-        </Card>
+      {categories.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <FilterIcon className="size-12 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground mb-4">Nog geen categorieën</p>
+          <Button size="sm" onClick={openNewCategorySheet}>
+            <PlusIcon className="size-4" />
+            Eerste categorie aanmaken
+          </Button>
+        </div>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleCategoryDragEnd}
+        >
+          <SortableContext
+            items={categories.map((c) => c.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10"></TableHead>
+                  <TableHead>Naam</TableHead>
+                  <TableHead className="hidden sm:table-cell">URL</TableHead>
+                  <TableHead className="hidden md:table-cell">Items</TableHead>
+                  <TableHead className="w-10"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {categories.map((category) => (
+                  <SortableRow
+                    key={category.id}
+                    id={category.id}
+                    onClick={() => openEditCategorySheet(category)}
+                    onDelete={() =>
+                      setDeleteTarget({
+                        type: "category",
+                        id: category.id,
+                        name: category.name,
+                      })
+                    }
+                  >
+                    <TableCell className="font-medium">
+                      {category.name}
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell text-muted-foreground">
+                      {category.slug}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-muted-foreground">
+                      {category.filters.length} item
+                      {category.filters.length !== 1 && "s"}
+                    </TableCell>
+                  </SortableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </SortableContext>
+        </DndContext>
+      )}
 
-        {/* Filters */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-base">
-              {selectedCategory ? `Filters in "${selectedCategory.name}"` : "Filters"}
-            </CardTitle>
-            <Button
-              size="sm"
-              onClick={openNewFilterDialog}
-              disabled={!selectedCategoryId}
-            >
-              <PlusIcon className="size-4" />
-              Nieuw
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {!selectedCategory ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                Selecteer een categorie
-              </p>
-            ) : selectedCategory.filters.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                Nog geen filters in deze categorie
-              </p>
-            ) : (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleFilterDragEnd}
-              >
-                <SortableContext
-                  items={selectedCategory.filters.map((f) => f.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-1">
-                    {selectedCategory.filters.map((filter) => (
-                      <SortableFilterItem
-                        key={filter.id}
-                        filter={filter}
-                        onEdit={() => openEditFilterDialog(filter)}
-                        onDelete={() =>
-                          setDeleteTarget({
-                            type: "filter",
-                            id: filter.id,
-                            name: filter.name,
-                          })
-                        }
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Category Dialog */}
-      <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
+      {/* Edit/Create Sheet */}
+      <Sheet open={sheetOpen} onOpenChange={(open) => !open && closeSheet()}>
+        <SheetContent
+          side="right"
+          className="px-4 w-full sm:max-w-xl overflow-y-auto"
+        >
+          <SheetHeader className="px-0">
+            <SheetTitle>
               {editingCategory ? "Categorie bewerken" : "Nieuwe categorie"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="category-name">Naam</Label>
-              <Input
-                id="category-name"
-                value={categoryName}
-                onChange={(e) => {
-                  setCategoryName(e.target.value);
-                  if (!editingCategory) {
-                    setCategorySlug(slugify(e.target.value));
-                  }
-                }}
-                placeholder="Bijv. Materiaal"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="category-slug">Slug</Label>
-              <Input
-                id="category-slug"
-                value={categorySlug}
-                onChange={(e) => setCategorySlug(e.target.value)}
-                placeholder="bijv-materiaal"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setCategoryDialogOpen(false)}
-            >
-              Annuleren
-            </Button>
-            <Button size="sm" onClick={handleSaveCategory} disabled={savingCategory}>
-              {savingCategory && (
-                <Loader2Icon className="size-4 animate-spin" />
-              )}
-              {editingCategory ? "Opslaan" : "Aanmaken"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </SheetTitle>
+            <SheetDescription>
+              {editingCategory
+                ? "Bewerk de categorie en beheer de bijbehorende filters."
+                : "Maak een nieuwe filtercategorie aan."}
+            </SheetDescription>
+          </SheetHeader>
 
-      {/* Filter Dialog */}
-      <Dialog open={filterDialogOpen} onOpenChange={setFilterDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingFilter ? "Filter bewerken" : "Nieuw filter"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="filter-name">Naam</Label>
-              <Input
-                id="filter-name"
-                value={filterName}
-                onChange={(e) => {
-                  setFilterName(e.target.value);
-                  if (!editingFilter) {
-                    setFilterSlug(slugify(e.target.value));
-                  }
-                }}
-                placeholder="Bijv. Hout"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="filter-slug">Slug</Label>
-              <Input
-                id="filter-slug"
-                value={filterSlug}
-                onChange={(e) => setFilterSlug(e.target.value)}
-                placeholder="bijv-hout"
-              />
-            </div>
-          </div>
-          <DialogFooter>
+          <FieldGroup>
+            <FieldSet>
+              <Field>
+                <FieldLabel htmlFor="category-name">Naam</FieldLabel>
+                <Input
+                  id="category-name"
+                  value={categoryName}
+                  onChange={(e) => {
+                    setCategoryName(e.target.value);
+                    if (!editingCategory) {
+                      setCategorySlug(slugify(e.target.value));
+                    }
+                  }}
+                  placeholder="Materiaal"
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="category-slug">URL</FieldLabel>
+                <Input
+                  id="category-slug"
+                  value={categorySlug}
+                  onChange={(e) => setCategorySlug(e.target.value)}
+                  placeholder="materiaal"
+                />
+              </Field>
+            </FieldSet>
+
+            <Separator />
+
+            {/* Filters section - only show when editing existing category */}
+            {editingCategory && (
+              <FieldSet>
+                <FieldLegend variant="label">Filters</FieldLegend>
+
+                <div className="flex gap-2">
+                  <Input
+                    value={newFilterName}
+                    onChange={(e) => setNewFilterName(e.target.value)}
+                    placeholder="Nieuwe filter..."
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && newFilterName.trim()) {
+                        e.preventDefault();
+                        handleAddFilter();
+                      }
+                    }}
+                  />
+                  <Button
+                    size="icon"
+                    onClick={handleAddFilter}
+                    disabled={!newFilterName.trim() || addingFilter}
+                  >
+                    {addingFilter ? (
+                      <Loader2Icon className="size-4 animate-spin" />
+                    ) : (
+                      <PlusIcon className="size-4" />
+                    )}
+                  </Button>
+                </div>
+
+                {editingCategory.filters.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-2">
+                    Nog geen filters in deze categorie
+                  </p>
+                ) : (
+                  <DndContext
+                    sensors={filterSensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleFilterDragEnd}
+                  >
+                    <SortableContext
+                      items={editingCategory.filters.map((f) => f.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-1">
+                        {editingCategory.filters.map((filter) => (
+                          <SortableFilter
+                            key={filter.id}
+                            filter={filter}
+                            onDelete={() =>
+                              setDeleteTarget({
+                                type: "filter",
+                                id: filter.id,
+                                name: filter.name,
+                              })
+                            }
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                )}
+              </FieldSet>
+            )}
+          </FieldGroup>
+
+          <SheetFooter className="px-0">
             <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setFilterDialogOpen(false)}
+              onClick={handleSaveCategory}
+              disabled={savingCategory || !hasChanges}
             >
-              Annuleren
+              {savingCategory ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin" />
+                  Opslaan...
+                </>
+              ) : (
+                <>
+                  <CheckIcon className="size-4" />
+                  {editingCategory ? "Opslaan" : "Aanmaken"}
+                </>
+              )}
             </Button>
-            <Button size="sm" onClick={handleSaveFilter} disabled={savingFilter}>
-              {savingFilter && <Loader2Icon className="size-4 animate-spin" />}
-              {editingFilter ? "Opslaan" : "Aanmaken"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
 
       {/* Delete Confirmation */}
       <AlertDialog
@@ -724,7 +632,7 @@ export default function FiltersPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={
@@ -732,12 +640,136 @@ export default function FiltersPage() {
                   ? handleDeleteCategory
                   : handleDeleteFilter
               }
+              disabled={deleting}
             >
-              Verwijderen
+              {deleting ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin" />
+                  Verwijderen...
+                </>
+              ) : (
+                "Verwijderen"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+
+// Reusable sortable row component
+function SortableRow({
+  id,
+  onClick,
+  onDelete,
+  children,
+}: {
+  id: string;
+  onClick: () => void;
+  onDelete: () => void;
+  children: React.ReactNode;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <TableRow
+      ref={setNodeRef}
+      style={style}
+      className="group cursor-pointer"
+      onClick={onClick}
+    >
+      <TableCell className="w-10">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab touch-none text-muted-foreground hover:text-foreground"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVerticalIcon className="size-4" />
+        </button>
+      </TableCell>
+      {children}
+      <TableCell className="w-10">
+        <Button
+          size="icon"
+          variant="ghost"
+          className="size-8 text-destructive hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+        >
+          <Trash2Icon className="size-4" />
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+// Sortable filter component
+function SortableFilter({
+  filter,
+  onDelete,
+}: {
+  filter: Filter;
+  onDelete: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: filter.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="group flex items-center gap-2 p-2 bg-muted/50 rounded-md"
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing touch-none"
+      >
+        <GripVerticalIcon className="size-3 text-muted-foreground" />
+      </button>
+      <div className="flex-1 min-w-0">
+        <span className="text-sm truncate block">{filter.name}</span>
+        <span className="text-xs text-muted-foreground truncate block">
+          {filter.slug}
+        </span>
+      </div>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="size-6 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={onDelete}
+      >
+        <Trash2Icon className="size-3" />
+      </Button>
     </div>
   );
 }
