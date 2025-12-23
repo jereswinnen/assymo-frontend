@@ -11,9 +11,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+  FieldSet,
+} from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -23,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import {
   CalendarIcon,
+  CheckIcon,
   ClockIcon,
   MailIcon,
   MapPinIcon,
@@ -211,149 +218,199 @@ export function AppointmentDialog({
 
         {editing ? (
           // Edit mode
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Datum</Label>
-                <Input
-                  type="date"
-                  value={editData.appointment_date}
-                  onChange={(e) =>
-                    setEditData({ ...editData, appointment_date: e.target.value })
-                  }
-                  className="[&::-webkit-calendar-picker-indicator]:hidden"
-                />
+          <FieldGroup>
+            {/* Date, time, status */}
+            <FieldSet>
+              <div className="grid grid-cols-2 gap-4">
+                <Field>
+                  <FieldLabel htmlFor="edit-date">Datum</FieldLabel>
+                  <Input
+                    id="edit-date"
+                    type="date"
+                    value={editData.appointment_date}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        appointment_date: e.target.value,
+                      })
+                    }
+                    className="[&::-webkit-calendar-picker-indicator]:hidden"
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="edit-time">Tijd</FieldLabel>
+                  <Input
+                    id="edit-time"
+                    type="time"
+                    value={editData.appointment_time}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        appointment_time: e.target.value,
+                      })
+                    }
+                    className="[&::-webkit-calendar-picker-indicator]:hidden"
+                  />
+                </Field>
               </div>
-              <div className="space-y-2">
-                <Label>Tijd</Label>
-                <Input
-                  type="time"
-                  value={editData.appointment_time}
-                  onChange={(e) =>
-                    setEditData({ ...editData, appointment_time: e.target.value })
+
+              <Field>
+                <FieldLabel htmlFor="edit-status">Status</FieldLabel>
+                <Select
+                  value={editData.status}
+                  onValueChange={(value) =>
+                    setEditData({
+                      ...editData,
+                      status: value as AppointmentStatus,
+                    })
                   }
-                  className="[&::-webkit-calendar-picker-indicator]:hidden"
-                />
-              </div>
-            </div>
+                >
+                  <SelectTrigger id="edit-status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="confirmed">Bevestigd</SelectItem>
+                    <SelectItem value="completed">Afgerond</SelectItem>
+                    <SelectItem value="cancelled">Geannuleerd</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+            </FieldSet>
 
-            <div className="space-y-2">
-              <Label>Status</Label>
-              <Select
-                value={editData.status}
-                onValueChange={(value) =>
-                  setEditData({ ...editData, status: value as AppointmentStatus })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="confirmed">Bevestigd</SelectItem>
-                  <SelectItem value="completed">Afgerond</SelectItem>
-                  <SelectItem value="cancelled">Geannuleerd</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <FieldSeparator />
 
-            <Separator />
-
-            <div className="space-y-2">
-              <Label>Naam</Label>
-              <Input
-                value={editData.customer_name}
-                onChange={(e) =>
-                  setEditData({ ...editData, customer_name: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>E-mail</Label>
+            {/* Customer info */}
+            <FieldSet>
+              <Field>
+                <FieldLabel htmlFor="edit-name">Naam</FieldLabel>
                 <Input
-                  type="email"
-                  value={editData.customer_email}
+                  id="edit-name"
+                  value={editData.customer_name}
                   onChange={(e) =>
-                    setEditData({ ...editData, customer_email: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Telefoon</Label>
-                <Input
-                  value={editData.customer_phone}
-                  onChange={(e) =>
-                    setEditData({ ...editData, customer_phone: e.target.value })
+                    setEditData({ ...editData, customer_name: e.target.value })
                   }
                 />
+              </Field>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Field>
+                  <FieldLabel htmlFor="edit-email">E-mail</FieldLabel>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={editData.customer_email}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        customer_email: e.target.value,
+                      })
+                    }
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="edit-phone">Telefoon</FieldLabel>
+                  <Input
+                    id="edit-phone"
+                    value={editData.customer_phone}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        customer_phone: e.target.value,
+                      })
+                    }
+                  />
+                </Field>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label>Straat en huisnummer</Label>
-              <Input
-                value={editData.customer_street}
-                onChange={(e) =>
-                  setEditData({ ...editData, customer_street: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Postcode</Label>
+              <Field>
+                <FieldLabel htmlFor="edit-street">
+                  Straat en huisnummer
+                </FieldLabel>
                 <Input
-                  value={editData.customer_postal_code}
+                  id="edit-street"
+                  value={editData.customer_street}
                   onChange={(e) =>
-                    setEditData({ ...editData, customer_postal_code: e.target.value })
+                    setEditData({
+                      ...editData,
+                      customer_street: e.target.value,
+                    })
                   }
                 />
+              </Field>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Field>
+                  <FieldLabel htmlFor="edit-postal">Postcode</FieldLabel>
+                  <Input
+                    id="edit-postal"
+                    value={editData.customer_postal_code}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        customer_postal_code: e.target.value,
+                      })
+                    }
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="edit-city">Plaats</FieldLabel>
+                  <Input
+                    id="edit-city"
+                    value={editData.customer_city}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        customer_city: e.target.value,
+                      })
+                    }
+                  />
+                </Field>
               </div>
-              <div className="space-y-2">
-                <Label>Plaats</Label>
-                <Input
-                  value={editData.customer_city}
+            </FieldSet>
+
+            <FieldSeparator />
+
+            {/* Notes */}
+            <FieldSet>
+              <Field>
+                <FieldLabel htmlFor="edit-remarks">Opmerkingen klant</FieldLabel>
+                <Textarea
+                  id="edit-remarks"
+                  value={editData.remarks}
                   onChange={(e) =>
-                    setEditData({ ...editData, customer_city: e.target.value })
+                    setEditData({ ...editData, remarks: e.target.value })
                   }
+                  rows={2}
                 />
-              </div>
-            </div>
+              </Field>
 
-            <div className="space-y-2">
-              <Label>Opmerkingen klant</Label>
-              <Textarea
-                value={editData.remarks}
-                onChange={(e) =>
-                  setEditData({ ...editData, remarks: e.target.value })
-                }
-                rows={2}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Interne notities (admin)</Label>
-              <Textarea
-                value={editData.admin_notes}
-                onChange={(e) =>
-                  setEditData({ ...editData, admin_notes: e.target.value })
-                }
-                rows={2}
-                placeholder="Alleen zichtbaar voor beheerders..."
-              />
-            </div>
+              <Field>
+                <FieldLabel htmlFor="edit-admin-notes">
+                  Interne notities
+                </FieldLabel>
+                <Textarea
+                  id="edit-admin-notes"
+                  value={editData.admin_notes}
+                  onChange={(e) =>
+                    setEditData({ ...editData, admin_notes: e.target.value })
+                  }
+                  rows={2}
+                  placeholder="Alleen zichtbaar voor beheerders..."
+                />
+              </Field>
+            </FieldSet>
 
             <DialogFooter>
-              <Button size="sm" variant="outline" onClick={() => setEditing(false)}>
-                Annuleren
-              </Button>
               <Button size="sm" onClick={handleSave} disabled={saving}>
-                {saving && <Loader2Icon className="size-4 animate-spin" />}
+                {saving ? (
+                  <Loader2Icon className="size-4 animate-spin" />
+                ) : (
+                  <CheckIcon className="size-4" />
+                )}
                 Opslaan
               </Button>
             </DialogFooter>
-          </div>
+          </FieldGroup>
         ) : (
           // View mode
           <div className="space-y-4">
@@ -415,7 +472,9 @@ export function AppointmentDialog({
               <>
                 <Separator />
                 <div>
-                  <Label className="text-muted-foreground">Opmerkingen</Label>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Opmerkingen
+                  </span>
                   <p className="text-sm mt-1 whitespace-pre-wrap">
                     {displayData.remarks}
                   </p>
@@ -428,10 +487,10 @@ export function AppointmentDialog({
               <>
                 <Separator />
                 <div>
-                  <Label className="text-muted-foreground">
+                  <span className="text-sm font-medium text-muted-foreground">
                     Interne notities
-                  </Label>
-                  <p className="text-sm mt-1 whitespace-pre-wrap bg-yellow-50 p-2 rounded">
+                  </span>
+                  <p className="text-sm mt-1 whitespace-pre-wrap bg-yellow-50 dark:bg-yellow-950 p-2 rounded">
                     {displayData.admin_notes}
                   </p>
                 </div>
