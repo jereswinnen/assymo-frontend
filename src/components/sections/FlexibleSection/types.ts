@@ -16,7 +16,6 @@ export interface FlexTextBlock extends BaseBlock {
   heading?: string;
   headingLevel?: "h2" | "h3" | "h4";
   text?: string; // HTML string from Tiptap
-  showButton?: boolean;
   button?: {
     label: string;
     action?: "link" | "openChatbot";

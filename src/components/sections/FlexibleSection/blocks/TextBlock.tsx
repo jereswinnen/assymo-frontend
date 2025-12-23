@@ -11,7 +11,7 @@ interface TextBlockProps {
 }
 
 export default function TextBlock({ block }: TextBlockProps) {
-  const { heading, headingLevel = "h2", text, showButton, button } = block;
+  const { heading, headingLevel = "h2", text, button } = block;
 
   const IconComponent =
     button?.icon && button.icon in iconMap ? iconMap[button.icon] : null;
@@ -42,7 +42,7 @@ export default function TextBlock({ block }: TextBlockProps) {
           </div>
         )}
       </div>
-      {showButton && button?.label && (
+      {button?.label && (
         button.action === "openChatbot" ? (
           <button
             onClick={handleOpenChatbot}
