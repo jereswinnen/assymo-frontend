@@ -34,7 +34,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
+import {
   CalendarOffIcon,
+  CheckIcon,
   GlobeIcon,
   Loader2Icon,
   RefreshCwIcon,
@@ -364,178 +373,170 @@ export function DateOverrides({
         </div>
       )}
 
-      {/* Create Dialog */}
-      <Dialog open={createDialogOpen} onOpenChange={onCreateDialogOpenChange}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CalendarOffIcon className="size-4" />
-              Uitzondering toevoegen
-            </DialogTitle>
-          </DialogHeader>
+      {/* Create Sheet */}
+      <Sheet open={createDialogOpen} onOpenChange={onCreateDialogOpenChange}>
+        <SheetContent className="flex flex-col overflow-hidden sm:max-w-xl">
+          <SheetHeader>
+            <SheetTitle>Uitzondering toevoegen</SheetTitle>
+            <SheetDescription>
+              Sluit de zaak op een specifieke datum of wijzig de openingstijden.
+            </SheetDescription>
+          </SheetHeader>
 
-          <FieldGroup>
-            {/* Date selection */}
-            <Field>
-              <FieldLabel>
-                {formData.hasDateRange ? "Begindatum" : "Datum"}
-              </FieldLabel>
-              <Input
-                type="date"
-                value={formData.date}
-                onChange={(e) =>
-                  setFormData({ ...formData, date: e.target.value })
-                }
-                min={
-                  formData.is_recurring
-                    ? undefined
-                    : new Date().toISOString().split("T")[0]
-                }
-                className="[&::-webkit-calendar-picker-indicator]:hidden"
-              />
-            </Field>
-
-            {/* Date range toggle */}
-            <Field orientation="horizontal">
-              <FieldLabel htmlFor="hasDateRange">
-                Meerdere dagen
-                <FieldDescription>Sluiting voor een periode</FieldDescription>
-              </FieldLabel>
-              <Switch
-                id="hasDateRange"
-                checked={formData.hasDateRange}
-                onCheckedChange={(checked) =>
-                  setFormData({
-                    ...formData,
-                    hasDateRange: checked,
-                    end_date: "",
-                  })
-                }
-              />
-            </Field>
-
-            {/* End date (conditional) */}
-            {formData.hasDateRange && (
+          <div className="flex-1 overflow-y-auto px-4">
+            <FieldGroup>
+              {/* Date selection */}
               <Field>
-                <FieldLabel>Einddatum</FieldLabel>
+                <FieldLabel>
+                  {formData.hasDateRange ? "Begindatum" : "Datum"}
+                </FieldLabel>
                 <Input
                   type="date"
-                  value={formData.end_date}
+                  value={formData.date}
                   onChange={(e) =>
-                    setFormData({ ...formData, end_date: e.target.value })
+                    setFormData({ ...formData, date: e.target.value })
                   }
-                  min={formData.date || new Date().toISOString().split("T")[0]}
+                  min={
+                    formData.is_recurring
+                      ? undefined
+                      : new Date().toISOString().split("T")[0]
+                  }
                   className="[&::-webkit-calendar-picker-indicator]:hidden"
                 />
               </Field>
-            )}
 
-            {/* Closed toggle */}
-            <Field orientation="horizontal">
-              <Checkbox
-                id="is_closed"
-                checked={formData.is_closed}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, is_closed: !!checked })
-                }
-              />
-              <FieldLabel htmlFor="is_closed">Volledig gesloten</FieldLabel>
-            </Field>
+              {/* Date range toggle */}
+              <Field orientation="horizontal">
+                <FieldLabel htmlFor="hasDateRange">Meerdere dagen</FieldLabel>
+                <Switch
+                  id="hasDateRange"
+                  checked={formData.hasDateRange}
+                  onCheckedChange={(checked) =>
+                    setFormData({
+                      ...formData,
+                      hasDateRange: checked,
+                      end_date: "",
+                    })
+                  }
+                />
+              </Field>
 
-            {/* Custom hours (conditional) */}
-            {!formData.is_closed && (
-              <div className="flex gap-4">
-                <Field className="flex-1">
-                  <FieldLabel>Van</FieldLabel>
+              {/* End date (conditional) */}
+              {formData.hasDateRange && (
+                <Field>
+                  <FieldLabel>Einddatum</FieldLabel>
                   <Input
-                    type="time"
-                    value={formData.open_time}
+                    type="date"
+                    value={formData.end_date}
                     onChange={(e) =>
-                      setFormData({ ...formData, open_time: e.target.value })
+                      setFormData({ ...formData, end_date: e.target.value })
+                    }
+                    min={
+                      formData.date || new Date().toISOString().split("T")[0]
                     }
                     className="[&::-webkit-calendar-picker-indicator]:hidden"
                   />
                 </Field>
-                <Field className="flex-1">
-                  <FieldLabel>Tot</FieldLabel>
-                  <Input
-                    type="time"
-                    value={formData.close_time}
-                    onChange={(e) =>
-                      setFormData({ ...formData, close_time: e.target.value })
-                    }
-                    className="[&::-webkit-calendar-picker-indicator]:hidden"
-                  />
-                </Field>
-              </div>
-            )}
+              )}
 
-            {/* Reason */}
-            <Field>
-              <FieldLabel>Reden (optioneel)</FieldLabel>
-              <Input
-                value={formData.reason}
-                onChange={(e) =>
-                  setFormData({ ...formData, reason: e.target.value })
-                }
-                placeholder="bijv. Feestdag, Vakantie..."
-              />
-            </Field>
+              {/* Closed toggle */}
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="is_closed"
+                  checked={formData.is_closed}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, is_closed: !!checked })
+                  }
+                />
+                <FieldLabel htmlFor="is_closed">Volledig gesloten</FieldLabel>
+              </Field>
 
-            <FieldSeparator />
+              {/* Custom hours (conditional) */}
+              {!formData.is_closed && (
+                <div className="flex gap-4">
+                  <Field className="flex-1">
+                    <FieldLabel>Van</FieldLabel>
+                    <Input
+                      type="time"
+                      value={formData.open_time}
+                      onChange={(e) =>
+                        setFormData({ ...formData, open_time: e.target.value })
+                      }
+                      className="[&::-webkit-calendar-picker-indicator]:hidden"
+                    />
+                  </Field>
+                  <Field className="flex-1">
+                    <FieldLabel>Tot</FieldLabel>
+                    <Input
+                      type="time"
+                      value={formData.close_time}
+                      onChange={(e) =>
+                        setFormData({ ...formData, close_time: e.target.value })
+                      }
+                      className="[&::-webkit-calendar-picker-indicator]:hidden"
+                    />
+                  </Field>
+                </div>
+              )}
 
-            {/* Recurring toggle */}
-            <Field orientation="horizontal">
-              <FieldLabel htmlFor="is_recurring">
-                <RefreshCwIcon className="size-4" />
-                Jaarlijks herhalen
-                <FieldDescription>
-                  Deze uitzondering herhaalt elk jaar
-                </FieldDescription>
-              </FieldLabel>
-              <Switch
-                id="is_recurring"
-                checked={formData.is_recurring}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, is_recurring: checked })
-                }
-              />
-            </Field>
+              {/* Reason */}
+              <Field>
+                <FieldLabel>Reden (optioneel)</FieldLabel>
+                <Input
+                  value={formData.reason}
+                  onChange={(e) =>
+                    setFormData({ ...formData, reason: e.target.value })
+                  }
+                  placeholder="bijv. Feestdag, Vakantie..."
+                />
+              </Field>
 
-            {/* Show on website toggle */}
-            <Field orientation="horizontal">
-              <FieldLabel htmlFor="show_on_website">
-                <GlobeIcon className="size-4" />
-                Toon op website
-                <FieldDescription>
-                  Bezoekers zien dat we gesloten zijn
-                </FieldDescription>
-              </FieldLabel>
-              <Switch
-                id="show_on_website"
-                checked={formData.show_on_website}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, show_on_website: checked })
-                }
-              />
-            </Field>
-          </FieldGroup>
+              <FieldSeparator />
 
-          <DialogFooter>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onCreateDialogOpenChange(false)}
-            >
-              Annuleren
+              {/* Recurring toggle */}
+              <Field orientation="horizontal">
+                <FieldLabel htmlFor="is_recurring">
+                  <RefreshCwIcon className="size-4" />
+                  Jaarlijks herhalen
+                </FieldLabel>
+                <Switch
+                  id="is_recurring"
+                  checked={formData.is_recurring}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, is_recurring: checked })
+                  }
+                />
+              </Field>
+
+              {/* Show on website toggle */}
+              <Field orientation="horizontal">
+                <FieldLabel htmlFor="show_on_website">
+                  <GlobeIcon className="size-4" />
+                  Toon op website
+                </FieldLabel>
+                <Switch
+                  id="show_on_website"
+                  checked={formData.show_on_website}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, show_on_website: checked })
+                  }
+                />
+              </Field>
+            </FieldGroup>
+          </div>
+
+          <SheetFooter>
+            <Button onClick={handleCreate} disabled={saving || !formData.date}>
+              {saving ? (
+                <Loader2Icon className="size-4 animate-spin" />
+              ) : (
+                <CheckIcon className="size-4" />
+              )}
+              Opslaan
             </Button>
-            <Button size="sm" onClick={handleCreate} disabled={saving}>
-              {saving && <Loader2Icon className="size-4 animate-spin" />}
-              Toevoegen
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
 
       {/* Delete Confirmation Dialog */}
       <Dialog
