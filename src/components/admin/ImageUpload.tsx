@@ -56,7 +56,7 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
       // Upload directly to Vercel Blob
       const blob = await upload(file.name, file, {
         access: "public",
-        handleUploadUrl: "/api/admin/content/images/client-upload",
+        handleUploadUrl: "/api/admin/content/images/upload",
       });
 
       // Trigger alt text generation in background
