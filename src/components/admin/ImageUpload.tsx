@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
+import { upload } from "@vercel/blob/client";
 import { Button } from "@/components/ui/button";
 import {
   Item,
@@ -12,6 +13,8 @@ import {
 import { ImageIcon, Loader2Icon, Trash2Icon, UploadIcon } from "lucide-react";
 import { toast } from "sonner";
 import { MediaLibraryDialog } from "./MediaLibraryDialog";
+
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
 export interface ImageValue {
   url: string;
@@ -42,29 +45,28 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
       return;
     }
 
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Afbeelding mag maximaal 10MB zijn");
+    // Validate file size (max 25MB)
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("Afbeelding mag maximaal 25MB zijn");
       return;
     }
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/admin/content/images/upload", {
-        method: "POST",
-        body: formData,
+      // Upload directly to Vercel Blob
+      const blob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/admin/content/images/client-upload",
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Upload failed");
-      }
+      // Trigger alt text generation in background
+      fetch("/api/admin/content/images/generate-alt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: blob.url, fileName: file.name }),
+      });
 
-      const { url } = await response.json();
-      onChange({ url });
+      onChange({ url: blob.url });
       toast.success("Afbeelding geupload");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload mislukt");
