@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { upload } from "@vercel/blob/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,6 +28,8 @@ import {
 } from "lucide-react";
 import { formatFileSize, formatDateShort } from "@/lib/format";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
 interface MediaItem {
   url: string;
@@ -141,35 +144,34 @@ export default function MediaPage() {
           continue;
         }
 
-        // Validate file size (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
+        // Validate file size (max 25MB)
+        if (file.size > MAX_FILE_SIZE) {
           errorCount++;
           continue;
         }
 
         try {
-          const formData = new FormData();
-          formData.append("file", file);
-
-          const response = await fetch("/api/admin/content/images/upload", {
-            method: "POST",
-            body: formData,
+          // Upload directly to Vercel Blob
+          const blob = await upload(file.name, file, {
+            access: "public",
+            handleUploadUrl: "/api/admin/content/images/upload",
           });
 
-          if (response.ok) {
-            const { url, filename } = await response.json();
-            // Add to uploaded list with file info
-            uploadedItems.push({
-              url,
-              pathname: filename,
-              size: file.size,
-              uploadedAt: new Date().toISOString(),
-              displayName: filename,
-              altText: null, // Alt text generated in background
-            });
-          } else {
-            errorCount++;
-          }
+          // Trigger alt text generation in background
+          fetch("/api/admin/content/images/generate-alt", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: blob.url, fileName: file.name }),
+          });
+
+          uploadedItems.push({
+            url: blob.url,
+            pathname: blob.pathname,
+            size: file.size,
+            uploadedAt: new Date().toISOString(),
+            displayName: file.name,
+            altText: null,
+          });
         } catch {
           errorCount++;
         }
