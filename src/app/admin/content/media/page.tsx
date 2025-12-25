@@ -4,6 +4,15 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { upload } from "@vercel/blob/client";
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,7 +28,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
+  ArrowLeftIcon,
   CloudUploadIcon,
+  FolderPlusIcon,
   ImageIcon,
   Loader2Icon,
   SearchIcon,
@@ -28,6 +39,10 @@ import {
 } from "lucide-react";
 import { formatFileSize, formatDateShort } from "@/lib/format";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { CreateFolderDialog } from "@/components/admin/CreateFolderDialog";
+import { FolderThumbnail } from "@/components/admin/FolderThumbnail";
+import { DraggableImage } from "@/components/admin/DraggableImage";
+import type { MediaFolder } from "@/app/api/admin/content/media/folders/route";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
@@ -38,39 +53,61 @@ interface MediaItem {
   uploadedAt: string;
   displayName: string | null;
   altText: string | null;
+  folderId: string | null;
 }
 
 export default function MediaPage() {
   const [media, setMedia] = useState<MediaItem[]>([]);
+  const [folders, setFolders] = useState<MediaFolder[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Current folder navigation
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [currentFolderName, setCurrentFolderName] = useState<string | null>(
+    null
+  );
+
+  // Create folder dialog
+  const [createFolderOpen, setCreateFolderOpen] = useState(false);
 
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<MediaItem | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Drag and drop
+  // Drag and drop for files
   const [isDragging, setIsDragging] = useState(false);
   const dragCounter = useRef(0);
+
+  // Drag and drop for moving images (dnd-kit)
+  const [draggedImage, setDraggedImage] = useState<MediaItem | null>(null);
 
   // Track items pending alt text generation
   const pendingAltTextUrls = useRef<Set<string>>(new Set());
   const isMountedRef = useRef(true);
   const MAX_POLL_ATTEMPTS = 10;
 
+  // dnd-kit sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+
   useEffect(() => {
-    fetchMedia();
+    fetchData();
     return () => {
       isMountedRef.current = false;
     };
-  }, []);
+  }, [currentFolderId]);
 
   // Poll for alt text updates on items that don't have it yet
   const pollForAltText = useCallback(async (urls: string[], attempt = 1) => {
     if (urls.length === 0 || !isMountedRef.current) return;
 
-    // Wait 3 seconds before first poll, 2 seconds for subsequent
     const delay = attempt === 1 ? 3000 : 2000;
     await new Promise((resolve) => setTimeout(resolve, delay));
 
@@ -79,16 +116,15 @@ export default function MediaPage() {
     for (const url of urls) {
       try {
         const response = await fetch(
-          `/api/admin/content/media/${encodeURIComponent(url)}`,
+          `/api/admin/content/media/${encodeURIComponent(url)}`
         );
         if (response.ok) {
           const data = await response.json();
           if (data.altText) {
-            // Update the item in state
             setMedia((prev) =>
               prev.map((item) =>
-                item.url === url ? { ...item, altText: data.altText } : item,
-              ),
+                item.url === url ? { ...item, altText: data.altText } : item
+              )
             );
             pendingAltTextUrls.current.delete(url);
           }
@@ -98,9 +134,8 @@ export default function MediaPage() {
       }
     }
 
-    // If there are still pending items and we haven't exceeded max attempts, poll again
     const stillPending = urls.filter((url) =>
-      pendingAltTextUrls.current.has(url),
+      pendingAltTextUrls.current.has(url)
     );
     if (
       stillPending.length > 0 &&
@@ -109,18 +144,31 @@ export default function MediaPage() {
     ) {
       pollForAltText(stillPending, attempt + 1);
     } else if (stillPending.length > 0) {
-      // Clear remaining pending URLs after max attempts
       stillPending.forEach((url) => pendingAltTextUrls.current.delete(url));
     }
   }, []);
 
-  const fetchMedia = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/admin/content/media");
-      if (!response.ok) throw new Error("Failed to fetch");
-      const data = await response.json();
-      setMedia(data);
+      // Fetch folders and media in parallel
+      const folderParam = currentFolderId ? currentFolderId : "root";
+      const [foldersRes, mediaRes] = await Promise.all([
+        currentFolderId
+          ? Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
+          : fetch("/api/admin/content/media/folders"),
+        fetch(`/api/admin/content/media?folderId=${folderParam}`),
+      ]);
+
+      if (foldersRes.ok && !currentFolderId) {
+        const foldersData = await foldersRes.json();
+        setFolders(foldersData);
+      }
+
+      if (mediaRes.ok) {
+        const mediaData = await mediaRes.json();
+        setMedia(mediaData);
+      }
     } catch {
       toast.error("Kon media niet ophalen");
     } finally {
@@ -128,7 +176,6 @@ export default function MediaPage() {
     }
   };
 
-  // Core upload function that can be called from input change or drag-drop
   const uploadFiles = useCallback(
     async (files: File[]) => {
       if (files.length === 0) return;
@@ -138,30 +185,31 @@ export default function MediaPage() {
       let errorCount = 0;
 
       for (const file of files) {
-        // Validate file type
         if (!file.type.startsWith("image/")) {
           errorCount++;
           continue;
         }
 
-        // Validate file size (max 25MB)
         if (file.size > MAX_FILE_SIZE) {
           errorCount++;
           continue;
         }
 
         try {
-          // Upload directly to Vercel Blob
           const blob = await upload(file.name, file, {
             access: "public",
             handleUploadUrl: "/api/admin/content/images/upload",
           });
 
-          // Trigger alt text generation in background
+          // Trigger alt text generation with folder context
           fetch("/api/admin/content/images/generate-alt", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: blob.url, fileName: file.name }),
+            body: JSON.stringify({
+              url: blob.url,
+              fileName: file.name,
+              folderId: currentFolderId,
+            }),
           });
 
           uploadedItems.push({
@@ -171,6 +219,7 @@ export default function MediaPage() {
             uploadedAt: new Date().toISOString(),
             displayName: file.name,
             altText: null,
+            folderId: currentFolderId,
           });
         } catch {
           errorCount++;
@@ -179,25 +228,34 @@ export default function MediaPage() {
 
       setUploading(false);
 
-      // Add uploaded items to state (newest first)
       if (uploadedItems.length > 0) {
         setMedia((prev) => [...uploadedItems, ...prev]);
         toast.success(
-          `${uploadedItems.length} afbeelding${uploadedItems.length > 1 ? "en" : ""} geupload`,
+          `${uploadedItems.length} afbeelding${uploadedItems.length > 1 ? "en" : ""} geupload`
         );
 
-        // Track these URLs for polling
         const newUrls = uploadedItems.map((item) => item.url);
         newUrls.forEach((url) => pendingAltTextUrls.current.add(url));
         pollForAltText(newUrls);
+
+        // Update folder item count if in a folder
+        if (currentFolderId) {
+          setFolders((prev) =>
+            prev.map((f) =>
+              f.id === currentFolderId
+                ? { ...f, itemCount: f.itemCount + uploadedItems.length }
+                : f
+            )
+          );
+        }
       }
       if (errorCount > 0) {
         toast.error(
-          `${errorCount} afbeelding${errorCount > 1 ? "en" : ""} mislukt`,
+          `${errorCount} afbeelding${errorCount > 1 ? "en" : ""} mislukt`
         );
       }
     },
-    [pollForAltText],
+    [currentFolderId, pollForAltText]
   );
 
   const handleUpload = useCallback(
@@ -207,10 +265,10 @@ export default function MediaPage() {
       uploadFiles(Array.from(files));
       e.target.value = "";
     },
-    [uploadFiles],
+    [uploadFiles]
   );
 
-  // Drag and drop handlers
+  // File drag and drop handlers
   useEffect(() => {
     const handleDragEnter = (e: DragEvent) => {
       e.preventDefault();
@@ -256,6 +314,65 @@ export default function MediaPage() {
     };
   }, [uploadFiles]);
 
+  // dnd-kit handlers for moving images
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    if (active.data.current?.type === "image") {
+      const image = media.find((m) => m.url === active.data.current?.url);
+      setDraggedImage(image || null);
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    setDraggedImage(null);
+
+    if (!over) return;
+
+    const activeData = active.data.current;
+    const overData = over.data.current;
+
+    if (activeData?.type === "image" && overData?.type === "folder") {
+      const imageUrl = activeData.url as string;
+      const targetFolderId = overData.folderId as string;
+
+      // Optimistically update UI
+      setMedia((prev) => prev.filter((m) => m.url !== imageUrl));
+      setFolders((prev) =>
+        prev.map((f) =>
+          f.id === targetFolderId ? { ...f, itemCount: f.itemCount + 1 } : f
+        )
+      );
+
+      try {
+        const response = await fetch(
+          `/api/admin/content/media/${encodeURIComponent(imageUrl)}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ folderId: targetFolderId }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to move image");
+        }
+
+        // Refetch folder previews
+        const foldersRes = await fetch("/api/admin/content/media/folders");
+        if (foldersRes.ok) {
+          setFolders(await foldersRes.json());
+        }
+
+        toast.success("Afbeelding verplaatst");
+      } catch {
+        // Revert on error
+        fetchData();
+        toast.error("Kon afbeelding niet verplaatsen");
+      }
+    }
+  };
+
   const deleteMedia = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!deleteTarget) return;
@@ -270,7 +387,6 @@ export default function MediaPage() {
 
       const data = await response.json();
 
-      // Close dialog first
       setDeleting(false);
       setDeleteTarget(null);
 
@@ -289,7 +405,33 @@ export default function MediaPage() {
     }
   };
 
-  // Filter media by search query (search in displayName, pathname, and altText)
+  const handleFolderClick = (folder: MediaFolder) => {
+    setCurrentFolderId(folder.id);
+    setCurrentFolderName(folder.name);
+    setSearchQuery("");
+  };
+
+  const handleBackClick = () => {
+    setCurrentFolderId(null);
+    setCurrentFolderName(null);
+    setSearchQuery("");
+  };
+
+  const handleFolderCreated = (folder: { id: string; name: string }) => {
+    setFolders((prev) => [
+      ...prev,
+      {
+        id: folder.id,
+        name: folder.name,
+        createdAt: new Date().toISOString(),
+        itemCount: 0,
+        previewImages: [],
+      },
+    ]);
+    toast.success("Map aangemaakt");
+  };
+
+  // Filter media by search query
   const filteredMedia = media.filter((item) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -299,187 +441,269 @@ export default function MediaPage() {
     );
   });
 
+  // Filter folders by search query (only at root level)
+  const filteredFolders = folders.filter((folder) =>
+    folder.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // Header actions
   const headerActions = useMemo(
     () => (
-      <label>
-        <Button size="sm" disabled={uploading} asChild>
-          <span className="cursor-pointer">
-            {uploading ? (
-              <>
-                <Loader2Icon className="size-4 animate-spin" />
-                Uploaden...
-              </>
-            ) : (
-              <>
-                <UploadIcon className="size-4" />
-                Upload
-              </>
-            )}
-          </span>
-        </Button>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          onChange={handleUpload}
-          disabled={uploading}
-        />
-      </label>
+      <div className="flex items-center gap-2">
+        {!currentFolderId && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setCreateFolderOpen(true)}
+          >
+            <FolderPlusIcon className="size-4" />
+            Nieuwe map
+          </Button>
+        )}
+        <label>
+          <Button size="sm" disabled={uploading} asChild>
+            <span className="cursor-pointer">
+              {uploading ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin" />
+                  Uploaden...
+                </>
+              ) : (
+                <>
+                  <UploadIcon className="size-4" />
+                  Upload
+                </>
+              )}
+            </span>
+          </Button>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={handleUpload}
+            disabled={uploading}
+          />
+        </label>
+      </div>
     ),
-    [uploading, handleUpload],
+    [uploading, handleUpload, currentFolderId]
   );
   useAdminHeaderActions(headerActions);
 
   return (
-    <div className="space-y-6">
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Zoek op bestandsnaam..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9"
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="space-y-6">
+        {/* Back button when in folder */}
+        {currentFolderId && (
+          <button
+            onClick={handleBackClick}
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeftIcon className="size-4" />
+            <span>Terug naar overzicht</span>
+          </button>
+        )}
+
+        {/* Folder title when inside a folder */}
+        {currentFolderName && (
+          <h2 className="text-xl font-semibold">{currentFolderName}</h2>
+        )}
+
+        {/* Search */}
+        <div className="relative max-w-sm">
+          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Zoek op bestandsnaam..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : filteredFolders.length === 0 && filteredMedia.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <ImageIcon className="size-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground mb-4">
+                {searchQuery
+                  ? "Geen resultaten gevonden"
+                  : currentFolderId
+                    ? "Deze map is leeg"
+                    : "Nog geen afbeeldingen geupload"}
+              </p>
+              {!searchQuery && (
+                <label>
+                  <Button size="sm" asChild>
+                    <span className="cursor-pointer">
+                      <UploadIcon className="size-4" />
+                      {currentFolderId
+                        ? "Afbeelding toevoegen"
+                        : "Eerste afbeelding uploaden"}
+                    </span>
+                  </Button>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleUpload}
+                  />
+                </label>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {/* Folders first (only at root level) */}
+            {!currentFolderId &&
+              filteredFolders.map((folder) => (
+                <FolderThumbnail
+                  key={folder.id}
+                  id={folder.id}
+                  name={folder.name}
+                  itemCount={folder.itemCount}
+                  previewImages={folder.previewImages}
+                  onClick={() => handleFolderClick(folder)}
+                />
+              ))}
+
+            {/* Images */}
+            {filteredMedia.map((item) => {
+              const name = item.displayName || item.pathname;
+              return (
+                <DraggableImage key={item.url} id={item.url} url={item.url}>
+                  <Link
+                    href={`/admin/content/media/${encodeURIComponent(item.url)}`}
+                    className="group relative aspect-square overflow-hidden rounded-lg shadow-sm transition-all duration-300 ease-in-out hover:scale-103 will-change-transform block"
+                  >
+                    <Image
+                      src={item.url}
+                      alt={item.altText || name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+                    />
+                    {/* Alt text generating indicator */}
+                    {!item.altText && (
+                      <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+                        <Loader2Icon className="size-3 animate-spin" />
+                        <span>Alt-tekst</span>
+                      </div>
+                    )}
+                    {/* Delete button in top-right corner */}
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setDeleteTarget(item);
+                        }}
+                        title="Verwijderen"
+                      >
+                        <Trash2Icon className="size-4" />
+                      </Button>
+                    </div>
+                    {/* Overlay info at bottom */}
+                    <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/90 to-transparent p-3 pt-6">
+                      <p
+                        className="mb-1! text-xs font-medium text-white truncate"
+                        title={name}
+                      >
+                        {name}
+                      </p>
+                      <p className="text-xs text-white/80">
+                        {formatFileSize(item.size)} •{" "}
+                        {formatDateShort(item.uploadedAt)}
+                      </p>
+                    </div>
+                  </Link>
+                </DraggableImage>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Drag overlay for images being moved */}
+        <DragOverlay>
+          {draggedImage && (
+            <div className="relative aspect-square w-24 overflow-hidden rounded-lg shadow-2xl opacity-80">
+              <Image
+                src={draggedImage.url}
+                alt=""
+                fill
+                className="object-cover"
+              />
+            </div>
+          )}
+        </DragOverlay>
+
+        {/* File drag and drop overlay */}
+        {isDragging && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-muted/80 animate-in fade-in duration-150">
+            <div className="flex flex-col items-center gap-1 animate-in zoom-in-95 duration-150">
+              <CloudUploadIcon className="size-6 animate-pulse" />
+              <p className="text-sm text-muted-foreground">
+                Laat los om te uploaden
+                {currentFolderName && ` in "${currentFolderName}"`}...
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Delete confirmation */}
+        <AlertDialog
+          open={!!deleteTarget}
+          onOpenChange={() => setDeleteTarget(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Afbeelding verwijderen?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Weet je zeker dat je &quot;
+                {deleteTarget?.displayName || deleteTarget?.pathname}&quot; wilt
+                verwijderen? Dit kan niet ongedaan worden gemaakt.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>
+                Annuleren
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={deleteMedia}
+                disabled={deleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2Icon className="size-4 animate-spin" />
+                    Verwijderen...
+                  </>
+                ) : (
+                  "Verwijderen"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Create folder dialog */}
+        <CreateFolderDialog
+          open={createFolderOpen}
+          onOpenChange={setCreateFolderOpen}
+          onCreated={handleFolderCreated}
         />
       </div>
-
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
-        </div>
-      ) : filteredMedia.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <ImageIcon className="size-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-4">
-              {searchQuery
-                ? "Geen afbeeldingen gevonden"
-                : "Nog geen afbeeldingen geupload"}
-            </p>
-            {!searchQuery && (
-              <label>
-                <Button size="sm" asChild>
-                  <span className="cursor-pointer">
-                    <UploadIcon className="size-4" />
-                    Eerste afbeelding uploaden
-                  </span>
-                </Button>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={handleUpload}
-                />
-              </label>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {filteredMedia.map((item) => {
-            const name = item.displayName || item.pathname;
-            return (
-              <Link
-                key={item.url}
-                href={`/admin/content/media/${encodeURIComponent(item.url)}`}
-                className="group relative aspect-square overflow-hidden rounded-lg shadow-sm transition-all duration-300 ease-in-out hover:scale-103 will-change-transform"
-              >
-                <Image
-                  src={item.url}
-                  alt={item.altText || name}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-                />
-                {/* Alt text generating indicator */}
-                {!item.altText && (
-                  <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-                    <Loader2Icon className="size-3 animate-spin" />
-                    <span>Alt-tekst</span>
-                  </div>
-                )}
-                {/* Delete button in top-right corner */}
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setDeleteTarget(item);
-                    }}
-                    title="Verwijderen"
-                  >
-                    <Trash2Icon className="size-4" />
-                  </Button>
-                </div>
-                {/* Overlay info at bottom */}
-                <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/90 to-transparent p-3 pt-6">
-                  <p
-                    className="mb-1! text-xs font-medium text-white truncate"
-                    title={name}
-                  >
-                    {name}
-                  </p>
-                  <p className="text-xs text-white/80">
-                    {formatFileSize(item.size)} •{" "}
-                    {formatDateShort(item.uploadedAt)}
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Drag and drop overlay */}
-      {isDragging && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-muted/80 animate-in fade-in duration-150">
-          <div className="flex flex-col items-center gap-1 animate-in zoom-in-95 duration-150">
-            <CloudUploadIcon className="size-6 animate-pulse" />
-            <p className="text-sm text-muted-foreground">
-              Laat los om te uploaden...
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Delete confirmation */}
-      <AlertDialog
-        open={!!deleteTarget}
-        onOpenChange={() => setDeleteTarget(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Afbeelding verwijderen?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Weet je zeker dat je &quot;
-              {deleteTarget?.displayName || deleteTarget?.pathname}&quot; wilt
-              verwijderen? Dit kan niet ongedaan worden gemaakt.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={deleteMedia}
-              disabled={deleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleting ? (
-                <>
-                  <Loader2Icon className="size-4 animate-spin" />
-                  Verwijderen...
-                </>
-              ) : (
-                "Verwijderen"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+    </DndContext>
   );
 }

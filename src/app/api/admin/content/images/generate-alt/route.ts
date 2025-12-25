@@ -9,7 +9,8 @@ const sql = neon(process.env.DATABASE_URL!);
 
 async function generateAndSaveAltText(
   imageUrl: string,
-  fileName: string
+  fileName: string,
+  folderId: string | null
 ): Promise<void> {
   try {
     const { text } = await generateText({
@@ -33,14 +34,26 @@ async function generateAndSaveAltText(
 
     const altText = text.trim();
 
-    await sql`
-      INSERT INTO image_metadata (url, alt_text, display_name)
-      VALUES (${imageUrl}, ${altText}, ${fileName})
-      ON CONFLICT (url) DO UPDATE SET
-        alt_text = ${altText},
-        display_name = ${fileName},
-        updated_at = NOW()
-    `;
+    if (folderId) {
+      await sql`
+        INSERT INTO image_metadata (url, alt_text, display_name, folder_id)
+        VALUES (${imageUrl}, ${altText}, ${fileName}, ${folderId}::uuid)
+        ON CONFLICT (url) DO UPDATE SET
+          alt_text = ${altText},
+          display_name = ${fileName},
+          folder_id = ${folderId}::uuid,
+          updated_at = NOW()
+      `;
+    } else {
+      await sql`
+        INSERT INTO image_metadata (url, alt_text, display_name)
+        VALUES (${imageUrl}, ${altText}, ${fileName})
+        ON CONFLICT (url) DO UPDATE SET
+          alt_text = ${altText},
+          display_name = ${fileName},
+          updated_at = NOW()
+      `;
+    }
 
     console.log("Alt text generated:", altText);
   } catch (error) {
@@ -56,7 +69,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { url, fileName } = await request.json();
+    const { url, fileName, folderId } = await request.json();
 
     if (!url || typeof url !== "string") {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
@@ -64,7 +77,11 @@ export async function POST(request: Request) {
 
     // Generate alt text in background after response is sent
     after(async () => {
-      await generateAndSaveAltText(url, fileName || url.split("/").pop() || "");
+      await generateAndSaveAltText(
+        url,
+        fileName || url.split("/").pop() || "",
+        folderId || null
+      );
     });
 
     return NextResponse.json({ success: true });

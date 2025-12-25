@@ -9,6 +9,7 @@ interface ImageMetadataRow {
   url: string;
   alt_text: string | null;
   display_name: string | null;
+  folder_id: string | null;
 }
 
 export async function GET(
@@ -32,7 +33,7 @@ export async function GET(
 
     // Get metadata from database (uses encoded URL as stored)
     const metadataRows = await sql`
-      SELECT url, alt_text, display_name FROM image_metadata WHERE url = ${dbUrl}
+      SELECT url, alt_text, display_name, folder_id FROM image_metadata WHERE url = ${dbUrl}
     ` as ImageMetadataRow[];
 
     const metadata = metadataRows[0];
@@ -151,6 +152,69 @@ export async function DELETE(
     console.error("Failed to delete image:", error);
     return NextResponse.json(
       { error: "Failed to delete image" },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH /api/admin/content/media/[url] - Move image to a folder
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ url: string }> }
+) {
+  try {
+    const authenticated = await isAuthenticated();
+    if (!authenticated) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { url: urlParam } = await params;
+    const dbUrl = urlParam;
+    const { folderId } = await request.json();
+
+    // folderId can be null (move to root) or a UUID string
+    if (folderId !== null && typeof folderId !== "string") {
+      return NextResponse.json(
+        { error: "Invalid folder ID" },
+        { status: 400 }
+      );
+    }
+
+    // Upsert the folder_id
+    if (folderId === null) {
+      await sql`
+        INSERT INTO image_metadata (url, folder_id)
+        VALUES (${dbUrl}, NULL)
+        ON CONFLICT (url) DO UPDATE SET
+          folder_id = NULL,
+          updated_at = NOW()
+      `;
+    } else {
+      // Verify folder exists
+      const folder = await sql`
+        SELECT id FROM media_folders WHERE id = ${folderId}::uuid
+      `;
+      if (folder.length === 0) {
+        return NextResponse.json(
+          { error: "Folder not found" },
+          { status: 404 }
+        );
+      }
+
+      await sql`
+        INSERT INTO image_metadata (url, folder_id)
+        VALUES (${dbUrl}, ${folderId}::uuid)
+        ON CONFLICT (url) DO UPDATE SET
+          folder_id = ${folderId}::uuid,
+          updated_at = NOW()
+      `;
+    }
+
+    return NextResponse.json({ success: true, folderId });
+  } catch (error) {
+    console.error("Failed to move image:", error);
+    return NextResponse.json(
+      { error: "Failed to move image" },
       { status: 500 }
     );
   }
