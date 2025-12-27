@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import {
   DndContext,
@@ -34,7 +35,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
-  ArrowLeftIcon,
   CloudUploadIcon,
   FolderPlusIcon,
   ImageIcon,
@@ -63,17 +63,18 @@ interface MediaItem {
 }
 
 export default function MediaPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Read folder from URL params
+  const currentFolderId = searchParams.get("folder");
+  const currentFolderName = searchParams.get("name");
+
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [folders, setFolders] = useState<MediaFolder[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Current folder navigation
-  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
-  const [currentFolderName, setCurrentFolderName] = useState<string | null>(
-    null
-  );
 
   // Create folder dialog
   const [createFolderOpen, setCreateFolderOpen] = useState(false);
@@ -412,15 +413,10 @@ export default function MediaPage() {
   };
 
   const handleFolderClick = (folder: MediaFolder) => {
-    setCurrentFolderId(folder.id);
-    setCurrentFolderName(folder.name);
     setSearchQuery("");
-  };
-
-  const handleBackClick = () => {
-    setCurrentFolderId(null);
-    setCurrentFolderName(null);
-    setSearchQuery("");
+    router.push(
+      `/admin/content/media?folder=${folder.id}&name=${encodeURIComponent(folder.name)}`
+    );
   };
 
   const handleFolderCreated = (folder: { id: string; name: string }) => {
@@ -504,22 +500,6 @@ export default function MediaPage() {
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-6">
-        {/* Back button when in folder */}
-        {currentFolderId && (
-          <button
-            onClick={handleBackClick}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeftIcon className="size-4" />
-            <span>Terug naar overzicht</span>
-          </button>
-        )}
-
-        {/* Folder title when inside a folder */}
-        {currentFolderName && (
-          <h2 className="text-xl font-semibold">{currentFolderName}</h2>
-        )}
-
         {/* Search */}
         <div className="relative max-w-sm">
           <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

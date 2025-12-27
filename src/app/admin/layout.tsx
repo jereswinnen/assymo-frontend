@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import {
@@ -30,7 +30,10 @@ interface BreadcrumbSegment {
   href?: string;
 }
 
-const getBreadcrumbs = (pathname: string): BreadcrumbSegment[] => {
+function useBreadcrumbs(): BreadcrumbSegment[] {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const routes: Record<string, string> = {
     "/admin/appointments": "Afspraken",
     "/admin/emails": "E-mails",
@@ -43,6 +46,18 @@ const getBreadcrumbs = (pathname: string): BreadcrumbSegment[] => {
     "/admin/content/navigation": "Navigatie",
     "/admin/content/parameters": "Parameters",
   };
+
+  // Media with folder param - show folder name in breadcrumb
+  if (pathname === "/admin/content/media") {
+    const folderName = searchParams.get("name");
+    if (folderName) {
+      return [
+        { label: "Media", href: "/admin/content/media" },
+        { label: folderName },
+      ];
+    }
+    return [{ label: "Media" }];
+  }
 
   // Static routes - single breadcrumb
   if (routes[pathname]) {
@@ -76,7 +91,7 @@ const getBreadcrumbs = (pathname: string): BreadcrumbSegment[] => {
   }
 
   return [{ label: "Admin" }];
-};
+}
 
 export default function AdminLayout({
   children,
@@ -84,6 +99,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
+  const breadcrumbs = useBreadcrumbs();
   const isAuthRoute = pathname.startsWith("/admin/auth");
 
   useEffect(() => {
@@ -99,8 +115,6 @@ export default function AdminLayout({
       </>
     );
   }
-
-  const breadcrumbs = getBreadcrumbs(pathname);
 
   return (
     <AdminHeaderProvider>
