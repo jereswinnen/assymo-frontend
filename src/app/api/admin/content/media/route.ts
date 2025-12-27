@@ -37,32 +37,12 @@ export async function GET(request: NextRequest) {
     // Get blobs from Vercel Blob
     const { blobs } = await list();
 
-    // Get metadata from database (with optional folder filter)
-    let metadataRows: ImageMetadataRow[];
+    // Always fetch ALL metadata so we have complete info for every blob
+    const allMetadataRows = (await sql`
+      SELECT url, alt_text, display_name, folder_id FROM image_metadata
+    `) as ImageMetadataRow[];
 
-    if (folderId === "root") {
-      // Get only root-level images (no folder)
-      metadataRows = (await sql`
-        SELECT url, alt_text, display_name, folder_id FROM image_metadata
-        WHERE folder_id IS NULL
-      `) as ImageMetadataRow[];
-    } else if (folderId) {
-      // Get images in specific folder
-      metadataRows = (await sql`
-        SELECT url, alt_text, display_name, folder_id FROM image_metadata
-        WHERE folder_id = ${folderId}::uuid
-      `) as ImageMetadataRow[];
-    } else {
-      // Get all images (for MediaLibraryDialog)
-      metadataRows = (await sql`
-        SELECT url, alt_text, display_name, folder_id FROM image_metadata
-      `) as ImageMetadataRow[];
-    }
-
-    const metadataMap = new Map(metadataRows.map((row) => [row.url, row]));
-
-    // Create a set of URLs that match our folder filter
-    const filteredUrls = new Set(metadataRows.map((row) => row.url));
+    const metadataMap = new Map(allMetadataRows.map((row) => [row.url, row]));
 
     // Sort by upload date (newest first) and merge with metadata
     let sortedBlobs: MediaItem[] = blobs
@@ -83,15 +63,15 @@ export async function GET(request: NextRequest) {
         };
       });
 
-    // If filtering by folder, only return matching images
-    // For "root" filter, include blobs without metadata (newly uploaded, not yet in DB)
+    // Filter based on folder parameter
     if (folderId === "root") {
-      sortedBlobs = sortedBlobs.filter(
-        (blob) => filteredUrls.has(blob.url) || !metadataMap.has(blob.url)
-      );
+      // Root: images with no folder_id (including those not in DB yet)
+      sortedBlobs = sortedBlobs.filter((blob) => blob.folderId === null);
     } else if (folderId) {
-      sortedBlobs = sortedBlobs.filter((blob) => filteredUrls.has(blob.url));
+      // Specific folder: only images with matching folder_id
+      sortedBlobs = sortedBlobs.filter((blob) => blob.folderId === folderId);
     }
+    // No folderId param: return all images (for MediaLibraryDialog)
 
     return NextResponse.json(sortedBlobs);
   } catch (error) {

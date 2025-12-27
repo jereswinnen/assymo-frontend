@@ -32,8 +32,8 @@ export function FolderThumbnail({
       onClick={onClick}
       className={cn(
         "group relative aspect-square overflow-hidden rounded-lg bg-muted transition-all duration-200",
-        "hover:ring-2 hover:ring-primary/50 focus:outline-none focus:ring-2 focus:ring-primary",
-        isOver && "ring-2 ring-primary bg-primary/10 scale-105"
+        "focus:outline-none focus:ring-2 focus:ring-primary",
+        isOver && "bg-primary/10 scale-105"
       )}
     >
       {/* Preview grid */}
@@ -89,10 +89,6 @@ export function FolderThumbnail({
         </p>
       </div>
 
-      {/* Drop indicator */}
-      {isOver && (
-        <div className="absolute inset-0 border-2 border-primary border-dashed rounded-lg pointer-events-none" />
-      )}
     </button>
   );
 }
