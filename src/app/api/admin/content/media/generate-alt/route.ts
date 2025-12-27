@@ -15,11 +15,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { url } = await request.json();
+    const { url, folderId } = await request.json();
 
     if (!url) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
     }
+
+    // Validate folderId if provided
+    const validFolderId = folderId && typeof folderId === "string" ? folderId : null;
 
     // Fetch the image and convert to base64
     const imageResponse = await fetch(url);
@@ -57,14 +60,25 @@ export async function POST(request: Request) {
 
     const altText = text.trim();
 
-    // Save to database
-    await sql`
-      INSERT INTO image_metadata (url, alt_text)
-      VALUES (${url}, ${altText})
-      ON CONFLICT (url) DO UPDATE SET
-        alt_text = ${altText},
-        updated_at = NOW()
-    `;
+    // Save to database (include folder_id if provided)
+    if (validFolderId) {
+      await sql`
+        INSERT INTO image_metadata (url, alt_text, folder_id)
+        VALUES (${url}, ${altText}, ${validFolderId}::uuid)
+        ON CONFLICT (url) DO UPDATE SET
+          alt_text = ${altText},
+          folder_id = COALESCE(image_metadata.folder_id, ${validFolderId}::uuid),
+          updated_at = NOW()
+      `;
+    } else {
+      await sql`
+        INSERT INTO image_metadata (url, alt_text)
+        VALUES (${url}, ${altText})
+        ON CONFLICT (url) DO UPDATE SET
+          alt_text = ${altText},
+          updated_at = NOW()
+      `;
+    }
 
     return NextResponse.json({ altText });
   } catch (error) {
