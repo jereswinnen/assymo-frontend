@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -30,10 +30,10 @@ interface BreadcrumbSegment {
   href?: string;
 }
 
-function useBreadcrumbs(): BreadcrumbSegment[] {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
+function getBreadcrumbs(
+  pathname: string,
+  folderName: string | null
+): BreadcrumbSegment[] {
   const routes: Record<string, string> = {
     "/admin/appointments": "Afspraken",
     "/admin/emails": "E-mails",
@@ -49,7 +49,6 @@ function useBreadcrumbs(): BreadcrumbSegment[] {
 
   // Media with folder param - show folder name in breadcrumb
   if (pathname === "/admin/content/media") {
-    const folderName = searchParams.get("name");
     if (folderName) {
       return [
         { label: "Media", href: "/admin/content/media" },
@@ -93,13 +92,40 @@ function useBreadcrumbs(): BreadcrumbSegment[] {
   return [{ label: "Admin" }];
 }
 
+function AdminBreadcrumbs() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const folderName = searchParams.get("name");
+  const breadcrumbs = getBreadcrumbs(pathname, folderName);
+
+  return (
+    <Breadcrumb>
+      <BreadcrumbList>
+        {breadcrumbs.map((crumb, index) => (
+          <React.Fragment key={index}>
+            {index > 0 && <BreadcrumbSeparator />}
+            <BreadcrumbItem>
+              {crumb.href ? (
+                <BreadcrumbLink asChild>
+                  <Link href={crumb.href}>{crumb.label}</Link>
+                </BreadcrumbLink>
+              ) : (
+                <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+              )}
+            </BreadcrumbItem>
+          </React.Fragment>
+        ))}
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+}
+
 export default function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const breadcrumbs = useBreadcrumbs();
   const isAuthRoute = pathname.startsWith("/admin/auth");
 
   useEffect(() => {
@@ -127,24 +153,9 @@ export default function AdminLayout({
               orientation="vertical"
               className="mr-2 data-[orientation=vertical]:h-4"
             />
-            <Breadcrumb>
-              <BreadcrumbList>
-                {breadcrumbs.map((crumb, index) => (
-                  <React.Fragment key={index}>
-                    {index > 0 && <BreadcrumbSeparator />}
-                    <BreadcrumbItem>
-                      {crumb.href ? (
-                        <BreadcrumbLink asChild>
-                          <Link href={crumb.href}>{crumb.label}</Link>
-                        </BreadcrumbLink>
-                      ) : (
-                        <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                      )}
-                    </BreadcrumbItem>
-                  </React.Fragment>
-                ))}
-              </BreadcrumbList>
-            </Breadcrumb>
+            <Suspense fallback={null}>
+              <AdminBreadcrumbs />
+            </Suspense>
             <div className="ml-auto flex items-center gap-2">
               <AdminHeaderActions />
             </div>

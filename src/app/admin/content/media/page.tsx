@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { Suspense, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -72,7 +72,7 @@ interface MediaItem {
   folderId: string | null;
 }
 
-export default function MediaPage() {
+function MediaPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -820,5 +820,13 @@ export default function MediaPage() {
         </AlertDialog>
       </div>
     </DndContext>
+  );
+}
+
+export default function MediaPage() {
+  return (
+    <Suspense fallback={null}>
+      <MediaPageContent />
+    </Suspense>
   );
 }
