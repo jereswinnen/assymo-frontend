@@ -31,9 +31,9 @@ export function FolderThumbnail({
       type="button"
       onClick={onClick}
       className={cn(
-        "group relative aspect-square overflow-hidden rounded-lg bg-muted transition-all duration-200",
-        "focus:outline-none focus:ring-2 focus:ring-primary",
-        isOver && "bg-primary/10 scale-105"
+        "cursor-pointer group relative aspect-square overflow-hidden rounded-lg bg-muted transition-all duration-300 ease-in-out hover:scale-103 will-change-transform",
+        "focus:outline-none",
+        isOver && "bg-primary/10 scale-105",
       )}
     >
       {/* Preview grid */}
@@ -69,13 +69,13 @@ export function FolderThumbnail({
           className={cn(
             "p-2 rounded-full bg-background/80 shadow-sm transition-transform",
             "group-hover:scale-110",
-            isOver && "scale-110 bg-primary/20"
+            isOver && "scale-110 bg-primary/20",
           )}
         >
           <FolderIcon
             className={cn(
               "size-6 text-muted-foreground",
-              isOver && "text-primary"
+              isOver && "text-primary",
             )}
           />
         </div>
@@ -88,7 +88,6 @@ export function FolderThumbnail({
           {itemCount} {itemCount === 1 ? "item" : "items"}
         </p>
       </div>
-
     </button>
   );
 }

@@ -33,12 +33,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import {
   CloudUploadIcon,
+  EllipsisIcon,
   FolderPlusIcon,
   ImageIcon,
   Loader2Icon,
+  PencilIcon,
   SearchIcon,
   Trash2Icon,
   UploadIcon,
@@ -46,6 +55,7 @@ import {
 import { formatFileSize, formatDateShort } from "@/lib/format";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import { CreateFolderDialog } from "@/components/admin/CreateFolderDialog";
+import { RenameFolderDialog } from "@/components/admin/RenameFolderDialog";
 import { FolderThumbnail } from "@/components/admin/FolderThumbnail";
 import { DraggableImage } from "@/components/admin/DraggableImage";
 import type { MediaFolder } from "@/app/api/admin/content/media/folders/route";
@@ -79,7 +89,14 @@ export default function MediaPage() {
   // Create folder dialog
   const [createFolderOpen, setCreateFolderOpen] = useState(false);
 
-  // Delete confirmation
+  // Rename folder dialog
+  const [renameFolderOpen, setRenameFolderOpen] = useState(false);
+
+  // Delete folder confirmation
+  const [deleteFolderOpen, setDeleteFolderOpen] = useState(false);
+  const [deletingFolder, setDeletingFolder] = useState(false);
+
+  // Delete image confirmation
   const [deleteTarget, setDeleteTarget] = useState<MediaItem | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -433,6 +450,42 @@ export default function MediaPage() {
     toast.success("Map aangemaakt");
   };
 
+  const handleFolderRenamed = (newName: string) => {
+    // Update URL with new name
+    if (currentFolderId) {
+      router.replace(
+        `/admin/content/media?folder=${currentFolderId}&name=${encodeURIComponent(newName)}`
+      );
+    }
+    toast.success("Map hernoemd");
+  };
+
+  const handleDeleteFolder = async () => {
+    if (!currentFolderId) return;
+
+    setDeletingFolder(true);
+    try {
+      const response = await fetch(
+        `/api/admin/content/media/folders/${currentFolderId}`,
+        { method: "DELETE" }
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete folder");
+      }
+
+      toast.success("Map verwijderd");
+      router.push("/admin/content/media");
+    } catch (error) {
+      console.error("Delete folder failed:", error);
+      toast.error("Kon map niet verwijderen");
+    } finally {
+      setDeletingFolder(false);
+      setDeleteFolderOpen(false);
+    }
+  };
+
   // Filter media by search query
   const filteredMedia = media.filter((item) => {
     const query = searchQuery.toLowerCase();
@@ -487,6 +540,29 @@ export default function MediaPage() {
             disabled={uploading}
           />
         </label>
+        {currentFolderId && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="outline">
+                <EllipsisIcon className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setRenameFolderOpen(true)}>
+                <PencilIcon />
+                Hernoemen
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => setDeleteFolderOpen(true)}
+              >
+                <Trash2Icon />
+                Verwijderen
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     ),
     [uploading, handleUpload, currentFolderId]
@@ -698,6 +774,50 @@ export default function MediaPage() {
           onOpenChange={setCreateFolderOpen}
           onCreated={handleFolderCreated}
         />
+
+        {/* Rename folder dialog */}
+        {currentFolderId && currentFolderName && (
+          <RenameFolderDialog
+            open={renameFolderOpen}
+            onOpenChange={setRenameFolderOpen}
+            folderId={currentFolderId}
+            currentName={currentFolderName}
+            onRenamed={handleFolderRenamed}
+          />
+        )}
+
+        {/* Delete folder confirmation */}
+        <AlertDialog open={deleteFolderOpen} onOpenChange={setDeleteFolderOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Map verwijderen?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Weet je zeker dat je &quot;{currentFolderName}&quot; wilt
+                verwijderen? De afbeeldingen in deze map worden niet verwijderd,
+                maar verplaatst naar de hoofdmap.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deletingFolder}>
+                Annuleren
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteFolder}
+                disabled={deletingFolder}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deletingFolder ? (
+                  <>
+                    <Loader2Icon className="size-4 animate-spin" />
+                    Verwijderen...
+                  </>
+                ) : (
+                  "Verwijderen"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </DndContext>
   );
