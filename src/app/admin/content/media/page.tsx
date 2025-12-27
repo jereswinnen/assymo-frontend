@@ -15,7 +15,13 @@ import {
 } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -530,37 +536,46 @@ export default function MediaPage() {
             <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
           </div>
         ) : filteredFolders.length === 0 && filteredMedia.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <ImageIcon className="size-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground mb-4">
+          <Empty className="border py-12">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ImageIcon className="size-5" />
+              </EmptyMedia>
+              <EmptyTitle>
                 {searchQuery
                   ? "Geen resultaten gevonden"
                   : currentFolderId
                     ? "Deze map is leeg"
-                    : "Nog geen afbeeldingen geupload"}
-              </p>
+                    : "Nog geen afbeeldingen"}
+              </EmptyTitle>
               {!searchQuery && (
-                <label>
-                  <Button size="sm" asChild>
-                    <span className="cursor-pointer">
-                      <UploadIcon className="size-4" />
-                      {currentFolderId
-                        ? "Afbeelding toevoegen"
-                        : "Eerste afbeelding uploaden"}
-                    </span>
-                  </Button>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={handleUpload}
-                  />
-                </label>
+                <EmptyDescription>
+                  {currentFolderId
+                    ? "Upload afbeeldingen om ze aan deze map toe te voegen."
+                    : "Upload je eerste afbeelding om te beginnen."}
+                </EmptyDescription>
               )}
-            </CardContent>
-          </Card>
+            </EmptyHeader>
+            {!searchQuery && (
+              <label>
+                <Button size="sm" asChild>
+                  <span className="cursor-pointer">
+                    <UploadIcon className="size-4" />
+                    {currentFolderId
+                      ? "Afbeelding toevoegen"
+                      : "Eerste afbeelding uploaden"}
+                  </span>
+                </Button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleUpload}
+                />
+              </label>
+            )}
+          </Empty>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {/* Folders first (only at root level) */}
