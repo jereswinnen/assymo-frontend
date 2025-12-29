@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/field";
 import { Loader2Icon } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { ProfileSection } from "@/components/admin/account/ProfileSection";
 import { PasswordSection } from "@/components/admin/account/PasswordSection";
 import { TwoFactorSection } from "@/components/admin/account/TwoFactorSection";
 import { PasskeysSection } from "@/components/admin/account/PasskeysSection";
@@ -42,6 +43,10 @@ export default function AccountPage() {
 
   return (
     <FieldGroup className="max-w-2xl">
+      <ProfileSection />
+
+      <Separator />
+
       <PasswordSection />
 
       <Separator />

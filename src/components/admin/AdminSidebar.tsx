@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  BuildingIcon,
   CalendarDaysIcon,
   ChevronsLeftRightEllipsisIcon,
   ChevronsUpDownIcon,
+  CompassIcon,
   FileTextIcon,
   FolderTreeIcon,
   ImageIcon,
@@ -17,14 +18,14 @@ import {
   MessagesSquareIcon,
   SettingsIcon,
   ToggleRightIcon,
-  UserIcon,
-  UsersIcon,
+  UserRoundIcon,
+  UsersRoundIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import Logo from "@/components/layout/Logo";
 import { SiteSelector } from "@/components/admin/SiteSelector";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,8 +57,8 @@ const navItems = [
     label: "Conversaties",
     icon: MessagesSquareIcon,
   },
-  { href: "/admin/users", label: "Gebruikers", icon: UsersIcon },
-  { href: "/admin/sites", label: "Sites", icon: BuildingIcon },
+  { href: "/admin/users", label: "Gebruikers", icon: UsersRoundIcon },
+  { href: "/admin/sites", label: "Sites", icon: CompassIcon },
   { href: "/admin/settings", label: "Instellingen", icon: SettingsIcon },
 ];
 
@@ -93,7 +94,11 @@ export function AdminSidebar({
   const pathname = usePathname();
   const router = useRouter();
   const { isMobile } = useSidebar();
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [user, setUser] = useState<{
+    name: string;
+    email: string;
+    image: string | null;
+  } | null>(null);
 
   useEffect(() => {
     async function loadUser() {
@@ -102,6 +107,7 @@ export function AdminSidebar({
         setUser({
           name: data.user.name || "Gebruiker",
           email: data.user.email,
+          image: data.user.image || null,
         });
       }
     }
@@ -190,7 +196,18 @@ export function AdminSidebar({
                   size="lg"
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
-                  <Avatar className="h-8 w-8 rounded-lg">
+                  <Avatar className="size-8 rounded-lg">
+                    <AvatarImage src={user?.image || undefined} asChild>
+                      {user?.image && (
+                        <Image
+                          src={user.image}
+                          alt={user.name}
+                          width={32}
+                          height={32}
+                          className="object-cover"
+                        />
+                      )}
+                    </AvatarImage>
                     <AvatarFallback className="rounded-lg">
                       {user ? getInitials(user.name) : ".."}
                     </AvatarFallback>
@@ -214,7 +231,18 @@ export function AdminSidebar({
               >
                 <DropdownMenuLabel className="p-0 font-normal">
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                    <Avatar className="h-8 w-8 rounded-lg">
+                    <Avatar className="size-8 rounded-lg">
+                      <AvatarImage src={user?.image || undefined} asChild>
+                        {user?.image && (
+                          <Image
+                            src={user.image}
+                            alt={user.name}
+                            width={32}
+                            height={32}
+                            className="object-cover"
+                          />
+                        )}
+                      </AvatarImage>
                       <AvatarFallback className="rounded-lg">
                         {user ? getInitials(user.name) : ".."}
                       </AvatarFallback>
@@ -232,7 +260,7 @@ export function AdminSidebar({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/admin/account">
-                    <UserIcon />
+                    <UserRoundIcon />
                     Account
                   </Link>
                 </DropdownMenuItem>
