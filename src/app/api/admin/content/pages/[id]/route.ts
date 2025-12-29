@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { updateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { isAuthenticated } from "@/lib/auth-utils";
 import { CACHE_TAGS } from "@/lib/content";
 
@@ -103,7 +103,7 @@ export async function PUT(
     }
 
     // Invalidate pages cache
-    updateTag(CACHE_TAGS.pages);
+    revalidateTag(CACHE_TAGS.pages, "max");
 
     return NextResponse.json(rows[0]);
   } catch (error) {
@@ -131,7 +131,7 @@ export async function DELETE(
     await sql`DELETE FROM pages WHERE id = ${id}`;
 
     // Invalidate pages cache
-    updateTag(CACHE_TAGS.pages);
+    revalidateTag(CACHE_TAGS.pages, "max");
 
     return NextResponse.json({ success: true });
   } catch (error) {

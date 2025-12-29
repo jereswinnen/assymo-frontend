@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { updateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { isAuthenticated } from "@/lib/auth-utils";
 import { CACHE_TAGS } from "@/lib/content";
 import type { SiteParameters } from "@/types/content";
@@ -63,7 +63,7 @@ export async function PUT(request: Request) {
     `;
 
     // Invalidate site parameters cache
-    updateTag(CACHE_TAGS.siteParameters);
+    revalidateTag(CACHE_TAGS.siteParameters, "max");
 
     return NextResponse.json({ success: true });
   } catch (error) {
