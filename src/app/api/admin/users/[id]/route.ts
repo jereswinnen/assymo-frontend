@@ -67,7 +67,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
  */
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
-    const { authorized, response } = await protectRoute({ feature: "users" });
+    const { authorized, response, ctx } = await protectRoute({ feature: "users" });
     if (!authorized) return response;
 
     const { id } = await params;
@@ -95,6 +95,29 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           { status: 400 }
         );
       }
+
+      // Prevent changing your own role
+      if (ctx?.user.id === id) {
+        return NextResponse.json(
+          { error: "Je kunt je eigen rol niet wijzigen" },
+          { status: 400 }
+        );
+      }
+
+      // Check if this would remove the last super_admin
+      const currentUser = await sql`SELECT role FROM "user" WHERE id = ${id}`;
+      if (currentUser[0]?.role === "super_admin" && role !== "super_admin") {
+        const superAdminCount = await sql`
+          SELECT COUNT(*) as count FROM "user" WHERE role = 'super_admin'
+        `;
+        if (parseInt(superAdminCount[0].count) <= 1) {
+          return NextResponse.json(
+            { error: "Er moet minimaal één super admin zijn" },
+            { status: 400 }
+          );
+        }
+      }
+
       await sql`UPDATE "user" SET role = ${role} WHERE id = ${id}`;
     }
 
@@ -184,6 +207,19 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         { error: "Gebruiker niet gevonden" },
         { status: 404 }
       );
+    }
+
+    // Prevent deleting the last super_admin
+    if (existingUser[0].role === "super_admin") {
+      const superAdminCount = await sql`
+        SELECT COUNT(*) as count FROM "user" WHERE role = 'super_admin'
+      `;
+      if (parseInt(superAdminCount[0].count) <= 1) {
+        return NextResponse.json(
+          { error: "Er moet minimaal één super admin zijn" },
+          { status: 400 }
+        );
+      }
     }
 
     // Remove site assignments
