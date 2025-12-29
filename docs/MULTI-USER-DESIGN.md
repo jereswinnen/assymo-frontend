@@ -7,8 +7,8 @@
 | 1 | Database Schema Foundation | ✓ Complete |
 | 2 | Permission Utilities | ✓ Complete |
 | 3 | Route Protection | ✓ Complete |
-| 4 | User Management UI | ☐ Not started |
-| 5 | Site Management & Content Scoping | ☐ Not started |
+| 4 | User Management UI | ✓ Complete |
+| 5 | Site Management & Content Scoping | ✓ Complete |
 | 6 | Content API Updates | ☐ Not started |
 | 7 | Refinements & Edge Cases | ☐ Not started |
 | 8 | Account Page (Personal Settings) | ☐ Not started |

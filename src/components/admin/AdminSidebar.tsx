@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  BuildingIcon,
   CalendarDaysIcon,
   ChevronsLeftRightEllipsisIcon,
   FileTextIcon,
@@ -14,10 +15,12 @@ import {
   MessagesSquareIcon,
   SettingsIcon,
   ToggleRightIcon,
+  UsersIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import Logo from "@/components/layout/Logo";
+import { SiteSelector } from "@/components/admin/SiteSelector";
 import {
   Sidebar,
   SidebarContent,
@@ -40,6 +43,8 @@ const navItems = [
     label: "Conversaties",
     icon: MessagesSquareIcon,
   },
+  { href: "/admin/users", label: "Gebruikers", icon: UsersIcon },
+  { href: "/admin/sites", label: "Sites", icon: BuildingIcon },
   { href: "/admin/settings", label: "Instellingen", icon: SettingsIcon },
 ];
 
@@ -80,10 +85,11 @@ export function AdminSidebar({
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader className="py-4 flex items-start">
+      <SidebarHeader className="py-4 space-y-3">
         <Link href="/admin/appointments">
           <Logo className="w-auto h-6" />
         </Link>
+        <SiteSelector />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

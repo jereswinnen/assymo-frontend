@@ -1,0 +1,354 @@
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
+import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
+import {
+  BuildingIcon,
+  CheckIcon,
+  GlobeIcon,
+  Loader2Icon,
+  PencilIcon,
+  PlusIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { toast } from "sonner";
+
+interface Site {
+  id: string;
+  name: string;
+  slug: string;
+  domain: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export default function SitesPage() {
+  const [sites, setSites] = useState<Site[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingSite, setEditingSite] = useState<Site | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    slug: "",
+    domain: "",
+  });
+
+  useEffect(() => {
+    loadSites();
+  }, []);
+
+  const loadSites = async () => {
+    try {
+      const response = await fetch("/api/admin/sites");
+      if (!response.ok) {
+        if (response.status === 403) {
+          toast.error("Geen toegang tot sitebeheer");
+          return;
+        }
+        throw new Error("Failed to load sites");
+      }
+      const data = await response.json();
+      setSites(data.sites || []);
+    } catch (error) {
+      console.error("Failed to load sites:", error);
+      toast.error("Kon sites niet laden");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openCreateDialog = () => {
+    setEditingSite(null);
+    setFormData({ name: "", slug: "", domain: "" });
+    setDialogOpen(true);
+  };
+
+  const openEditDialog = (site: Site) => {
+    setEditingSite(site);
+    setFormData({
+      name: site.name,
+      slug: site.slug,
+      domain: site.domain || "",
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.name || !formData.slug) {
+      toast.error("Naam en slug zijn verplicht");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const url = editingSite
+        ? `/api/admin/sites/${editingSite.id}`
+        : "/api/admin/sites";
+      const method = editingSite ? "PATCH" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to save");
+      }
+
+      toast.success(editingSite ? "Site bijgewerkt" : "Site aangemaakt");
+      setDialogOpen(false);
+      loadSites();
+    } catch (error) {
+      console.error("Failed to save site:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Kon site niet opslaan"
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (site: Site) => {
+    if (!confirm(`Weet je zeker dat je "${site.name}" wilt verwijderen?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/sites/${site.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete");
+      }
+
+      toast.success("Site verwijderd");
+      loadSites();
+    } catch (error) {
+      console.error("Failed to delete site:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Kon site niet verwijderen"
+      );
+    }
+  };
+
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+  };
+
+  // Header actions
+  const headerActions = useMemo(
+    () => (
+      <Button size="sm" onClick={openCreateDialog}>
+        <PlusIcon className="size-4" />
+        Nieuwe site
+      </Button>
+    ),
+    []
+  );
+  useAdminHeaderActions(headerActions);
+
+  const formatDate = (date: string) => {
+    return new Intl.DateTimeFormat("nl-NL", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(date));
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <BuildingIcon className="size-4" />
+        <span>{sites.length} sites</span>
+      </div>
+
+      {sites.length === 0 ? (
+        <div className="text-muted-foreground text-center text-sm py-8">
+          Geen sites gevonden.
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Naam</TableHead>
+              <TableHead>Slug</TableHead>
+              <TableHead>Domein</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Aangemaakt</TableHead>
+              <TableHead className="w-[100px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sites.map((site) => (
+              <TableRow key={site.id}>
+                <TableCell className="font-medium">{site.name}</TableCell>
+                <TableCell className="text-muted-foreground font-mono text-sm">
+                  {site.slug}
+                </TableCell>
+                <TableCell>
+                  {site.domain ? (
+                    <div className="flex items-center gap-1 text-sm">
+                      <GlobeIcon className="size-3 text-muted-foreground" />
+                      {site.domain}
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">-</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Badge variant={site.is_active ? "default" : "secondary"}>
+                    {site.is_active ? "Actief" : "Inactief"}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {formatDate(site.created_at)}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openEditDialog(site)}
+                    >
+                      <PencilIcon className="size-4" />
+                    </Button>
+                    {site.slug !== "assymo" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(site)}
+                      >
+                        <Trash2Icon className="size-4" />
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingSite ? "Site bewerken" : "Nieuwe site"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <FieldGroup>
+            <FieldSet>
+              <Field>
+                <FieldLabel htmlFor="site-name">Naam</FieldLabel>
+                <Input
+                  id="site-name"
+                  value={formData.name}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    setFormData((prev) => ({
+                      ...prev,
+                      name,
+                      // Auto-generate slug only for new sites
+                      slug: editingSite ? prev.slug : generateSlug(name),
+                    }));
+                  }}
+                  placeholder="Mijn Site"
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="site-slug">Slug</FieldLabel>
+                <Input
+                  id="site-slug"
+                  value={formData.slug}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, slug: e.target.value }))
+                  }
+                  placeholder="mijn-site"
+                  className="font-mono"
+                  disabled={editingSite?.slug === "assymo"}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Kleine letters, cijfers en koppeltekens
+                </p>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="site-domain">
+                  Domein (optioneel)
+                </FieldLabel>
+                <Input
+                  id="site-domain"
+                  value={formData.domain}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, domain: e.target.value }))
+                  }
+                  placeholder="www.example.com"
+                />
+              </Field>
+            </FieldSet>
+          </FieldGroup>
+
+          <DialogFooter>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setDialogOpen(false)}
+            >
+              Annuleren
+            </Button>
+            <Button size="sm" onClick={handleSave} disabled={saving}>
+              {saving ? (
+                <Loader2Icon className="size-4 animate-spin" />
+              ) : (
+                <CheckIcon className="size-4" />
+              )}
+              {editingSite ? "Opslaan" : "Aanmaken"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

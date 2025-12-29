@@ -9,6 +9,7 @@ import {
   AdminHeaderProvider,
   AdminHeaderActions,
 } from "@/components/admin/AdminHeaderContext";
+import { SiteProvider } from "@/lib/permissions/site-context";
 import {
   SidebarInset,
   SidebarProvider,
@@ -38,6 +39,8 @@ function getBreadcrumbs(
     "/admin/appointments": "Afspraken",
     "/admin/emails": "E-mails",
     "/admin/conversations": "Conversaties",
+    "/admin/users": "Gebruikers",
+    "/admin/sites": "Sites",
     "/admin/settings": "Instellingen",
     "/admin/content/pages": "Pagina's",
     "/admin/content/solutions": "Realisaties",
@@ -143,27 +146,29 @@ export default function AdminLayout({
   }
 
   return (
-    <AdminHeaderProvider>
-      <SidebarProvider>
-        <AdminSidebar />
-        <SidebarInset>
-          <header className="px-4 flex h-16 shrink-0 items-center gap-2 border-b">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
-            <Suspense fallback={null}>
-              <AdminBreadcrumbs />
-            </Suspense>
-            <div className="ml-auto flex items-center gap-2">
-              <AdminHeaderActions />
-            </div>
-          </header>
-          <div className="flex-1 p-4">{children}</div>
-        </SidebarInset>
-      </SidebarProvider>
-      <Toaster />
-    </AdminHeaderProvider>
+    <SiteProvider>
+      <AdminHeaderProvider>
+        <SidebarProvider>
+          <AdminSidebar />
+          <SidebarInset>
+            <header className="px-4 flex h-16 shrink-0 items-center gap-2 border-b">
+              <SidebarTrigger className="-ml-1" />
+              <Separator
+                orientation="vertical"
+                className="mr-2 data-[orientation=vertical]:h-4"
+              />
+              <Suspense fallback={null}>
+                <AdminBreadcrumbs />
+              </Suspense>
+              <div className="ml-auto flex items-center gap-2">
+                <AdminHeaderActions />
+              </div>
+            </header>
+            <div className="flex-1 p-4">{children}</div>
+          </SidebarInset>
+        </SidebarProvider>
+        <Toaster />
+      </AdminHeaderProvider>
+    </SiteProvider>
   );
 }
