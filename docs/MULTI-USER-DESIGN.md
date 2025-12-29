@@ -10,7 +10,7 @@
 | 4 | User Management UI | ✓ Complete |
 | 5 | Site Management & Content Scoping | ✓ Complete |
 | 6 | Content API Updates | ✓ Complete |
-| 7 | Refinements & Edge Cases | ✓ Complete (core) |
+| 7 | Refinements & Edge Cases | ✓ Complete |
 | 8 | Account Page (Personal Settings) | ☐ Not started |
 
 **Quick Links:** [Phase 1](#phase-1-database-schema-foundation) · [Phase 2](#phase-2-permission-utilities) · [Phase 3](#phase-3-route-protection) · [Phase 4](#phase-4-user-management-ui) · [Phase 5](#phase-5-site-management-and-content-scoping) · [Phase 6](#phase-6-content-api-updates) · [Phase 7](#phase-7-refinements-and-edge-cases) · [Phase 8](#phase-8-account-page-personal-settings)
