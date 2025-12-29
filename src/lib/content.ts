@@ -21,19 +21,40 @@ export const CACHE_TAGS = {
   siteParameters: "site-parameters",
 } as const;
 
+// Default site slug (used when no site is specified)
+const DEFAULT_SITE_SLUG = "assymo";
+
+/**
+ * Get site ID from slug (cached)
+ */
+async function _getSiteIdBySlug(slug: string): Promise<string | null> {
+  const rows = await sql`SELECT id FROM sites WHERE slug = ${slug}`;
+  return rows[0]?.id || null;
+}
+
+const getSiteIdBySlug = (slug: string) =>
+  unstable_cache(_getSiteIdBySlug, [`site-id-${slug}`], {
+    revalidate: 86400, // 24 hours - sites rarely change
+  })(slug);
+
 // =============================================================================
 // Pages
 // =============================================================================
 
 /**
  * Get a page by its slug (with image alt text from media library)
+ * @param slug - Page slug
+ * @param siteSlug - Site slug (defaults to "assymo")
  */
-async function _getPageBySlug(slug: string): Promise<Page | null> {
+async function _getPageBySlug(slug: string, siteSlug: string = DEFAULT_SITE_SLUG): Promise<Page | null> {
+  const siteId = await getSiteIdBySlug(siteSlug);
+  if (!siteId) return null;
+
   const rows = await sql`
     SELECT p.*, im.alt_text as header_image_alt
     FROM pages p
     LEFT JOIN image_metadata im ON im.url = p.header_image->>'url'
-    WHERE p.slug = ${slug}
+    WHERE p.slug = ${slug} AND p.site_id = ${siteId}
   `;
 
   if (!rows[0]) return null;
@@ -53,21 +74,25 @@ async function _getPageBySlug(slug: string): Promise<Page | null> {
   return page as Page;
 }
 
-export const getPageBySlug = (slug: string) =>
-  unstable_cache(_getPageBySlug, [`page-${slug}`], {
+export const getPageBySlug = (slug: string, siteSlug: string = DEFAULT_SITE_SLUG) =>
+  unstable_cache(_getPageBySlug, [`page-${siteSlug}-${slug}`], {
     tags: [CACHE_TAGS.pages],
     revalidate: 3600,
-  })(slug);
+  })(slug, siteSlug);
 
 /**
  * Get the homepage (with image alt text from media library)
+ * @param siteSlug - Site slug (defaults to "assymo")
  */
-async function _getHomepage(): Promise<Page | null> {
+async function _getHomepage(siteSlug: string = DEFAULT_SITE_SLUG): Promise<Page | null> {
+  const siteId = await getSiteIdBySlug(siteSlug);
+  if (!siteId) return null;
+
   const rows = await sql`
     SELECT p.*, im.alt_text as header_image_alt
     FROM pages p
     LEFT JOIN image_metadata im ON im.url = p.header_image->>'url'
-    WHERE p.is_homepage = true
+    WHERE p.is_homepage = true AND p.site_id = ${siteId}
     LIMIT 1
   `;
 
@@ -88,10 +113,11 @@ async function _getHomepage(): Promise<Page | null> {
   return page as Page;
 }
 
-export const getHomepage = unstable_cache(_getHomepage, ["homepage"], {
-  tags: [CACHE_TAGS.pages],
-  revalidate: 3600,
-});
+export const getHomepage = (siteSlug: string = DEFAULT_SITE_SLUG) =>
+  unstable_cache(_getHomepage, [`homepage-${siteSlug}`], {
+    tags: [CACHE_TAGS.pages],
+    revalidate: 3600,
+  })(siteSlug);
 
 /**
  * Get all pages (list view) - used by admin, not cached
@@ -111,8 +137,13 @@ export async function getAllPages(): Promise<PageListItem[]> {
 
 /**
  * Get a solution by its slug (with filters and image alt text from media library)
+ * @param slug - Solution slug
+ * @param siteSlug - Site slug (defaults to "assymo")
  */
-async function _getSolutionBySlug(slug: string): Promise<Solution | null> {
+async function _getSolutionBySlug(slug: string, siteSlug: string = DEFAULT_SITE_SLUG): Promise<Solution | null> {
+  const siteId = await getSiteIdBySlug(siteSlug);
+  if (!siteId) return null;
+
   const rows = await sql`
     SELECT s.*,
       im.alt_text as header_image_alt,
@@ -126,7 +157,7 @@ async function _getSolutionBySlug(slug: string): Promise<Solution | null> {
     LEFT JOIN solution_filters sf ON s.id = sf.solution_id
     LEFT JOIN filters f ON sf.filter_id = f.id
     LEFT JOIN image_metadata im ON im.url = s.header_image->>'url'
-    WHERE s.slug = ${slug}
+    WHERE s.slug = ${slug} AND s.site_id = ${siteId}
     GROUP BY s.id, im.alt_text
   `;
 
@@ -147,16 +178,20 @@ async function _getSolutionBySlug(slug: string): Promise<Solution | null> {
   return solution as Solution;
 }
 
-export const getSolutionBySlug = (slug: string) =>
-  unstable_cache(_getSolutionBySlug, [`solution-${slug}`], {
+export const getSolutionBySlug = (slug: string, siteSlug: string = DEFAULT_SITE_SLUG) =>
+  unstable_cache(_getSolutionBySlug, [`solution-${siteSlug}-${slug}`], {
     tags: [CACHE_TAGS.solutions],
     revalidate: 3600,
-  })(slug);
+  })(slug, siteSlug);
 
 /**
  * Get all solutions (with filters and image alt text from media library)
+ * @param siteSlug - Site slug (defaults to "assymo")
  */
-async function _getAllSolutions(): Promise<SolutionListItem[]> {
+async function _getAllSolutions(siteSlug: string = DEFAULT_SITE_SLUG): Promise<SolutionListItem[]> {
+  const siteId = await getSiteIdBySlug(siteSlug);
+  if (!siteId) return [];
+
   const rows = await sql`
     SELECT
       s.id,
@@ -176,6 +211,7 @@ async function _getAllSolutions(): Promise<SolutionListItem[]> {
     LEFT JOIN solution_filters sf ON s.id = sf.solution_id
     LEFT JOIN filters f ON sf.filter_id = f.id
     LEFT JOIN image_metadata im ON im.url = s.header_image->>'url'
+    WHERE s.site_id = ${siteId}
     GROUP BY s.id, im.alt_text
     ORDER BY s.order_rank
   `;
@@ -191,10 +227,11 @@ async function _getAllSolutions(): Promise<SolutionListItem[]> {
   });
 }
 
-export const getAllSolutions = unstable_cache(_getAllSolutions, ["all-solutions"], {
-  tags: [CACHE_TAGS.solutions],
-  revalidate: 3600,
-});
+export const getAllSolutions = (siteSlug: string = DEFAULT_SITE_SLUG) =>
+  unstable_cache(_getAllSolutions, [`all-solutions-${siteSlug}`], {
+    tags: [CACHE_TAGS.solutions],
+    revalidate: 3600,
+  })(siteSlug);
 
 // =============================================================================
 // Filter Categories
@@ -202,8 +239,12 @@ export const getAllSolutions = unstable_cache(_getAllSolutions, ["all-solutions"
 
 /**
  * Get all filter categories with their filters
+ * @param siteSlug - Site slug (defaults to "assymo")
  */
-async function _getFilterCategories(): Promise<FilterCategory[]> {
+async function _getFilterCategories(siteSlug: string = DEFAULT_SITE_SLUG): Promise<FilterCategory[]> {
+  const siteId = await getSiteIdBySlug(siteSlug);
+  if (!siteId) return [];
+
   const rows = await sql`
     SELECT fc.*,
       COALESCE(
@@ -215,16 +256,18 @@ async function _getFilterCategories(): Promise<FilterCategory[]> {
       ) as filters
     FROM filter_categories fc
     LEFT JOIN filters f ON fc.id = f.category_id
+    WHERE fc.site_id = ${siteId}
     GROUP BY fc.id
     ORDER BY fc.order_rank
   `;
   return rows as FilterCategory[];
 }
 
-export const getFilterCategories = unstable_cache(_getFilterCategories, ["filter-categories"], {
-  tags: [CACHE_TAGS.filters],
-  revalidate: 3600,
-});
+export const getFilterCategories = (siteSlug: string = DEFAULT_SITE_SLUG) =>
+  unstable_cache(_getFilterCategories, [`filter-categories-${siteSlug}`], {
+    tags: [CACHE_TAGS.filters],
+    revalidate: 3600,
+  })(siteSlug);
 
 // =============================================================================
 // Navigation
@@ -233,10 +276,16 @@ export const getFilterCategories = unstable_cache(_getFilterCategories, ["filter
 /**
  * Get navigation links for a location (header or footer)
  * Includes alt text for solution header images from media library
+ * @param location - "header" or "footer"
+ * @param siteSlug - Site slug (defaults to "assymo")
  */
 async function _getNavigation(
-  location: "header" | "footer"
+  location: "header" | "footer",
+  siteSlug: string = DEFAULT_SITE_SLUG
 ): Promise<NavigationLink[]> {
+  const siteId = await getSiteIdBySlug(siteSlug);
+  if (!siteId) return [];
+
   const rows = await sql`
     SELECT nl.*,
       COALESCE(
@@ -258,7 +307,7 @@ async function _getNavigation(
     FROM navigation_links nl
     LEFT JOIN navigation_subitems ns ON nl.id = ns.link_id
     LEFT JOIN solutions s ON ns.solution_id = s.id
-    WHERE nl.location = ${location}
+    WHERE nl.location = ${location} AND nl.site_id = ${siteId}
     GROUP BY nl.id
     ORDER BY nl.order_rank
   `;
@@ -305,30 +354,35 @@ async function _getNavigation(
   return navLinks;
 }
 
-export const getNavigation = (location: "header" | "footer") =>
-  unstable_cache(_getNavigation, [`navigation-${location}`], {
+export const getNavigation = (location: "header" | "footer", siteSlug: string = DEFAULT_SITE_SLUG) =>
+  unstable_cache(_getNavigation, [`navigation-${siteSlug}-${location}`], {
     tags: [CACHE_TAGS.navigation],
     revalidate: 3600,
-  })(location);
+  })(location, siteSlug);
 
 // =============================================================================
 // Site Parameters
 // =============================================================================
 
 /**
- * Get site parameters (singleton)
+ * Get site parameters for a site
+ * @param siteSlug - Site slug (defaults to "assymo")
  */
-async function _getSiteParameters(): Promise<SiteParameters | null> {
+async function _getSiteParameters(siteSlug: string = DEFAULT_SITE_SLUG): Promise<SiteParameters | null> {
+  const siteId = await getSiteIdBySlug(siteSlug);
+  if (!siteId) return null;
+
   const rows = await sql`
-    SELECT * FROM site_parameters WHERE id = 1
+    SELECT * FROM site_parameters WHERE site_id = ${siteId}
   `;
   return (rows[0] as SiteParameters) || null;
 }
 
-export const getSiteParameters = unstable_cache(_getSiteParameters, ["site-parameters"], {
-  tags: [CACHE_TAGS.siteParameters],
-  revalidate: 3600,
-});
+export const getSiteParameters = (siteSlug: string = DEFAULT_SITE_SLUG) =>
+  unstable_cache(_getSiteParameters, [`site-parameters-${siteSlug}`], {
+    tags: [CACHE_TAGS.siteParameters],
+    revalidate: 3600,
+  })(siteSlug);
 
 // =============================================================================
 // Images
