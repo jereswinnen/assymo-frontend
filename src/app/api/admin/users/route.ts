@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { protectRoute } from "@/lib/permissions";
+import { auth } from "@/lib/auth";
+import crypto from "crypto";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -48,11 +50,8 @@ export async function GET() {
 
 /**
  * POST /api/admin/users
- * Create a new user (via Better Auth admin API or direct DB)
+ * Create a new user and send password reset email
  * Requires: super_admin
- *
- * Note: For now, this just updates an existing user's role.
- * Creating users requires Better Auth CLI: `npx better-auth user create`
  */
 export async function POST(request: NextRequest) {
   try {
@@ -60,40 +59,59 @@ export async function POST(request: NextRequest) {
     if (!authorized) return response;
 
     const body = await request.json();
-    const { email, role, siteIds } = body;
+    const { name, email, role, siteIds } = body;
 
-    if (!email || !role) {
+    if (!name || !email || !role) {
       return NextResponse.json(
-        { error: "Email en rol zijn verplicht" },
+        { error: "Naam, email en rol zijn verplicht" },
         { status: 400 }
       );
     }
 
-    // Check if user exists
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: "Ongeldig email adres" },
+        { status: 400 }
+      );
+    }
+
+    // Check if user already exists
     const existingUser = await sql`
       SELECT id FROM "user" WHERE email = ${email}
     `;
 
-    if (existingUser.length === 0) {
+    if (existingUser.length > 0) {
       return NextResponse.json(
-        { error: "Gebruiker niet gevonden. Maak eerst een account aan via CLI." },
-        { status: 404 }
+        { error: "Er bestaat al een gebruiker met dit email adres" },
+        { status: 400 }
       );
     }
 
-    const userId = existingUser[0].id;
+    // Generate a random password (user will reset it via email)
+    const tempPassword = crypto.randomBytes(32).toString("hex");
 
-    // Update role
+    // Create user via Better Auth's internal context
+    const ctx = await auth.$context;
+    const hashedPassword = await ctx.password.hash(tempPassword);
+    const userId = crypto.randomUUID();
+    const now = new Date();
+
+    // Insert user into database
     await sql`
-      UPDATE "user" SET role = ${role} WHERE id = ${userId}
+      INSERT INTO "user" (id, name, email, "emailVerified", role, "createdAt", "updatedAt")
+      VALUES (${userId}, ${name}, ${email}, true, ${role}, ${now.toISOString()}, ${now.toISOString()})
     `;
 
-    // Update site assignments
-    if (siteIds && Array.isArray(siteIds)) {
-      // Remove existing assignments
-      await sql`DELETE FROM user_sites WHERE user_id = ${userId}`;
+    // Insert account (password credential)
+    await sql`
+      INSERT INTO "account" (id, "userId", "accountId", "providerId", password, "createdAt", "updatedAt")
+      VALUES (${crypto.randomUUID()}, ${userId}, ${userId}, 'credential', ${hashedPassword}, ${now.toISOString()}, ${now.toISOString()})
+    `;
 
-      // Add new assignments
+    // Assign sites if provided
+    if (siteIds && Array.isArray(siteIds) && siteIds.length > 0) {
       for (const siteId of siteIds) {
         await sql`
           INSERT INTO user_sites (user_id, site_id)
@@ -102,11 +120,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true });
+    // Trigger password reset email using Better Auth's forgetPassword
+    // This will send the reset email to the user
+    const baseUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    await fetch(`${baseUrl}/api/auth/forget-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    return NextResponse.json({ success: true, userId });
   } catch (error) {
-    console.error("Error creating/updating user:", error);
+    console.error("Error creating user:", error);
     return NextResponse.json(
-      { error: "Er is een fout opgetreden" },
+      { error: "Er is een fout opgetreden bij het aanmaken van de gebruiker" },
       { status: 500 }
     );
   }

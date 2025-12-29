@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -10,9 +11,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2Icon, ShieldCheckIcon } from "lucide-react";
+import { Loader2Icon, ShieldCheckIcon, PlusIcon } from "lucide-react";
 import { toast } from "sonner";
 import { UserEditDialog } from "@/components/admin/UserEditDialog";
+import { UserCreateDialog } from "@/components/admin/UserCreateDialog";
+import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import type { Role, FeatureOverrides } from "@/lib/permissions/types";
 
 interface Site {
@@ -49,11 +52,16 @@ export default function UsersPage() {
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   useEffect(() => {
     loadUsers();
     loadSites();
+  }, []);
+
+  const openCreateDialog = useCallback(() => {
+    setCreateDialogOpen(true);
   }, []);
 
   const loadUsers = async () => {
@@ -89,8 +97,20 @@ export default function UsersPage() {
 
   const handleUserClick = (user: User) => {
     setSelectedUser(user);
-    setDialogOpen(true);
+    setEditDialogOpen(true);
   };
+
+  // Header actions
+  const headerActions = useMemo(
+    () => (
+      <Button size="sm" onClick={openCreateDialog}>
+        <PlusIcon className="size-4" />
+        Nieuwe gebruiker
+      </Button>
+    ),
+    [openCreateDialog]
+  );
+  useAdminHeaderActions(headerActions);
 
   const formatDate = (date: string) => {
     return new Intl.DateTimeFormat("nl-NL", {
@@ -174,9 +194,16 @@ export default function UsersPage() {
       <UserEditDialog
         user={selectedUser}
         sites={sites}
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
         onUpdate={loadUsers}
+      />
+
+      <UserCreateDialog
+        sites={sites}
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onCreated={loadUsers}
       />
     </div>
   );
