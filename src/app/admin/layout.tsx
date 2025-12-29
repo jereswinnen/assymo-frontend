@@ -43,6 +43,7 @@ function getBreadcrumbs(
     "/admin/users": "Gebruikers",
     "/admin/sites": "Sites",
     "/admin/settings": "Instellingen",
+    "/admin/account": "Mijn Account",
     "/admin/content/pages": "Pagina's",
     "/admin/content/solutions": "Realisaties",
     "/admin/content/media": "Media",

@@ -15,6 +15,7 @@ import {
   MessagesSquareIcon,
   SettingsIcon,
   ToggleRightIcon,
+  UserIcon,
   UsersIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -146,6 +147,18 @@ export function AdminSidebar({
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === "/admin/account"}
+              tooltip="Mijn Account"
+            >
+              <Link href="/admin/account">
+                <UserIcon />
+                <span>Mijn Account</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton onClick={handleLogout} tooltip="Uitloggen">
               <LogOutIcon />

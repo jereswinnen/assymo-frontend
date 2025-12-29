@@ -30,26 +30,14 @@ import {
   BotMessageSquareIcon,
   CheckIcon,
   CloudUploadIcon,
-  FileTextIcon,
-  FingerprintIcon,
   Loader2Icon,
-  PlusIcon,
-  ScanText,
   ScanTextIcon,
   Settings2Icon,
   Trash2Icon,
-  UploadCloudIcon,
 } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
 import { getTestEmail, setTestEmail } from "@/lib/adminSettings";
 import { DEFAULT_TEST_EMAIL } from "@/config/resend";
 import type { DocumentInfo } from "@/types/chat";
-
-interface Passkey {
-  id: string;
-  name?: string;
-  createdAt: Date;
-}
 
 export default function SettingsPage() {
   // General settings
@@ -69,16 +57,6 @@ export default function SettingsPage() {
     useState(false);
   const [deletingDocument, setDeletingDocument] = useState(false);
 
-  // Passkeys
-  const [passkeys, setPasskeys] = useState<Passkey[]>([]);
-  const [loadingPasskeys, setLoadingPasskeys] = useState(true);
-  const [addingPasskey, setAddingPasskey] = useState(false);
-  const [deletingPasskeyId, setDeletingPasskeyId] = useState<string | null>(
-    null,
-  );
-  const [deletePasskeyDialogOpen, setDeletePasskeyDialogOpen] = useState(false);
-  const [passkeyToDelete, setPasskeyToDelete] = useState<Passkey | null>(null);
-
   const hasEmailChanges = testEmailValue !== originalEmail;
 
   // Load all data on mount
@@ -90,9 +68,6 @@ export default function SettingsPage() {
 
     // Load document info
     loadDocumentInfo();
-
-    // Load passkeys
-    loadPasskeys();
   }, []);
 
   // === Email handlers ===
@@ -249,76 +224,6 @@ export default function SettingsPage() {
     }
   };
 
-  // === Passkey handlers ===
-  const loadPasskeys = async () => {
-    try {
-      const { data } = await authClient.passkey.listUserPasskeys();
-      if (data) setPasskeys(data);
-    } catch (err) {
-      console.error("Failed to load passkeys:", err);
-    } finally {
-      setLoadingPasskeys(false);
-    }
-  };
-
-  const handleAddPasskey = async () => {
-    setAddingPasskey(true);
-    try {
-      const { error } = await authClient.passkey.addPasskey();
-      if (error) {
-        if (!error.message?.toLowerCase().includes("cancel")) {
-          toast.error("Kon passkey niet toevoegen");
-        }
-        return;
-      }
-      toast.success("Passkey toegevoegd");
-      loadPasskeys();
-    } catch (err) {
-      if (err instanceof Error && err.name !== "AbortError") {
-        toast.error("Kon passkey niet toevoegen");
-      }
-    } finally {
-      setAddingPasskey(false);
-    }
-  };
-
-  const openDeletePasskeyDialog = (passkey: Passkey) => {
-    setPasskeyToDelete(passkey);
-    setDeletePasskeyDialogOpen(true);
-  };
-
-  const handleDeletePasskey = async () => {
-    if (!passkeyToDelete) return;
-
-    setDeletingPasskeyId(passkeyToDelete.id);
-    try {
-      const { error } = await authClient.passkey.deletePasskey({
-        id: passkeyToDelete.id,
-      });
-      if (error) {
-        toast.error("Kon passkey niet verwijderen");
-        return;
-      }
-      toast.success("Passkey verwijderd");
-      setPasskeys((prev) => prev.filter((p) => p.id !== passkeyToDelete.id));
-      setDeletePasskeyDialogOpen(false);
-      setPasskeyToDelete(null);
-    } catch (err) {
-      console.error("Failed to delete passkey:", err);
-      toast.error("Kon passkey niet verwijderen");
-    } finally {
-      setDeletingPasskeyId(null);
-    }
-  };
-
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("nl-NL", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
-
   // Header actions
   const headerActions = useMemo(
     () => (
@@ -339,9 +244,7 @@ export default function SettingsPage() {
   );
   useAdminHeaderActions(headerActions);
 
-  const loading = loadingDocument || loadingPasskeys;
-
-  if (loading) {
+  if (loadingDocument) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
@@ -532,68 +435,6 @@ export default function SettingsPage() {
         )}
       </FieldSet>
 
-      <Separator />
-
-      {/* Beveiliging */}
-      <FieldSet>
-        <FieldLegend className="flex items-center gap-1.5 font-semibold">
-          <FingerprintIcon className="size-4 opacity-80" />
-          Beveiliging
-        </FieldLegend>
-        <FieldDescription className="mb-0!">
-          Log sneller in met FaceID, TouchID of de toegangscode van je toestel.
-        </FieldDescription>
-
-        <div className="space-y-4">
-          {passkeys.length > 0 ? (
-            <div className="p-3 space-y-4 border border-border rounded-lg">
-              {passkeys.map((passkey) => (
-                <div
-                  key={passkey.id}
-                  className="flex items-center justify-between"
-                >
-                  <div>
-                    <p className="mb-0! text-base font-medium">
-                      {passkey.name || "Passkey"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Toegevoegd op {formatDate(passkey.createdAt)}
-                    </p>
-                  </div>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => openDeletePasskeyDialog(passkey)}
-                    disabled={deletingPasskeyId === passkey.id}
-                  >
-                    <Trash2Icon className="size-4" /> Verwijderen
-                  </Button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Geen passkeys geregistreerd
-            </p>
-          )}
-
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={handleAddPasskey}
-            disabled={addingPasskey}
-            className="w-fit"
-          >
-            {addingPasskey ? (
-              <Loader2Icon className="size-4 animate-spin" />
-            ) : (
-              <PlusIcon className="size-4" />
-            )}
-            Passkey toevoegen
-          </Button>
-        </div>
-      </FieldSet>
-
       {/* Delete Document Dialog */}
       <Dialog
         open={deleteDocumentDialogOpen}
@@ -630,44 +471,6 @@ export default function SettingsPage() {
                   <Trash2Icon className="size-4" />
                   Verwijderen
                 </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Passkey Dialog */}
-      <Dialog
-        open={deletePasskeyDialogOpen}
-        onOpenChange={setDeletePasskeyDialogOpen}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Passkey verwijderen</DialogTitle>
-            <DialogDescription>
-              Weet je zeker dat je deze passkey wilt verwijderen? Je kunt dan
-              niet meer inloggen met deze passkey.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setDeletePasskeyDialogOpen(false)}
-              disabled={!!deletingPasskeyId}
-            >
-              Annuleren
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={handleDeletePasskey}
-              disabled={!!deletingPasskeyId}
-            >
-              {deletingPasskeyId ? (
-                <Loader2Icon className="size-4 animate-spin" />
-              ) : (
-                "Verwijderen"
               )}
             </Button>
           </DialogFooter>
