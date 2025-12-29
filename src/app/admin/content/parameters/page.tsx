@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
@@ -41,6 +42,7 @@ const defaultParams: SiteParams = {
 };
 
 export default function SiteParametersPage() {
+  const { currentSite, loading: siteLoading } = useSiteContext();
   const [params, setParams] = useState<SiteParams>(defaultParams);
   const [originalParams, setOriginalParams] =
     useState<SiteParams>(defaultParams);
@@ -50,34 +52,38 @@ export default function SiteParametersPage() {
   const hasChanges = JSON.stringify(params) !== JSON.stringify(originalParams);
 
   useEffect(() => {
-    fetch("/api/admin/content/site-parameters")
-      .then((r) => r.json())
-      .then((data) => {
-        const loadedParams = {
-          address: data.address || "",
-          phone: data.phone || "",
-          email: data.email || "",
-          instagram: data.instagram || "",
-          facebook: data.facebook || "",
-          vat_number: data.vat_number || "",
-        };
-        setParams(loadedParams);
-        setOriginalParams(loadedParams);
-      })
-      .catch((error) => {
-        console.error("Failed to load site parameters:", error);
-        toast.error("Kon instellingen niet laden");
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    if (!siteLoading && currentSite) {
+      setLoading(true);
+      fetch(`/api/admin/content/site-parameters?siteId=${currentSite.id}`)
+        .then((r) => r.json())
+        .then((data) => {
+          const loadedParams = {
+            address: data.address || "",
+            phone: data.phone || "",
+            email: data.email || "",
+            instagram: data.instagram || "",
+            facebook: data.facebook || "",
+            vat_number: data.vat_number || "",
+          };
+          setParams(loadedParams);
+          setOriginalParams(loadedParams);
+        })
+        .catch((error) => {
+          console.error("Failed to load site parameters:", error);
+          toast.error("Kon instellingen niet laden");
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [currentSite, siteLoading]);
 
   const handleSave = useCallback(async () => {
+    if (!currentSite) return;
     setSaving(true);
     try {
       const response = await fetch("/api/admin/content/site-parameters", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
+        body: JSON.stringify({ ...params, siteId: currentSite.id }),
       });
 
       if (!response.ok) {
@@ -92,7 +98,7 @@ export default function SiteParametersPage() {
     } finally {
       setSaving(false);
     }
-  }, [params]);
+  }, [params, currentSite]);
 
   const updateField =
     (field: keyof SiteParams) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,7 +121,9 @@ export default function SiteParametersPage() {
   );
   useAdminHeaderActions(headerActions);
 
-  if (loading) {
+  const isLoading = loading || siteLoading;
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2Icon className="size-6 animate-spin text-muted-foreground" />

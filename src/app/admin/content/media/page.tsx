@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { upload } from "@vercel/blob/client";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import {
   DndContext,
   DragEndEvent,
@@ -75,6 +76,7 @@ interface MediaItem {
 function MediaPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { currentSite, loading: siteLoading } = useSiteContext();
 
   // Read folder from URL params
   const currentFolderId = searchParams.get("folder");
@@ -122,11 +124,13 @@ function MediaPageContent() {
   );
 
   useEffect(() => {
-    fetchData();
+    if (!siteLoading && currentSite) {
+      fetchData();
+    }
     return () => {
       isMountedRef.current = false;
     };
-  }, [currentFolderId]);
+  }, [currentFolderId, currentSite, siteLoading]);
 
   // Poll for alt text updates on items that don't have it yet
   const pollForAltText = useCallback(async (urls: string[], attempt = 1) => {
@@ -173,6 +177,7 @@ function MediaPageContent() {
   }, []);
 
   const fetchData = async () => {
+    if (!currentSite) return;
     setLoading(true);
     try {
       // Fetch folders and media in parallel
@@ -180,8 +185,8 @@ function MediaPageContent() {
       const [foldersRes, mediaRes] = await Promise.all([
         currentFolderId
           ? Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
-          : fetch("/api/admin/content/media/folders"),
-        fetch(`/api/admin/content/media?folderId=${folderParam}`),
+          : fetch(`/api/admin/content/media/folders?siteId=${currentSite.id}`),
+        fetch(`/api/admin/content/media?folderId=${folderParam}&siteId=${currentSite.id}`),
       ]);
 
       if (foldersRes.ok && !currentFolderId) {
@@ -225,14 +230,15 @@ function MediaPageContent() {
             handleUploadUrl: "/api/admin/content/images/upload",
           });
 
-          // Trigger alt text generation with folder context
-          fetch("/api/admin/content/images/generate-alt", {
+          // Trigger alt text generation with folder and site context
+          fetch("/api/admin/content/media/generate-alt", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               url: blob.url,
               fileName: file.name,
               folderId: currentFolderId,
+              siteId: currentSite?.id,
             }),
           });
 
@@ -588,7 +594,7 @@ function MediaPageContent() {
           />
         </div>
 
-        {loading ? (
+        {loading || siteLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
           </div>
@@ -774,6 +780,7 @@ function MediaPageContent() {
           open={createFolderOpen}
           onOpenChange={setCreateFolderOpen}
           onCreated={handleFolderCreated}
+          siteId={currentSite?.id}
         />
 
         {/* Rename folder dialog */}

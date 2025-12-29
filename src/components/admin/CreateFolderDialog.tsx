@@ -16,13 +16,15 @@ import { Loader2Icon } from "lucide-react";
 interface CreateFolderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreated: (folder: { id: string; name: string }) => void;
+  onCreated: (folder: { id: string; name: string; siteId?: string | null }) => void;
+  siteId?: string;
 }
 
 export function CreateFolderDialog({
   open,
   onOpenChange,
   onCreated,
+  siteId,
 }: CreateFolderDialogProps) {
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
@@ -43,7 +45,7 @@ export function CreateFolderDialog({
       const response = await fetch("/api/admin/content/media/folders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim() }),
+        body: JSON.stringify({ name: name.trim(), siteId }),
       });
 
       const data = await response.json();
@@ -54,7 +56,7 @@ export function CreateFolderDialog({
         return;
       }
 
-      onCreated({ id: data.id, name: data.name });
+      onCreated({ id: data.id, name: data.name, siteId: data.siteId });
       setName("");
       onOpenChange(false);
     } catch {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import {
   DndContext,
   closestCenter,
@@ -90,6 +91,7 @@ function slugify(text: string): string {
 }
 
 export default function FiltersPage() {
+  const { currentSite, loading: siteLoading } = useSiteContext();
   const [categories, setCategories] = useState<FilterCategory[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -135,12 +137,16 @@ export default function FiltersPage() {
   );
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    if (!siteLoading && currentSite) {
+      fetchCategories();
+    }
+  }, [currentSite, siteLoading]);
 
   const fetchCategories = async () => {
+    if (!currentSite) return;
+    setLoading(true);
     try {
-      const response = await fetch("/api/admin/content/filter-categories");
+      const response = await fetch(`/api/admin/content/filter-categories?siteId=${currentSite.id}`);
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setCategories(data);
@@ -216,10 +222,11 @@ export default function FiltersPage() {
         if (!response.ok) throw new Error("Failed to update");
         toast.success("Categorie bijgewerkt");
       } else {
+        if (!currentSite) return;
         const response = await fetch("/api/admin/content/filter-categories", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: categoryName, slug }),
+          body: JSON.stringify({ name: categoryName, slug, siteId: currentSite.id }),
         });
         if (!response.ok) throw new Error("Failed to create");
         toast.success("Categorie aangemaakt");
@@ -263,7 +270,7 @@ export default function FiltersPage() {
   const handleCategoryDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (over && active.id !== over.id) {
+    if (over && active.id !== over.id && currentSite) {
       const oldIndex = categories.findIndex((c) => c.id === active.id);
       const newIndex = categories.findIndex((c) => c.id === over.id);
 
@@ -274,7 +281,7 @@ export default function FiltersPage() {
         await fetch("/api/admin/content/filter-categories/reorder", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderedIds: newCategories.map((c) => c.id) }),
+          body: JSON.stringify({ orderedIds: newCategories.map((c) => c.id), siteId: currentSite.id }),
         });
       } catch (error) {
         console.error("Failed to reorder categories:", error);
@@ -407,8 +414,9 @@ export default function FiltersPage() {
   useAdminHeaderActions(headerActions);
 
   const sheetOpen = !!editingCategory || isNewCategory;
+  const isLoading = loading || siteLoading;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2Icon className="size-6 animate-spin text-muted-foreground" />

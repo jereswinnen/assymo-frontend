@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import {
   DndContext,
   closestCenter,
@@ -185,6 +186,7 @@ function SortableSolutionRow({
 
 export default function SolutionsPage() {
   const router = useRouter();
+  const { currentSite, loading: siteLoading } = useSiteContext();
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -204,13 +206,16 @@ export default function SolutionsPage() {
   );
 
   useEffect(() => {
-    fetchSolutions();
-  }, []);
+    if (!siteLoading && currentSite) {
+      fetchSolutions();
+    }
+  }, [currentSite, siteLoading]);
 
   const fetchSolutions = async () => {
+    if (!currentSite) return;
     setLoading(true);
     try {
-      const response = await fetch("/api/admin/content/solutions");
+      const response = await fetch(`/api/admin/content/solutions?siteId=${currentSite.id}`);
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setSolutions(data);
@@ -222,6 +227,7 @@ export default function SolutionsPage() {
   };
 
   const createSolution = useCallback(async () => {
+    if (!currentSite) return;
     setCreating(true);
     try {
       const response = await fetch("/api/admin/content/solutions", {
@@ -230,6 +236,7 @@ export default function SolutionsPage() {
         body: JSON.stringify({
           name: "Nieuwe realisatie",
           slug: `nieuwe-realisatie-${Date.now()}`,
+          siteId: currentSite.id,
         }),
       });
 
@@ -246,7 +253,7 @@ export default function SolutionsPage() {
       );
       setCreating(false);
     }
-  }, [router]);
+  }, [router, currentSite]);
 
   const deleteSolution = async () => {
     if (!deleteTarget) return;
@@ -300,7 +307,7 @@ export default function SolutionsPage() {
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (!over || active.id === over.id) return;
+    if (!over || active.id === over.id || !currentSite) return;
 
     const oldIndex = solutions.findIndex((s) => s.id === active.id);
     const newIndex = solutions.findIndex((s) => s.id === over.id);
@@ -313,7 +320,7 @@ export default function SolutionsPage() {
       const response = await fetch("/api/admin/content/solutions/reorder", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderedIds: newOrder.map((s) => s.id) }),
+        body: JSON.stringify({ orderedIds: newOrder.map((s) => s.id), siteId: currentSite.id }),
       });
 
       if (!response.ok) throw new Error("Failed to reorder");
@@ -340,9 +347,11 @@ export default function SolutionsPage() {
   );
   useAdminHeaderActions(headerActions);
 
+  const isLoading = loading || siteLoading;
+
   return (
     <div className="space-y-6">
-      {loading ? (
+      {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
         </div>

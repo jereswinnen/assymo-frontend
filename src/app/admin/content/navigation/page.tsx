@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import {
   DndContext,
   closestCenter,
@@ -105,6 +106,7 @@ function slugify(text: string): string {
 }
 
 export default function NavigationPage() {
+  const { currentSite, loading: siteLoading } = useSiteContext();
   const [links, setLinks] = useState<NavigationLink[]>([]);
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -145,13 +147,16 @@ export default function NavigationPage() {
   );
 
   useEffect(() => {
-    fetchSolutions();
-    fetchLinks();
-  }, []);
+    if (!siteLoading && currentSite) {
+      fetchSolutions();
+      fetchLinks();
+    }
+  }, [currentSite, siteLoading]);
 
   const fetchSolutions = async () => {
+    if (!currentSite) return;
     try {
-      const response = await fetch("/api/admin/content/solutions");
+      const response = await fetch(`/api/admin/content/solutions?siteId=${currentSite.id}`);
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setSolutions(data);
@@ -161,10 +166,11 @@ export default function NavigationPage() {
   };
 
   const fetchLinks = async () => {
+    if (!currentSite) return;
     setLoading(true);
     try {
       const response = await fetch(
-        "/api/admin/content/navigation?location=header",
+        `/api/admin/content/navigation?location=header&siteId=${currentSite.id}`,
       );
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
@@ -243,6 +249,7 @@ export default function NavigationPage() {
         if (!response.ok) throw new Error("Failed to update");
         toast.success("Link bijgewerkt");
       } else {
+        if (!currentSite) return;
         const response = await fetch("/api/admin/content/navigation", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -251,6 +258,7 @@ export default function NavigationPage() {
             title: linkTitle,
             slug,
             submenu_heading: linkSubmenuHeading || null,
+            siteId: currentSite.id,
           }),
         });
         if (!response.ok) throw new Error("Failed to create");
@@ -290,7 +298,7 @@ export default function NavigationPage() {
   const handleLinkDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (over && active.id !== over.id) {
+    if (over && active.id !== over.id && currentSite) {
       const oldIndex = links.findIndex((l) => l.id === active.id);
       const newIndex = links.findIndex((l) => l.id === over.id);
 
@@ -301,7 +309,7 @@ export default function NavigationPage() {
         await fetch("/api/admin/content/navigation/reorder", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderedIds: newLinks.map((l) => l.id) }),
+          body: JSON.stringify({ orderedIds: newLinks.map((l) => l.id), siteId: currentSite.id }),
         });
       } catch (error) {
         console.error("Failed to reorder links:", error);
@@ -328,8 +336,9 @@ export default function NavigationPage() {
       toast.success("Subitem toegevoegd");
 
       // Refresh and update editing link
+      if (!currentSite) return;
       const linksResponse = await fetch(
-        "/api/admin/content/navigation?location=header",
+        `/api/admin/content/navigation?location=header&siteId=${currentSite.id}`,
       );
       if (linksResponse.ok) {
         const data = await linksResponse.json();
@@ -443,10 +452,11 @@ export default function NavigationPage() {
   useAdminHeaderActions(headerActions);
 
   const sheetOpen = !!editingLink || isNewLink;
+  const isLoading = loading || siteLoading;
 
   return (
     <div className="space-y-6">
-      {loading ? (
+      {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
         </div>

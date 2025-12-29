@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -55,6 +56,7 @@ interface Page {
 
 export default function PagesPage() {
   const router = useRouter();
+  const { currentSite, loading: siteLoading } = useSiteContext();
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -67,13 +69,16 @@ export default function PagesPage() {
   const [duplicating, setDuplicating] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchPages();
-  }, []);
+    if (!siteLoading && currentSite) {
+      fetchPages();
+    }
+  }, [currentSite, siteLoading]);
 
   const fetchPages = async () => {
+    if (!currentSite) return;
     setLoading(true);
     try {
-      const response = await fetch("/api/admin/content/pages");
+      const response = await fetch(`/api/admin/content/pages?siteId=${currentSite.id}`);
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setPages(data);
@@ -85,6 +90,7 @@ export default function PagesPage() {
   };
 
   const createPage = useCallback(async () => {
+    if (!currentSite) return;
     setCreating(true);
     try {
       const response = await fetch("/api/admin/content/pages", {
@@ -94,6 +100,7 @@ export default function PagesPage() {
           title: "Nieuwe pagina",
           slug: `nieuwe-pagina-${Date.now()}`,
           is_homepage: false,
+          siteId: currentSite.id,
         }),
       });
 
@@ -110,7 +117,7 @@ export default function PagesPage() {
       );
       setCreating(false);
     }
-  }, [router]);
+  }, [router, currentSite]);
 
   const deletePage = async () => {
     if (!deleteTarget) return;
@@ -185,9 +192,11 @@ export default function PagesPage() {
   );
   useAdminHeaderActions(headerActions);
 
+  const isLoading = loading || siteLoading;
+
   return (
     <div className="space-y-6">
-      {loading ? (
+      {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
         </div>
