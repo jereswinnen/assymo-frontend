@@ -27,7 +27,6 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import {
-  BuildingIcon,
   CheckIcon,
   GlobeIcon,
   Loader2Icon,
@@ -197,11 +196,6 @@ export default function SitesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <BuildingIcon className="size-4" />
-        <span>{sites.length} sites</span>
-      </div>
-
       {sites.length === 0 ? (
         <div className="text-muted-foreground text-center text-sm py-8">
           Geen sites gevonden.

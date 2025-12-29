@@ -9,8 +9,7 @@ import {
   AdminHeaderProvider,
   AdminHeaderActions,
 } from "@/components/admin/AdminHeaderContext";
-import { SiteProvider, useSiteContext } from "@/lib/permissions/site-context";
-import { Badge } from "@/components/ui/badge";
+import { SiteProvider } from "@/lib/permissions/site-context";
 import {
   SidebarInset,
   SidebarProvider,
@@ -97,33 +96,6 @@ function getBreadcrumbs(
   return [{ label: "Admin" }];
 }
 
-// Content paths that should show the site indicator
-const SITE_SCOPED_PATHS = [
-  "/admin/content/pages",
-  "/admin/content/solutions",
-  "/admin/content/media",
-  "/admin/content/filters",
-  "/admin/content/navigation",
-  "/admin/content/parameters",
-];
-
-function CurrentSiteIndicator() {
-  const pathname = usePathname();
-  const { currentSite, loading } = useSiteContext();
-
-  // Only show on content pages
-  const isContentPage = SITE_SCOPED_PATHS.some((path) => pathname.startsWith(path));
-  if (!isContentPage) return null;
-
-  if (loading || !currentSite) return null;
-
-  return (
-    <Badge variant="outline" className="text-xs font-normal">
-      {currentSite.name}
-    </Badge>
-  );
-}
-
 function AdminBreadcrumbs() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -131,27 +103,24 @@ function AdminBreadcrumbs() {
   const breadcrumbs = getBreadcrumbs(pathname, folderName);
 
   return (
-    <div className="flex items-center gap-2">
-      <Breadcrumb>
-        <BreadcrumbList>
-          {breadcrumbs.map((crumb, index) => (
-            <React.Fragment key={index}>
-              {index > 0 && <BreadcrumbSeparator />}
-              <BreadcrumbItem>
-                {crumb.href ? (
-                  <BreadcrumbLink asChild>
-                    <Link href={crumb.href}>{crumb.label}</Link>
-                  </BreadcrumbLink>
-                ) : (
-                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                )}
-              </BreadcrumbItem>
-            </React.Fragment>
-          ))}
-        </BreadcrumbList>
-      </Breadcrumb>
-      <CurrentSiteIndicator />
-    </div>
+    <Breadcrumb>
+      <BreadcrumbList>
+        {breadcrumbs.map((crumb, index) => (
+          <React.Fragment key={index}>
+            {index > 0 && <BreadcrumbSeparator />}
+            <BreadcrumbItem>
+              {crumb.href ? (
+                <BreadcrumbLink asChild>
+                  <Link href={crumb.href}>{crumb.label}</Link>
+                </BreadcrumbLink>
+              ) : (
+                <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+              )}
+            </BreadcrumbItem>
+          </React.Fragment>
+        ))}
+      </BreadcrumbList>
+    </Breadcrumb>
   );
 }
 

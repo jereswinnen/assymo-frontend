@@ -55,6 +55,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 import { toast } from "sonner";
 import {
   CheckIcon,
@@ -427,14 +434,21 @@ export default function FiltersPage() {
   return (
     <div className="space-y-6">
       {categories.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12">
-          <FilterIcon className="size-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground mb-4">Nog geen categorieën</p>
+        <Empty className="border py-12">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <FilterIcon className="size-5" />
+            </EmptyMedia>
+            <EmptyTitle>Nog geen categorieën</EmptyTitle>
+            <EmptyDescription>
+              Maak je eerste categorie aan om filters te organiseren.
+            </EmptyDescription>
+          </EmptyHeader>
           <Button size="sm" onClick={openNewCategorySheet}>
             <PlusIcon className="size-4" />
-            Eerste categorie aanmaken
+            Categorie aanmaken
           </Button>
-        </div>
+        </Empty>
       ) : (
         <DndContext
           sensors={sensors}

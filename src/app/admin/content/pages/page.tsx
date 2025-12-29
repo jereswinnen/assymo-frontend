@@ -29,6 +29,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -201,18 +208,25 @@ export default function PagesPage() {
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
         </div>
       ) : pages.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12">
-          <FileTextIcon className="size-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground mb-4">Nog geen pagina&apos;s</p>
+        <Empty className="border py-12">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <FileTextIcon className="size-5" />
+            </EmptyMedia>
+            <EmptyTitle>Nog geen pagina&apos;s</EmptyTitle>
+            <EmptyDescription>
+              Maak je eerste pagina aan om te beginnen.
+            </EmptyDescription>
+          </EmptyHeader>
           <Button size="sm" onClick={createPage} disabled={creating}>
             {creating ? (
               <Loader2Icon className="size-4 animate-spin" />
             ) : (
               <PlusIcon className="size-4" />
             )}
-            Eerste pagina aanmaken
+            Pagina aanmaken
           </Button>
-        </div>
+        </Empty>
       ) : (
         <Table>
           <TableHeader>

@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2Icon, ShieldCheckIcon, UserIcon } from "lucide-react";
+import { Loader2Icon, ShieldCheckIcon } from "lucide-react";
 import { toast } from "sonner";
 import { UserEditDialog } from "@/components/admin/UserEditDialog";
 import type { Role, FeatureOverrides } from "@/lib/permissions/types";
@@ -110,11 +110,6 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <UserIcon className="size-4" />
-        <span>{users.length} gebruikers</span>
-      </div>
-
       {users.length === 0 ? (
         <div className="text-muted-foreground text-center text-sm py-8">
           Geen gebruikers gevonden.

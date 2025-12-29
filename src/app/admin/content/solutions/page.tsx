@@ -46,6 +46,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 import { toast } from "sonner";
 import {
   CopyIcon,
@@ -356,18 +363,25 @@ export default function SolutionsPage() {
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
         </div>
       ) : solutions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12">
-          <ImageIcon className="size-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground mb-4">Nog geen realisaties</p>
+        <Empty className="border py-12">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ImageIcon className="size-5" />
+            </EmptyMedia>
+            <EmptyTitle>Nog geen realisaties</EmptyTitle>
+            <EmptyDescription>
+              Maak je eerste realisatie aan om te beginnen.
+            </EmptyDescription>
+          </EmptyHeader>
           <Button size="sm" onClick={createSolution} disabled={creating}>
             {creating ? (
               <Loader2Icon className="size-4 animate-spin" />
             ) : (
               <PlusIcon className="size-4" />
             )}
-            Eerste realisatie aanmaken
+            Realisatie aanmaken
           </Button>
-        </div>
+        </Empty>
       ) : (
         <DndContext
           sensors={sensors}

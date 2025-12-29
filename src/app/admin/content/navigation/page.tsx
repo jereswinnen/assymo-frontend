@@ -68,10 +68,18 @@ import {
   CheckIcon,
   GripVerticalIcon,
   Loader2Icon,
+  MenuIcon,
   PlusIcon,
   Trash2Icon,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 
 interface Solution {
   id: string;
@@ -461,13 +469,21 @@ export default function NavigationPage() {
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
         </div>
       ) : links.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12">
-          <p className="text-muted-foreground mb-4">Nog geen navigatie links</p>
+        <Empty className="border py-12">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <MenuIcon className="size-5" />
+            </EmptyMedia>
+            <EmptyTitle>Nog geen navigatie links</EmptyTitle>
+            <EmptyDescription>
+              Maak je eerste link aan om de navigatie te configureren.
+            </EmptyDescription>
+          </EmptyHeader>
           <Button size="sm" onClick={openNewLinkSheet}>
             <PlusIcon className="size-4" />
-            Eerste link aanmaken
+            Link aanmaken
           </Button>
-        </div>
+        </Empty>
       ) : (
         <DndContext
           sensors={sensors}
