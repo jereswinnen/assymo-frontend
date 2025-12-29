@@ -6,7 +6,7 @@
 |-------|-------------|--------|
 | 1 | Database Schema Foundation | ✓ Complete |
 | 2 | Permission Utilities | ✓ Complete |
-| 3 | Route Protection | ☐ Not started |
+| 3 | Route Protection | ✓ Complete |
 | 4 | User Management UI | ☐ Not started |
 | 5 | Site Management & Content Scoping | ☐ Not started |
 | 6 | Content API Updates | ☐ Not started |

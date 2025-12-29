@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import {
   getAllAppointments,
   getAppointmentsByDateRange,
@@ -29,10 +29,8 @@ import type { CreateAppointmentInput, AppointmentStatus } from "@/types/appointm
  */
 export async function GET(request: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "appointments" });
+    if (!authorized) return response;
 
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get("startDate");
@@ -87,10 +85,8 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "appointments" });
+    if (!authorized) return response;
 
     const body = await request.json();
 

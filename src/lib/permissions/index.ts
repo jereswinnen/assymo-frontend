@@ -43,3 +43,7 @@ export {
   updateUserRole,
   updateUserFeatureOverrides,
 } from "./queries";
+
+// Route protection middleware
+export { protectRoute, requireAuth } from "./middleware";
+export type { ProtectRouteOptions, ProtectRouteResult } from "./middleware";
