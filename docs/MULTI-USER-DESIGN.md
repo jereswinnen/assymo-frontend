@@ -143,7 +143,8 @@ The following tables require a `site_id` column for multi-site content scoping:
 | `navigation_links` | Add `site_id TEXT REFERENCES sites(id)` |
 | `navigation_subitems` | No change (inherits from parent) |
 | `image_metadata` | Add `site_id TEXT REFERENCES sites(id)` |
-| `site_parameters` | Rename to `site_settings`, add `site_id` (one per site) |
+| `media_folders` | Add `site_id TEXT REFERENCES sites(id)` |
+| `site_parameters` | Add `site_id TEXT REFERENCES sites(id)` (one row per site) |
 
 **Tables that remain global (no site_id):**
 - `appointments` - Global business feature
@@ -185,6 +186,8 @@ ALTER TABLE filters ADD COLUMN site_id TEXT REFERENCES sites(id);
 ALTER TABLE filter_categories ADD COLUMN site_id TEXT REFERENCES sites(id);
 ALTER TABLE navigation_links ADD COLUMN site_id TEXT REFERENCES sites(id);
 ALTER TABLE image_metadata ADD COLUMN site_id TEXT REFERENCES sites(id);
+ALTER TABLE media_folders ADD COLUMN site_id TEXT REFERENCES sites(id);
+ALTER TABLE site_parameters ADD COLUMN site_id TEXT REFERENCES sites(id);
 
 -- Create indexes for site_id columns
 CREATE INDEX pages_site_idx ON pages(site_id);
@@ -193,6 +196,8 @@ CREATE INDEX filters_site_idx ON filters(site_id);
 CREATE INDEX filter_categories_site_idx ON filter_categories(site_id);
 CREATE INDEX navigation_links_site_idx ON navigation_links(site_id);
 CREATE INDEX image_metadata_site_idx ON image_metadata(site_id);
+CREATE INDEX media_folders_site_idx ON media_folders(site_id);
+CREATE INDEX site_parameters_site_idx ON site_parameters(site_id);
 ```
 
 ---
@@ -1039,6 +1044,8 @@ ALTER TABLE filters ADD COLUMN site_id TEXT REFERENCES sites(id);
 ALTER TABLE filter_categories ADD COLUMN site_id TEXT REFERENCES sites(id);
 ALTER TABLE navigation_links ADD COLUMN site_id TEXT REFERENCES sites(id);
 ALTER TABLE image_metadata ADD COLUMN site_id TEXT REFERENCES sites(id);
+ALTER TABLE media_folders ADD COLUMN site_id TEXT REFERENCES sites(id);
+ALTER TABLE site_parameters ADD COLUMN site_id TEXT REFERENCES sites(id);
 
 -- Assign existing content to default site (Assymo)
 UPDATE pages SET site_id = (SELECT id FROM sites WHERE slug = 'assymo');
@@ -1047,6 +1054,8 @@ UPDATE filters SET site_id = (SELECT id FROM sites WHERE slug = 'assymo');
 UPDATE filter_categories SET site_id = (SELECT id FROM sites WHERE slug = 'assymo');
 UPDATE navigation_links SET site_id = (SELECT id FROM sites WHERE slug = 'assymo');
 UPDATE image_metadata SET site_id = (SELECT id FROM sites WHERE slug = 'assymo');
+UPDATE media_folders SET site_id = (SELECT id FROM sites WHERE slug = 'assymo');
+UPDATE site_parameters SET site_id = (SELECT id FROM sites WHERE slug = 'assymo');
 
 -- Make site_id NOT NULL after migration
 ALTER TABLE pages ALTER COLUMN site_id SET NOT NULL;
