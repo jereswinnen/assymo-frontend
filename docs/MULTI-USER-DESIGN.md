@@ -580,6 +580,44 @@ export function getSiteFilter(
 └─────────────────────────────────────────────────────────────┘
 ```
 
+#### `/admin/account` - Personal Account Settings
+
+Each user manages their own security settings here. Accessible to ALL users.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Mijn Account                                                │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ BEVEILIGING                                             │ │
+│ ├─────────────────────────────────────────────────────────┤ │
+│ │                                                         │ │
+│ │ Wachtwoord                                              │ │
+│ │ ••••••••••                          [Wijzigen]         │ │
+│ │                                                         │ │
+│ │ Tweestapsverificatie (2FA)                              │ │
+│ │ Ingeschakeld ✓                      [Beheren]          │ │
+│ │                                                         │ │
+│ │ Passkeys                                                │ │
+│ │ 2 passkeys geregistreerd            [Beheren]          │ │
+│ │                                                         │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ SESSIES                                                 │ │
+│ ├─────────────────────────────────────────────────────────┤ │
+│ │ Huidige sessie: Chrome op macOS                        │ │
+│ │ Andere actieve sessies: 1           [Alles uitloggen]  │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Key distinction:**
+- `/admin/account` - Personal security (passkeys, 2FA, password) - ALL users
+- `/admin/settings` - App/site configuration - admin/super_admin only
+
 ### 5.2 Navigation Structure Changes
 
 **Current AdminSidebar items:**
@@ -622,6 +660,9 @@ const adminItems = [
   { href: "/admin/users", label: "Gebruikers", feature: "users" },
   { href: "/admin/sites", label: "Sites", feature: "sites" },
 ];
+
+// Account link - shown to ALL users (bottom of sidebar or user menu)
+const accountItem = { href: "/admin/account", label: "Mijn Account" };
 ```
 
 **Site Selector Component:**
@@ -1087,9 +1128,52 @@ const rows = await sql`
 
 ---
 
-## 8. Migration Path
+### Phase 8: Account Page (Personal Settings)
+**Duration:** 1 session
+**Dependencies:** Phase 1 complete (can be done in parallel with Phases 4-7)
 
-### 8.1 Migrating Existing Users
+This phase moves personal security settings from `/admin/settings` to a dedicated `/admin/account` page. This is important because:
+- Each user should manage their own passkeys, 2FA, and password
+- The Settings page should only contain app/site configuration
+- All users need access to account settings, regardless of role
+
+**Files to create:**
+- `src/app/admin/account/page.tsx` - Account settings page
+- `src/components/admin/account/PasswordSection.tsx` - Change password UI
+- `src/components/admin/account/TwoFactorSection.tsx` - 2FA management
+- `src/components/admin/account/PasskeysSection.tsx` - Passkey management
+- `src/components/admin/account/SessionsSection.tsx` - Active sessions list
+
+**Files to modify:**
+- `src/components/admin/AdminSidebar.tsx` - Add "Mijn Account" link (for all users)
+- `src/app/admin/settings/page.tsx` - Remove personal security settings (keep only app config)
+
+**What moves from Settings to Account:**
+| Setting | From | To |
+|---------|------|-----|
+| Passkeys | `/admin/settings` | `/admin/account` |
+| 2FA setup | `/admin/settings` | `/admin/account` |
+| Password change | `/admin/settings` | `/admin/account` |
+| Active sessions | (new) | `/admin/account` |
+
+**What stays in Settings:**
+- Site parameters (or moves to per-site settings)
+- Any app-wide configuration
+
+**Verification:**
+- [ ] All users can access `/admin/account`
+- [ ] Passkey management works in new location
+- [ ] 2FA setup/disable works in new location
+- [ ] Password change works in new location
+- [ ] Sessions list shows active sessions with logout option
+- [ ] `/admin/settings` no longer shows personal security options
+- [ ] Existing passkeys and 2FA continue to work
+
+---
+
+## 9. Migration Path
+
+### 9.1 Migrating Existing Users
 
 The existing users will be migrated as follows:
 
@@ -1124,7 +1208,7 @@ The existing users will be migrated as follows:
      WHERE u.email = 'willem@example.com' AND s.slug = 'vpg';
      ```
 
-### 8.2 Migrating Existing Content
+### 9.2 Migrating Existing Content
 
 During Phase 5:
 
@@ -1133,7 +1217,7 @@ During Phase 5:
 3. Verify content appears correctly in admin
 4. Move specific content to VPG site as needed via admin UI
 
-### 8.3 Rollback Strategy
+### 9.3 Rollback Strategy
 
 **Phase 1-3 rollback:**
 - The `role` column has a default value, so removing permission checks will restore original behavior
