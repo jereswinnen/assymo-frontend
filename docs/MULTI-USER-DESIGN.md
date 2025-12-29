@@ -1,5 +1,22 @@
 # Multi-User Roles and Permissions System Design
 
+## Implementation Progress
+
+| Phase | Description | Status |
+|-------|-------------|--------|
+| 1 | Database Schema Foundation | ☐ Not started |
+| 2 | Permission Utilities | ☐ Not started |
+| 3 | Route Protection | ☐ Not started |
+| 4 | User Management UI | ☐ Not started |
+| 5 | Site Management & Content Scoping | ☐ Not started |
+| 6 | Content API Updates | ☐ Not started |
+| 7 | Refinements & Edge Cases | ☐ Not started |
+| 8 | Account Page (Personal Settings) | ☐ Not started |
+
+**Quick Links:** [Phase 1](#phase-1-database-schema-foundation) · [Phase 2](#phase-2-permission-utilities) · [Phase 3](#phase-3-route-protection) · [Phase 4](#phase-4-user-management-ui) · [Phase 5](#phase-5-site-management-and-content-scoping) · [Phase 6](#phase-6-content-api-updates) · [Phase 7](#phase-7-refinements-and-edge-cases) · [Phase 8](#phase-8-account-page-personal-settings)
+
+---
+
 ## 1. Executive Summary
 
 This document outlines a multi-tenant, role-based access control (RBAC) system for the Assymo admin CMS. The system introduces:
