@@ -1,24 +1,33 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { revalidateTag } from "next/cache";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import { CACHE_TAGS } from "@/lib/content";
 
 const sql = neon(process.env.DATABASE_URL!);
 
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const authenticated = await isAuthenticated();
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
 
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export async function PUT(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { authorized, response, ctx } = await protectRoute({ feature: "navigation" });
+    if (!authorized) return response;
 
     const { id } = await params;
     const { title, slug, submenu_heading } = await request.json();
+
+    // Fetch existing link to check site access
+    const existing = await sql`SELECT site_id FROM navigation_links WHERE id = ${id}`;
+    if (existing.length === 0) {
+      return NextResponse.json({ error: "Navigation link not found" }, { status: 404 });
+    }
+
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+    if (!isSuperAdmin && !ctx!.userSites.includes(existing[0].site_id)) {
+      return NextResponse.json({ error: "Geen toegang tot dit navigatie-item" }, { status: 403 });
+    }
 
     const rows = await sql`
       UPDATE navigation_links
@@ -47,18 +56,23 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const authenticated = await isAuthenticated();
-
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response, ctx } = await protectRoute({ feature: "navigation" });
+    if (!authorized) return response;
 
     const { id } = await params;
+
+    // Fetch existing link to check site access
+    const existing = await sql`SELECT site_id FROM navigation_links WHERE id = ${id}`;
+    if (existing.length === 0) {
+      return NextResponse.json({ error: "Navigation link not found" }, { status: 404 });
+    }
+
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+    if (!isSuperAdmin && !ctx!.userSites.includes(existing[0].site_id)) {
+      return NextResponse.json({ error: "Geen toegang tot dit navigatie-item" }, { status: 403 });
+    }
 
     await sql`DELETE FROM navigation_links WHERE id = ${id}`;
 

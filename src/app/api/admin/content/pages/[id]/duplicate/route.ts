@@ -1,21 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { revalidateTag } from "next/cache";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import { CACHE_TAGS } from "@/lib/content";
 
 const sql = neon(process.env.DATABASE_URL!);
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const authenticated = await isAuthenticated();
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
 
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export async function POST(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { authorized, response, ctx } = await protectRoute({ feature: "pages" });
+    if (!authorized) return response;
 
     const { id } = await params;
 
@@ -30,29 +28,36 @@ export async function POST(
 
     const original = rows[0];
 
-    // Generate unique slug
+    // Verify user has access to this page's site
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+    if (!isSuperAdmin && !ctx!.userSites.includes(original.site_id)) {
+      return NextResponse.json({ error: "Geen toegang tot deze pagina" }, { status: 403 });
+    }
+
+    // Generate unique slug within the same site
     const baseSlug = original.slug ? `${original.slug}-kopie` : "kopie";
     let newSlug = baseSlug;
     let counter = 1;
 
     while (true) {
       const existing = await sql`
-        SELECT id FROM pages WHERE slug = ${newSlug}
+        SELECT id FROM pages WHERE slug = ${newSlug} AND site_id = ${original.site_id}
       `;
       if (existing.length === 0) break;
       counter++;
       newSlug = `${baseSlug}-${counter}`;
     }
 
-    // Create duplicate
+    // Create duplicate with same site_id
     const duplicated = await sql`
-      INSERT INTO pages (title, slug, is_homepage, header_image, sections)
+      INSERT INTO pages (title, slug, is_homepage, header_image, sections, site_id)
       VALUES (
         ${original.title + " (kopie)"},
         ${newSlug},
         false,
         ${original.header_image ? JSON.stringify(original.header_image) : null}::jsonb,
-        ${JSON.stringify(original.sections || [])}::jsonb
+        ${JSON.stringify(original.sections || [])}::jsonb,
+        ${original.site_id}
       )
       RETURNING *
     `;

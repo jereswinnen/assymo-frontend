@@ -1,21 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { revalidateTag } from "next/cache";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import { CACHE_TAGS } from "@/lib/content";
 
 const sql = neon(process.env.DATABASE_URL!);
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const authenticated = await isAuthenticated();
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
 
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export async function POST(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { authorized, response, ctx } = await protectRoute({ feature: "navigation" });
+    if (!authorized) return response;
 
     const { id: linkId } = await params;
     const { solution_id } = await request.json();
@@ -25,6 +23,17 @@ export async function POST(
         { error: "solution_id is required" },
         { status: 400 }
       );
+    }
+
+    // Fetch existing link to check site access
+    const existing = await sql`SELECT site_id FROM navigation_links WHERE id = ${linkId}`;
+    if (existing.length === 0) {
+      return NextResponse.json({ error: "Navigation link not found" }, { status: 404 });
+    }
+
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+    if (!isSuperAdmin && !ctx!.userSites.includes(existing[0].site_id)) {
+      return NextResponse.json({ error: "Geen toegang tot dit navigatie-item" }, { status: 403 });
     }
 
     // Get max order_rank for this link
@@ -53,16 +62,10 @@ export async function POST(
   }
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const authenticated = await isAuthenticated();
-
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response, ctx } = await protectRoute({ feature: "navigation" });
+    if (!authorized) return response;
 
     const { id: linkId } = await params;
     const { orderedIds } = await request.json();
@@ -72,6 +75,17 @@ export async function PUT(
         { error: "orderedIds must be an array" },
         { status: 400 }
       );
+    }
+
+    // Fetch existing link to check site access
+    const existing = await sql`SELECT site_id FROM navigation_links WHERE id = ${linkId}`;
+    if (existing.length === 0) {
+      return NextResponse.json({ error: "Navigation link not found" }, { status: 404 });
+    }
+
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+    if (!isSuperAdmin && !ctx!.userSites.includes(existing[0].site_id)) {
+      return NextResponse.json({ error: "Geen toegang tot dit navigatie-item" }, { status: 403 });
     }
 
     // Update order_rank for each subitem

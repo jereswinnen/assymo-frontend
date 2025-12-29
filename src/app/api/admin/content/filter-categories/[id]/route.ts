@@ -1,21 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { revalidateTag } from "next/cache";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import { CACHE_TAGS } from "@/lib/content";
 
 const sql = neon(process.env.DATABASE_URL!);
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const authenticated = await isAuthenticated();
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
 
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { authorized, response, ctx } = await protectRoute({ feature: "filters" });
+    if (!authorized) return response;
 
     const { id } = await params;
 
@@ -35,13 +33,17 @@ export async function GET(
     `;
 
     if (rows.length === 0) {
-      return NextResponse.json(
-        { error: "Filter category not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Filter category not found" }, { status: 404 });
     }
 
-    return NextResponse.json(rows[0]);
+    const category = rows[0];
+
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+    if (!isSuperAdmin && !ctx!.userSites.includes(category.site_id)) {
+      return NextResponse.json({ error: "Geen toegang tot deze filtercategorie" }, { status: 403 });
+    }
+
+    return NextResponse.json(category);
   } catch (error) {
     console.error("Failed to fetch filter category:", error);
     return NextResponse.json(
@@ -51,19 +53,24 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const authenticated = await isAuthenticated();
-
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response, ctx } = await protectRoute({ feature: "filters" });
+    if (!authorized) return response;
 
     const { id } = await params;
     const { name, slug, order_rank } = await request.json();
+
+    // Fetch existing category to check site access
+    const existing = await sql`SELECT site_id FROM filter_categories WHERE id = ${id}`;
+    if (existing.length === 0) {
+      return NextResponse.json({ error: "Filter category not found" }, { status: 404 });
+    }
+
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+    if (!isSuperAdmin && !ctx!.userSites.includes(existing[0].site_id)) {
+      return NextResponse.json({ error: "Geen toegang tot deze filtercategorie" }, { status: 403 });
+    }
 
     const rows = await sql`
       UPDATE filter_categories
@@ -92,18 +99,23 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const authenticated = await isAuthenticated();
-
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response, ctx } = await protectRoute({ feature: "filters" });
+    if (!authorized) return response;
 
     const { id } = await params;
+
+    // Fetch existing category to check site access
+    const existing = await sql`SELECT site_id FROM filter_categories WHERE id = ${id}`;
+    if (existing.length === 0) {
+      return NextResponse.json({ error: "Filter category not found" }, { status: 404 });
+    }
+
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+    if (!isSuperAdmin && !ctx!.userSites.includes(existing[0].site_id)) {
+      return NextResponse.json({ error: "Geen toegang tot deze filtercategorie" }, { status: 403 });
+    }
 
     await sql`DELETE FROM filter_categories WHERE id = ${id}`;
 

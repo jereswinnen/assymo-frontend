@@ -436,7 +436,7 @@ function MediaPageContent() {
     );
   };
 
-  const handleFolderCreated = (folder: { id: string; name: string }) => {
+  const handleFolderCreated = (folder: { id: string; name: string; siteId?: string | null }) => {
     setFolders((prev) => [
       ...prev,
       {
@@ -445,6 +445,7 @@ function MediaPageContent() {
         createdAt: new Date().toISOString(),
         itemCount: 0,
         previewImages: [],
+        siteId: folder.siteId || null,
       },
     ]);
     toast.success("Map aangemaakt");

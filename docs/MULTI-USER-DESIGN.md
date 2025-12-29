@@ -9,7 +9,7 @@
 | 3 | Route Protection | ✓ Complete |
 | 4 | User Management UI | ✓ Complete |
 | 5 | Site Management & Content Scoping | ✓ Complete |
-| 6 | Content API Updates | ☐ Not started |
+| 6 | Content API Updates | ✓ Complete |
 | 7 | Refinements & Edge Cases | ☐ Not started |
 | 8 | Account Page (Personal Settings) | ☐ Not started |
 

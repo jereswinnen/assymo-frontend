@@ -1,49 +1,112 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { revalidateTag } from "next/cache";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import { CACHE_TAGS } from "@/lib/content";
 
 const sql = neon(process.env.DATABASE_URL!);
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
-
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response, ctx } = await protectRoute({ feature: "navigation" });
+    if (!authorized) return response;
 
     const { searchParams } = new URL(request.url);
     const location = searchParams.get("location") || "header";
+    const siteId = searchParams.get("siteId");
 
-    const rows = await sql`
-      SELECT nl.*,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', ns.id,
-              'solution_id', ns.solution_id,
-              'order_rank', ns.order_rank,
-              'solution', CASE
-                WHEN s.id IS NOT NULL THEN json_build_object(
-                  'id', s.id,
-                  'name', s.name,
-                  'slug', s.slug
-                )
-                ELSE NULL
-              END
-            ) ORDER BY ns.order_rank
-          ) FILTER (WHERE ns.id IS NOT NULL),
-          '[]'
-        ) as sub_items
-      FROM navigation_links nl
-      LEFT JOIN navigation_subitems ns ON nl.id = ns.link_id
-      LEFT JOIN solutions s ON ns.solution_id = s.id
-      WHERE nl.location = ${location}
-      GROUP BY nl.id
-      ORDER BY nl.order_rank
-    `;
+    const accessibleSites = ctx!.userSites;
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+
+    let rows;
+    if (siteId) {
+      if (!isSuperAdmin && !accessibleSites.includes(siteId)) {
+        return NextResponse.json({ error: "Geen toegang tot deze site" }, { status: 403 });
+      }
+      rows = await sql`
+        SELECT nl.*,
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', ns.id,
+                'solution_id', ns.solution_id,
+                'order_rank', ns.order_rank,
+                'solution', CASE
+                  WHEN s.id IS NOT NULL THEN json_build_object(
+                    'id', s.id,
+                    'name', s.name,
+                    'slug', s.slug
+                  )
+                  ELSE NULL
+                END
+              ) ORDER BY ns.order_rank
+            ) FILTER (WHERE ns.id IS NOT NULL),
+            '[]'
+          ) as sub_items
+        FROM navigation_links nl
+        LEFT JOIN navigation_subitems ns ON nl.id = ns.link_id
+        LEFT JOIN solutions s ON ns.solution_id = s.id
+        WHERE nl.location = ${location} AND nl.site_id = ${siteId}
+        GROUP BY nl.id
+        ORDER BY nl.order_rank
+      `;
+    } else if (isSuperAdmin) {
+      rows = await sql`
+        SELECT nl.*,
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', ns.id,
+                'solution_id', ns.solution_id,
+                'order_rank', ns.order_rank,
+                'solution', CASE
+                  WHEN s.id IS NOT NULL THEN json_build_object(
+                    'id', s.id,
+                    'name', s.name,
+                    'slug', s.slug
+                  )
+                  ELSE NULL
+                END
+              ) ORDER BY ns.order_rank
+            ) FILTER (WHERE ns.id IS NOT NULL),
+            '[]'
+          ) as sub_items
+        FROM navigation_links nl
+        LEFT JOIN navigation_subitems ns ON nl.id = ns.link_id
+        LEFT JOIN solutions s ON ns.solution_id = s.id
+        WHERE nl.location = ${location}
+        GROUP BY nl.id
+        ORDER BY nl.order_rank
+      `;
+    } else {
+      rows = await sql`
+        SELECT nl.*,
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', ns.id,
+                'solution_id', ns.solution_id,
+                'order_rank', ns.order_rank,
+                'solution', CASE
+                  WHEN s.id IS NOT NULL THEN json_build_object(
+                    'id', s.id,
+                    'name', s.name,
+                    'slug', s.slug
+                  )
+                  ELSE NULL
+                END
+              ) ORDER BY ns.order_rank
+            ) FILTER (WHERE ns.id IS NOT NULL),
+            '[]'
+          ) as sub_items
+        FROM navigation_links nl
+        LEFT JOIN navigation_subitems ns ON nl.id = ns.link_id
+        LEFT JOIN solutions s ON ns.solution_id = s.id
+        WHERE nl.location = ${location} AND nl.site_id = ANY(${accessibleSites})
+        GROUP BY nl.id
+        ORDER BY nl.order_rank
+      `;
+    }
 
     return NextResponse.json(rows);
   } catch (error) {
@@ -55,15 +118,12 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
+    const { authorized, response, ctx } = await protectRoute({ feature: "navigation" });
+    if (!authorized) return response;
 
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { location, title, slug, submenu_heading } = await request.json();
+    const { location, title, slug, submenu_heading, siteId } = await request.json();
 
     if (!location || !title || !slug) {
       return NextResponse.json(
@@ -72,16 +132,28 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get max order_rank for this location
+    if (!siteId) {
+      return NextResponse.json(
+        { error: "Site is required" },
+        { status: 400 }
+      );
+    }
+
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+    if (!isSuperAdmin && !ctx!.userSites.includes(siteId)) {
+      return NextResponse.json({ error: "Geen toegang tot deze site" }, { status: 403 });
+    }
+
+    // Get max order_rank for this location and site
     const maxRank = await sql`
       SELECT COALESCE(MAX(order_rank), -1) + 1 as next_rank
       FROM navigation_links
-      WHERE location = ${location}
+      WHERE location = ${location} AND site_id = ${siteId}
     `;
 
     const rows = await sql`
-      INSERT INTO navigation_links (location, title, slug, submenu_heading, order_rank)
-      VALUES (${location}, ${title}, ${slug}, ${submenu_heading || null}, ${maxRank[0].next_rank})
+      INSERT INTO navigation_links (location, title, slug, submenu_heading, order_rank, site_id)
+      VALUES (${location}, ${title}, ${slug}, ${submenu_heading || null}, ${maxRank[0].next_rank}, ${siteId})
       RETURNING *
     `;
 

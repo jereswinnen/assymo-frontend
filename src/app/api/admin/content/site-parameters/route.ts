@@ -1,22 +1,34 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { revalidateTag } from "next/cache";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import { CACHE_TAGS } from "@/lib/content";
 import type { SiteParameters } from "@/types/content";
 
 const sql = neon(process.env.DATABASE_URL!);
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
+    const { authorized, response, ctx } = await protectRoute({ feature: "parameters" });
+    if (!authorized) return response;
 
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { searchParams } = new URL(request.url);
+    const siteId = searchParams.get("siteId");
+
+    if (!siteId) {
+      return NextResponse.json(
+        { error: "siteId is required" },
+        { status: 400 }
+      );
+    }
+
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+    if (!isSuperAdmin && !ctx!.userSites.includes(siteId)) {
+      return NextResponse.json({ error: "Geen toegang tot deze site" }, { status: 403 });
     }
 
     const rows = await sql`
-      SELECT * FROM site_parameters WHERE id = 1
+      SELECT * FROM site_parameters WHERE site_id = ${siteId}
     `;
 
     // Return empty object with defaults if no row exists
@@ -39,20 +51,30 @@ export async function GET() {
   }
 }
 
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
-
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response, ctx } = await protectRoute({ feature: "parameters" });
+    if (!authorized) return response;
 
     const data = await request.json();
+    const { siteId } = data;
+
+    if (!siteId) {
+      return NextResponse.json(
+        { error: "siteId is required" },
+        { status: 400 }
+      );
+    }
+
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+    if (!isSuperAdmin && !ctx!.userSites.includes(siteId)) {
+      return NextResponse.json({ error: "Geen toegang tot deze site" }, { status: 403 });
+    }
 
     await sql`
-      INSERT INTO site_parameters (id, address, phone, email, instagram, facebook, vat_number, updated_at)
-      VALUES (1, ${data.address || null}, ${data.phone || null}, ${data.email || null}, ${data.instagram || null}, ${data.facebook || null}, ${data.vat_number || null}, NOW())
-      ON CONFLICT (id) DO UPDATE SET
+      INSERT INTO site_parameters (site_id, address, phone, email, instagram, facebook, vat_number, updated_at)
+      VALUES (${siteId}, ${data.address || null}, ${data.phone || null}, ${data.email || null}, ${data.instagram || null}, ${data.facebook || null}, ${data.vat_number || null}, NOW())
+      ON CONFLICT (site_id) DO UPDATE SET
         address = ${data.address || null},
         phone = ${data.phone || null},
         email = ${data.email || null},
