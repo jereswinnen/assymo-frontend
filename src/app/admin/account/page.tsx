@@ -10,7 +10,6 @@ import { authClient } from "@/lib/auth-client";
 import { PasswordSection } from "@/components/admin/account/PasswordSection";
 import { TwoFactorSection } from "@/components/admin/account/TwoFactorSection";
 import { PasskeysSection } from "@/components/admin/account/PasskeysSection";
-import { SessionsSection } from "@/components/admin/account/SessionsSection";
 
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
@@ -55,10 +54,6 @@ export default function AccountPage() {
       <Separator />
 
       <PasskeysSection />
-
-      <Separator />
-
-      <SessionsSection />
     </FieldGroup>
   );
 }
