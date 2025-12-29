@@ -5,7 +5,7 @@
 | Phase | Description | Status |
 |-------|-------------|--------|
 | 1 | Database Schema Foundation | ✓ Complete |
-| 2 | Permission Utilities | ☐ Not started |
+| 2 | Permission Utilities | ✓ Complete |
 | 3 | Route Protection | ☐ Not started |
 | 4 | User Management UI | ☐ Not started |
 | 5 | Site Management & Content Scoping | ☐ Not started |
