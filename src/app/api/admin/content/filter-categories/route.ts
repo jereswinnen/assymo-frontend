@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { revalidateTag } from "next/cache";
+import { updateTag } from "next/cache";
 import { isAuthenticated } from "@/lib/auth-utils";
 import { CACHE_TAGS } from "@/lib/content";
 
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     `;
 
     // Invalidate filters cache
-    revalidateTag(CACHE_TAGS.filters, "max");
+    updateTag(CACHE_TAGS.filters);
 
     return NextResponse.json(rows[0]);
   } catch (error) {

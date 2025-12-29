@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { revalidateTag } from "next/cache";
+import { updateTag } from "next/cache";
 import { isAuthenticated } from "@/lib/auth-utils";
 import { CACHE_TAGS } from "@/lib/content";
 
@@ -80,7 +80,7 @@ export async function PUT(
     }
 
     // Invalidate filters cache
-    revalidateTag(CACHE_TAGS.filters, "max");
+    updateTag(CACHE_TAGS.filters);
 
     return NextResponse.json(rows[0]);
   } catch (error) {
@@ -108,7 +108,7 @@ export async function DELETE(
     await sql`DELETE FROM filter_categories WHERE id = ${id}`;
 
     // Invalidate filters cache
-    revalidateTag(CACHE_TAGS.filters, "max");
+    updateTag(CACHE_TAGS.filters);
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { revalidateTag } from "next/cache";
+import { updateTag } from "next/cache";
 import { isAuthenticated } from "@/lib/auth-utils";
 import { CACHE_TAGS } from "@/lib/content";
 
@@ -35,7 +35,7 @@ export async function PUT(
     }
 
     // Invalidate navigation cache
-    revalidateTag(CACHE_TAGS.navigation, "max");
+    updateTag(CACHE_TAGS.navigation);
 
     return NextResponse.json(rows[0]);
   } catch (error) {
@@ -63,7 +63,7 @@ export async function DELETE(
     await sql`DELETE FROM navigation_links WHERE id = ${id}`;
 
     // Invalidate navigation cache
-    revalidateTag(CACHE_TAGS.navigation, "max");
+    updateTag(CACHE_TAGS.navigation);
 
     return NextResponse.json({ success: true });
   } catch (error) {
