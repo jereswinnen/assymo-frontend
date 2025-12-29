@@ -21,6 +21,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Field,
   FieldGroup,
   FieldLabel,
@@ -30,7 +40,6 @@ import {
   CheckIcon,
   GlobeIcon,
   Loader2Icon,
-  PencilIcon,
   PlusIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -56,6 +65,8 @@ export default function SitesPage() {
     slug: "",
     domain: "",
   });
+  const [deleteTarget, setDeleteTarget] = useState<Site | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadSites();
@@ -134,13 +145,12 @@ export default function SitesPage() {
     }
   };
 
-  const handleDelete = async (site: Site) => {
-    if (!confirm(`Weet je zeker dat je "${site.name}" wilt verwijderen?`)) {
-      return;
-    }
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
 
+    setDeleting(true);
     try {
-      const response = await fetch(`/api/admin/sites/${site.id}`, {
+      const response = await fetch(`/api/admin/sites/${deleteTarget.id}`, {
         method: "DELETE",
       });
 
@@ -150,12 +160,15 @@ export default function SitesPage() {
       }
 
       toast.success("Site verwijderd");
+      setDeleteTarget(null);
       loadSites();
     } catch (error) {
       console.error("Failed to delete site:", error);
       toast.error(
         error instanceof Error ? error.message : "Kon site niet verwijderen"
       );
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -214,7 +227,11 @@ export default function SitesPage() {
           </TableHeader>
           <TableBody>
             {sites.map((site) => (
-              <TableRow key={site.id}>
+              <TableRow
+                key={site.id}
+                className="group cursor-pointer"
+                onClick={() => openEditDialog(site)}
+              >
                 <TableCell className="font-medium">{site.name}</TableCell>
                 <TableCell className="text-muted-foreground font-mono text-sm">
                   {site.slug}
@@ -238,24 +255,19 @@ export default function SitesPage() {
                   {formatDate(site.created_at)}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-1">
+                  {site.slug !== "assymo" && (
                     <Button
                       variant="ghost"
-                      size="sm"
-                      onClick={() => openEditDialog(site)}
+                      size="icon"
+                      className="size-8 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteTarget(site);
+                      }}
                     >
-                      <PencilIcon className="size-4" />
+                      <Trash2Icon className="size-4" />
                     </Button>
-                    {site.slug !== "assymo" && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(site)}
-                      >
-                        <Trash2Icon className="size-4" />
-                      </Button>
-                    )}
-                  </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -343,6 +355,39 @@ export default function SitesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={() => setDeleteTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Site verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je &quot;{deleteTarget?.name}&quot; wilt
+              verwijderen? Dit kan niet ongedaan worden gemaakt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin" />
+                  Verwijderen...
+                </>
+              ) : (
+                "Verwijderen"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
