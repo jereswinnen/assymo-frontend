@@ -9,3 +9,12 @@ import { passkeyClient } from "@better-auth/passkey/client";
 export const authClient = createAuthClient({
   plugins: [twoFactorClient(), passkeyClient()],
 });
+
+// Re-export for convenience
+export const {
+  signIn,
+  signOut,
+  useSession,
+  getSession,
+  $Infer: AuthTypes,
+} = authClient;

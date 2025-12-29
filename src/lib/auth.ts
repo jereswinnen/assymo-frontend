@@ -17,6 +17,16 @@ export const auth = betterAuth({
         type: "boolean",
         defaultValue: false,
       },
+      role: {
+        type: "string",
+        defaultValue: "content_editor",
+        input: false, // Cannot be set during signup (admin only)
+      },
+      featureOverrides: {
+        type: "string", // JSONB stored as string, parsed in app
+        required: false,
+        input: false,
+      },
     },
   },
   emailAndPassword: {
