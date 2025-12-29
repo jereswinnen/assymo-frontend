@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { getHomepage } from "@/lib/content";
 import SectionRenderer from "@/components/general/SectionRenderer";
 import type { Metadata } from "next";

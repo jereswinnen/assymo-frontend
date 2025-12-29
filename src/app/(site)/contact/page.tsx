@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { getPageMetadata } from "@/lib/getPageMetadata";
 import { getPageBySlug } from "@/lib/content";
 import SectionRenderer from "@/components/general/SectionRenderer";

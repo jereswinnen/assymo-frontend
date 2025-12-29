@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+import { unstable_cache } from "next/cache";
 import type {
   Page,
   PageListItem,
@@ -11,6 +12,15 @@ import type {
 
 const sql = neon(process.env.DATABASE_URL!);
 
+// Cache tags for on-demand revalidation
+export const CACHE_TAGS = {
+  pages: "pages",
+  solutions: "solutions",
+  filters: "filters",
+  navigation: "navigation",
+  siteParameters: "site-parameters",
+} as const;
+
 // =============================================================================
 // Pages
 // =============================================================================
@@ -18,7 +28,7 @@ const sql = neon(process.env.DATABASE_URL!);
 /**
  * Get a page by its slug (with image alt text from media library)
  */
-export async function getPageBySlug(slug: string): Promise<Page | null> {
+async function _getPageBySlug(slug: string): Promise<Page | null> {
   const rows = await sql`
     SELECT p.*, im.alt_text as header_image_alt
     FROM pages p
@@ -43,10 +53,16 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
   return page as Page;
 }
 
+export const getPageBySlug = (slug: string) =>
+  unstable_cache(_getPageBySlug, [`page-${slug}`], {
+    tags: [CACHE_TAGS.pages],
+    revalidate: 3600,
+  })(slug);
+
 /**
  * Get the homepage (with image alt text from media library)
  */
-export async function getHomepage(): Promise<Page | null> {
+async function _getHomepage(): Promise<Page | null> {
   const rows = await sql`
     SELECT p.*, im.alt_text as header_image_alt
     FROM pages p
@@ -72,8 +88,13 @@ export async function getHomepage(): Promise<Page | null> {
   return page as Page;
 }
 
+export const getHomepage = unstable_cache(_getHomepage, ["homepage"], {
+  tags: [CACHE_TAGS.pages],
+  revalidate: 3600,
+});
+
 /**
- * Get all pages (list view)
+ * Get all pages (list view) - used by admin, not cached
  */
 export async function getAllPages(): Promise<PageListItem[]> {
   const rows = await sql`
@@ -91,7 +112,7 @@ export async function getAllPages(): Promise<PageListItem[]> {
 /**
  * Get a solution by its slug (with filters and image alt text from media library)
  */
-export async function getSolutionBySlug(slug: string): Promise<Solution | null> {
+async function _getSolutionBySlug(slug: string): Promise<Solution | null> {
   const rows = await sql`
     SELECT s.*,
       im.alt_text as header_image_alt,
@@ -126,10 +147,16 @@ export async function getSolutionBySlug(slug: string): Promise<Solution | null> 
   return solution as Solution;
 }
 
+export const getSolutionBySlug = (slug: string) =>
+  unstable_cache(_getSolutionBySlug, [`solution-${slug}`], {
+    tags: [CACHE_TAGS.solutions],
+    revalidate: 3600,
+  })(slug);
+
 /**
  * Get all solutions (with filters and image alt text from media library)
  */
-export async function getAllSolutions(): Promise<SolutionListItem[]> {
+async function _getAllSolutions(): Promise<SolutionListItem[]> {
   const rows = await sql`
     SELECT
       s.id,
@@ -164,6 +191,11 @@ export async function getAllSolutions(): Promise<SolutionListItem[]> {
   });
 }
 
+export const getAllSolutions = unstable_cache(_getAllSolutions, ["all-solutions"], {
+  tags: [CACHE_TAGS.solutions],
+  revalidate: 3600,
+});
+
 // =============================================================================
 // Filter Categories
 // =============================================================================
@@ -171,7 +203,7 @@ export async function getAllSolutions(): Promise<SolutionListItem[]> {
 /**
  * Get all filter categories with their filters
  */
-export async function getFilterCategories(): Promise<FilterCategory[]> {
+async function _getFilterCategories(): Promise<FilterCategory[]> {
   const rows = await sql`
     SELECT fc.*,
       COALESCE(
@@ -189,6 +221,11 @@ export async function getFilterCategories(): Promise<FilterCategory[]> {
   return rows as FilterCategory[];
 }
 
+export const getFilterCategories = unstable_cache(_getFilterCategories, ["filter-categories"], {
+  tags: [CACHE_TAGS.filters],
+  revalidate: 3600,
+});
+
 // =============================================================================
 // Navigation
 // =============================================================================
@@ -197,7 +234,7 @@ export async function getFilterCategories(): Promise<FilterCategory[]> {
  * Get navigation links for a location (header or footer)
  * Includes alt text for solution header images from media library
  */
-export async function getNavigation(
+async function _getNavigation(
   location: "header" | "footer"
 ): Promise<NavigationLink[]> {
   const rows = await sql`
@@ -268,6 +305,12 @@ export async function getNavigation(
   return navLinks;
 }
 
+export const getNavigation = (location: "header" | "footer") =>
+  unstable_cache(_getNavigation, [`navigation-${location}`], {
+    tags: [CACHE_TAGS.navigation],
+    revalidate: 3600,
+  })(location);
+
 // =============================================================================
 // Site Parameters
 // =============================================================================
@@ -275,12 +318,17 @@ export async function getNavigation(
 /**
  * Get site parameters (singleton)
  */
-export async function getSiteParameters(): Promise<SiteParameters | null> {
+async function _getSiteParameters(): Promise<SiteParameters | null> {
   const rows = await sql`
     SELECT * FROM site_parameters WHERE id = 1
   `;
   return (rows[0] as SiteParameters) || null;
 }
+
+export const getSiteParameters = unstable_cache(_getSiteParameters, ["site-parameters"], {
+  tags: [CACHE_TAGS.siteParameters],
+  revalidate: 3600,
+});
 
 // =============================================================================
 // Images

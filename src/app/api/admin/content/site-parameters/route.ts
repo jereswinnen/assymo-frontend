@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { revalidateTag } from "next/cache";
 import { isAuthenticated } from "@/lib/auth-utils";
+import { CACHE_TAGS } from "@/lib/content";
 import type { SiteParameters } from "@/types/content";
 
 const sql = neon(process.env.DATABASE_URL!);
@@ -59,6 +61,9 @@ export async function PUT(request: Request) {
         vat_number = ${data.vat_number || null},
         updated_at = NOW()
     `;
+
+    // Invalidate site parameters cache
+    revalidateTag(CACHE_TAGS.siteParameters, "max");
 
     return NextResponse.json({ success: true });
   } catch (error) {

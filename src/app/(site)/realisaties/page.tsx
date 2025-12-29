@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { Suspense } from "react";
 import { getPageBySlug, getAllSolutions, getFilterCategories } from "@/lib/content";
 import SectionRenderer from "@/components/general/SectionRenderer";

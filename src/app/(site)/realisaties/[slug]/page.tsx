@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { getSolutionBySlug } from "@/lib/content";
 import { notFound } from "next/navigation";
 import SectionRenderer from "@/components/general/SectionRenderer";

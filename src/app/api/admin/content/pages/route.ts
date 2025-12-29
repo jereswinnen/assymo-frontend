@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { revalidateTag } from "next/cache";
 import { isAuthenticated } from "@/lib/auth-utils";
+import { CACHE_TAGS } from "@/lib/content";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -77,6 +79,9 @@ export async function POST(request: Request) {
       VALUES (${title}, ${slug || null}, ${is_homepage || false}, '[]'::jsonb)
       RETURNING *
     `;
+
+    // Invalidate pages cache
+    revalidateTag(CACHE_TAGS.pages, "max");
 
     return NextResponse.json(rows[0]);
   } catch (error) {

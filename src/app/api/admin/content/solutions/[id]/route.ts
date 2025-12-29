@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { revalidateTag } from "next/cache";
 import { isAuthenticated } from "@/lib/auth-utils";
+import { CACHE_TAGS } from "@/lib/content";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -130,6 +132,10 @@ export async function PUT(
       GROUP BY s.id
     `;
 
+    // Invalidate solutions and navigation cache (nav includes solution images)
+    revalidateTag(CACHE_TAGS.solutions, "max");
+    revalidateTag(CACHE_TAGS.navigation, "max");
+
     return NextResponse.json(updated[0]);
   } catch (error) {
     console.error("Failed to update solution:", error);
@@ -155,6 +161,10 @@ export async function DELETE(
 
     // solution_filters will be deleted automatically due to CASCADE
     await sql`DELETE FROM solutions WHERE id = ${id}`;
+
+    // Invalidate solutions and navigation cache
+    revalidateTag(CACHE_TAGS.solutions, "max");
+    revalidateTag(CACHE_TAGS.navigation, "max");
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { revalidateTag } from "next/cache";
 import { isAuthenticated } from "@/lib/auth-utils";
+import { CACHE_TAGS } from "@/lib/content";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -67,6 +69,9 @@ export async function POST(request: Request) {
       VALUES (${name}, ${slug}, ${maxRank[0].next_rank}, '[]'::jsonb)
       RETURNING *
     `;
+
+    // Invalidate solutions cache
+    revalidateTag(CACHE_TAGS.solutions, "max");
 
     return NextResponse.json(rows[0]);
   } catch (error) {

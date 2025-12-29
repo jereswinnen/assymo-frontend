@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { revalidateTag } from "next/cache";
 import { isAuthenticated } from "@/lib/auth-utils";
+import { CACHE_TAGS } from "@/lib/content";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -32,6 +34,9 @@ export async function PUT(
       );
     }
 
+    // Invalidate filters cache
+    revalidateTag(CACHE_TAGS.filters, "max");
+
     return NextResponse.json(rows[0]);
   } catch (error) {
     console.error("Failed to update filter:", error);
@@ -56,6 +61,9 @@ export async function DELETE(
     const { id } = await params;
 
     await sql`DELETE FROM filters WHERE id = ${id}`;
+
+    // Invalidate filters cache
+    revalidateTag(CACHE_TAGS.filters, "max");
 
     return NextResponse.json({ success: true });
   } catch (error) {

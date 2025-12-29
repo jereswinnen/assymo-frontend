@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { revalidateTag } from "next/cache";
 import { isAuthenticated } from "@/lib/auth-utils";
+import { CACHE_TAGS } from "@/lib/content";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -29,6 +31,9 @@ export async function PUT(request: Request) {
         WHERE id = ${orderedIds[i]}
       `;
     }
+
+    // Invalidate navigation cache
+    revalidateTag(CACHE_TAGS.navigation, "max");
 
     return NextResponse.json({ success: true });
   } catch (error) {

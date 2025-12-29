@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { revalidateTag } from "next/cache";
 import { isAuthenticated } from "@/lib/auth-utils";
+import { CACHE_TAGS } from "@/lib/content";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -100,6 +102,9 @@ export async function PUT(
       return NextResponse.json({ error: "Page not found" }, { status: 404 });
     }
 
+    // Invalidate pages cache
+    revalidateTag(CACHE_TAGS.pages, "max");
+
     return NextResponse.json(rows[0]);
   } catch (error) {
     console.error("Failed to update page:", error);
@@ -124,6 +129,9 @@ export async function DELETE(
     const { id } = await params;
 
     await sql`DELETE FROM pages WHERE id = ${id}`;
+
+    // Invalidate pages cache
+    revalidateTag(CACHE_TAGS.pages, "max");
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { revalidateTag } from "next/cache";
 import { isAuthenticated } from "@/lib/auth-utils";
+import { CACHE_TAGS } from "@/lib/content";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -37,6 +39,9 @@ export async function POST(
       VALUES (${linkId}, ${solution_id}, ${maxRank[0].next_rank})
       RETURNING *
     `;
+
+    // Invalidate navigation cache
+    revalidateTag(CACHE_TAGS.navigation, "max");
 
     return NextResponse.json(rows[0]);
   } catch (error) {
@@ -77,6 +82,9 @@ export async function PUT(
         WHERE id = ${orderedIds[i]} AND link_id = ${linkId}
       `;
     }
+
+    // Invalidate navigation cache
+    revalidateTag(CACHE_TAGS.navigation, "max");
 
     return NextResponse.json({ success: true });
   } catch (error) {
