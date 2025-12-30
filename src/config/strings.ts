@@ -329,7 +329,8 @@ export const ADMIN_STRINGS = {
       altGenerateFailed: "Kon alt-tekst niet genereren",
       folderCreateFailed: "Kon map niet aanmaken",
       folderRenameFailed: "Kon map niet hernoemen",
-      addSections: "Voeg secties toe om de inhoud van deze pagina op te bouwen.",
+      addSections:
+        "Voeg secties toe om de inhoud van deze pagina op te bouwen.",
       folderDeleteFailed: "Kon map niet verwijderen",
       draftSaveFailed: "Kon concept niet opslaan",
       draftCreateFailed: "Kon concept niet aanmaken",
@@ -374,7 +375,6 @@ export const ADMIN_STRINGS = {
       optionalSubtitle: "Optionele subtitel",
       optionalTitle: "Optionele titel",
       pageTitle: "Pagina titel",
-      pageTitle2: "Page titel",
       formTitle: "Formulier titel",
       itemTitle: "Item titel",
       title: "Titel",
@@ -424,7 +424,7 @@ export const ADMIN_STRINGS = {
       noButtons: "Nog geen knoppen toegevoegd",
       noImages: "Nog geen afbeeldingen toegevoegd",
       noUsps: "Nog geen USPs toegevoegd",
-      noBlocks: "Geen blokken toegevoegd",
+      noBlocks: "Nog geen blokken toegevoegd",
       noFilters: "Nog geen filters in deze categorie",
       noSubitems: "Nog geen subitems",
       noResults: "Geen resultaten gevonden",
@@ -632,7 +632,8 @@ export const ADMIN_STRINGS = {
       sections: "Secties",
       section: "Sectie",
       optional: "Optioneel",
-      optionalText: "Optionele tekst die naast het onderwerp in de inbox verschijnt",
+      optionalText:
+        "Optionele tekst die naast het onderwerp in de inbox verschijnt",
       deleteSection: "Sectie verwijderen",
       deleteSectionDesc:
         "Weet je zeker dat je deze sectie wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
@@ -647,7 +648,8 @@ export const ADMIN_STRINGS = {
         "Weet je zeker dat je deze nieuwsbrief wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
       deleteDraftDesc:
         "Weet je zeker dat je dit concept wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
-      noNewsletters: "Nog geen nieuwsbrieven. Maak een nieuwe aan om te beginnen.",
+      noNewsletters:
+        "Nog geen nieuwsbrieven. Maak een nieuwe aan om te beginnen.",
       noSubject: "Geen onderwerp",
       sent: "Verzonden",
       draft: "Concept",
@@ -683,70 +685,87 @@ export const ADMIN_STRINGS = {
       noPasskeysRegistered: "Geen passkeys geregistreerd",
       noImagesYet: "Nog geen afbeeldingen",
       uploadFirstImage: "Upload je eerste afbeelding om te beginnen.",
-      folderEmptyUpload: "Upload afbeeldingen om ze aan deze map toe te voegen.",
+      folderEmptyUpload:
+        "Upload afbeeldingen om ze aan deze map toe te voegen.",
       firstImageUpload: "Eerste afbeelding uploaden",
       addImageToFolder: "Afbeelding toevoegen",
       releaseToUpload: "Laat los om te uploaden",
       deleteImageQuestion: "Afbeelding verwijderen?",
-      deleteImageDesc: "Weet je zeker dat je deze afbeelding wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
+      deleteImageDesc:
+        "Weet je zeker dat je deze afbeelding wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
       deleteFolderQuestion: "Map verwijderen?",
-      deleteFolderDesc: "De afbeeldingen in deze map worden niet verwijderd, maar verplaatst naar de hoofdmap.",
+      deleteFolderDesc:
+        "De afbeeldingen in deze map worden niet verwijderd, maar verplaatst naar de hoofdmap.",
       uploadedImages: "afbeelding(en) geupload",
       failedImages: "afbeelding(en) mislukt",
       altTextLabel: "Alt-tekst",
       generateAlt: "Genereer",
       fileSize: "Bestandsgrootte",
       uploadedOn: "Geupload op",
-      accessibilityDesc: "Alt tekst wordt gebruikt voor toegankelijkheid en SEO",
+      accessibilityDesc:
+        "Alt tekst wordt gebruikt voor toegankelijkheid en SEO",
       deleteFilterQuestion: "Filter verwijderen?",
       deleteCategoryQuestion: "Categorie verwijderen?",
       deleteSiteQuestion: "Site verwijderen?",
       deleteUserQuestion: "Gebruiker verwijderen?",
-      deleteUserDesc: "De gebruiker verliest alle toegang en site-toewijzingen.",
+      deleteUserDesc:
+        "De gebruiker verliest alle toegang en site-toewijzingen.",
       sites: "Sites",
       newUser: "Nieuwe gebruiker",
       deleteLinkQuestion: "Link verwijderen?",
       deleteOverrideQuestion: "Uitzondering verwijderen?",
       cancelAppointmentQuestion: "Afspraak annuleren?",
-      cancelAppointmentEmailNotice: "De klant ontvangt hiervan een e-mailnotificatie.",
+      cancelAppointmentEmailNotice:
+        "De klant ontvangt hiervan een e-mailnotificatie.",
       noNavLinksYet: "Nog geen navigatie links",
-      createNavLinkDesc: "Maak je eerste link aan om de navigatie te configureren.",
+      createNavLinkDesc:
+        "Maak je eerste link aan om de navigatie te configureren.",
       createNavLink: "Link aanmaken",
       noCategoriesYet: "Nog geen categorieën",
-      createCategoryDesc: "Maak je eerste categorie aan om filters te organiseren.",
+      createCategoryDesc:
+        "Maak je eerste categorie aan om filters te organiseren.",
       createCategory: "Categorie aanmaken",
       appointmentDetails: "Afspraak details",
       editAppointmentDesc: "Bekijk de afspraakgegevens of bewerk ze.",
       editingAppointmentDesc: "Bewerk de afspraakgegevens.",
       viewAppointmentDesc: "Bekijk de afspraakgegevens.",
-      cancelAppointmentDesc: "Weet je zeker dat je deze afspraak wilt annuleren? De klant ontvangt een annuleringsmail.",
+      cancelAppointmentDesc:
+        "Weet je zeker dat je deze afspraak wilt annuleren? De klant ontvangt een annuleringsmail.",
       yesCancel: "Ja, annuleer",
       createdOn: "Aangemaakt op",
-      noCategoriesDesc: "Maak je eerste categorie aan om filters te organiseren.",
-      deleteCategoryDesc: "Deze categorie en alle bijbehorende filters worden permanent verwijderd.",
+      noCategoriesDesc:
+        "Maak je eerste categorie aan om filters te organiseren.",
+      deleteCategoryDesc:
+        "Deze categorie en alle bijbehorende filters worden permanent verwijderd.",
       editSectionDesc: "Bewerk de inhoud van deze sectie.",
       slugHint: "Kleine letters, cijfers en koppeltekens",
-      passkeysDesc: "Log sneller in met Face ID, Touch ID of de toegangscode van je toestel.",
-      twoFactorDesc: "Voeg een extra beveiligingslaag toe aan je account met een authenticator app.",
+      passkeysDesc:
+        "Log sneller in met Face ID, Touch ID of de toegangscode van je toestel.",
+      twoFactorDesc:
+        "Voeg een extra beveiligingslaag toe aan je account met een authenticator app.",
       twoFactorActive: "Je account is beveiligd met 2FA",
       twoFactorInactive: "Niet ingeschakeld",
       disableTwoFactor: "Uitschakelen",
       enableTwoFactor: "Inschakelen",
       disable: "Uitschakelen",
       enable: "Inschakelen",
-      disableTwoFactorDesc: "Bevestig je wachtwoord om twee-factor authenticatie uit te schakelen.",
+      disableTwoFactorDesc:
+        "Bevestig je wachtwoord om twee-factor authenticatie uit te schakelen.",
       enableTwoFactorDesc: "Bevestig je wachtwoord om verder te gaan.",
       enterPassword: "Vul je wachtwoord in",
       invalidPasswordError: "Ongeldig wachtwoord",
-      scanQrDesc: "Scan met je authenticator app (bijv. Google Authenticator, 1Password).",
+      scanQrDesc:
+        "Scan met je authenticator app (bijv. Google Authenticator, 1Password).",
       enterSixDigitCode: "Voer de 6-cijferige code in:",
       backupCodesTitle: "Backup codes",
-      backupCodesDesc: "Bewaar deze codes veilig. Je kunt ze gebruiken als je geen toegang hebt tot je authenticator app.",
+      backupCodesDesc:
+        "Bewaar deze codes veilig. Je kunt ze gebruiken als je geen toegang hebt tot je authenticator app.",
       finished: "Gereed",
       copy: "Kopieer",
       copied: "Gekopieerd",
       deletePasskeyQuestion: "Passkey verwijderen",
-      deletePasskeyDesc: "Weet je zeker dat je deze passkey wilt verwijderen? Je kunt dan niet meer inloggen met deze passkey.",
+      deletePasskeyDesc:
+        "Weet je zeker dat je deze passkey wilt verwijderen? Je kunt dan niet meer inloggen met deze passkey.",
       addedOn: "Toegevoegd op",
       yearly: "Jaarlijks",
       expired: "Verlopen",
@@ -786,13 +805,15 @@ export const ADMIN_STRINGS = {
       couldNotEnable2fa: "Kon 2FA niet inschakelen",
       couldNotDisable2fa: "Kon 2FA niet uitschakelen",
       addOverride: "Uitzondering toevoegen",
-      addOverrideDesc: "Sluit de zaak op een specifieke datum of wijzig de openingsuren.",
+      addOverrideDesc:
+        "Sluit de zaak op een specifieke datum of wijzig de openingsuren.",
       repeatYearly: "Jaarlijks herhalen",
       showOnWebsite: "Toon op website",
       from: "Van",
       to: "Tot",
       noNavigationLinksYet: "Nog geen navigatie links",
-      noNavigationLinksDesc: "Maak je eerste link aan om de navigatie te configureren.",
+      noNavigationLinksDesc:
+        "Maak je eerste link aan om de navigatie te configureren.",
       createLink: "Link aanmaken",
       subitems: "Subitems",
       noSubitemsYet: "Nog geen subitems",
@@ -864,7 +885,7 @@ export function t(key: StringKey, params?: Record<string, string>): string {
   // Replace {param} placeholders with actual values
   return value.replace(
     /\{(\w+)\}/g,
-    (match, paramKey) => params[paramKey] ?? match
+    (match, paramKey) => params[paramKey] ?? match,
   );
 }
 

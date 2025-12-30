@@ -70,7 +70,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
           id="title"
           value={section.title || ""}
           onChange={(e) => onChange({ ...section, title: e.target.value })}
-          placeholder={t("admin.placeholders.pageTitle2")}
+          placeholder={t("admin.placeholders.pageTitle")}
         />
       </Field>
 
@@ -186,7 +186,8 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                           placeholder="/contact"
                         />
                         <FieldDescription>
-                          {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
+                          {process.env.NEXT_PUBLIC_BASE_URL ||
+                            "https://assymo.be"}
                           {button.url || "/..."}
                         </FieldDescription>
                       </Field>
