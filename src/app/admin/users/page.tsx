@@ -11,7 +11,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2Icon, ShieldCheckIcon, PlusIcon } from "lucide-react";
+import { Loader2Icon, ShieldCheckIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { UserEditDialog } from "@/components/admin/UserEditDialog";
 import { UserCreateDialog } from "@/components/admin/UserCreateDialog";
@@ -54,6 +64,8 @@ export default function UsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -100,6 +112,33 @@ export default function UsersPage() {
     setEditDialogOpen(true);
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/admin/users/${deleteTarget.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete");
+      }
+
+      toast.success("Gebruiker verwijderd");
+      setDeleteTarget(null);
+      loadUsers();
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Kon gebruiker niet verwijderen"
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   // Header actions
   const headerActions = useMemo(
     () => (
@@ -144,13 +183,14 @@ export default function UsersPage() {
               <TableHead>Sites</TableHead>
               <TableHead>2FA</TableHead>
               <TableHead>Aangemaakt</TableHead>
+              <TableHead className="w-10"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {users.map((user) => (
               <TableRow
                 key={user.id}
-                className="cursor-pointer"
+                className="group cursor-pointer"
                 onClick={() => handleUserClick(user)}
               >
                 <TableCell className="font-medium">{user.name}</TableCell>
@@ -185,6 +225,19 @@ export default function UsersPage() {
                 <TableCell className="text-muted-foreground">
                   {formatDate(user.created_at)}
                 </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteTarget(user);
+                    }}
+                  >
+                    <Trash2Icon className="size-4" />
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -205,6 +258,39 @@ export default function UsersPage() {
         onOpenChange={setCreateDialogOpen}
         onCreated={loadUsers}
       />
+
+      {/* Delete Confirmation */}
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={() => setDeleteTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Gebruiker verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je &quot;{deleteTarget?.name}&quot; wilt
+              verwijderen? De gebruiker verliest alle toegang en site-toewijzingen.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin" />
+                  Verwijderen...
+                </>
+              ) : (
+                "Verwijderen"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
