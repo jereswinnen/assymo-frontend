@@ -11,6 +11,9 @@ export const ROLES = {
 
 export type Role = (typeof ROLES)[keyof typeof ROLES];
 
+// Default role for users without an explicit role
+export const DEFAULT_ROLE: Role = "content_editor";
+
 // Role hierarchy for permission comparisons
 export const ROLE_HIERARCHY: Record<Role, number> = {
   super_admin: 100,

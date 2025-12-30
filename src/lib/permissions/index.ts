@@ -12,6 +12,7 @@ export type {
 export {
   ROLES,
   FEATURES,
+  DEFAULT_ROLE,
   ROLE_HIERARCHY,
   ROLE_FEATURES,
   SITE_SCOPED_FEATURES,
@@ -20,6 +21,8 @@ export {
 
 // Permission checking functions
 export {
+  parseFeatureOverrides,
+  getEffectiveFeatures,
   hasFeatureAccess,
   canAccessSite,
   getAccessibleSites,

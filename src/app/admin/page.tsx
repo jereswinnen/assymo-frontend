@@ -1,7 +1,13 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { type Role, type Feature, ROLE_FEATURES } from "@/lib/permissions/types";
+import {
+  type Role,
+  type Feature,
+  DEFAULT_ROLE,
+  getEffectiveFeatures,
+  parseFeatureOverrides,
+} from "@/lib/permissions";
 
 // Map features to their routes
 const FEATURE_ROUTES: Record<Feature, string> = {
@@ -44,16 +50,9 @@ export default async function AdminPage() {
 
   // Calculate effective features
   const user = session.user as { role?: string; featureOverrides?: string };
-  const role = (user.role as Role) || "content_editor";
-  const roleFeatures = ROLE_FEATURES[role] || [];
-  const overrides = user.featureOverrides ? JSON.parse(user.featureOverrides) : null;
-  const grants: Feature[] = overrides?.grants || [];
-  const revokes: Feature[] = overrides?.revokes || [];
-
-  const effectiveFeatures = [
-    ...roleFeatures.filter((f) => !revokes.includes(f)),
-    ...grants.filter((f) => !roleFeatures.includes(f)),
-  ];
+  const role = (user.role as Role) || DEFAULT_ROLE;
+  const overrides = parseFeatureOverrides(user.featureOverrides);
+  const effectiveFeatures = getEffectiveFeatures(role, overrides);
 
   // Find first available feature by priority
   const firstFeature = FEATURE_PRIORITY.find((f) => effectiveFeatures.includes(f));

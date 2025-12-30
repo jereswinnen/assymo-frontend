@@ -48,7 +48,13 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { type Feature, type Role, ROLE_FEATURES } from "@/lib/permissions/types";
+import {
+  type Feature,
+  type Role,
+  DEFAULT_ROLE,
+  getEffectiveFeatures,
+  parseFeatureOverrides,
+} from "@/lib/permissions";
 
 // Nav items with their required feature
 const navItems: { href: string; label: string; icon: typeof CalendarDaysIcon; feature: Feature }[] = [
@@ -109,8 +115,8 @@ export function AdminSidebar({
           name: u.name || "Gebruiker",
           email: u.email,
           image: u.image || null,
-          role: (u.role as Role) || "content_editor",
-          featureOverrides: u.featureOverrides ? JSON.parse(u.featureOverrides) : null,
+          role: (u.role as Role) || DEFAULT_ROLE,
+          featureOverrides: parseFeatureOverrides(u.featureOverrides),
         });
       }
     }
@@ -118,17 +124,11 @@ export function AdminSidebar({
   }, []);
 
   // Calculate effective features based on role + overrides
-  // Show all items until user data is loaded to prevent hydration mismatch
-  const effectiveFeatures = useMemo(() => {
-    if (!user) return null; // null = not loaded yet, show all
-    const roleFeatures = ROLE_FEATURES[user.role] || [];
-    const grants = user.featureOverrides?.grants || [];
-    const revokes = user.featureOverrides?.revokes || [];
-    return [
-      ...roleFeatures.filter((f) => !revokes.includes(f)),
-      ...grants.filter((f) => !roleFeatures.includes(f)),
-    ];
-  }, [user]);
+  // Returns null until user data is loaded to prevent hydration mismatch
+  const effectiveFeatures = useMemo(
+    () => (user ? getEffectiveFeatures(user.role, user.featureOverrides) : null),
+    [user]
+  );
 
   // Filter nav items based on user's features (show all until loaded)
   const visibleNavItems = useMemo(

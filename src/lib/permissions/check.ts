@@ -1,11 +1,53 @@
 import {
   type Feature,
+  type FeatureOverrides,
   type Role,
   type PermissionContext,
   ROLE_FEATURES,
   ROLE_HIERARCHY,
   SITE_SCOPED_FEATURES,
 } from "./types";
+
+/**
+ * Safely parse feature overrides from JSON string
+ * Returns null if parsing fails or input is invalid
+ */
+export function parseFeatureOverrides(
+  json: string | null | undefined
+): FeatureOverrides | null {
+  if (!json) return null;
+  try {
+    const parsed = JSON.parse(json);
+    // Validate structure
+    if (typeof parsed !== "object" || parsed === null) return null;
+    return {
+      grants: Array.isArray(parsed.grants) ? parsed.grants : undefined,
+      revokes: Array.isArray(parsed.revokes) ? parsed.revokes : undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Calculate effective features for a user based on role and overrides
+ * This is the single source of truth for feature calculation
+ */
+export function getEffectiveFeatures(
+  role: Role,
+  overrides: FeatureOverrides | null | undefined
+): Feature[] {
+  const roleFeatures = ROLE_FEATURES[role];
+  if (!overrides) return roleFeatures;
+
+  const grants = overrides.grants || [];
+  const revokes = overrides.revokes || [];
+
+  return [
+    ...roleFeatures.filter((f) => !revokes.includes(f)),
+    ...grants.filter((f) => !roleFeatures.includes(f)),
+  ];
+}
 
 /**
  * Check if user has access to a specific feature

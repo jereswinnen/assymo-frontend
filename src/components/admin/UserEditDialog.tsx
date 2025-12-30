@@ -47,8 +47,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import type { Role, Feature, FeatureOverrides } from "@/lib/permissions/types";
-import { FEATURES, ROLE_FEATURES, SITE_SCOPED_FEATURES } from "@/lib/permissions/types";
+import {
+  type Role,
+  type Feature,
+  type FeatureOverrides,
+  FEATURES,
+  ROLE_FEATURES,
+  SITE_SCOPED_FEATURES,
+  getEffectiveFeatures,
+} from "@/lib/permissions";
 
 interface Site {
   id: string;
@@ -231,13 +238,12 @@ export function UserEditDialog({
   const roleFeatures = ROLE_FEATURES[editData.role] || [];
   const allFeatures = Object.values(FEATURES);
 
-  // Calculate effective features
+  // Get current overrides for UI state
   const grants = editData.featureOverrides?.grants || [];
   const revokes = editData.featureOverrides?.revokes || [];
-  const effectiveFeatures = [
-    ...roleFeatures.filter((f) => !revokes.includes(f)),
-    ...grants.filter((f) => !roleFeatures.includes(f)),
-  ];
+
+  // Calculate effective features
+  const effectiveFeatures = getEffectiveFeatures(editData.role, editData.featureOverrides);
 
   if (!user) return null;
 
