@@ -1,10 +1,17 @@
 "use client";
 
 import React, { Suspense } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
+
+// Dynamic import with SSR disabled to prevent hydration mismatches
+// The sidebar requires client-side session data and Radix UI components
+const AdminSidebar = dynamic(
+  () => import("@/components/admin/AdminSidebar").then((mod) => mod.AdminSidebar),
+  { ssr: false }
+);
 import {
   AdminHeaderProvider,
   AdminHeaderActions,

@@ -48,8 +48,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { type Feature, type FeatureOverrides, type Role, DEFAULT_ROLE } from "@/lib/permissions/types";
-import { getEffectiveFeatures, parseFeatureOverrides } from "@/lib/permissions/check";
+import { type Feature, type Role } from "@/lib/permissions/types";
 
 // Nav items with their required feature
 const navItems: { href: string; label: string; icon: typeof CalendarDaysIcon; feature: Feature }[] = [
@@ -83,8 +82,6 @@ interface UserData {
   name: string;
   email: string;
   image: string | null;
-  role: Role;
-  featureOverrides: { grants?: Feature[]; revokes?: Feature[] } | null;
 }
 
 export function AdminSidebar({
@@ -94,56 +91,52 @@ export function AdminSidebar({
   const router = useRouter();
   const { isMobile } = useSidebar();
   const [user, setUser] = useState<UserData | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const [effectiveFeatures, setEffectiveFeatures] = useState<Feature[] | null>(null);
 
-  // Track when component has mounted to prevent hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
+  // Load user info from session (for display)
   useEffect(() => {
     async function loadUser() {
       const { data } = await authClient.getSession();
       if (data?.user) {
-        const u = data.user as {
-          name?: string;
-          email: string;
-          image?: string | null;
-          role?: string;
-          featureOverrides?: string | FeatureOverrides | null;
-        };
         setUser({
-          name: u.name || "Gebruiker",
-          email: u.email,
-          image: u.image || null,
-          role: (u.role as Role) || DEFAULT_ROLE,
-          featureOverrides: parseFeatureOverrides(u.featureOverrides),
+          name: data.user.name || "Gebruiker",
+          email: data.user.email,
+          image: data.user.image || null,
         });
       }
     }
     loadUser();
   }, []);
 
-  // Calculate effective features based on role + overrides
-  const effectiveFeatures = useMemo(
-    () => (user ? getEffectiveFeatures(user.role, user.featureOverrides) : null),
-    [user]
-  );
+  // Load effective features from API (fresh from database)
+  useEffect(() => {
+    async function loadPermissions() {
+      try {
+        const response = await fetch("/api/admin/user-permissions");
+        if (response.ok) {
+          const data = await response.json();
+          setEffectiveFeatures(data.effectiveFeatures);
+        }
+      } catch (error) {
+        console.error("Failed to load permissions:", error);
+      }
+    }
+    loadPermissions();
+  }, []);
 
-  // Filter nav items only after mount to prevent hydration mismatch
-  // Server and initial client render show all items, then filter after mount
+  // Filter nav items based on effective features
   const visibleNavItems = useMemo(
-    () => (!mounted || effectiveFeatures === null)
+    () => effectiveFeatures === null
       ? navItems
       : navItems.filter((item) => effectiveFeatures.includes(item.feature)),
-    [mounted, effectiveFeatures]
+    [effectiveFeatures]
   );
 
   const visibleContentItems = useMemo(
-    () => (!mounted || effectiveFeatures === null)
+    () => effectiveFeatures === null
       ? contentItems
       : contentItems.filter((item) => effectiveFeatures.includes(item.feature)),
-    [mounted, effectiveFeatures]
+    [effectiveFeatures]
   );
 
   const handleLogout = async () => {

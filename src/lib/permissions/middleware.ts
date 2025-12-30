@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth-utils";
 import { hasFeatureAccess, canAccessSite } from "./check";
-import { getUserSiteIds } from "./queries";
-import type { Feature, PermissionContext, Role } from "./types";
+import { getUserSiteIds, getUserPermissions } from "./queries";
+import type { Feature, PermissionContext } from "./types";
+import { DEFAULT_ROLE } from "./types";
 
 export interface ProtectRouteOptions {
   /** Required feature to access this route */
@@ -54,17 +55,20 @@ export async function protectRoute(
 
   const user = session.user;
 
-  // Get user's site assignments
-  const userSites = await getUserSiteIds(user.id);
+  // Query fresh permissions from database (not cached session)
+  const [userSites, permissions] = await Promise.all([
+    getUserSiteIds(user.id),
+    getUserPermissions(user.id),
+  ]);
 
-  // Build permission context
+  // Build permission context with fresh data from DB
   const ctx: PermissionContext = {
     user: {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: (user.role as Role) || "content_editor",
-      featureOverrides: user.featureOverrides as PermissionContext["user"]["featureOverrides"],
+      role: permissions?.role || DEFAULT_ROLE,
+      featureOverrides: permissions?.featureOverrides || null,
     },
     userSites,
   };
@@ -119,15 +123,20 @@ export async function requireAuth(): Promise<{
   }
 
   const user = session.user;
-  const userSites = await getUserSiteIds(user.id);
+
+  // Query fresh permissions from database
+  const [userSites, permissions] = await Promise.all([
+    getUserSiteIds(user.id),
+    getUserPermissions(user.id),
+  ]);
 
   const ctx: PermissionContext = {
     user: {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: (user.role as Role) || "content_editor",
-      featureOverrides: user.featureOverrides as PermissionContext["user"]["featureOverrides"],
+      role: permissions?.role || DEFAULT_ROLE,
+      featureOverrides: permissions?.featureOverrides || null,
     },
     userSites,
   };
