@@ -48,13 +48,8 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {
-  type Feature,
-  type Role,
-  DEFAULT_ROLE,
-  getEffectiveFeatures,
-  parseFeatureOverrides,
-} from "@/lib/permissions";
+import { type Feature, type Role, DEFAULT_ROLE } from "@/lib/permissions/types";
+import { getEffectiveFeatures, parseFeatureOverrides } from "@/lib/permissions/check";
 
 // Nav items with their required feature
 const navItems: { href: string; label: string; icon: typeof CalendarDaysIcon; feature: Feature }[] = [

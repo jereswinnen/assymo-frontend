@@ -54,8 +54,8 @@ import {
   FEATURES,
   ROLE_FEATURES,
   SITE_SCOPED_FEATURES,
-  getEffectiveFeatures,
-} from "@/lib/permissions";
+} from "@/lib/permissions/types";
+import { getEffectiveFeatures } from "@/lib/permissions/check";
 
 interface Site {
   id: string;
