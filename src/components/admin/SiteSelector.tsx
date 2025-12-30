@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BuildingIcon, Loader2Icon } from "lucide-react";
+import { CompassIcon, Loader2Icon } from "lucide-react";
 import { useSiteContext } from "@/lib/permissions/site-context";
 
 interface SiteSelectorProps {
@@ -24,7 +24,9 @@ export function SiteSelector({ className }: SiteSelectorProps) {
 
   if (loading) {
     return (
-      <div className={`flex items-center gap-2 text-sm text-muted-foreground ${className}`}>
+      <div
+        className={`flex items-center gap-2 text-sm text-muted-foreground ${className}`}
+      >
         <Loader2Icon className="size-4 animate-spin" />
         <span>Laden...</span>
       </div>
@@ -36,7 +38,7 @@ export function SiteSelector({ className }: SiteSelectorProps) {
       <Select value={currentSite?.id || ""} onValueChange={selectSite}>
         <SelectTrigger className="w-full">
           <div className="flex items-center gap-2">
-            <BuildingIcon className="size-4 text-muted-foreground" />
+            <CompassIcon className="size-4 text-muted-foreground" />
             <SelectValue placeholder="Selecteer site" />
           </div>
         </SelectTrigger>
