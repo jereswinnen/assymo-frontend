@@ -178,8 +178,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 /**
  * DELETE /api/admin/users/[id]
- * Delete a user (removes site assignments, not the user record itself)
- * Note: Full user deletion should be done via Better Auth CLI
+ * Permanently delete a user and all associated data
  * Requires: super_admin
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
@@ -222,16 +221,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       }
     }
 
-    // Remove site assignments
+    // Delete in order: sessions, accounts, site assignments, then user
+    await sql`DELETE FROM "session" WHERE "userId" = ${id}`;
+    await sql`DELETE FROM "account" WHERE "userId" = ${id}`;
     await sql`DELETE FROM user_sites WHERE user_id = ${id}`;
-
-    // Reset role to content_editor (demote) and clear overrides
-    // This effectively disables the user without deleting the account
-    await sql`
-      UPDATE "user"
-      SET role = 'content_editor', feature_overrides = NULL
-      WHERE id = ${id}
-    `;
+    await sql`DELETE FROM "user" WHERE id = ${id}`;
 
     return NextResponse.json({ success: true });
   } catch (error) {
