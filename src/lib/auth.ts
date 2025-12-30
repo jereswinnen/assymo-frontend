@@ -6,9 +6,27 @@ import { resend } from "@/lib/resend";
 import { RESEND_CONFIG } from "@/config/resend";
 import { PasswordReset } from "@/emails/PasswordReset";
 
+function getBaseURL() {
+  // Explicit override takes precedence
+  if (process.env.BETTER_AUTH_URL) {
+    return process.env.BETTER_AUTH_URL;
+  }
+
+  // Vercel deployments - use production URL or preview URL
+  if (process.env.VERCEL_URL) {
+    if (process.env.VERCEL_ENV === "production" && process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+      return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+    }
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // Local development
+  return "http://localhost:3000";
+}
+
 export const auth = betterAuth({
   appName: "Assymo Admin",
-  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL,
+  baseURL: getBaseURL(),
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
   }),
