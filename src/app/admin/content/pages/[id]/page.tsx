@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { t } from "@/config/strings";
 
 interface PageData {
   id: string;
@@ -114,7 +115,7 @@ export default function PageEditorPage({
       const response = await fetch(`/api/admin/content/pages/${id}`);
       if (!response.ok) {
         if (response.status === 404) {
-          toast.error("Pagina niet gevonden");
+          toast.error(t("admin.messages.pageNotFound"));
           router.push("/admin/content/pages");
           return;
         }
@@ -128,7 +129,7 @@ export default function PageEditorPage({
       setHeaderImage(data.header_image);
       setSections(data.sections || []);
     } catch {
-      toast.error("Kon pagina niet ophalen");
+      toast.error(t("admin.messages.pageLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -148,12 +149,12 @@ export default function PageEditorPage({
 
   const savePage = useCallback(async () => {
     if (!title.trim()) {
-      toast.error("Titel is verplicht");
+      toast.error(t("admin.messages.titleRequired"));
       return;
     }
 
     if (!isHomepage && !slug.trim()) {
-      toast.error("Slug is verplicht voor niet-homepage pagina's");
+      toast.error(t("admin.messages.slugRequired"));
       return;
     }
 
@@ -182,10 +183,10 @@ export default function PageEditorPage({
       setIsHomepage(updatedPage.is_homepage);
       setSections(updatedPage.sections || []);
       setHasChanges(false);
-      toast.success("Pagina opgeslagen");
+      toast.success(t("admin.messages.pageSaved"));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Kon pagina niet opslaan",
+        error instanceof Error ? error.message : t("admin.messages.pageSaveFailed"),
       );
     } finally {
       setSaving(false);
@@ -201,10 +202,10 @@ export default function PageEditorPage({
 
       if (!response.ok) throw new Error("Failed to delete");
 
-      toast.success("Pagina verwijderd");
+      toast.success(t("admin.messages.pageDeleted"));
       router.push("/admin/content/pages");
     } catch {
-      toast.error("Kon pagina niet verwijderen");
+      toast.error(t("admin.messages.pageDeleteFailed"));
     } finally {
       setDeleting(false);
     }
@@ -220,7 +221,7 @@ export default function PageEditorPage({
           ) : (
             <CheckIcon className="size-4" />
           )}
-          Opslaan
+          {t("admin.buttons.save")}
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -245,7 +246,7 @@ export default function PageEditorPage({
               disabled={isHomepage}
             >
               <Trash2Icon className="size-4" />
-              Verwijderen
+              {t("admin.buttons.delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -273,7 +274,7 @@ export default function PageEditorPage({
         {/* Main content - Sections */}
         <div className="space-y-4 md:col-span-2">
           <div className="flex items-center justify-between">
-            <h3 className="mb-0! text-sm font-medium">Secties</h3>
+            <h3 className="mb-0! text-sm font-medium">{t("admin.misc.sections")}</h3>
             <AddSectionButton
               onAdd={(section) => setSections([...sections, section])}
             />
@@ -294,12 +295,12 @@ export default function PageEditorPage({
             {/* Algemeen */}
             <FieldSet>
               <Field>
-                <FieldLabel htmlFor="title">Titel</FieldLabel>
+                <FieldLabel htmlFor="title">{t("admin.labels.title")}</FieldLabel>
                 <Input
                   id="title"
                   value={title}
                   onChange={(e) => handleTitleChange(e.target.value)}
-                  placeholder="Pagina titel"
+                  placeholder={t("admin.placeholders.pageTitle")}
                 />
               </Field>
               {!isHomepage && (
@@ -318,7 +319,7 @@ export default function PageEditorPage({
               )}
               <Field orientation="horizontal">
                 <FieldLabel htmlFor="is_homepage">
-                  Stel in als homepage
+                  {t("admin.misc.setAsHomepage")}
                 </FieldLabel>
                 <Switch
                   id="is_homepage"
@@ -332,7 +333,7 @@ export default function PageEditorPage({
 
             {/* Header image */}
             <Field>
-              <FieldLabel>Header afbeelding</FieldLabel>
+              <FieldLabel>{t("admin.misc.headerImage")}</FieldLabel>
               <ImageUpload value={headerImage} onChange={setHeaderImage} />
             </Field>
 
@@ -341,7 +342,7 @@ export default function PageEditorPage({
             {/* Meta info */}
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Aangemaakt</span>
+                <span className="text-muted-foreground">{t("admin.misc.created")}</span>
                 <span>
                   {new Date(page.created_at).toLocaleDateString("nl-NL", {
                     year: "numeric",
@@ -351,7 +352,7 @@ export default function PageEditorPage({
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Laatst bewerkt</span>
+                <span className="text-muted-foreground">{t("admin.misc.lastEdited")}</span>
                 <span>
                   {new Date(page.updated_at).toLocaleDateString("nl-NL", {
                     year: "numeric",
@@ -371,14 +372,13 @@ export default function PageEditorPage({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Pagina verwijderen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.misc.deletePageQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je &quot;{page.title}&quot; wilt verwijderen?
-              Dit kan niet ongedaan worden gemaakt.
+              {t("admin.misc.deletePageDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("admin.buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={deletePage}
               disabled={deleting}
@@ -387,10 +387,10 @@ export default function PageEditorPage({
               {deleting ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Verwijderen...
+                  {t("admin.loading.deleting")}
                 </>
               ) : (
-                "Verwijderen"
+                t("admin.buttons.delete")
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -55,6 +55,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { FilterCategoryEditSheet } from "./sheets/FilterCategoryEditSheet";
+import { t } from "@/config/strings";
 
 interface Filter {
   id: string;
@@ -114,7 +115,7 @@ export default function FiltersPage() {
       setCategories(data);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
-      toast.error("Kon categorieën niet laden");
+      toast.error(t("admin.messages.categoriesLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -155,7 +156,7 @@ export default function FiltersPage() {
       );
       if (!response.ok) throw new Error("Failed to delete");
 
-      toast.success("Categorie verwijderd");
+      toast.success(t("admin.messages.categoryDeleted"));
       if (editingCategory?.id === deleteTarget.id) {
         setSheetOpen(false);
         setEditingCategory(null);
@@ -163,7 +164,7 @@ export default function FiltersPage() {
       fetchCategories();
     } catch (error) {
       console.error("Failed to delete category:", error);
-      toast.error("Kon categorie niet verwijderen");
+      toast.error(t("admin.messages.categoryDeleteFailed"));
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
@@ -191,7 +192,7 @@ export default function FiltersPage() {
         });
       } catch (error) {
         console.error("Failed to reorder categories:", error);
-        toast.error("Kon volgorde niet opslaan");
+        toast.error(t("admin.messages.orderSaveFailed"));
         fetchCategories();
       }
     }
@@ -202,7 +203,7 @@ export default function FiltersPage() {
     () => (
       <Button size="sm" onClick={openNewCategorySheet}>
         <PlusIcon className="size-4" />
-        Nieuwe categorie
+        {t("admin.headings.newCategory")}
       </Button>
     ),
     [openNewCategorySheet],
@@ -227,14 +228,14 @@ export default function FiltersPage() {
             <EmptyMedia variant="icon">
               <FilterIcon className="size-5" />
             </EmptyMedia>
-            <EmptyTitle>Nog geen categorieën</EmptyTitle>
+            <EmptyTitle>{t("admin.misc.noCategoriesYet")}</EmptyTitle>
             <EmptyDescription>
-              Maak je eerste categorie aan om filters te organiseren.
+              {t("admin.misc.noCategoriesDesc")}
             </EmptyDescription>
           </EmptyHeader>
           <Button size="sm" onClick={openNewCategorySheet}>
             <PlusIcon className="size-4" />
-            Categorie aanmaken
+            {t("admin.misc.createCategory")}
           </Button>
         </Empty>
       ) : (
@@ -251,9 +252,9 @@ export default function FiltersPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10"></TableHead>
-                  <TableHead>Naam</TableHead>
+                  <TableHead>{t("admin.labels.name")}</TableHead>
                   <TableHead className="hidden sm:table-cell">URL</TableHead>
-                  <TableHead className="hidden md:table-cell">Items</TableHead>
+                  <TableHead className="hidden md:table-cell">{t("admin.misc.items")}</TableHead>
                   <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -305,14 +306,13 @@ export default function FiltersPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Categorie verwijderen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.misc.deleteCategoryQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              &quot;{deleteTarget?.name}&quot; en alle bijbehorende filters
-              worden permanent verwijderd.
+              {t("admin.misc.deleteCategoryDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("admin.buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={handleDeleteCategory}
@@ -321,10 +321,10 @@ export default function FiltersPage() {
               {deleting ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Verwijderen...
+                  {t("admin.loading.deleting")}
                 </>
               ) : (
-                "Verwijderen"
+                t("admin.buttons.delete")
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

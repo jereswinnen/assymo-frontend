@@ -34,6 +34,7 @@ import {
 import { toast } from "sonner";
 import { EmailTemplatePreview } from "@/components/admin/EmailTemplatePreview";
 import type { Newsletter } from "@/config/newsletter";
+import { t } from "@/config/strings";
 
 export default function EmailsPage() {
   const router = useRouter();
@@ -58,7 +59,7 @@ export default function EmailsPage() {
       setDrafts(data.newsletters || []);
     } catch (error) {
       console.error("Failed to load drafts:", error);
-      toast.error("Kon concepten niet laden");
+      toast.error(t("admin.messages.draftsLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -92,10 +93,10 @@ export default function EmailsPage() {
 
       const data = await response.json();
       router.push(`/admin/emails/${data.newsletter.id}`);
-      toast.success("Nieuw concept aangemaakt");
+      toast.success(t("admin.messages.draftCreated"));
     } catch (error) {
       console.error("Failed to create draft:", error);
-      toast.error("Kon concept niet aanmaken");
+      toast.error(t("admin.messages.draftCreateFailed"));
     } finally {
       setCreating(false);
     }
@@ -121,7 +122,7 @@ export default function EmailsPage() {
           ) : (
             <MailPlusIcon className="size-4" />
           )}
-          Nieuwe nieuwsbrief
+          {t("admin.misc.newNewsletter")}
         </Button>
       </>
     ),
@@ -155,10 +156,10 @@ export default function EmailsPage() {
       if (!response.ok) throw new Error("Failed to delete draft");
 
       await loadDrafts();
-      toast.success("Concept verwijderd");
+      toast.success(t("admin.messages.draftDeleted"));
     } catch (error) {
       console.error("Failed to delete draft:", error);
-      toast.error("Kon concept niet verwijderen");
+      toast.error(t("admin.messages.draftDeleteFailed"));
     } finally {
       setDeleteDialogOpen(false);
       setNewsletterToDelete(null);
@@ -194,26 +195,26 @@ export default function EmailsPage() {
       <TabsList>
         <TabsTrigger value="newsletter">
           <MailIcon className="size-4" />
-          Nieuwsbrieven
+          {t("admin.misc.newsletters")}
         </TabsTrigger>
         <TabsTrigger value="templates">
           <TextSelectIcon className="size-4" />
-          Templates
+          {t("admin.misc.templates")}
         </TabsTrigger>
       </TabsList>
 
       <TabsContent value="newsletter" className="space-y-6">
         {allNewsletters.length === 0 ? (
           <div className="text-muted-foreground text-center text-sm py-8">
-            Nog geen nieuwsbrieven. Maak een nieuwe aan om te beginnen.
+            {t("admin.misc.noNewsletters")}
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Onderwerp</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Datum</TableHead>
+                <TableHead>{t("admin.labels.subject")}</TableHead>
+                <TableHead>{t("admin.labels.status")}</TableHead>
+                <TableHead>{t("admin.labels.date")}</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -238,7 +239,7 @@ export default function EmailsPage() {
                     <TableCell>
                       {newsletter.subject || (
                         <span className="italic text-muted-foreground">
-                          Geen onderwerp
+                          {t("admin.misc.noSubject")}
                         </span>
                       )}
                     </TableCell>
@@ -248,7 +249,7 @@ export default function EmailsPage() {
                           newsletter.status === "sent" ? "default" : "outline"
                         }
                       >
-                        {newsletter.status === "sent" ? "Verzonden" : "Concept"}
+                        {newsletter.status === "sent" ? t("admin.misc.sent") : t("admin.misc.draft")}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -288,10 +289,9 @@ export default function EmailsPage() {
         <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Concept verwijderen</DialogTitle>
+              <DialogTitle>{t("admin.headings.deleteDraft")}</DialogTitle>
               <DialogDescription>
-                Weet je zeker dat je dit concept wilt verwijderen? Deze actie
-                kan niet ongedaan worden gemaakt.
+                {t("admin.misc.deleteDraftDesc")}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -300,7 +300,7 @@ export default function EmailsPage() {
                 variant="outline"
                 onClick={() => setDeleteDialogOpen(false)}
               >
-                Annuleren
+                {t("admin.buttons.cancel")}
               </Button>
               <Button
                 size="sm"
@@ -308,7 +308,7 @@ export default function EmailsPage() {
                 onClick={handleDeleteConfirm}
               >
                 <Trash2Icon className="size-4" />
-                Verwijderen
+                {t("admin.buttons.delete")}
               </Button>
             </DialogFooter>
           </DialogContent>

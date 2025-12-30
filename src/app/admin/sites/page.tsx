@@ -44,6 +44,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { t } from "@/config/strings";
 
 interface Site {
   id: string;
@@ -77,7 +78,7 @@ export default function SitesPage() {
       const response = await fetch("/api/admin/sites");
       if (!response.ok) {
         if (response.status === 403) {
-          toast.error("Geen toegang tot sitebeheer");
+          toast.error(t("admin.messages.noSiteAccess"));
           return;
         }
         throw new Error("Failed to load sites");
@@ -86,7 +87,7 @@ export default function SitesPage() {
       setSites(data.sites || []);
     } catch (error) {
       console.error("Failed to load sites:", error);
-      toast.error("Kon sites niet laden");
+      toast.error(t("admin.messages.sitesLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -110,7 +111,7 @@ export default function SitesPage() {
 
   const handleSave = async () => {
     if (!formData.name || !formData.slug) {
-      toast.error("Naam en slug zijn verplicht");
+      toast.error(t("admin.messages.nameSlugRequired"));
       return;
     }
 
@@ -132,13 +133,13 @@ export default function SitesPage() {
         throw new Error(data.error || "Failed to save");
       }
 
-      toast.success(editingSite ? "Site bijgewerkt" : "Site aangemaakt");
+      toast.success(editingSite ? t("admin.misc.siteUpdated") : t("admin.misc.siteCreated"));
       setDialogOpen(false);
       loadSites();
     } catch (error) {
       console.error("Failed to save site:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon site niet opslaan"
+        error instanceof Error ? error.message : t("admin.misc.siteCouldNotSave")
       );
     } finally {
       setSaving(false);
@@ -159,13 +160,13 @@ export default function SitesPage() {
         throw new Error(data.error || "Failed to delete");
       }
 
-      toast.success("Site verwijderd");
+      toast.success(t("admin.messages.siteDeleted"));
       setDeleteTarget(null);
       loadSites();
     } catch (error) {
       console.error("Failed to delete site:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon site niet verwijderen"
+        error instanceof Error ? error.message : t("admin.misc.siteCouldNotDelete")
       );
     } finally {
       setDeleting(false);
@@ -184,7 +185,7 @@ export default function SitesPage() {
     () => (
       <Button size="sm" onClick={openCreateDialog}>
         <PlusIcon className="size-4" />
-        Nieuwe site
+        {t("admin.headings.newSite")}
       </Button>
     ),
     []
@@ -211,17 +212,17 @@ export default function SitesPage() {
     <div className="space-y-6">
       {sites.length === 0 ? (
         <div className="text-muted-foreground text-center text-sm py-8">
-          Geen sites gevonden.
+          {t("admin.misc.noSitesFound")}
         </div>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Naam</TableHead>
-              <TableHead>Slug</TableHead>
-              <TableHead>Domein</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Aangemaakt</TableHead>
+              <TableHead>{t("admin.labels.name")}</TableHead>
+              <TableHead>{t("admin.labels.slug")}</TableHead>
+              <TableHead>{t("admin.labels.domain")}</TableHead>
+              <TableHead>{t("admin.labels.status")}</TableHead>
+              <TableHead>{t("admin.misc.created")}</TableHead>
               <TableHead className="w-[100px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -248,7 +249,7 @@ export default function SitesPage() {
                 </TableCell>
                 <TableCell>
                   <Badge variant={site.is_active ? "default" : "secondary"}>
-                    {site.is_active ? "Actief" : "Inactief"}
+                    {site.is_active ? t("admin.misc.active") : t("admin.misc.inactive")}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
@@ -279,14 +280,14 @@ export default function SitesPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editingSite ? "Site bewerken" : "Nieuwe site"}
+              {editingSite ? t("admin.headings.editSite") : t("admin.headings.newSite")}
             </DialogTitle>
           </DialogHeader>
 
           <FieldGroup>
             <FieldSet>
               <Field>
-                <FieldLabel htmlFor="site-name">Naam</FieldLabel>
+                <FieldLabel htmlFor="site-name">{t("admin.labels.name")}</FieldLabel>
                 <Input
                   id="site-name"
                   value={formData.name}
@@ -299,7 +300,7 @@ export default function SitesPage() {
                       slug: editingSite ? prev.slug : generateSlug(name),
                     }));
                   }}
-                  placeholder="Mijn Site"
+                  placeholder={t("admin.placeholders.siteName")}
                 />
               </Field>
 
@@ -311,18 +312,18 @@ export default function SitesPage() {
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, slug: e.target.value }))
                   }
-                  placeholder="mijn-site"
+                  placeholder={t("admin.placeholders.siteSlug")}
                   className="font-mono"
                   disabled={editingSite?.slug === "assymo"}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Kleine letters, cijfers en koppeltekens
+                  {t("admin.misc.slugHint")}
                 </p>
               </Field>
 
               <Field>
                 <FieldLabel htmlFor="site-domain">
-                  Domein (optioneel)
+                  {t("admin.labels.domain")} ({t("admin.placeholders.optional")})
                 </FieldLabel>
                 <Input
                   id="site-domain"
@@ -330,7 +331,7 @@ export default function SitesPage() {
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, domain: e.target.value }))
                   }
-                  placeholder="www.example.com"
+                  placeholder={t("admin.placeholders.hostname")}
                 />
               </Field>
             </FieldSet>
@@ -342,7 +343,7 @@ export default function SitesPage() {
               variant="outline"
               onClick={() => setDialogOpen(false)}
             >
-              Annuleren
+              {t("admin.buttons.cancel")}
             </Button>
             <Button size="sm" onClick={handleSave} disabled={saving}>
               {saving ? (
@@ -350,7 +351,7 @@ export default function SitesPage() {
               ) : (
                 <CheckIcon className="size-4" />
               )}
-              {editingSite ? "Opslaan" : "Aanmaken"}
+              {editingSite ? t("admin.buttons.save") : t("admin.buttons.create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -363,14 +364,13 @@ export default function SitesPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Site verwijderen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.misc.deleteSiteQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je &quot;{deleteTarget?.name}&quot; wilt
-              verwijderen? Dit kan niet ongedaan worden gemaakt.
+              {t("admin.dialogs.confirmDelete")} {t("admin.dialogs.cannotUndo")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("admin.buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
@@ -379,10 +379,10 @@ export default function SitesPage() {
               {deleting ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Verwijderen...
+                  {t("admin.loading.deleting")}
                 </>
               ) : (
-                "Verwijderen"
+                t("admin.buttons.delete")
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

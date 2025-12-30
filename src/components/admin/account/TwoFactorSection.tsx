@@ -37,6 +37,7 @@ import {
   AlertCircleIcon,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { t } from "@/config/strings";
 
 interface TwoFactorSectionProps {
   enabled: boolean;
@@ -91,7 +92,7 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
 
   const handleEnableTwoFactor = async () => {
     if (!password) {
-      setError("Vul je wachtwoord in");
+      setError(t("admin.misc.enterPassword"));
       return;
     }
 
@@ -104,9 +105,9 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
       if (error) {
         if (error.message?.toLowerCase().includes("invalid") ||
             error.message?.toLowerCase().includes("incorrect")) {
-          setError("Ongeldig wachtwoord");
+          setError(t("admin.misc.invalidPasswordError"));
         } else {
-          setError(error.message || "Kon 2FA niet inschakelen");
+          setError(error.message || t("admin.misc.couldNotEnable2fa"));
         }
         return;
       }
@@ -120,7 +121,7 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
       }
     } catch (err) {
       console.error("2FA enable error:", err);
-      setError("Er is een fout opgetreden");
+      setError(t("admin.messages.errorOccurred"));
     } finally {
       setLoading(false);
     }
@@ -128,7 +129,7 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
 
   const handleVerify = async () => {
     if (otpCode.length !== 6) {
-      setError("Vul een 6-cijferige code in");
+      setError(t("admin.messages.enter6DigitCode"));
       return;
     }
 
@@ -141,7 +142,7 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
       });
 
       if (error) {
-        setError("Ongeldige code");
+        setError(t("admin.messages.invalidCode"));
         setOtpCode("");
         return;
       }
@@ -154,12 +155,12 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
         setStep("backup-codes");
       } else {
         onToggle(true);
-        toast.success("Twee-factor authenticatie ingeschakeld");
+        toast.success(t("admin.messages.twoFactorEnabled"));
         closeDialog();
       }
     } catch (err) {
       console.error("2FA verification error:", err);
-      setError("Er is een fout opgetreden");
+      setError(t("admin.messages.errorOccurred"));
       setOtpCode("");
     } finally {
       setLoading(false);
@@ -168,13 +169,13 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
 
   const handleComplete = () => {
     onToggle(true);
-    toast.success("Twee-factor authenticatie ingeschakeld");
+    toast.success(t("admin.messages.twoFactorEnabled"));
     closeDialog();
   };
 
   const handleDisable = async () => {
     if (!password) {
-      setError("Vul je wachtwoord in");
+      setError(t("admin.misc.enterPassword"));
       return;
     }
 
@@ -187,19 +188,19 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
       if (error) {
         if (error.message?.toLowerCase().includes("invalid") ||
             error.message?.toLowerCase().includes("incorrect")) {
-          setError("Ongeldig wachtwoord");
+          setError(t("admin.misc.invalidPasswordError"));
         } else {
-          setError(error.message || "Kon 2FA niet uitschakelen");
+          setError(error.message || t("admin.misc.couldNotDisable2fa"));
         }
         return;
       }
 
       onToggle(false);
-      toast.success("Twee-factor authenticatie uitgeschakeld");
+      toast.success(t("admin.messages.twoFactorDisabled"));
       closeDialog();
     } catch (err) {
       console.error("2FA disable error:", err);
-      setError("Er is een fout opgetreden");
+      setError(t("admin.messages.errorOccurred"));
     } finally {
       setLoading(false);
     }
@@ -224,27 +225,27 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
       <FieldSet>
         <FieldLegend className="flex items-center gap-1.5 font-semibold">
           <ShieldCheckIcon className="size-4 opacity-80" />
-          Twee-factor authenticatie
+          {t("admin.headings.twoFactorAuth")}
         </FieldLegend>
         <FieldDescription>
-          Voeg een extra beveiligingslaag toe aan je account met een authenticator app.
+          {t("admin.misc.twoFactorDesc")}
         </FieldDescription>
 
         <div className="flex items-center justify-between p-3 border rounded-lg">
           <div className="flex items-center gap-3">
             <div>
-              <p className="font-medium">Authenticator app</p>
+              <p className="font-medium">{t("admin.misc.authenticatorApp")}</p>
               <p className="text-sm text-muted-foreground">
                 {enabled
-                  ? "Je account is beveiligd met 2FA"
-                  : "Niet ingeschakeld"}
+                  ? t("admin.misc.twoFactorActive")
+                  : t("admin.misc.twoFactorInactive")}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {enabled && (
               <Badge variant="secondary" className="bg-green-100 text-green-800">
-                Actief
+                {t("admin.misc.active")}
               </Badge>
             )}
             <Button
@@ -252,7 +253,7 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
               size="sm"
               onClick={openDialog}
             >
-              {enabled ? "Uitschakelen" : "Inschakelen"}
+              {enabled ? t("admin.misc.disableTwoFactor") : t("admin.misc.enableTwoFactor")}
             </Button>
           </div>
         </div>
@@ -264,9 +265,9 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
           {step === "disable" && (
             <>
               <DialogHeader>
-                <DialogTitle>2FA uitschakelen</DialogTitle>
+                <DialogTitle>{t("admin.headings.twoFactorAuth")}</DialogTitle>
                 <DialogDescription>
-                  Bevestig je wachtwoord om twee-factor authenticatie uit te schakelen.
+                  {t("admin.misc.disableTwoFactorDesc")}
                 </DialogDescription>
               </DialogHeader>
 
@@ -279,7 +280,7 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
                 )}
 
                 <Field>
-                  <FieldLabel htmlFor="disable-password">Wachtwoord</FieldLabel>
+                  <FieldLabel htmlFor="disable-password">{t("admin.labels.password")}</FieldLabel>
                   <Input
                     id="disable-password"
                     type="password"
@@ -292,7 +293,7 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
 
               <DialogFooter>
                 <Button variant="outline" onClick={closeDialog} disabled={loading}>
-                  Annuleren
+                  {t("admin.buttons.cancel")}
                 </Button>
                 <Button
                   variant="destructive"
@@ -302,7 +303,7 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
                   {loading ? (
                     <Loader2Icon className="size-4 animate-spin" />
                   ) : (
-                    "Uitschakelen"
+                    t("admin.misc.disable")
                   )}
                 </Button>
               </DialogFooter>
@@ -313,9 +314,9 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
           {step === "password" && (
             <>
               <DialogHeader>
-                <DialogTitle>2FA inschakelen</DialogTitle>
+                <DialogTitle>{t("admin.headings.twoFactorAuth")}</DialogTitle>
                 <DialogDescription>
-                  Bevestig je wachtwoord om verder te gaan.
+                  {t("admin.misc.enableTwoFactorDesc")}
                 </DialogDescription>
               </DialogHeader>
 
@@ -328,7 +329,7 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
                 )}
 
                 <Field>
-                  <FieldLabel htmlFor="enable-password">Wachtwoord</FieldLabel>
+                  <FieldLabel htmlFor="enable-password">{t("admin.labels.password")}</FieldLabel>
                   <Input
                     id="enable-password"
                     type="password"
@@ -341,13 +342,13 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
 
               <DialogFooter>
                 <Button variant="outline" onClick={closeDialog} disabled={loading}>
-                  Annuleren
+                  {t("admin.buttons.cancel")}
                 </Button>
                 <Button onClick={handleEnableTwoFactor} disabled={loading || !password}>
                   {loading ? (
                     <Loader2Icon className="size-4 animate-spin" />
                   ) : (
-                    "Doorgaan"
+                    t("admin.misc.continue")
                   )}
                 </Button>
               </DialogFooter>
@@ -358,9 +359,9 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
           {step === "qr" && totpUri && (
             <>
               <DialogHeader>
-                <DialogTitle>Scan de QR code</DialogTitle>
+                <DialogTitle>{t("admin.misc.scanQrTitle")}</DialogTitle>
                 <DialogDescription>
-                  Scan met je authenticator app (bijv. Google Authenticator, 1Password).
+                  {t("admin.misc.scanQrDesc")}
                 </DialogDescription>
               </DialogHeader>
 
@@ -387,12 +388,12 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
                     {secretCopied ? (
                       <>
                         <CheckIcon className="size-4" />
-                        Gekopieerd
+                        {t("admin.misc.copied")}
                       </>
                     ) : (
                       <>
                         <CopyIcon className="size-4" />
-                        Kopieer setup code
+                        {t("admin.buttons.copySetupCode")}
                       </>
                     )}
                   </Button>
@@ -402,7 +403,7 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
 
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">
-                    Voer de 6-cijferige code in:
+                    {t("admin.misc.enterSixDigitCode")}
                   </p>
                   <InputOTP
                     maxLength={6}
@@ -430,13 +431,13 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
 
               <DialogFooter>
                 <Button variant="outline" onClick={closeDialog} disabled={loading}>
-                  Annuleren
+                  {t("admin.buttons.cancel")}
                 </Button>
                 <Button onClick={handleVerify} disabled={loading || otpCode.length !== 6}>
                   {loading ? (
                     <Loader2Icon className="size-4 animate-spin" />
                   ) : (
-                    "Bevestigen"
+                    t("admin.misc.confirm")
                   )}
                 </Button>
               </DialogFooter>
@@ -447,9 +448,9 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
           {step === "backup-codes" && (
             <>
               <DialogHeader>
-                <DialogTitle>Backup codes</DialogTitle>
+                <DialogTitle>{t("admin.misc.backupCodesTitle")}</DialogTitle>
                 <DialogDescription>
-                  Bewaar deze codes veilig. Je kunt ze gebruiken als je geen toegang hebt tot je authenticator app.
+                  {t("admin.misc.backupCodesDesc")}
                 </DialogDescription>
               </DialogHeader>
 
@@ -468,18 +469,18 @@ export function TwoFactorSection({ enabled, onToggle }: TwoFactorSectionProps) {
                   {copied ? (
                     <>
                       <CheckIcon className="size-4" />
-                      Gekopieerd
+                      {t("admin.misc.copied")}
                     </>
                   ) : (
                     <>
                       <CopyIcon className="size-4" />
-                      Kopieer
+                      {t("admin.misc.copy")}
                     </>
                   )}
                 </Button>
                 <Button onClick={handleComplete}>
                   <CheckIcon className="size-4" />
-                  Gereed
+                  {t("admin.misc.finished")}
                 </Button>
               </DialogFooter>
             </>

@@ -65,6 +65,7 @@ import {
 } from "lucide-react";
 import { formatDateShort } from "@/lib/format";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { t } from "@/config/strings";
 
 interface Solution {
   id: string;
@@ -172,7 +173,7 @@ function SortableSolutionRow({
               ) : (
                 <CopyIcon className="size-4" />
               )}
-              Dupliceren
+              {t("admin.buttons.duplicate")}
             </DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
@@ -182,7 +183,7 @@ function SortableSolutionRow({
               }}
             >
               <Trash2Icon className="size-4" />
-              Verwijderen
+              {t("admin.buttons.delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -227,7 +228,7 @@ export default function SolutionsPage() {
       const data = await response.json();
       setSolutions(data);
     } catch {
-      toast.error("Kon realisaties niet ophalen");
+      toast.error(t("admin.messages.solutionsLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -256,7 +257,7 @@ export default function SolutionsPage() {
       router.push(`/admin/content/solutions/${newSolution.id}`);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Kon realisatie niet aanmaken",
+        error instanceof Error ? error.message : t("admin.messages.solutionSaveFailed"),
       );
       setCreating(false);
     }
@@ -276,9 +277,9 @@ export default function SolutionsPage() {
 
       setSolutions((prev) => prev.filter((s) => s.id !== deleteTarget.id));
       setDeleteTarget(null);
-      toast.success("Realisatie verwijderd");
+      toast.success(t("admin.messages.solutionDeleted"));
     } catch {
-      toast.error("Kon realisatie niet verwijderen");
+      toast.error(t("admin.messages.solutionDeleteFailed"));
     } finally {
       setDeleting(false);
     }
@@ -299,12 +300,12 @@ export default function SolutionsPage() {
 
       const newSolution = await response.json();
       setSolutions((prev) => [...prev, newSolution]);
-      toast.success("Realisatie gedupliceerd");
+      toast.success(t("admin.messages.solutionDuplicated"));
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Kon realisatie niet dupliceren",
+          : t("admin.misc.solutionCouldNotDuplicate"),
       );
     } finally {
       setDuplicating(null);
@@ -334,7 +335,7 @@ export default function SolutionsPage() {
     } catch {
       // Revert on error
       setSolutions(solutions);
-      toast.error("Kon volgorde niet opslaan");
+      toast.error(t("admin.messages.orderSaveFailed"));
     }
   };
 
@@ -347,7 +348,7 @@ export default function SolutionsPage() {
         ) : (
           <PlusIcon className="size-4" />
         )}
-        Nieuwe realisatie
+        {t("admin.misc.newSolution")}
       </Button>
     ),
     [createSolution, creating],
@@ -368,9 +369,9 @@ export default function SolutionsPage() {
             <EmptyMedia variant="icon">
               <ImageIcon className="size-5" />
             </EmptyMedia>
-            <EmptyTitle>Nog geen realisaties</EmptyTitle>
+            <EmptyTitle>{t("admin.misc.noSolutionsYet")}</EmptyTitle>
             <EmptyDescription>
-              Maak je eerste realisatie aan om te beginnen.
+              {t("admin.misc.noSolutionsDesc")}
             </EmptyDescription>
           </EmptyHeader>
           <Button size="sm" onClick={createSolution} disabled={creating}>
@@ -379,7 +380,7 @@ export default function SolutionsPage() {
             ) : (
               <PlusIcon className="size-4" />
             )}
-            Realisatie aanmaken
+            {t("admin.misc.createSolution")}
           </Button>
         </Empty>
       ) : (
@@ -397,10 +398,10 @@ export default function SolutionsPage() {
                 <TableRow>
                   <TableHead className="w-10"></TableHead>
                   <TableHead className="w-12"></TableHead>
-                  <TableHead>Naam</TableHead>
+                  <TableHead>{t("admin.labels.name")}</TableHead>
                   <TableHead className="hidden sm:table-cell">URL</TableHead>
                   <TableHead className="hidden md:table-cell">
-                    Laatst bewerkt
+                    {t("admin.misc.lastEdited")}
                   </TableHead>
                   <TableHead className="w-10"></TableHead>
                 </TableRow>
@@ -431,14 +432,13 @@ export default function SolutionsPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Realisatie verwijderen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.misc.deleteSolutionQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je &quot;{deleteTarget?.name}&quot; wilt
-              verwijderen? Dit kan niet ongedaan worden gemaakt.
+              {t("admin.misc.deleteSolutionDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("admin.buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={deleteSolution}
               disabled={deleting}
@@ -447,10 +447,10 @@ export default function SolutionsPage() {
               {deleting ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Verwijderen...
+                  {t("admin.loading.deleting")}
                 </>
               ) : (
-                "Verwijderen"
+                t("admin.buttons.delete")
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -13,6 +13,7 @@ import {
 import { ImageIcon, Loader2Icon, Trash2Icon, UploadIcon } from "lucide-react";
 import { toast } from "sonner";
 import { MediaLibraryDialog } from "./MediaLibraryDialog";
+import { t } from "@/config/strings";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
@@ -41,13 +42,13 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      toast.error("Bestand moet een afbeelding zijn");
+      toast.error(t("admin.messages.fileMustBeImage"));
       return;
     }
 
     // Validate file size (max 25MB)
     if (file.size > MAX_FILE_SIZE) {
-      toast.error("Afbeelding mag maximaal 25MB zijn");
+      toast.error(t("admin.messages.imageMaxSize"));
       return;
     }
 
@@ -67,9 +68,9 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
       });
 
       onChange({ url: blob.url });
-      toast.success("Afbeelding geupload");
+      toast.success(t("admin.messages.imageUploaded"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Upload mislukt");
+      toast.error(error instanceof Error ? error.message : t("admin.messages.uploadFailed"));
     } finally {
       setUploading(false);
       // Reset input so same file can be selected again

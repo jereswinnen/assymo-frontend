@@ -19,6 +19,7 @@ import {
   UnlinkIcon,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { t } from "@/config/strings";
 
 function ResetPasswordForm() {
   const [password, setPassword] = useState("");
@@ -35,14 +36,12 @@ function ResetPasswordForm() {
   useEffect(() => {
     // Check for error parameter from Better Auth (invalid/expired token)
     if (urlError === "INVALID_TOKEN") {
-      setPageError(
-        "Deze reset link is verlopen of ongeldig. Vraag een nieuwe link aan.",
-      );
+      setPageError(t("admin.dialogs.resetLinkExpired"));
       return;
     }
 
     if (!token && !urlError) {
-      setPageError("Geen geldige reset link. Vraag een nieuwe link aan.");
+      setPageError(t("admin.dialogs.noValidResetLink"));
     }
   }, [token, urlError]);
 
@@ -50,17 +49,17 @@ function ResetPasswordForm() {
     setValidationError(null);
 
     if (!password || !confirmPassword) {
-      setValidationError("Vul beide velden in.");
+      setValidationError(t("admin.messages.fillBothFields"));
       return false;
     }
 
     if (password.length < 8) {
-      setValidationError("Wachtwoord moet minimaal 8 tekens zijn.");
+      setValidationError(t("admin.messages.passwordMinLengthWithPeriod"));
       return false;
     }
 
     if (password !== confirmPassword) {
-      setValidationError("Wachtwoorden komen niet overeen.");
+      setValidationError(t("admin.messages.passwordMismatchWithPeriod"));
       return false;
     }
 
@@ -75,7 +74,7 @@ function ResetPasswordForm() {
     }
 
     if (!token) {
-      setValidationError("Geen geldige reset link.");
+      setValidationError(t("admin.dialogs.noValidResetLinkShort"));
       return;
     }
 
@@ -95,12 +94,10 @@ function ResetPasswordForm() {
           error.message?.toLowerCase().includes("invalid") ||
           error.message?.toLowerCase().includes("expired")
         ) {
-          setValidationError(
-            "Deze reset link is verlopen of ongeldig. Vraag een nieuwe link aan.",
-          );
+          setValidationError(t("admin.dialogs.resetLinkExpired"));
         } else {
           setValidationError(
-            error.message || "Er is iets misgegaan. Probeer het opnieuw.",
+            error.message || t("admin.messages.somethingWentWrong"),
           );
         }
       } else {
@@ -108,7 +105,7 @@ function ResetPasswordForm() {
       }
     } catch (err) {
       console.error("Reset password error:", err);
-      setValidationError("Er is iets misgegaan. Probeer het opnieuw.");
+      setValidationError(t("admin.messages.somethingWentWrong"));
     } finally {
       setLoading(false);
     }
@@ -119,7 +116,7 @@ function ResetPasswordForm() {
       <div className="w-full max-w-lg space-y-6">
         <header className="flex items-center gap-2">
           <UnlinkIcon className="size-6 opacity-80" />
-          <p className="text-2xl font-semibold tracking-tight">Link ongeldig</p>
+          <p className="text-2xl font-semibold tracking-tight">{t("admin.headings.linkInvalid")}</p>
         </header>
 
         <div className="space-y-4">
@@ -129,7 +126,7 @@ function ResetPasswordForm() {
           </Alert>
 
           <Button onClick={() => router.push("/admin/auth")}>
-            Terug naar inloggen
+            {t("admin.buttons.backToLogin")}
           </Button>
         </div>
       </div>
@@ -142,16 +139,15 @@ function ResetPasswordForm() {
         <header className="flex items-center gap-2">
           <KeyRoundIcon className="size-6 opacity-80" />
           <p className="text-2xl font-semibold tracking-tight">
-            Wachtwoord gewijzigd
+            {t("admin.headings.passwordChanged")}
           </p>
         </header>
 
         <p className="text-muted-foreground">
-          Je wachtwoord is succesvol gewijzigd. Je kunt nu inloggen met je
-          nieuwe wachtwoord.
+          {t("admin.dialogs.passwordSuccessfullyChanged")}
         </p>
         <Button onClick={() => router.push("/admin/auth")}>
-          Naar inloggen
+          {t("admin.buttons.goToLogin")}
         </Button>
       </div>
     );
@@ -162,7 +158,7 @@ function ResetPasswordForm() {
       <header className="flex items-center gap-2">
         <KeyRoundIcon className="size-6 opacity-80" />
         <p className="text-2xl font-semibold tracking-tight">
-          Nieuw wachtwoord
+          {t("admin.headings.newPassword")}
         </p>
       </header>
 
@@ -176,7 +172,7 @@ function ResetPasswordForm() {
 
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor="password">Wachtwoord</FieldLabel>
+            <FieldLabel htmlFor="password">{t("admin.labels.password")}</FieldLabel>
             <Input
               id="password"
               type="password"
@@ -189,12 +185,12 @@ function ResetPasswordForm() {
               disabled={loading}
               autoFocus
             />
-            <FieldDescription>Minimaal 8 tekens</FieldDescription>
+            <FieldDescription>{t("admin.dialogs.minChars")}</FieldDescription>
           </Field>
 
           <Field>
             <FieldLabel htmlFor="confirmPassword">
-              Bevestig wachtwoord
+              {t("admin.labels.confirmPassword")}
             </FieldLabel>
             <Input
               id="confirmPassword"
@@ -217,12 +213,12 @@ function ResetPasswordForm() {
           {loading ? (
             <>
               <Loader2Icon className="size-4 animate-spin" />
-              Bewaren...
+              {t("admin.loading.saving")}
             </>
           ) : (
             <>
               <CheckIcon className="size-4" />
-              Bewaren
+              {t("admin.buttons.save")}
             </>
           )}
         </Button>

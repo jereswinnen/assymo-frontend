@@ -55,6 +55,7 @@ import {
   EmptyDescription,
 } from "@/components/ui/empty";
 import { NavLinkEditSheet } from "./sheets/NavLinkEditSheet";
+import { t } from "@/config/strings";
 
 interface Solution {
   id: string;
@@ -135,7 +136,7 @@ export default function NavigationPage() {
       setLinks(data);
     } catch (error) {
       console.error("Failed to fetch navigation:", error);
-      toast.error("Kon navigatie niet laden");
+      toast.error(t("admin.messages.navigationLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -175,11 +176,11 @@ export default function NavigationPage() {
       );
       if (!response.ok) throw new Error("Failed to delete");
 
-      toast.success("Link verwijderd");
+      toast.success(t("admin.messages.linkDeleted"));
       fetchLinks();
     } catch (error) {
       console.error("Failed to delete link:", error);
-      toast.error("Kon link niet verwijderen");
+      toast.error(t("admin.messages.linkDeleteFailed"));
     } finally {
       setDeleteTarget(null);
     }
@@ -206,7 +207,7 @@ export default function NavigationPage() {
         });
       } catch (error) {
         console.error("Failed to reorder links:", error);
-        toast.error("Kon volgorde niet opslaan");
+        toast.error(t("admin.messages.orderSaveFailed"));
         fetchLinks();
       }
     }
@@ -217,7 +218,7 @@ export default function NavigationPage() {
     () => (
       <Button size="sm" onClick={openNewLinkSheet}>
         <PlusIcon className="size-4" />
-        Nieuwe link
+        {t("admin.headings.newLink")}
       </Button>
     ),
     [openNewLinkSheet],
@@ -238,14 +239,14 @@ export default function NavigationPage() {
             <EmptyMedia variant="icon">
               <MenuIcon className="size-5" />
             </EmptyMedia>
-            <EmptyTitle>Nog geen navigatie links</EmptyTitle>
+            <EmptyTitle>{t("admin.misc.noNavigationLinksYet")}</EmptyTitle>
             <EmptyDescription>
-              Maak je eerste link aan om de navigatie te configureren.
+              {t("admin.misc.noNavigationLinksDesc")}
             </EmptyDescription>
           </EmptyHeader>
           <Button size="sm" onClick={openNewLinkSheet}>
             <PlusIcon className="size-4" />
-            Link aanmaken
+            {t("admin.misc.createLink")}
           </Button>
         </Empty>
       ) : (
@@ -262,10 +263,10 @@ export default function NavigationPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10"></TableHead>
-                  <TableHead>Titel</TableHead>
+                  <TableHead>{t("admin.labels.title")}</TableHead>
                   <TableHead className="hidden sm:table-cell">URL</TableHead>
                   <TableHead className="hidden md:table-cell">
-                    Subitems
+                    {t("admin.misc.subitems")}
                   </TableHead>
                   <TableHead className="w-10"></TableHead>
                 </TableRow>
@@ -314,19 +315,18 @@ export default function NavigationPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Link verwijderen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.misc.deleteLinkQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              &quot;{deleteTarget?.title}&quot; en alle bijbehorende subitems
-              worden permanent verwijderd.
+              {t("admin.misc.deleteLinkDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogCancel>{t("admin.buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={handleDeleteLink}
             >
-              Verwijderen
+              {t("admin.buttons.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -26,6 +26,7 @@ import {
   RefreshCwIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { t } from "@/config/strings";
 
 interface DateOverrideCreateSheetProps {
   open: boolean;
@@ -74,12 +75,12 @@ export function DateOverrideCreateSheet({
 
   const handleCreate = async () => {
     if (!formData.date) {
-      toast.error("Selecteer een datum");
+      toast.error(t("admin.messages.selectDate"));
       return;
     }
 
     if (formData.hasDateRange && !formData.end_date) {
-      toast.error("Selecteer een einddatum");
+      toast.error(t("admin.messages.selectEndDate"));
       return;
     }
 
@@ -105,7 +106,7 @@ export function DateOverrideCreateSheet({
         throw new Error(data.error || "Failed to create");
       }
 
-      toast.success("Uitzondering toegevoegd");
+      toast.success(t("admin.messages.overrideAdded"));
       onOpenChange(false);
       onCreated();
     } catch (error) {
@@ -113,7 +114,7 @@ export function DateOverrideCreateSheet({
       toast.error(
         error instanceof Error
           ? error.message
-          : "Kon uitzondering niet toevoegen",
+          : t("admin.misc.overrideCouldNotAdd"),
       );
     } finally {
       setSaving(false);
@@ -124,9 +125,9 @@ export function DateOverrideCreateSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="flex flex-col overflow-hidden w-full md:max-w-xl">
         <SheetHeader>
-          <SheetTitle>Uitzondering toevoegen</SheetTitle>
+          <SheetTitle>{t("admin.misc.addOverride")}</SheetTitle>
           <SheetDescription>
-            Sluit de zaak op een specifieke datum of wijzig de openingstijden.
+            {t("admin.misc.addOverrideDesc")}
           </SheetDescription>
         </SheetHeader>
 
@@ -135,7 +136,7 @@ export function DateOverrideCreateSheet({
             {/* Date selection */}
             <Field>
               <FieldLabel>
-                {formData.hasDateRange ? "Begindatum" : "Datum"}
+                {formData.hasDateRange ? t("admin.labels.startDate") : t("admin.labels.date")}
               </FieldLabel>
               <Input
                 type="date"
@@ -154,7 +155,7 @@ export function DateOverrideCreateSheet({
 
             {/* Date range toggle */}
             <Field orientation="horizontal">
-              <FieldLabel htmlFor="hasDateRange">Meerdere dagen</FieldLabel>
+              <FieldLabel htmlFor="hasDateRange">{t("admin.misc.multipleDays")}</FieldLabel>
               <Switch
                 id="hasDateRange"
                 checked={formData.hasDateRange}
@@ -171,7 +172,7 @@ export function DateOverrideCreateSheet({
             {/* End date (conditional) */}
             {formData.hasDateRange && (
               <Field>
-                <FieldLabel>Einddatum</FieldLabel>
+                <FieldLabel>{t("admin.labels.endDate")}</FieldLabel>
                 <Input
                   type="date"
                   value={formData.end_date}
@@ -195,14 +196,14 @@ export function DateOverrideCreateSheet({
                   setFormData({ ...formData, is_closed: !!checked })
                 }
               />
-              <FieldLabel htmlFor="is_closed">Volledig gesloten</FieldLabel>
+              <FieldLabel htmlFor="is_closed">{t("admin.misc.fullyClosed")}</FieldLabel>
             </Field>
 
             {/* Custom hours (conditional) */}
             {!formData.is_closed && (
               <div className="flex gap-4">
                 <Field className="flex-1">
-                  <FieldLabel>Van</FieldLabel>
+                  <FieldLabel>{t("admin.misc.from")}</FieldLabel>
                   <Input
                     type="time"
                     value={formData.open_time}
@@ -213,7 +214,7 @@ export function DateOverrideCreateSheet({
                   />
                 </Field>
                 <Field className="flex-1">
-                  <FieldLabel>Tot</FieldLabel>
+                  <FieldLabel>{t("admin.misc.to")}</FieldLabel>
                   <Input
                     type="time"
                     value={formData.close_time}
@@ -228,13 +229,13 @@ export function DateOverrideCreateSheet({
 
             {/* Reason */}
             <Field>
-              <FieldLabel>Reden (optioneel)</FieldLabel>
+              <FieldLabel>{t("admin.misc.reasonOptional")}</FieldLabel>
               <Input
                 value={formData.reason}
                 onChange={(e) =>
                   setFormData({ ...formData, reason: e.target.value })
                 }
-                placeholder="bijv. Feestdag, Vakantie..."
+                placeholder={t("admin.placeholders.holidayVacation")}
               />
             </Field>
 
@@ -244,7 +245,7 @@ export function DateOverrideCreateSheet({
             <Field orientation="horizontal">
               <FieldLabel htmlFor="is_recurring">
                 <RefreshCwIcon className="size-4" />
-                Jaarlijks herhalen
+                {t("admin.misc.repeatYearly")}
               </FieldLabel>
               <Switch
                 id="is_recurring"
@@ -259,7 +260,7 @@ export function DateOverrideCreateSheet({
             <Field orientation="horizontal">
               <FieldLabel htmlFor="show_on_website">
                 <GlobeIcon className="size-4" />
-                Toon op website
+                {t("admin.misc.showOnWebsite")}
               </FieldLabel>
               <Switch
                 id="show_on_website"
@@ -279,7 +280,7 @@ export function DateOverrideCreateSheet({
             ) : (
               <CheckIcon className="size-4" />
             )}
-            Opslaan
+            {t("admin.buttons.save")}
           </Button>
         </SheetFooter>
       </SheetContent>

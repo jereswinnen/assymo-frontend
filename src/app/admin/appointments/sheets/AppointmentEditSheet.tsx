@@ -52,6 +52,7 @@ import {
 import { toast } from "sonner";
 import type { Appointment, AppointmentStatus } from "@/types/appointments";
 import { STATUS_LABELS } from "@/types/appointments";
+import { t } from "@/config/strings";
 
 interface AppointmentEditSheetProps {
   appointment: Appointment | null;
@@ -142,7 +143,7 @@ export function AppointmentEditSheet({
         throw new Error(data.error || "Failed to update");
       }
 
-      toast.success("Afspraak bijgewerkt");
+      toast.success(t("admin.messages.appointmentUpdated"));
       // Update local display data with edited values
       setDisplayData((prev) =>
         prev
@@ -158,7 +159,7 @@ export function AppointmentEditSheet({
     } catch (error) {
       console.error("Failed to update appointment:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon afspraak niet bijwerken",
+        error instanceof Error ? error.message : t("admin.misc.appointmentCouldNotUpdate"),
       );
     } finally {
       setSaving(false);
@@ -180,13 +181,13 @@ export function AppointmentEditSheet({
         throw new Error(data.error || "Failed to cancel");
       }
 
-      toast.success("Afspraak geannuleerd");
+      toast.success(t("admin.messages.appointmentCancelled"));
       onOpenChange(false);
       onUpdate();
     } catch (error) {
       console.error("Failed to cancel appointment:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon afspraak niet annuleren",
+        error instanceof Error ? error.message : t("admin.misc.appointmentCouldNotCancel"),
       );
     } finally {
       setCancelling(false);
@@ -231,15 +232,15 @@ export function AppointmentEditSheet({
         >
           <SheetHeader className="px-0">
             <SheetTitle className="flex items-center gap-2">
-              Afspraak details
+              {t("admin.misc.appointmentDetails")}
               <Badge variant={getStatusBadgeVariant(displayData.status)}>
                 {STATUS_LABELS[displayData.status]}
               </Badge>
             </SheetTitle>
             <SheetDescription>
               {editing
-                ? "Bewerk de afspraakgegevens."
-                : "Bekijk de afspraakgegevens of bewerk ze."}
+                ? t("admin.misc.editAppointmentDesc")
+                : t("admin.misc.viewAppointmentDesc")}
             </SheetDescription>
           </SheetHeader>
 
@@ -250,7 +251,7 @@ export function AppointmentEditSheet({
               <FieldSet>
                 <div className="grid grid-cols-2 gap-4">
                   <Field>
-                    <FieldLabel htmlFor="edit-date">Datum</FieldLabel>
+                    <FieldLabel htmlFor="edit-date">{t("admin.labels.date")}</FieldLabel>
                     <Input
                       id="edit-date"
                       type="date"
@@ -265,7 +266,7 @@ export function AppointmentEditSheet({
                     />
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="edit-time">Tijd</FieldLabel>
+                    <FieldLabel htmlFor="edit-time">{t("admin.labels.time")}</FieldLabel>
                     <Input
                       id="edit-time"
                       type="time"
@@ -309,7 +310,7 @@ export function AppointmentEditSheet({
               {/* Customer info */}
               <FieldSet>
                 <Field>
-                  <FieldLabel htmlFor="edit-name">Naam</FieldLabel>
+                  <FieldLabel htmlFor="edit-name">{t("admin.labels.name")}</FieldLabel>
                   <Input
                     id="edit-name"
                     value={editData.customer_name}
@@ -321,7 +322,7 @@ export function AppointmentEditSheet({
 
                 <div className="grid grid-cols-2 gap-4">
                   <Field>
-                    <FieldLabel htmlFor="edit-email">E-mail</FieldLabel>
+                    <FieldLabel htmlFor="edit-email">{t("admin.labels.email")}</FieldLabel>
                     <Input
                       id="edit-email"
                       type="email"
@@ -335,7 +336,7 @@ export function AppointmentEditSheet({
                     />
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="edit-phone">Telefoon</FieldLabel>
+                    <FieldLabel htmlFor="edit-phone">{t("admin.labels.phone")}</FieldLabel>
                     <Input
                       id="edit-phone"
                       value={editData.customer_phone}
@@ -351,7 +352,7 @@ export function AppointmentEditSheet({
 
                 <Field>
                   <FieldLabel htmlFor="edit-street">
-                    Straat en huisnummer
+                    {t("admin.labels.streetAddress")}
                   </FieldLabel>
                   <Input
                     id="edit-street"
@@ -367,7 +368,7 @@ export function AppointmentEditSheet({
 
                 <div className="grid grid-cols-2 gap-4">
                   <Field>
-                    <FieldLabel htmlFor="edit-postal">Postcode</FieldLabel>
+                    <FieldLabel htmlFor="edit-postal">{t("admin.labels.postalCode")}</FieldLabel>
                     <Input
                       id="edit-postal"
                       value={editData.customer_postal_code}
@@ -380,7 +381,7 @@ export function AppointmentEditSheet({
                     />
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="edit-city">Plaats</FieldLabel>
+                    <FieldLabel htmlFor="edit-city">{t("admin.labels.city")}</FieldLabel>
                     <Input
                       id="edit-city"
                       value={editData.customer_city}
@@ -401,7 +402,7 @@ export function AppointmentEditSheet({
               <FieldSet>
                 <Field>
                   <FieldLabel htmlFor="edit-remarks">
-                    Opmerkingen klant
+                    {t("admin.labels.customerRemarks")}
                   </FieldLabel>
                   <Textarea
                     id="edit-remarks"
@@ -415,7 +416,7 @@ export function AppointmentEditSheet({
 
                 <Field>
                   <FieldLabel htmlFor="edit-admin-notes">
-                    Interne notities
+                    {t("admin.labels.internalNotes")}
                   </FieldLabel>
                   <Textarea
                     id="edit-admin-notes"
@@ -424,7 +425,7 @@ export function AppointmentEditSheet({
                       setEditData({ ...editData, admin_notes: e.target.value })
                     }
                     rows={2}
-                    placeholder="Alleen zichtbaar voor beheerders..."
+                    placeholder={t("admin.placeholders.adminOnly")}
                   />
                 </Field>
               </FieldSet>
@@ -491,7 +492,7 @@ export function AppointmentEditSheet({
                   <Separator />
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">
-                      Opmerkingen
+                      {t("admin.misc.remarks")}
                     </span>
                     <p className="text-sm mt-1 whitespace-pre-wrap">
                       {displayData.remarks}
@@ -506,7 +507,7 @@ export function AppointmentEditSheet({
                   <Separator />
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">
-                      Interne notities
+                      {t("admin.labels.internalNotes")}
                     </span>
                     <p className="text-sm mt-1 whitespace-pre-wrap bg-yellow-50 dark:bg-yellow-950 p-2 rounded">
                       {displayData.admin_notes}
@@ -519,7 +520,7 @@ export function AppointmentEditSheet({
 
               {/* Metadata */}
               <div className="text-xs text-muted-foreground">
-                Aangemaakt op{" "}
+                {t("admin.misc.createdOn")}{" "}
                 {new Date(displayData.created_at).toLocaleString("nl-NL")}
               </div>
             </div>
@@ -533,7 +534,7 @@ export function AppointmentEditSheet({
                 ) : (
                   <CheckIcon className="size-4" />
                 )}
-                Opslaan
+                {t("admin.buttons.save")}
               </Button>
             ) : (
               <>
@@ -544,12 +545,12 @@ export function AppointmentEditSheet({
                     disabled={cancelling}
                   >
                     <TrashIcon className="size-4" />
-                    Annuleren
+                    {t("admin.buttons.cancel")}
                   </Button>
                 )}
                 <Button variant="outline" onClick={startEditing}>
                   <PencilIcon className="size-4" />
-                  Bewerken
+                  {t("admin.buttons.edit")}
                 </Button>
               </>
             )}
@@ -564,21 +565,20 @@ export function AppointmentEditSheet({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Afspraak annuleren?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.misc.cancelAppointmentQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je deze afspraak wilt annuleren? De klant
-              ontvangt hiervan een e-mailnotificatie.
+              {t("admin.misc.cancelAppointmentDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={cancelling}>Terug</AlertDialogCancel>
+            <AlertDialogCancel disabled={cancelling}>{t("admin.buttons.back")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={handleCancel}
               disabled={cancelling}
             >
               {cancelling && <Loader2Icon className="size-4 animate-spin" />}
-              Ja, annuleren
+              {t("admin.misc.yesCancel")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

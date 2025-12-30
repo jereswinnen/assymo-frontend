@@ -44,6 +44,7 @@ import { getTestEmail } from "@/lib/adminSettings";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { ImageUpload } from "@/components/admin/media/ImageUpload";
 import type { Newsletter, NewsletterSection } from "@/config/newsletter";
+import { t } from "@/config/strings";
 
 export default function EditNewsletterPage() {
   const params = useParams();
@@ -87,7 +88,7 @@ export default function EditNewsletterPage() {
       const response = await fetch(`/api/admin/newsletters/${params.id}`);
       if (!response.ok) {
         if (response.status === 404) {
-          toast.error("Nieuwsbrief niet gevonden");
+          toast.error(t("admin.messages.newsletterNotFound"));
           router.push("/admin/emails");
           return;
         }
@@ -98,7 +99,7 @@ export default function EditNewsletterPage() {
       setSavedNewsletter(data.newsletter);
     } catch (error) {
       console.error("Failed to load newsletter:", error);
-      toast.error("Kon nieuwsbrief niet laden");
+      toast.error(t("admin.messages.newsletterLoadFailed"));
       router.push("/admin/emails");
     } finally {
       setLoading(false);
@@ -156,7 +157,7 @@ export default function EditNewsletterPage() {
 
   const handleRemoveSectionClick = (index: number) => {
     if (newsletter && newsletter.sections.length <= 1) {
-      toast.error("Je hebt minimaal één sectie nodig");
+      toast.error(t("admin.messages.sectionRequired"));
       return;
     }
     setSectionToDelete(index);
@@ -194,10 +195,10 @@ export default function EditNewsletterPage() {
       if (!response.ok) throw new Error("Failed to save draft");
 
       setSavedNewsletter(newsletter);
-      toast.success("Concept opgeslagen");
+      toast.success(t("admin.messages.draftSaved"));
     } catch (error) {
       console.error("Failed to save draft:", error);
-      toast.error("Kon concept niet opslaan");
+      toast.error(t("admin.messages.draftSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -207,12 +208,12 @@ export default function EditNewsletterPage() {
     if (!newsletter) return;
 
     if (!newsletter.subject.trim()) {
-      toast.error("Vul een onderwerp in");
+      toast.error(t("admin.messages.subjectRequired"));
       return;
     }
 
     if (newsletter.sections.every((s) => !s.title.trim() && !s.text.trim())) {
-      toast.error("Voeg content toe aan minimaal één sectie");
+      toast.error(t("admin.messages.contentRequired"));
       return;
     }
 
@@ -224,7 +225,7 @@ export default function EditNewsletterPage() {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(testEmail)) {
-      toast.error("Vul een geldig e-mailadres in");
+      toast.error(t("admin.messages.emailInvalid"));
       return;
     }
 
@@ -264,17 +265,17 @@ export default function EditNewsletterPage() {
     if (!newsletter) return;
 
     if (!newsletter.subject.trim()) {
-      toast.error("Vul een onderwerp in");
+      toast.error(t("admin.messages.subjectRequired"));
       return;
     }
 
     if (newsletter.sections.every((s) => !s.title.trim() && !s.text.trim())) {
-      toast.error("Voeg content toe aan minimaal één sectie");
+      toast.error(t("admin.messages.contentRequired"));
       return;
     }
 
     if (!subscriberCount || subscriberCount === 0) {
-      toast.error("Er zijn geen abonnees om naar te verzenden");
+      toast.error(t("admin.messages.noSubscribers"));
       return;
     }
 
@@ -305,12 +306,12 @@ export default function EditNewsletterPage() {
       }
 
       toast.success(
-        `Nieuwsbrief verzonden naar ${data.sent} ${data.sent === 1 ? "abonnee" : "abonnees"}`,
+        `Nieuwsbrief verzonden naar ${data.sent} ${data.sent === 1 ? t("admin.misc.abonnee") : t("admin.misc.abonnees")}`,
       );
       router.push("/admin/emails");
     } catch (error) {
       console.error("Failed to send broadcast:", error);
-      toast.error(error instanceof Error ? error.message : "Verzenden mislukt");
+      toast.error(error instanceof Error ? error.message : t("admin.messages.somethingWentWrongShort"));
     } finally {
       setSendingBroadcast(false);
     }
@@ -329,11 +330,11 @@ export default function EditNewsletterPage() {
         throw new Error("Failed to delete newsletter");
       }
 
-      toast.success("Nieuwsbrief verwijderd");
+      toast.success(t("admin.messages.newsletterDeleted"));
       router.push("/admin/emails");
     } catch (error) {
       console.error("Failed to delete newsletter:", error);
-      toast.error("Kon nieuwsbrief niet verwijderen");
+      toast.error(t("admin.messages.newsletterDeleteFailed"));
     } finally {
       setDeleting(false);
       setShowDeleteDialog(false);
@@ -354,7 +355,7 @@ export default function EditNewsletterPage() {
           ) : (
             <CheckIcon className="size-4" />
           )}
-          Opslaan
+          {t("admin.buttons.save")}
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -368,7 +369,7 @@ export default function EditNewsletterPage() {
               disabled={sendingTest || saving || sendingBroadcast}
             >
               <ForwardIcon className="size-4" />
-              Test versturen
+              {t("admin.misc.testSend")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handleSendBroadcastClick}
@@ -382,8 +383,8 @@ export default function EditNewsletterPage() {
             >
               <SendIcon className="size-4" />
               {subscriberCount && subscriberCount > 0
-                ? `Versturen (${subscriberCount})`
-                : "Versturen"}
+                ? `${t("admin.buttons.send")} (${subscriberCount})`
+                : t("admin.buttons.send")}
             </DropdownMenuItem>
             {isDraft && (
               <>
@@ -393,7 +394,7 @@ export default function EditNewsletterPage() {
                   onClick={() => setShowDeleteDialog(true)}
                 >
                   <Trash2Icon className="size-4" />
-                  Verwijderen
+                  {t("admin.buttons.delete")}
                 </DropdownMenuItem>
               </>
             )}
@@ -430,24 +431,24 @@ export default function EditNewsletterPage() {
       {/* Subject & Preheader */}
       <FieldSet>
         <Field>
-          <FieldLabel htmlFor="subject">Onderwerp</FieldLabel>
+          <FieldLabel htmlFor="subject">{t("admin.labels.subject")}</FieldLabel>
           <Input
             id="subject"
-            placeholder="bijv. Winterkorting op alle tuinhuizen"
+            placeholder={t("admin.placeholders.emailSubject")}
             value={newsletter.subject}
             onChange={(e) => updateField("subject", e.target.value)}
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="preheader">Preheader</FieldLabel>
+          <FieldLabel htmlFor="preheader">{t("admin.labels.preview")}</FieldLabel>
           <Input
             id="preheader"
-            placeholder="Korte preview tekst die in de inbox wordt getoond"
+            placeholder={t("admin.placeholders.emailPreview")}
             value={newsletter.preheader || ""}
             onChange={(e) => updateField("preheader", e.target.value || null)}
           />
           <FieldDescription>
-            Optionele tekst die naast het onderwerp in de inbox verschijnt
+            {t("admin.misc.optionalText")}
           </FieldDescription>
         </Field>
       </FieldSet>
@@ -457,10 +458,10 @@ export default function EditNewsletterPage() {
       {/* Sections */}
       <FieldSet>
         <header className="flex items-center justify-between">
-          <h3 className="mb-0! text-sm font-medium">Secties</h3>
+          <h3 className="mb-0! text-sm font-medium">{t("admin.misc.sections")}</h3>
           <Button size="sm" variant="outline" onClick={addSection}>
             <PlusIcon className="size-4" />
-            Sectie toevoegen
+            {t("admin.buttons.addSection")}
           </Button>
         </header>
 
@@ -476,7 +477,7 @@ export default function EditNewsletterPage() {
                   </span>*/}
 
                   <Field>
-                    <FieldLabel>Afbeelding</FieldLabel>
+                    <FieldLabel>{t("admin.labels.image")}</FieldLabel>
                     <ImageUpload
                       value={
                         section.imageUrl ? { url: section.imageUrl } : null
@@ -485,14 +486,14 @@ export default function EditNewsletterPage() {
                         updateSection(index, "imageUrl", val?.url || "")
                       }
                     />
-                    <FieldDescription>Optioneel</FieldDescription>
+                    <FieldDescription>{t("admin.misc.optional")}</FieldDescription>
                   </Field>
 
                   <Field>
-                    <FieldLabel htmlFor={`title-${index}`}>Titel</FieldLabel>
+                    <FieldLabel htmlFor={`title-${index}`}>{t("admin.labels.title")}</FieldLabel>
                     <Input
                       id={`title-${index}`}
-                      placeholder="Sectie titel"
+                      placeholder={t("admin.placeholders.sectionTitle")}
                       value={section.title}
                       onChange={(e) =>
                         updateSection(index, "title", e.target.value)
@@ -501,7 +502,7 @@ export default function EditNewsletterPage() {
                   </Field>
 
                   <Field>
-                    <FieldLabel>Tekst</FieldLabel>
+                    <FieldLabel>{t("admin.labels.text")}</FieldLabel>
                     <RichTextEditor
                       value={section.text}
                       onChange={(val) => updateSection(index, "text", val)}
@@ -512,14 +513,14 @@ export default function EditNewsletterPage() {
 
                   <Field orientation="horizontal">
                     <FieldLabel htmlFor={`cta-toggle-${index}`}>
-                      Actie
+                      {t("admin.labels.action")}
                     </FieldLabel>
                     <Switch
                       id={`cta-toggle-${index}`}
                       checked={hasAction}
                       onCheckedChange={(checked) => {
                         if (checked) {
-                          updateSection(index, "ctaText", "Meer info");
+                          updateSection(index, "ctaText", t("admin.placeholders.moreInfo"));
                         } else {
                           updateSection(index, "ctaText", "");
                           updateSection(index, "ctaUrl", "");
@@ -532,11 +533,11 @@ export default function EditNewsletterPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <Field>
                         <FieldLabel htmlFor={`cta-text-${index}`}>
-                          Label
+                          {t("admin.labels.label")}
                         </FieldLabel>
                         <Input
                           id={`cta-text-${index}`}
-                          placeholder="bijv. Bekijk meer"
+                          placeholder={t("admin.placeholders.buttonLabel")}
                           value={section.ctaText || ""}
                           onChange={(e) =>
                             updateSection(index, "ctaText", e.target.value)
@@ -545,7 +546,7 @@ export default function EditNewsletterPage() {
                       </Field>
                       <Field>
                         <FieldLabel htmlFor={`cta-url-${index}`}>
-                          URL
+                          {t("admin.labels.url")}
                         </FieldLabel>
                         <Input
                           id={`cta-url-${index}`}
@@ -569,7 +570,7 @@ export default function EditNewsletterPage() {
                     disabled={newsletter.sections.length <= 1}
                   >
                     <Trash2Icon className="size-4" />
-                    Sectie verwijderen
+                    {t("admin.misc.deleteSection")}
                   </Button>
                 </FieldSet>
               </div>
@@ -585,10 +586,9 @@ export default function EditNewsletterPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Sectie verwijderen</DialogTitle>
+            <DialogTitle>{t("admin.headings.deleteSection")}</DialogTitle>
             <DialogDescription>
-              Weet je zeker dat je deze sectie wilt verwijderen? Deze actie kan
-              niet ongedaan worden gemaakt.
+              {t("admin.misc.deleteSectionDesc")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -597,7 +597,7 @@ export default function EditNewsletterPage() {
               variant="outline"
               onClick={() => setSectionToDelete(null)}
             >
-              Annuleren
+              {t("admin.buttons.cancel")}
             </Button>
             <Button
               size="sm"
@@ -605,7 +605,7 @@ export default function EditNewsletterPage() {
               onClick={handleRemoveSectionConfirm}
             >
               <Trash2Icon className="size-4" />
-              Verwijderen
+              {t("admin.buttons.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -618,14 +618,14 @@ export default function EditNewsletterPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nieuwsbrief versturen</DialogTitle>
+            <DialogTitle>{t("admin.headings.sendNewsletter")}</DialogTitle>
             <DialogDescription>
-              Je staat op het punt om deze nieuwsbrief te versturen naar{" "}
+              {t("admin.misc.sendBroadcastDesc")}{" "}
               <strong>
                 {subscriberCount}{" "}
-                {subscriberCount === 1 ? "abonnee" : "abonnees"}
+                {subscriberCount === 1 ? t("admin.misc.abonnee") : t("admin.misc.abonnees")}
               </strong>
-              . Deze actie kan niet ongedaan worden gemaakt.
+              . {t("admin.dialogs.cannotUndo")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -634,11 +634,11 @@ export default function EditNewsletterPage() {
               variant="outline"
               onClick={() => setShowBroadcastConfirm(false)}
             >
-              Annuleren
+              {t("admin.buttons.cancel")}
             </Button>
             <Button size="sm" onClick={handleConfirmBroadcast}>
               <SendIcon className="size-4" />
-              Versturen
+              {t("admin.buttons.send")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -648,19 +648,18 @@ export default function EditNewsletterPage() {
       <Dialog open={showTestDialog} onOpenChange={setShowTestDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Test e-mail versturen</DialogTitle>
+            <DialogTitle>{t("admin.headings.sendTestEmail")}</DialogTitle>
             <DialogDescription>
-              Verstuur een test e-mail om te controleren hoe de nieuwsbrief
-              eruitziet.
+              {t("admin.misc.testEmailDialogDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <Field>
-              <FieldLabel htmlFor="test-email">E-mailadres</FieldLabel>
+              <FieldLabel htmlFor="test-email">{t("admin.labels.email")}</FieldLabel>
               <Input
                 id="test-email"
                 type="email"
-                placeholder="test@voorbeeld.be"
+                placeholder={t("admin.placeholders.testEmail")}
                 value={testEmail}
                 onChange={(e) => setTestEmailState(e.target.value)}
               />
@@ -672,11 +671,11 @@ export default function EditNewsletterPage() {
               variant="outline"
               onClick={() => setShowTestDialog(false)}
             >
-              Annuleren
+              {t("admin.buttons.cancel")}
             </Button>
             <Button size="sm" onClick={handleConfirmTest}>
               <ForwardIcon className="size-4" />
-              Versturen
+              {t("admin.buttons.send")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -686,10 +685,9 @@ export default function EditNewsletterPage() {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nieuwsbrief verwijderen</DialogTitle>
+            <DialogTitle>{t("admin.headings.deleteNewsletter")}</DialogTitle>
             <DialogDescription>
-              Weet je zeker dat je deze nieuwsbrief wilt verwijderen? Deze actie
-              kan niet ongedaan worden gemaakt.
+              {t("admin.misc.deleteNewsletterDesc")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -699,7 +697,7 @@ export default function EditNewsletterPage() {
               onClick={() => setShowDeleteDialog(false)}
               disabled={deleting}
             >
-              Annuleren
+              {t("admin.buttons.cancel")}
             </Button>
             <Button
               size="sm"
@@ -712,7 +710,7 @@ export default function EditNewsletterPage() {
               ) : (
                 <Trash2Icon className="size-4" />
               )}
-              Verwijderen
+              {t("admin.buttons.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

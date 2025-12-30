@@ -10,6 +10,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { CompassIcon } from "lucide-react";
 import { useSiteContext } from "@/lib/permissions/site-context";
+import { t } from "@/config/strings";
 
 interface SiteSelectorProps {
   className?: string;
@@ -37,7 +38,7 @@ export function SiteSelector({ className }: SiteSelectorProps) {
         <SelectTrigger className="w-full">
           <div className="flex items-center gap-2">
             <CompassIcon className="size-4 text-muted-foreground" />
-            <SelectValue placeholder="Selecteer site" />
+            <SelectValue placeholder={t("admin.placeholders.selectSite")} />
           </div>
         </SelectTrigger>
         <SelectContent>

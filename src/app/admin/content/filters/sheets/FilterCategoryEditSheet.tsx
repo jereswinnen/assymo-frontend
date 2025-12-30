@@ -54,6 +54,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { t } from "@/config/strings";
 
 interface Filter {
   id: string;
@@ -156,7 +157,7 @@ export function FilterCategoryEditSheet({
 
   const handleSaveCategory = async () => {
     if (!categoryName.trim()) {
-      toast.error("Naam is verplicht");
+      toast.error(t("admin.messages.nameRequired"));
       return;
     }
 
@@ -178,7 +179,7 @@ export function FilterCategoryEditSheet({
           },
         );
         if (!response.ok) throw new Error("Failed to update");
-        toast.success("Categorie bijgewerkt");
+        toast.success(t("admin.messages.categoryUpdated"));
       } else {
         if (!siteId) return;
         const response = await fetch("/api/admin/content/filter-categories", {
@@ -187,14 +188,14 @@ export function FilterCategoryEditSheet({
           body: JSON.stringify({ name: categoryName, slug, siteId }),
         });
         if (!response.ok) throw new Error("Failed to create");
-        toast.success("Categorie aangemaakt");
+        toast.success(t("admin.messages.categoryCreated"));
       }
 
       onOpenChange(false);
       onSaved();
     } catch (error) {
       console.error("Failed to save category:", error);
-      toast.error("Kon categorie niet opslaan");
+      toast.error(t("admin.messages.categorySaveFailed"));
     } finally {
       setSavingCategory(false);
     }
@@ -218,7 +219,7 @@ export function FilterCategoryEditSheet({
       if (!response.ok) throw new Error("Failed to create");
 
       const newFilter = await response.json();
-      toast.success("Filter toegevoegd");
+      toast.success(t("admin.messages.filterAdded"));
       setNewFilterName("");
 
       const updatedCategory = {
@@ -229,7 +230,7 @@ export function FilterCategoryEditSheet({
       onCategoryUpdated(updatedCategory);
     } catch (error) {
       console.error("Failed to add filter:", error);
-      toast.error("Kon filter niet toevoegen");
+      toast.error(t("admin.messages.filterAddFailed"));
     } finally {
       setAddingFilter(false);
     }
@@ -246,7 +247,7 @@ export function FilterCategoryEditSheet({
       );
       if (!response.ok) throw new Error("Failed to delete");
 
-      toast.success("Filter verwijderd");
+      toast.success(t("admin.messages.filterDeleted"));
 
       const updatedFilters = editingCategory.filters.filter(
         (f) => f.id !== deleteTarget.id,
@@ -256,7 +257,7 @@ export function FilterCategoryEditSheet({
       onCategoryUpdated(updatedCategory);
     } catch (error) {
       console.error("Failed to delete filter:", error);
-      toast.error("Kon filter niet verwijderen");
+      toast.error(t("admin.messages.filterDeleteFailed"));
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
@@ -292,7 +293,7 @@ export function FilterCategoryEditSheet({
         });
       } catch (error) {
         console.error("Failed to reorder filters:", error);
-        toast.error("Kon volgorde niet opslaan");
+        toast.error(t("admin.messages.orderSaveFailed"));
       }
     }
   };
@@ -306,19 +307,19 @@ export function FilterCategoryEditSheet({
         >
           <SheetHeader className="px-0">
             <SheetTitle>
-              {editingCategory ? "Categorie bewerken" : "Nieuwe categorie"}
+              {editingCategory ? t("admin.headings.editCategory") : t("admin.headings.newCategory")}
             </SheetTitle>
             <SheetDescription>
               {editingCategory
-                ? "Bewerk de categorie en beheer de bijbehorende filters."
-                : "Maak een nieuwe filtercategorie aan."}
+                ? t("admin.dialogs.editCategoryDesc")
+                : t("admin.dialogs.newCategoryDesc")}
             </SheetDescription>
           </SheetHeader>
 
           <FieldGroup>
             <FieldSet>
               <Field>
-                <FieldLabel htmlFor="category-name">Naam</FieldLabel>
+                <FieldLabel htmlFor="category-name">{t("admin.labels.name")}</FieldLabel>
                 <Input
                   id="category-name"
                   value={categoryName}
@@ -328,7 +329,7 @@ export function FilterCategoryEditSheet({
                       setCategorySlug(slugify(e.target.value));
                     }
                   }}
-                  placeholder="Materiaal"
+                  placeholder={t("admin.placeholders.categoryName")}
                 />
               </Field>
 
@@ -338,7 +339,7 @@ export function FilterCategoryEditSheet({
                   id="category-slug"
                   value={categorySlug}
                   onChange={(e) => setCategorySlug(e.target.value)}
-                  placeholder="materiaal"
+                  placeholder={t("admin.placeholders.categorySlug")}
                 />
               </Field>
             </FieldSet>
@@ -347,13 +348,13 @@ export function FilterCategoryEditSheet({
 
             {editingCategory && (
               <FieldSet>
-                <FieldLegend variant="label">Filters</FieldLegend>
+                <FieldLegend variant="label">{t("admin.labels.filters")}</FieldLegend>
 
                 <div className="flex gap-2">
                   <Input
                     value={newFilterName}
                     onChange={(e) => setNewFilterName(e.target.value)}
-                    placeholder="Nieuwe filter..."
+                    placeholder={t("admin.placeholders.newFilter")}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && newFilterName.trim()) {
                         e.preventDefault();
@@ -376,7 +377,7 @@ export function FilterCategoryEditSheet({
 
                 {editingCategory.filters.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-2">
-                    Nog geen filters in deze categorie
+                    {t("admin.empty.noFilters")}
                   </p>
                 ) : (
                   <DndContext
@@ -418,12 +419,12 @@ export function FilterCategoryEditSheet({
               {savingCategory ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Opslaan...
+                  {t("admin.loading.saving")}
                 </>
               ) : (
                 <>
                   <CheckIcon className="size-4" />
-                  {editingCategory ? "Opslaan" : "Aanmaken"}
+                  {editingCategory ? t("admin.buttons.save") : t("admin.buttons.create")}
                 </>
               )}
             </Button>
@@ -437,13 +438,13 @@ export function FilterCategoryEditSheet({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Filter verwijderen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.misc.deleteFilterQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              &quot;{deleteTarget?.name}&quot; wordt permanent verwijderd.
+              &quot;{deleteTarget?.name}&quot; {t("admin.dialogs.permanentDelete")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("admin.buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={handleDeleteFilter}
@@ -452,10 +453,10 @@ export function FilterCategoryEditSheet({
               {deleting ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Verwijderen...
+                  {t("admin.loading.deleting")}
                 </>
               ) : (
-                "Verwijderen"
+                t("admin.buttons.delete")
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

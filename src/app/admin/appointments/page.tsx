@@ -16,6 +16,7 @@ import {
 import { AppointmentsList } from "@/components/admin/appointments/AppointmentsList";
 import { OpeningHours } from "@/components/admin/appointments/OpeningHours";
 import { DateOverrides } from "@/components/admin/appointments/DateOverrides";
+import { t } from "@/config/strings";
 
 export default function AppointmentsPage() {
   const [mounted, setMounted] = useState(false);
@@ -51,7 +52,7 @@ export default function AppointmentsPage() {
       return (
         <Button size="sm" onClick={() => setCreateAppointmentOpen(true)}>
           <CalendarPlusIcon className="size-4" />
-          Nieuwe afspraak
+          {t("admin.headings.newAppointment")}
         </Button>
       );
     }
@@ -68,7 +69,7 @@ export default function AppointmentsPage() {
           ) : (
             <CheckIcon className="size-4" />
           )}
-          Opslaan
+          {t("admin.buttons.save")}
         </Button>
       );
     }
@@ -77,7 +78,7 @@ export default function AppointmentsPage() {
       return (
         <Button size="sm" onClick={() => setCreateOverrideOpen(true)}>
           <ClockPlusIcon className="size-4" />
-          Toevoegen
+          {t("admin.buttons.add")}
         </Button>
       );
     }
@@ -100,15 +101,15 @@ export default function AppointmentsPage() {
       <TabsList>
         <TabsTrigger value="overview">
           <ListTreeIcon className="size-4" />
-          Overzicht
+          {t("admin.headings.overview")}
         </TabsTrigger>
         <TabsTrigger value="opening-hours">
           <ClockIcon className="size-4" />
-          Openingsuren
+          {t("admin.headings.openingHours")}
         </TabsTrigger>
         <TabsTrigger value="overrides">
           <SquareDashedMousePointerIcon className="size-4" />
-          Uitzonderingen
+          {t("admin.headings.exceptions")}
         </TabsTrigger>
       </TabsList>
 

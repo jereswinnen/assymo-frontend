@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2Icon } from "lucide-react";
+import { t } from "@/config/strings";
 
 interface CreateFolderDialogProps {
   open: boolean;
@@ -34,7 +35,7 @@ export function CreateFolderDialog({
     e.preventDefault();
 
     if (!name.trim()) {
-      setError("Vul een naam in");
+      setError(t("admin.messages.nameRequired"));
       return;
     }
 
@@ -51,7 +52,7 @@ export function CreateFolderDialog({
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Kon map niet aanmaken");
+        setError(data.error || t("admin.messages.somethingWentWrongShort"));
         setCreating(false);
         return;
       }
@@ -60,7 +61,7 @@ export function CreateFolderDialog({
       setName("");
       onOpenChange(false);
     } catch {
-      setError("Kon map niet aanmaken");
+      setError(t("admin.messages.somethingWentWrongShort"));
     } finally {
       setCreating(false);
     }
@@ -79,10 +80,10 @@ export function CreateFolderDialog({
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Nieuwe map</DialogTitle>
+            <DialogTitle>{t("admin.headings.newFolder")}</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <Label htmlFor="folder-name">Naam</Label>
+            <Label htmlFor="folder-name">{t("admin.labels.name")}</Label>
             <Input
               id="folder-name"
               value={name}
@@ -90,7 +91,7 @@ export function CreateFolderDialog({
                 setName(e.target.value);
                 setError(null);
               }}
-              placeholder="Mapnaam"
+              placeholder={t("admin.placeholders.folderName")}
               autoFocus
               className="mt-2"
             />
@@ -103,16 +104,16 @@ export function CreateFolderDialog({
               onClick={() => handleOpenChange(false)}
               disabled={creating}
             >
-              Annuleren
+              {t("admin.buttons.cancel")}
             </Button>
             <Button type="submit" disabled={creating || !name.trim()}>
               {creating ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Aanmaken...
+                  {t("admin.buttons.creating")}
                 </>
               ) : (
-                "Aanmaken"
+                t("admin.buttons.create")
               )}
             </Button>
           </DialogFooter>

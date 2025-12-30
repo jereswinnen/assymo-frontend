@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import { UserIcon, Loader2Icon, CheckIcon, CameraIcon } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { t } from "@/config/strings";
 
 function getInitials(name: string): string {
   return name
@@ -59,13 +60,13 @@ export function ProfileSection() {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      toast.error("Alleen afbeeldingen zijn toegestaan");
+      toast.error(t("admin.messages.imagesOnly"));
       return;
     }
 
     // Validate file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      toast.error("Afbeelding mag maximaal 2MB zijn");
+      toast.error(t("admin.messages.imageMaxSize2MB"));
       return;
     }
 
@@ -96,10 +97,10 @@ export function ProfileSection() {
       }
 
       setImage(url);
-      toast.success("Profielfoto gewijzigd");
+      toast.success(t("admin.messages.avatarChanged"));
     } catch (error) {
       console.error("Image upload error:", error);
-      toast.error("Kon profielfoto niet uploaden");
+      toast.error(t("admin.messages.avatarUploadFailed"));
     } finally {
       setUploadingImage(false);
       // Reset file input
@@ -111,7 +112,7 @@ export function ProfileSection() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      toast.error("Naam mag niet leeg zijn");
+      toast.error(t("admin.messages.nameRequired"));
       return;
     }
 
@@ -122,15 +123,15 @@ export function ProfileSection() {
       });
 
       if (error) {
-        toast.error(error.message || "Kon naam niet wijzigen");
+        toast.error(error.message || t("admin.messages.nameSaveFailed"));
         return;
       }
 
       setOriginalName(name.trim());
-      toast.success("Naam gewijzigd");
+      toast.success(t("admin.messages.nameChanged"));
     } catch (error) {
       console.error("Profile update error:", error);
-      toast.error("Er is een fout opgetreden");
+      toast.error(t("admin.messages.errorOccurred"));
     } finally {
       setSaving(false);
     }
@@ -142,11 +143,11 @@ export function ProfileSection() {
     <FieldSet>
       <FieldLegend className="flex items-center gap-1.5 font-semibold">
         <UserIcon className="size-4 opacity-80" />
-        Profiel
+        {t("admin.headings.profile")}
       </FieldLegend>
 
       <Field>
-        <FieldLabel>Profielfoto</FieldLabel>
+        <FieldLabel>{t("admin.labels.profilePhoto")}</FieldLabel>
         <div className="flex items-center gap-4">
           <div className="relative">
             <Avatar className="size-20">
@@ -154,7 +155,7 @@ export function ProfileSection() {
                 {image && (
                   <Image
                     src={image}
-                    alt={name || "Profielfoto"}
+                    alt={name || t("admin.labels.profilePhoto")}
                     width={80}
                     height={80}
                     className="object-cover"
@@ -187,14 +188,14 @@ export function ProfileSection() {
               disabled={uploadingImage}
             >
               <CameraIcon className="size-4" />
-              Foto wijzigen
+              {t("admin.buttons.changePhoto")}
             </Button>
           </div>
         </div>
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="name">Naam</FieldLabel>
+        <FieldLabel htmlFor="name">{t("admin.labels.name")}</FieldLabel>
         <Input
           id="name"
           type="text"
@@ -214,7 +215,7 @@ export function ProfileSection() {
         ) : (
           <CheckIcon className="size-4" />
         )}
-        Opslaan
+        {t("admin.buttons.save")}
       </Button>
     </FieldSet>
   );

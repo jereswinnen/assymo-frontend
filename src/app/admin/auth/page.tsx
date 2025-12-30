@@ -30,6 +30,7 @@ import {
   CheckIcon,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { t } from "@/config/strings";
 
 type AuthStep = "login" | "2fa" | "forgot-password" | "reset-email-sent";
 
@@ -82,7 +83,7 @@ export default function AdminLoginPage() {
     setError(null);
 
     if (!email || !password) {
-      setError("Vul alle velden in.");
+      setError(t("admin.messages.fillAllFieldsAuth"));
       return;
     }
 
@@ -100,11 +101,11 @@ export default function AdminLoginPage() {
           error.message?.toLowerCase().includes("invalid") ||
           error.message?.toLowerCase().includes("incorrect")
         ) {
-          setError("Ongeldige e-mail of wachtwoord.");
+          setError(t("admin.messages.invalidCredentials"));
         } else if (error.message?.toLowerCase().includes("not found")) {
-          setError("Geen account gevonden met dit e-mailadres.");
+          setError(t("admin.messages.accountNotFound"));
         } else {
-          setError(error.message || "Ongeldige inloggegevens.");
+          setError(error.message || t("admin.messages.invalidLogin"));
         }
         return;
       }
@@ -131,7 +132,7 @@ export default function AdminLoginPage() {
       router.refresh();
     } catch (err) {
       console.error("Login error:", err);
-      setError("Er is iets misgegaan. Probeer het opnieuw.");
+      setError(t("admin.messages.somethingWentWrong"));
     } finally {
       setLoading(false);
     }
@@ -142,7 +143,7 @@ export default function AdminLoginPage() {
     setError(null);
 
     if (otpCode.length !== 6) {
-      setError("Vul een 6-cijferige code in.");
+      setError(t("admin.messages.enter6DigitCode"));
       return;
     }
 
@@ -155,7 +156,7 @@ export default function AdminLoginPage() {
 
       if (error) {
         console.error("2FA verification error:", error);
-        setError("Ongeldige code. Probeer opnieuw.");
+        setError(t("admin.messages.invalidCode"));
         setOtpCode("");
         return;
       }
@@ -165,7 +166,7 @@ export default function AdminLoginPage() {
       router.refresh();
     } catch (err) {
       console.error("2FA verification error:", err);
-      setError("Er is iets misgegaan. Probeer het opnieuw.");
+      setError(t("admin.messages.somethingWentWrong"));
       setOtpCode("");
     } finally {
       setLoading(false);
@@ -177,12 +178,12 @@ export default function AdminLoginPage() {
     setError(null);
 
     if (!email) {
-      setError("Vul je e-mailadres in.");
+      setError(t("admin.messages.enterEmail"));
       return;
     }
 
     if (!EMAIL_REGEX.test(email)) {
-      setError("Vul een geldig e-mailadres in.");
+      setError(t("admin.messages.emailInvalid"));
       return;
     }
 
@@ -202,7 +203,7 @@ export default function AdminLoginPage() {
       }
     } catch (err) {
       console.error("Forgot password error:", err);
-      setError("Er is iets misgegaan. Probeer het opnieuw.");
+      setError(t("admin.messages.somethingWentWrong"));
     } finally {
       setLoading(false);
     }
@@ -220,7 +221,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-lg space-y-6">
         <header className="flex items-center gap-2">
           <MailboxIcon className="size-6 opacity-80" />
-          <p className="text-2xl font-medium">E-mail verstuurd</p>
+          <p className="text-2xl font-medium">{t("admin.headings.emailSent")}</p>
         </header>
 
         <div className="space-y-6">
@@ -231,7 +232,7 @@ export default function AdminLoginPage() {
           </p>
 
           <Button variant="secondary" onClick={resetToLogin}>
-            Terug naar inloggen
+            {t("admin.buttons.backToLogin")}
           </Button>
         </div>
       </div>
@@ -245,7 +246,7 @@ export default function AdminLoginPage() {
         <header className="flex items-center gap-2">
           <RotateCcwKeyIcon className="size-6 opacity-80" />
           <p className="text-2xl font-semibold tracking-tight">
-            Reset wachtwoord
+            {t("admin.headings.resetPassword")}
           </p>
         </header>
 
@@ -258,7 +259,7 @@ export default function AdminLoginPage() {
           )}
 
           <Field>
-            <FieldLabel htmlFor="email">E-mailadres</FieldLabel>
+            <FieldLabel htmlFor="email">{t("admin.labels.email")}</FieldLabel>
             <Input
               id="email"
               type="email"
@@ -267,12 +268,12 @@ export default function AdminLoginPage() {
                 setEmail(e.target.value);
                 setError(null);
               }}
-              placeholder="admin@assymo.be"
+              placeholder={t("admin.placeholders.emailExample")}
               disabled={loading}
               autoFocus
             />
             <FieldDescription>
-              We sturen je een e-mail met een link om je wachtwoord te resetten
+              {t("admin.dialogs.resetEmailHint")}
             </FieldDescription>
           </Field>
 
@@ -283,7 +284,7 @@ export default function AdminLoginPage() {
               onClick={resetToLogin}
               disabled={loading}
             >
-              Terug naar inloggen
+              {t("admin.buttons.backToLogin")}
             </Button>
 
             <Button
@@ -293,12 +294,12 @@ export default function AdminLoginPage() {
               {loading ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Versturen...
+                  {t("admin.loading.sending")}
                 </>
               ) : (
                 <>
                   <MailIcon className="size-4" />
-                  Link versturen
+                  {t("admin.buttons.sendLink")}
                 </>
               )}
             </Button>
@@ -314,7 +315,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-lg space-y-6">
         <header className="flex items-center gap-2">
           <ShieldEllipsisIcon className="size-6 opacity-80" />
-          <p className="text-2xl font-semibold tracking-tight">Verificatie</p>
+          <p className="text-2xl font-semibold tracking-tight">{t("admin.headings.verification")}</p>
         </header>
 
         <form onSubmit={handleVerify2FA} className="space-y-4">
@@ -349,7 +350,7 @@ export default function AdminLoginPage() {
           </InputOTP>
 
           <p className="text-muted-foreground text-sm">
-            Vul de 6-cijferige code uit je authenticator app in.
+            {t("admin.dialogs.enter2faCode")}
           </p>
         </form>
 
@@ -360,19 +361,19 @@ export default function AdminLoginPage() {
             onClick={resetToLogin}
             disabled={loading}
           >
-            Terug naar inloggen
+            {t("admin.buttons.backToLogin")}
           </Button>
 
           <Button type="submit" disabled={loading || otpCode.length !== 6}>
             {loading ? (
               <>
                 <Loader2Icon className="size-4 animate-spin" />
-                Verifiëren...
+                {t("admin.loading.verifying")}
               </>
             ) : (
               <>
                 <CheckIcon className="size-4" />
-                Verifiëren
+                {t("admin.buttons.verify")}
               </>
             )}
           </Button>
@@ -386,7 +387,7 @@ export default function AdminLoginPage() {
     <div className="w-full max-w-lg space-y-6">
       <header className="flex items-center gap-2">
         <LockKeyholeIcon className="size-6 opacity-80" />
-        <p className="text-2xl font-semibold tracking-tight">Inloggen</p>
+        <p className="text-2xl font-semibold tracking-tight">{t("admin.headings.login")}</p>
       </header>
 
       <form onSubmit={handleLogin} className="space-y-6">
@@ -400,7 +401,7 @@ export default function AdminLoginPage() {
         <FieldSet>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="email">E-mailadres</FieldLabel>
+              <FieldLabel htmlFor="email">{t("admin.labels.email")}</FieldLabel>
               <Input
                 id="email"
                 type="email"
@@ -409,7 +410,7 @@ export default function AdminLoginPage() {
                   setEmail(e.target.value);
                   setError(null);
                 }}
-                placeholder="admin@assymo.be"
+                placeholder={t("admin.placeholders.emailExample")}
                 autoComplete="username webauthn"
                 disabled={loading}
                 autoFocus
@@ -417,7 +418,7 @@ export default function AdminLoginPage() {
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="password">Wachtwoord</FieldLabel>
+              <FieldLabel htmlFor="password">{t("admin.labels.password")}</FieldLabel>
               <Input
                 id="password"
                 type="password"
@@ -442,19 +443,19 @@ export default function AdminLoginPage() {
               setError(null);
             }}
           >
-            Wachtwoord vergeten?
+            {t("admin.buttons.forgotPassword")}
           </Button>
 
           <Button type="submit" disabled={loading || !email || !password}>
             {loading ? (
               <>
                 <Loader2Icon className="size-4 animate-spin" />
-                Laden...
+                {t("admin.loading.default")}
               </>
             ) : (
               <>
                 <LogInIcon className="size-4" />
-                Inloggen
+                {t("admin.buttons.login")}
               </>
             )}
           </Button>

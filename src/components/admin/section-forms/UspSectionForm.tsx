@@ -9,6 +9,7 @@ import { IconSelect } from "@/components/admin/IconSelect";
 import { Separator } from "@/components/ui/separator";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { UspSectionSection, UspItem } from "@/types/sections";
+import { t } from "@/config/strings";
 
 interface UspSectionFormProps {
   section: UspSectionSection;
@@ -49,7 +50,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
           id="heading"
           value={section.heading || ""}
           onChange={(e) => onChange({ ...section, heading: e.target.value })}
-          placeholder="Waarom kiezen voor ons?"
+          placeholder={t("admin.placeholders.uspHeading")}
         />
       </Field>
 
@@ -84,7 +85,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                       onChange={(e) =>
                         updateUsp(index, { title: e.target.value })
                       }
-                      placeholder="Titel"
+                      placeholder={t("admin.placeholders.title")}
                     />
                   </Field>
                   <Field>
@@ -102,7 +103,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                   label="Tekst"
                   value={usp.text || ""}
                   onChange={(value) => updateUsp(index, { text: value })}
-                  placeholder="Beschrijving"
+                  placeholder={t("admin.placeholders.description")}
                 />
 
                 <Separator />
@@ -132,7 +133,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                             link: { ...usp.link, label: e.target.value },
                           })
                         }
-                        placeholder="Meer info"
+                        placeholder={t("admin.placeholders.moreInfo")}
                       />
                     </Field>
                     <Field>
@@ -144,7 +145,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                             link: { ...usp.link, url: e.target.value },
                           })
                         }
-                        placeholder="/contact"
+                        placeholder={t("admin.placeholders.contactUrl")}
                       />
                       <FieldDescription>
                         {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}

@@ -35,6 +35,7 @@ import {
 import { toast } from "sonner";
 import type { DateOverride } from "@/types/appointments";
 import { DateOverrideCreateSheet } from "@/app/admin/appointments/sheets/DateOverrideCreateSheet";
+import { t } from "@/config/strings";
 
 interface DateOverridesProps {
   createDialogOpen: boolean;
@@ -63,7 +64,7 @@ export function DateOverrides({
       setOverrides(data.overrides || []);
     } catch (error) {
       console.error("Failed to load overrides:", error);
-      toast.error("Kon overrides niet laden");
+      toast.error(t("admin.messages.overridesLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -82,14 +83,14 @@ export function DateOverrides({
         throw new Error(data.error || "Failed to delete");
       }
 
-      toast.success("Uitzondering verwijderd");
+      toast.success(t("admin.messages.overrideDeleted"));
       loadOverrides();
     } catch (error) {
       console.error("Failed to delete override:", error);
       toast.error(
         error instanceof Error
           ? error.message
-          : "Kon uitzondering niet verwijderen",
+          : t("admin.misc.overrideCouldNotDelete"),
       );
     } finally {
       setDeleting(null);
@@ -156,7 +157,7 @@ export function DateOverrides({
     <div className="space-y-6">
       {overrides.length === 0 ? (
         <div className="text-muted-foreground text-center text-sm py-8">
-          Geen uitzonderingen
+          {t("admin.misc.noExceptions")}
         </div>
       ) : (
         <div className="space-y-6">
@@ -166,9 +167,9 @@ export function DateOverrides({
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10"></TableHead>
-                  <TableHead>Datum</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Reden</TableHead>
+                  <TableHead>{t("admin.labels.date")}</TableHead>
+                  <TableHead>{t("admin.labels.status")}</TableHead>
+                  <TableHead>{t("admin.labels.reason")}</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -183,7 +184,7 @@ export function DateOverrides({
                               <GlobeIcon className="size-4 opacity-80" />
                             </TooltipTrigger>
                             <TooltipContent>
-                              Zichtbaar op website
+                              {t("admin.misc.visibleOnWebsite")}
                             </TooltipContent>
                           </Tooltip>
                         )}
@@ -198,7 +199,7 @@ export function DateOverrides({
                             className="w-fit text-xs gap-1"
                           >
                             <RefreshCwIcon className="size-3" />
-                            Jaarlijks
+                            {t("admin.misc.yearly")}
                           </Badge>
                         )}
                       </div>
@@ -210,7 +211,7 @@ export function DateOverrides({
                         }
                       >
                         {override.is_closed
-                          ? "Gesloten"
+                          ? t("admin.empty.closed")
                           : `${override.open_time?.substring(0, 5)} - ${override.close_time?.substring(0, 5)}`}
                       </Badge>
                     </TableCell>
@@ -242,14 +243,14 @@ export function DateOverrides({
           {pastOverrides.length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                Verlopen
+                {t("admin.misc.expired")}
               </h4>
               <Table className="opacity-60">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Datum</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Reden</TableHead>
+                    <TableHead>{t("admin.labels.date")}</TableHead>
+                    <TableHead>{t("admin.labels.status")}</TableHead>
+                    <TableHead>{t("admin.labels.reason")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -258,7 +259,7 @@ export function DateOverrides({
                       <TableCell>{formatDateRange(override)}</TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {override.is_closed ? "Gesloten" : "Aangepast"}
+                          {override.is_closed ? t("admin.empty.closed") : t("admin.misc.customHours")}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
@@ -287,15 +288,14 @@ export function DateOverrides({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Uitzondering verwijderen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.misc.deleteOverrideQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je deze uitzondering wilt verwijderen? Dit kan
-              niet ongedaan worden gemaakt.
+              {t("admin.dialogs.confirmDelete")} {t("admin.dialogs.cannotUndo")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting !== null}>
-              Annuleren
+              {t("admin.buttons.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -305,7 +305,7 @@ export function DateOverrides({
               {deleting !== null && (
                 <Loader2Icon className="size-4 animate-spin" />
               )}
-              Verwijderen
+              {t("admin.buttons.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -45,6 +45,7 @@ import {
 import { Section, getSectionLabel } from "@/types/sections";
 import { AddSectionButton } from "./AddSectionButton";
 import { SectionEditSheet } from "@/app/admin/content/sheets/SectionEditSheet";
+import { t } from "@/config/strings";
 
 interface SortableSectionRowProps {
   section: Section;
@@ -184,9 +185,9 @@ export function SectionList({
             <EmptyMedia variant="icon">
               <BlocksIcon />
             </EmptyMedia>
-            <EmptyTitle>Geen secties</EmptyTitle>
+            <EmptyTitle>{t("admin.misc.noSections")}</EmptyTitle>
             <EmptyDescription>
-              Voeg secties toe om de inhoud van deze pagina op te bouwen.
+              {t("admin.messages.addSections")}
             </EmptyDescription>
           </EmptyHeader>
           {showAddButton && <AddSectionButton onAdd={handleAdd} />}
@@ -238,20 +239,18 @@ export function SectionList({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Sectie verwijderen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.headings.deleteSectionQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je de{" "}
-              {sectionToDelete && getSectionLabel(sectionToDelete._type)} sectie
-              wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+              {t("admin.misc.deleteSectionDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogCancel>{t("admin.buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Verwijderen
+              {t("admin.buttons.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

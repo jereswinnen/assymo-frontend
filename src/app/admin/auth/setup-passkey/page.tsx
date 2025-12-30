@@ -11,6 +11,7 @@ import {
   CheckIcon,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { t } from "@/config/strings";
 
 export default function SetupPasskeyPage() {
   const [loading, setLoading] = useState(true);
@@ -57,7 +58,7 @@ export default function SetupPasskeyPage() {
         console.error("Add passkey error:", error);
         // Don't show error for user cancellation
         if (!error.message?.toLowerCase().includes("cancel")) {
-          setError("Kon passkey niet toevoegen. Probeer opnieuw.");
+          setError(t("admin.dialogs.couldPasskeyNotAdd"));
         }
         return;
       }
@@ -70,7 +71,7 @@ export default function SetupPasskeyPage() {
       console.error("Add passkey error:", err);
       // Don't show error for AbortError (user cancelled)
       if (err instanceof Error && err.name !== "AbortError") {
-        setError("Kon passkey niet toevoegen. Probeer opnieuw.");
+        setError(t("admin.dialogs.couldPasskeyNotAdd"));
       }
     } finally {
       setAdding(false);
@@ -98,12 +99,11 @@ export default function SetupPasskeyPage() {
         <div className="flex items-center gap-2">
           <FingerprintIcon className="size-6 opacity-80" />
           <p className="text-2xl font-semibold tracking-tight">
-            Passkey toevoegen
+            {t("admin.dialogs.addPasskey")}
           </p>
         </div>
         <p className="text-muted-foreground text-sm">
-          Voeg een passkey toe om in te loggen met FaceID, TouchID of de
-          toegangscode van je toestel.
+          {t("admin.dialogs.addPasskeyDesc")}
         </p>
       </header>
 
@@ -116,19 +116,19 @@ export default function SetupPasskeyPage() {
 
       <div className="flex items-center justify-between">
         <Button variant="secondary" onClick={handleSkip} disabled={adding}>
-          Overslaan
+          {t("admin.buttons.skip")}
         </Button>
 
         <Button onClick={handleAddPasskey} disabled={adding}>
           {adding ? (
             <>
               <Loader2Icon className="size-4 animate-spin" />
-              Laden...
+              {t("admin.loading.default")}
             </>
           ) : (
             <>
               <CheckIcon className="size-4" />
-              Bewaren
+              {t("admin.buttons.save")}
             </>
           )}
         </Button>

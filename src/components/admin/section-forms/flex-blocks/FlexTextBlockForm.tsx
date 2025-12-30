@@ -14,6 +14,7 @@ import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { IconSelect } from "@/components/admin/IconSelect";
 import { Separator } from "@/components/ui/separator";
 import { FlexTextBlock } from "@/types/sections";
+import { t } from "@/config/strings";
 
 interface FlexTextBlockFormProps {
   block: FlexTextBlock;
@@ -29,7 +30,7 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
           <Input
             value={block.heading || ""}
             onChange={(e) => onChange({ ...block, heading: e.target.value })}
-            placeholder="Optionele titel"
+            placeholder={t("admin.placeholders.optionalTitle")}
           />
         </Field>
         <Field>

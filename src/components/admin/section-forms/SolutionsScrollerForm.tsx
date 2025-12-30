@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/field";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { SolutionsScrollerSection } from "@/types/sections";
+import { t } from "@/config/strings";
 
 interface SolutionsScrollerFormProps {
   section: SolutionsScrollerSection;
@@ -27,14 +28,14 @@ export function SolutionsScrollerForm({
           id="heading"
           value={section.heading || ""}
           onChange={(e) => onChange({ ...section, heading: e.target.value })}
-          placeholder="Onze realisaties"
+          placeholder={t("admin.placeholders.solutionsHeading")}
         />
       </Field>
       <RichTextEditor
         label="Subtitel"
         value={section.subtitle || ""}
         onChange={(value) => onChange({ ...section, subtitle: value })}
-        placeholder="Bekijk onze projecten"
+        placeholder={t("admin.placeholders.solutionsSubtitle")}
       />
     </FieldGroup>
   );

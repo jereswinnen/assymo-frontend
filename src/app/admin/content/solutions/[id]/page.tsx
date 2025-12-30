@@ -42,6 +42,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { t } from "@/config/strings";
 
 interface Filter {
   id: string;
@@ -153,7 +154,7 @@ export default function SolutionEditorPage({
 
       if (!solutionRes.ok) {
         if (solutionRes.status === 404) {
-          toast.error("Realisatie niet gevonden");
+          toast.error(t("admin.messages.solutionNotFound"));
           router.push("/admin/content/solutions");
           return;
         }
@@ -174,7 +175,7 @@ export default function SolutionEditorPage({
       setSections(solutionData.sections || []);
       setSelectedFilterIds(new Set(solutionData.filters.map((f) => f.id)));
     } catch {
-      toast.error("Kon gegevens niet ophalen");
+      toast.error(t("admin.messages.dataLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -206,7 +207,7 @@ export default function SolutionEditorPage({
 
   const saveSolution = useCallback(async () => {
     if (!name.trim() || !slug.trim()) {
-      toast.error("Naam en slug zijn verplicht");
+      toast.error(t("admin.messages.nameSlugRequired"));
       return;
     }
 
@@ -234,10 +235,10 @@ export default function SolutionEditorPage({
       setSolution(updatedSolution);
       setSections(updatedSolution.sections || []);
       setHasChanges(false);
-      toast.success("Realisatie opgeslagen");
+      toast.success(t("admin.messages.solutionSaved"));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Kon realisatie niet opslaan",
+        error instanceof Error ? error.message : t("admin.misc.solutionCouldNotSave"),
       );
     } finally {
       setSaving(false);
@@ -253,10 +254,10 @@ export default function SolutionEditorPage({
 
       if (!response.ok) throw new Error("Failed to delete");
 
-      toast.success("Realisatie verwijderd");
+      toast.success(t("admin.messages.solutionDeleted"));
       router.push("/admin/content/solutions");
     } catch {
-      toast.error("Kon realisatie niet verwijderen");
+      toast.error(t("admin.messages.solutionDeleteFailed"));
     } finally {
       setDeleting(false);
     }
@@ -276,7 +277,7 @@ export default function SolutionEditorPage({
           ) : (
             <CheckIcon className="size-4" />
           )}
-          Opslaan
+          {t("admin.buttons.save")}
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -300,7 +301,7 @@ export default function SolutionEditorPage({
               onClick={() => setShowDeleteDialog(true)}
             >
               <Trash2Icon className="size-4" />
-              Verwijderen
+              {t("admin.buttons.delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -328,7 +329,7 @@ export default function SolutionEditorPage({
         {/* Main content - Sections */}
         <div className="space-y-4 md:col-span-2">
           <div className="flex items-center justify-between">
-            <h3 className="mb-0! text-sm font-medium">Secties</h3>
+            <h3 className="mb-0! text-sm font-medium">{t("admin.misc.sections")}</h3>
             <AddSectionButton
               onAdd={(section) => setSections([...sections, section])}
             />
@@ -349,21 +350,21 @@ export default function SolutionEditorPage({
             {/* Algemeen */}
             <FieldSet>
               <Field>
-                <FieldLabel htmlFor="name">Naam</FieldLabel>
+                <FieldLabel htmlFor="name">{t("admin.labels.name")}</FieldLabel>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  placeholder="Realisatie naam"
+                  placeholder={t("admin.placeholders.solutionName")}
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="subtitle">Subtitel</FieldLabel>
+                <FieldLabel htmlFor="subtitle">{t("admin.labels.subtitle")}</FieldLabel>
                 <Input
                   id="subtitle"
                   value={subtitle}
                   onChange={(e) => setSubtitle(e.target.value)}
-                  placeholder="Optionele subtitel"
+                  placeholder={t("admin.placeholders.optionalSubtitle")}
                 />
               </Field>
               <Field>
@@ -386,7 +387,7 @@ export default function SolutionEditorPage({
             {filterCategories.length > 0 && (
               <>
                 <div className="space-y-4">
-                  <FieldLabel>Filters</FieldLabel>
+                  <FieldLabel>{t("admin.labels.filters")}</FieldLabel>
                   {filterCategories.map((category) => (
                     <div key={category.id}>
                       <p className="text-sm font-medium mb-2">
@@ -394,7 +395,7 @@ export default function SolutionEditorPage({
                       </p>
                       {category.filters.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
-                          Geen filters in deze categorie
+                          {t("admin.misc.noFiltersInCategory")}
                         </p>
                       ) : (
                         <div className="space-y-2">
@@ -421,7 +422,7 @@ export default function SolutionEditorPage({
 
             {/* Header image */}
             <Field>
-              <FieldLabel>Header afbeelding</FieldLabel>
+              <FieldLabel>{t("admin.misc.headerImage")}</FieldLabel>
               <ImageUpload value={headerImage} onChange={setHeaderImage} />
             </Field>
 
@@ -430,7 +431,7 @@ export default function SolutionEditorPage({
             {/* Meta info */}
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Aangemaakt</span>
+                <span className="text-muted-foreground">{t("admin.misc.created")}</span>
                 <span>
                   {new Date(solution.created_at).toLocaleDateString("nl-NL", {
                     year: "numeric",
@@ -440,7 +441,7 @@ export default function SolutionEditorPage({
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Laatst bewerkt</span>
+                <span className="text-muted-foreground">{t("admin.misc.lastEdited")}</span>
                 <span>
                   {new Date(solution.updated_at).toLocaleDateString("nl-NL", {
                     year: "numeric",
@@ -460,14 +461,13 @@ export default function SolutionEditorPage({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Realisatie verwijderen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.misc.deleteSolutionQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je &quot;{solution.name}&quot; wilt verwijderen?
-              Dit kan niet ongedaan worden gemaakt.
+              {t("admin.misc.deleteSolutionDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("admin.buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={deleteSolution}
               disabled={deleting}
@@ -476,10 +476,10 @@ export default function SolutionEditorPage({
               {deleting ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Verwijderen...
+                  {t("admin.loading.deleting")}
                 </>
               ) : (
-                "Verwijderen"
+                t("admin.buttons.delete")
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

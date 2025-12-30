@@ -55,6 +55,7 @@ import {
 } from "lucide-react";
 import { formatFileSize, formatDateShort } from "@/lib/format";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { t } from "@/config/strings";
 import { CreateFolderDialog } from "@/components/admin/media/CreateFolderDialog";
 import { RenameFolderDialog } from "@/components/admin/media/RenameFolderDialog";
 import { FolderThumbnail } from "@/components/admin/media/FolderThumbnail";
@@ -199,7 +200,7 @@ function MediaPageContent() {
         setMedia(mediaData);
       }
     } catch {
-      toast.error("Kon media niet ophalen");
+      toast.error(t("admin.messages.mediaLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -394,11 +395,11 @@ function MediaPageContent() {
           setFolders(await foldersRes.json());
         }
 
-        toast.success("Afbeelding verplaatst");
+        toast.success(t("admin.messages.imageMoved"));
       } catch {
         // Revert on error
         fetchData();
-        toast.error("Kon afbeelding niet verplaatsen");
+        toast.error(t("admin.messages.imageMoveFailed"));
       }
     }
   };
@@ -421,17 +422,17 @@ function MediaPageContent() {
       setDeleteTarget(null);
 
       if (!response.ok) {
-        toast.error(data.error || "Kon afbeelding niet verwijderen");
+        toast.error(data.error || t("admin.messages.imageDeleteFailed"));
         return;
       }
 
       setMedia((prev) => prev.filter((m) => m.url !== deleteTarget.url));
-      toast.success("Afbeelding verwijderd");
+      toast.success(t("admin.messages.imageDeleted"));
     } catch (error) {
       console.error("Delete failed:", error);
       setDeleting(false);
       setDeleteTarget(null);
-      toast.error("Kon afbeelding niet verwijderen");
+      toast.error(t("admin.messages.imageDeleteFailed"));
     }
   };
 
@@ -454,7 +455,7 @@ function MediaPageContent() {
         siteId: folder.siteId || null,
       },
     ]);
-    toast.success("Map aangemaakt");
+    toast.success(t("admin.messages.folderCreated"));
   };
 
   const handleFolderRenamed = (newName: string) => {
@@ -464,7 +465,7 @@ function MediaPageContent() {
         `/admin/content/media?folder=${currentFolderId}&name=${encodeURIComponent(newName)}`
       );
     }
-    toast.success("Map hernoemd");
+    toast.success(t("admin.messages.folderRenamed"));
   };
 
   const handleDeleteFolder = async () => {
@@ -482,11 +483,11 @@ function MediaPageContent() {
         throw new Error(data.error || "Failed to delete folder");
       }
 
-      toast.success("Map verwijderd");
+      toast.success(t("admin.messages.folderDeleted"));
       router.push("/admin/content/media");
     } catch (error) {
       console.error("Delete folder failed:", error);
-      toast.error("Kon map niet verwijderen");
+      toast.error(t("admin.messages.folderDeleteFailed"));
     } finally {
       setDeletingFolder(false);
       setDeleteFolderOpen(false);
@@ -519,7 +520,7 @@ function MediaPageContent() {
             onClick={() => setCreateFolderOpen(true)}
           >
             <FolderPlusIcon className="size-4" />
-            Nieuwe map
+            {t("admin.headings.newFolder")}
           </Button>
         )}
         <label>
@@ -528,12 +529,12 @@ function MediaPageContent() {
               {uploading ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Uploaden...
+                  {t("admin.loading.uploading")}
                 </>
               ) : (
                 <>
                   <UploadIcon className="size-4" />
-                  Upload
+                  {t("admin.buttons.upload")}
                 </>
               )}
             </span>
@@ -557,7 +558,7 @@ function MediaPageContent() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setRenameFolderOpen(true)}>
                 <PencilIcon />
-                Hernoemen
+                {t("admin.buttons.edit")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -565,7 +566,7 @@ function MediaPageContent() {
                 onClick={() => setDeleteFolderOpen(true)}
               >
                 <Trash2Icon />
-                Verwijderen
+                {t("admin.buttons.delete")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -587,7 +588,7 @@ function MediaPageContent() {
         <div className="relative max-w-sm">
           <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Zoek op bestandsnaam..."
+            placeholder={t("admin.placeholders.searchFilename")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -606,16 +607,16 @@ function MediaPageContent() {
               </EmptyMedia>
               <EmptyTitle>
                 {searchQuery
-                  ? "Geen resultaten gevonden"
+                  ? t("admin.empty.noResults")
                   : currentFolderId
-                    ? "Deze map is leeg"
-                    : "Nog geen afbeeldingen"}
+                    ? t("admin.empty.folderEmpty")
+                    : t("admin.misc.noImagesYet")}
               </EmptyTitle>
               {!searchQuery && (
                 <EmptyDescription>
                   {currentFolderId
-                    ? "Upload afbeeldingen om ze aan deze map toe te voegen."
-                    : "Upload je eerste afbeelding om te beginnen."}
+                    ? t("admin.misc.folderEmptyUpload")
+                    : t("admin.misc.uploadFirstImage")}
                 </EmptyDescription>
               )}
             </EmptyHeader>
@@ -625,8 +626,8 @@ function MediaPageContent() {
                   <span className="cursor-pointer">
                     <UploadIcon className="size-4" />
                     {currentFolderId
-                      ? "Afbeelding toevoegen"
-                      : "Eerste afbeelding uploaden"}
+                      ? t("admin.misc.addImageToFolder")
+                      : t("admin.misc.firstImageUpload")}
                   </span>
                 </Button>
                 <input
@@ -674,7 +675,7 @@ function MediaPageContent() {
                     {!item.altText && (
                       <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
                         <Loader2Icon className="size-3 animate-spin" />
-                        <span>Alt-tekst</span>
+                        <span>{t("admin.misc.altTextLabel")}</span>
                       </div>
                     )}
                     {/* Delete button in top-right corner */}
@@ -687,7 +688,7 @@ function MediaPageContent() {
                           e.stopPropagation();
                           setDeleteTarget(item);
                         }}
-                        title="Verwijderen"
+                        title={t("admin.buttons.delete")}
                       >
                         <Trash2Icon className="size-4" />
                       </Button>
@@ -732,7 +733,7 @@ function MediaPageContent() {
             <div className="flex flex-col items-center gap-1 animate-in zoom-in-95 duration-150">
               <CloudUploadIcon className="size-6 animate-pulse" />
               <p className="text-sm text-muted-foreground">
-                Laat los om te uploaden
+                {t("admin.misc.releaseToUpload")}
                 {currentFolderName && ` in "${currentFolderName}"`}...
               </p>
             </div>
@@ -746,7 +747,7 @@ function MediaPageContent() {
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Afbeelding verwijderen?</AlertDialogTitle>
+              <AlertDialogTitle>{t("admin.misc.deleteImageQuestion")}</AlertDialogTitle>
               <AlertDialogDescription>
                 Weet je zeker dat je &quot;
                 {deleteTarget?.displayName || deleteTarget?.pathname}&quot; wilt
@@ -755,7 +756,7 @@ function MediaPageContent() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={deleting}>
-                Annuleren
+                {t("admin.buttons.cancel")}
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={deleteMedia}
@@ -765,10 +766,10 @@ function MediaPageContent() {
                 {deleting ? (
                   <>
                     <Loader2Icon className="size-4 animate-spin" />
-                    Verwijderen...
+                    {t("admin.loading.deleting")}
                   </>
                 ) : (
-                  "Verwijderen"
+                  t("admin.buttons.delete")
                 )}
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -798,7 +799,7 @@ function MediaPageContent() {
         <AlertDialog open={deleteFolderOpen} onOpenChange={setDeleteFolderOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Map verwijderen?</AlertDialogTitle>
+              <AlertDialogTitle>{t("admin.misc.deleteFolderQuestion")}</AlertDialogTitle>
               <AlertDialogDescription>
                 Weet je zeker dat je &quot;{currentFolderName}&quot; wilt
                 verwijderen? De afbeeldingen in deze map worden niet verwijderd,
@@ -807,7 +808,7 @@ function MediaPageContent() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={deletingFolder}>
-                Annuleren
+                {t("admin.buttons.cancel")}
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteFolder}
@@ -817,10 +818,10 @@ function MediaPageContent() {
                 {deletingFolder ? (
                   <>
                     <Loader2Icon className="size-4 animate-spin" />
-                    Verwijderen...
+                    {t("admin.loading.deleting")}
                   </>
                 ) : (
-                  "Verwijderen"
+                  t("admin.buttons.delete")
                 )}
               </AlertDialogAction>
             </AlertDialogFooter>

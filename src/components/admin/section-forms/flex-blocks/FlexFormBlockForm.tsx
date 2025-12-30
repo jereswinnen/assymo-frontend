@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/field";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { FlexFormBlock } from "@/types/sections";
+import { t } from "@/config/strings";
 
 interface FlexFormBlockFormProps {
   block: FlexFormBlock;
@@ -27,7 +28,7 @@ export function FlexFormBlockForm({ block, onChange }: FlexFormBlockFormProps) {
         <Input
           value={block.title || ""}
           onChange={(e) => onChange({ ...block, title: e.target.value })}
-          placeholder="Formulier titel"
+          placeholder={t("admin.placeholders.formTitle")}
         />
       </Field>
 
@@ -35,7 +36,7 @@ export function FlexFormBlockForm({ block, onChange }: FlexFormBlockFormProps) {
         label="Subtitel"
         value={block.subtitle || ""}
         onChange={(value) => onChange({ ...block, subtitle: value })}
-        placeholder="Optioneel"
+        placeholder={t("admin.placeholders.optional")}
       />
     </FieldGroup>
   );

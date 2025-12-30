@@ -51,6 +51,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { t } from "@/config/strings";
 
 interface Solution {
   id: string;
@@ -164,7 +165,7 @@ export function NavLinkEditSheet({
 
   const handleSaveLink = async () => {
     if (!linkTitle.trim()) {
-      toast.error("Titel is verplicht");
+      toast.error(t("admin.messages.titleRequired"));
       return;
     }
 
@@ -186,7 +187,7 @@ export function NavLinkEditSheet({
           },
         );
         if (!response.ok) throw new Error("Failed to update");
-        toast.success("Link bijgewerkt");
+        toast.success(t("admin.messages.linkUpdated"));
       } else {
         if (!siteId) return;
         const response = await fetch("/api/admin/content/navigation", {
@@ -201,14 +202,14 @@ export function NavLinkEditSheet({
           }),
         });
         if (!response.ok) throw new Error("Failed to create");
-        toast.success("Link aangemaakt");
+        toast.success(t("admin.messages.linkCreated"));
       }
 
       onOpenChange(false);
       onSaved();
     } catch (error) {
       console.error("Failed to save link:", error);
-      toast.error("Kon link niet opslaan");
+      toast.error(t("admin.messages.linkSaveFailed"));
     } finally {
       setSavingLink(false);
     }
@@ -228,7 +229,7 @@ export function NavLinkEditSheet({
         },
       );
       if (!response.ok) throw new Error("Failed to add");
-      toast.success("Subitem toegevoegd");
+      toast.success(t("admin.messages.subitemAdded"));
 
       // Refresh and update editing link
       const linksResponse = await fetch(
@@ -246,7 +247,7 @@ export function NavLinkEditSheet({
       }
     } catch (error) {
       console.error("Failed to add subitem:", error);
-      toast.error("Kon subitem niet toevoegen");
+      toast.error(t("admin.messages.subitemAddFailed"));
     }
   };
 
@@ -259,7 +260,7 @@ export function NavLinkEditSheet({
         { method: "DELETE" },
       );
       if (!response.ok) throw new Error("Failed to delete");
-      toast.success("Subitem verwijderd");
+      toast.success(t("admin.messages.subitemDeleted"));
 
       // Update local state
       const updatedLink = {
@@ -270,7 +271,7 @@ export function NavLinkEditSheet({
       onLinkUpdated(updatedLink);
     } catch (error) {
       console.error("Failed to delete subitem:", error);
-      toast.error("Kon subitem niet verwijderen");
+      toast.error(t("admin.messages.subitemDeleteFailed"));
     }
   };
 
@@ -294,7 +295,7 @@ export function NavLinkEditSheet({
       });
     } catch (error) {
       console.error("Failed to reorder subitems:", error);
-      toast.error("Kon volgorde niet opslaan");
+      toast.error(t("admin.messages.orderSaveFailed"));
     }
   };
 
@@ -327,12 +328,12 @@ export function NavLinkEditSheet({
       >
         <SheetHeader className="px-0">
           <SheetTitle>
-            {editingLink ? "Link bewerken" : "Nieuwe link"}
+            {editingLink ? t("admin.headings.editLink") : t("admin.headings.newLink")}
           </SheetTitle>
           <SheetDescription>
             {editingLink
-              ? "Bewerk de navigatie link en bijbehorende subitems."
-              : "Maak een nieuwe navigatie link aan."}
+              ? t("admin.dialogs.editLinkDesc")
+              : t("admin.dialogs.newLinkDesc")}
           </SheetDescription>
         </SheetHeader>
 
@@ -349,7 +350,7 @@ export function NavLinkEditSheet({
                     setLinkSlug(slugify(e.target.value));
                   }
                 }}
-                placeholder="Bijv. Producten"
+                placeholder={t("admin.placeholders.linkLabel")}
               />
             </Field>
 
@@ -359,7 +360,7 @@ export function NavLinkEditSheet({
                 id="link-slug"
                 value={linkSlug}
                 onChange={(e) => setLinkSlug(e.target.value)}
-                placeholder="bijv-producten"
+                placeholder={t("admin.placeholders.linkSlug")}
               />
               <FieldDescription>
                 {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}/
@@ -373,7 +374,7 @@ export function NavLinkEditSheet({
                 id="link-submenu"
                 value={linkSubmenuHeading}
                 onChange={(e) => setLinkSubmenuHeading(e.target.value)}
-                placeholder="Ontdek"
+                placeholder={t("admin.placeholders.submenuHeading")}
               />
               <FieldDescription>
                 Enkel invullen indien er subitems aanwezig zijn voor deze link.
@@ -391,7 +392,7 @@ export function NavLinkEditSheet({
               {availableSolutions.length > 0 && (
                 <Select onValueChange={handleAddSubitem} value="">
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Voeg solution toe..." />
+                    <SelectValue placeholder={t("admin.placeholders.addSolution")} />
                   </SelectTrigger>
                   <SelectContent>
                     {availableSolutions.map((solution) => (
@@ -405,7 +406,7 @@ export function NavLinkEditSheet({
 
               {editingLink.sub_items.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-2">
-                  Nog geen subitems
+                  {t("admin.misc.noSubitemsYet")}
                 </p>
               ) : (
                 <DndContext
@@ -438,12 +439,12 @@ export function NavLinkEditSheet({
             {savingLink ? (
               <>
                 <Loader2Icon className="size-4 animate-spin" />
-                Opslaan...
+                {t("admin.loading.saving")}
               </>
             ) : (
               <>
                 <CheckIcon className="size-4" />
-                {editingLink ? "Opslaan" : "Aanmaken"}
+                {editingLink ? t("admin.buttons.save") : t("admin.buttons.create")}
               </>
             )}
           </Button>

@@ -30,6 +30,7 @@ import {
 import { CheckIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import type { Role } from "@/lib/permissions/types";
+import { t } from "@/config/strings";
 
 interface Site {
   id: string;
@@ -76,7 +77,7 @@ export function UserCreateSheet({
 
   const handleCreate = async () => {
     if (!formData.name.trim() || !formData.email.trim()) {
-      toast.error("Naam en email zijn verplicht");
+      toast.error(t("admin.messages.nameEmailRequired"));
       return;
     }
 
@@ -93,13 +94,13 @@ export function UserCreateSheet({
         throw new Error(data.error || "Failed to create user");
       }
 
-      toast.success("Gebruiker aangemaakt.");
+      toast.success(t("admin.messages.userCreated"));
       handleOpenChange(false);
       onCreated();
     } catch (error) {
       console.error("Failed to create user:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon gebruiker niet aanmaken",
+        error instanceof Error ? error.message : t("admin.messages.somethingWentWrong"),
       );
     } finally {
       setSaving(false);
@@ -121,9 +122,9 @@ export function UserCreateSheet({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className="flex flex-col overflow-hidden w-full md:max-w-xl">
         <SheetHeader>
-          <SheetTitle>Nieuwe gebruiker</SheetTitle>
+          <SheetTitle>{t("admin.headings.newUser")}</SheetTitle>
           <SheetDescription>
-            De gebruiker ontvangt een email om een wachtwoord in te stellen.
+            {t("admin.dialogs.userWillReceiveEmail")}
           </SheetDescription>
         </SheetHeader>
 
@@ -131,19 +132,19 @@ export function UserCreateSheet({
           <FieldGroup>
             <FieldSet>
               <Field>
-                <FieldLabel htmlFor="user-name">Naam</FieldLabel>
+                <FieldLabel htmlFor="user-name">{t("admin.labels.name")}</FieldLabel>
                 <Input
                   id="user-name"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, name: e.target.value }))
                   }
-                  placeholder="Jan Janssen"
+                  placeholder={t("admin.placeholders.userName")}
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="user-email">Email</FieldLabel>
+                <FieldLabel htmlFor="user-email">{t("admin.labels.email")}</FieldLabel>
                 <Input
                   id="user-email"
                   type="email"
@@ -151,12 +152,12 @@ export function UserCreateSheet({
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, email: e.target.value }))
                   }
-                  placeholder="jan@example.com"
+                  placeholder={t("admin.placeholders.userEmail")}
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="user-role">Rol</FieldLabel>
+                <FieldLabel htmlFor="user-role">{t("admin.labels.role")}</FieldLabel>
                 <Select
                   value={formData.role}
                   onValueChange={(value) =>
@@ -189,7 +190,7 @@ export function UserCreateSheet({
 
             <FieldSet>
               <Field>
-                <FieldLabel>Toegewezen sites</FieldLabel>
+                <FieldLabel>{t("admin.misc.sites")}</FieldLabel>
                 <FieldDescription>
                   Content features zijn beperkt tot de toegewezen sites
                 </FieldDescription>
@@ -213,7 +214,7 @@ export function UserCreateSheet({
                   ))}
                   {sites.length === 0 && (
                     <p className="text-sm text-muted-foreground">
-                      Geen sites beschikbaar
+                      {t("admin.misc.noSitesAvailable")}
                     </p>
                   )}
                 </div>
@@ -229,7 +230,7 @@ export function UserCreateSheet({
             ) : (
               <CheckIcon className="size-4" />
             )}
-            Aanmaken
+            {t("admin.buttons.create")}
           </Button>
         </SheetFooter>
       </SheetContent>

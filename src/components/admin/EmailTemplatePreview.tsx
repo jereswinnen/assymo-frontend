@@ -16,6 +16,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { t } from "@/config/strings";
 
 interface Template {
   id: string;
@@ -97,7 +98,7 @@ export function EmailTemplatePreview() {
                 onValueChange={setSelectedTemplate}
               >
                 <SelectTrigger className="w-[280px] bg-white">
-                  <SelectValue placeholder="Selecteer een template" />
+                  <SelectValue placeholder={t("admin.placeholders.selectTemplate")} />
                 </SelectTrigger>
                 <SelectContent>
                   {templates.map((template) => (

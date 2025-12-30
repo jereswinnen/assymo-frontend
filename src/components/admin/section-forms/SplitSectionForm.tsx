@@ -19,6 +19,7 @@ import { ImageUpload } from "@/components/admin/media/ImageUpload";
 import { IconSelect } from "@/components/admin/IconSelect";
 import { Separator } from "@/components/ui/separator";
 import { SplitSectionSection, SplitSectionItem } from "@/types/sections";
+import { t } from "@/config/strings";
 
 interface SplitSectionFormProps {
   section: SplitSectionSection;
@@ -60,7 +61,7 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
           <Input
             value={item.title || ""}
             onChange={(e) => updateItem(index, { title: e.target.value })}
-            placeholder="Item titel"
+            placeholder={t("admin.placeholders.itemTitle")}
           />
         </Field>
         <Field>
@@ -68,7 +69,7 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
           <Input
             value={item.subtitle || ""}
             onChange={(e) => updateItem(index, { subtitle: e.target.value })}
-            placeholder="Optionele subtitel"
+            placeholder={t("admin.placeholders.optionalSubtitle")}
           />
         </Field>
 
@@ -114,7 +115,7 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
                     action: { ...item.action, label: e.target.value },
                   })
                 }
-                placeholder="Bekijk meer"
+                placeholder={t("admin.placeholders.viewMore")}
               />
             </Field>
             <Field>

@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/field";
 import { Loader2Icon, CheckIcon } from "lucide-react";
 import { toast } from "sonner";
+import { t } from "@/config/strings";
 
 interface AppointmentCreateSheetProps {
   open: boolean;
@@ -69,7 +70,7 @@ export function AppointmentCreateSheet({
   const handleSubmit = async () => {
     // Basic validation
     if (!formData.appointment_date || !formData.appointment_time) {
-      toast.error("Selecteer een datum en tijd");
+      toast.error(t("admin.messages.selectDateTime"));
       return;
     }
 
@@ -78,7 +79,7 @@ export function AppointmentCreateSheet({
       !formData.customer_email ||
       !formData.customer_phone
     ) {
-      toast.error("Vul alle verplichte klantgegevens in");
+      toast.error(t("admin.messages.customerDataRequired"));
       return;
     }
 
@@ -87,7 +88,7 @@ export function AppointmentCreateSheet({
       !formData.customer_postal_code ||
       !formData.customer_city
     ) {
-      toast.error("Vul het volledige adres in");
+      toast.error(t("admin.messages.addressRequired"));
       return;
     }
 
@@ -107,13 +108,13 @@ export function AppointmentCreateSheet({
         throw new Error(data.error || "Failed to create appointment");
       }
 
-      toast.success("Afspraak aangemaakt");
+      toast.success(t("admin.messages.appointmentCreated"));
       resetForm();
       onCreated();
     } catch (error) {
       console.error("Failed to create appointment:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon afspraak niet aanmaken",
+        error instanceof Error ? error.message : t("admin.dialogs.couldAppointmentNotCreate"),
       );
     } finally {
       setSaving(false);
@@ -142,9 +143,9 @@ export function AppointmentCreateSheet({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className="flex flex-col overflow-hidden w-full md:max-w-xl">
         <SheetHeader>
-          <SheetTitle>Nieuwe afspraak</SheetTitle>
+          <SheetTitle>{t("admin.headings.newAppointment")}</SheetTitle>
           <SheetDescription>
-            Maak handmatig een nieuwe afspraak aan voor een klant.
+            {t("admin.dialogs.newAppointmentDesc")}
           </SheetDescription>
         </SheetHeader>
 
@@ -154,7 +155,7 @@ export function AppointmentCreateSheet({
             <FieldSet>
               <div className="grid grid-cols-2 gap-4">
                 <Field>
-                  <FieldLabel htmlFor="date">Datum</FieldLabel>
+                  <FieldLabel htmlFor="date">{t("admin.labels.date")}</FieldLabel>
                   <Input
                     id="date"
                     type="date"
@@ -169,7 +170,7 @@ export function AppointmentCreateSheet({
                   />
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="time">Tijd</FieldLabel>
+                  <FieldLabel htmlFor="time">{t("admin.labels.time")}</FieldLabel>
                   <Input
                     id="time"
                     type="time"
@@ -191,20 +192,20 @@ export function AppointmentCreateSheet({
             {/* Customer info and address */}
             <FieldSet>
               <Field>
-                <FieldLabel htmlFor="name">Naam</FieldLabel>
+                <FieldLabel htmlFor="name">{t("admin.labels.name")}</FieldLabel>
                 <Input
                   id="name"
                   value={formData.customer_name}
                   onChange={(e) =>
                     setFormData({ ...formData, customer_name: e.target.value })
                   }
-                  placeholder="Volledige naam"
+                  placeholder={t("admin.placeholders.fullName")}
                 />
               </Field>
 
               <div className="grid grid-cols-2 gap-4">
                 <Field>
-                  <FieldLabel htmlFor="email">E-mail</FieldLabel>
+                  <FieldLabel htmlFor="email">{t("admin.labels.email")}</FieldLabel>
                   <Input
                     id="email"
                     type="email"
@@ -215,11 +216,11 @@ export function AppointmentCreateSheet({
                         customer_email: e.target.value,
                       })
                     }
-                    placeholder="email@voorbeeld.be"
+                    placeholder={t("admin.placeholders.emailFormat")}
                   />
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="phone">Telefoon</FieldLabel>
+                  <FieldLabel htmlFor="phone">{t("admin.labels.phoneShort")}</FieldLabel>
                   <Input
                     id="phone"
                     type="tel"
@@ -230,13 +231,13 @@ export function AppointmentCreateSheet({
                         customer_phone: e.target.value,
                       })
                     }
-                    placeholder="0412 34 56 78"
+                    placeholder={t("admin.placeholders.phoneFormat")}
                   />
                 </Field>
               </div>
 
               <Field>
-                <FieldLabel htmlFor="street">Straat en huisnummer</FieldLabel>
+                <FieldLabel htmlFor="street">{t("admin.labels.streetAndNumber")}</FieldLabel>
                 <Input
                   id="street"
                   value={formData.customer_street}
@@ -246,13 +247,13 @@ export function AppointmentCreateSheet({
                       customer_street: e.target.value,
                     })
                   }
-                  placeholder="Straatnaam 123"
+                  placeholder={t("admin.placeholders.streetFormat")}
                 />
               </Field>
 
               <div className="grid grid-cols-2 gap-4">
                 <Field>
-                  <FieldLabel htmlFor="postal">Postcode</FieldLabel>
+                  <FieldLabel htmlFor="postal">{t("admin.labels.postalCode")}</FieldLabel>
                   <Input
                     id="postal"
                     value={formData.customer_postal_code}
@@ -262,11 +263,11 @@ export function AppointmentCreateSheet({
                         customer_postal_code: e.target.value,
                       })
                     }
-                    placeholder="1234"
+                    placeholder={t("admin.placeholders.postalCode")}
                   />
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="city">Plaats</FieldLabel>
+                  <FieldLabel htmlFor="city">{t("admin.labels.place")}</FieldLabel>
                   <Input
                     id="city"
                     value={formData.customer_city}
@@ -276,7 +277,7 @@ export function AppointmentCreateSheet({
                         customer_city: e.target.value,
                       })
                     }
-                    placeholder="Plaatsnaam"
+                    placeholder={t("admin.placeholders.city")}
                   />
                 </Field>
               </div>
@@ -287,7 +288,7 @@ export function AppointmentCreateSheet({
             {/* Optional notes */}
             <FieldSet>
               <Field>
-                <FieldLabel htmlFor="remarks">Opmerkingen klant</FieldLabel>
+                <FieldLabel htmlFor="remarks">{t("admin.labels.customerRemarks")}</FieldLabel>
                 <Textarea
                   id="remarks"
                   value={formData.remarks}
@@ -295,12 +296,12 @@ export function AppointmentCreateSheet({
                     setFormData({ ...formData, remarks: e.target.value })
                   }
                   rows={2}
-                  placeholder="Eventuele opmerkingen van de klant..."
+                  placeholder={t("admin.placeholders.customerRemarks")}
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="admin_notes">Interne notities</FieldLabel>
+                <FieldLabel htmlFor="admin_notes">{t("admin.labels.adminNotes")}</FieldLabel>
                 <Textarea
                   id="admin_notes"
                   value={formData.admin_notes}
@@ -308,7 +309,7 @@ export function AppointmentCreateSheet({
                     setFormData({ ...formData, admin_notes: e.target.value })
                   }
                   rows={2}
-                  placeholder="Alleen zichtbaar voor beheerders..."
+                  placeholder={t("admin.placeholders.adminOnly")}
                 />
               </Field>
             </FieldSet>
@@ -323,7 +324,7 @@ export function AppointmentCreateSheet({
                 onCheckedChange={(checked) => setSendConfirmation(!!checked)}
               />
               <FieldLabel htmlFor="send_confirmation">
-                Bevestigingsmail naar klant sturen
+                {t("admin.labels.sendConfirmationEmail")}
               </FieldLabel>
             </Field>
           </FieldGroup>
@@ -336,7 +337,7 @@ export function AppointmentCreateSheet({
             ) : (
               <CheckIcon className="size-4" />
             )}
-            Opslaan
+            {t("admin.buttons.save")}
           </Button>
         </SheetFooter>
       </SheetContent>

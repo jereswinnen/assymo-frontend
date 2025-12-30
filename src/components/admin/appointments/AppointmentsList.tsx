@@ -29,6 +29,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "../../ui/input-group";
+import { t } from "@/config/strings";
 
 interface AppointmentsListProps {
   createDialogOpen: boolean;
@@ -68,7 +69,7 @@ export function AppointmentsList({
       setAppointments(data.appointments || []);
     } catch (error) {
       console.error("Failed to load appointments:", error);
-      toast.error("Kon afspraken niet laden");
+      toast.error(t("admin.messages.appointmentsLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -91,7 +92,7 @@ export function AppointmentsList({
       setAppointments(data.appointments || []);
     } catch (error) {
       console.error("Search failed:", error);
-      toast.error("Zoeken mislukt");
+      toast.error(t("admin.messages.searchFailed"));
     } finally {
       setLoading(false);
     }
@@ -149,7 +150,7 @@ export function AppointmentsList({
       <div className="flex flex-1 max-w-xl gap-2">
         <InputGroup className="flex flex-1">
           <InputGroupInput
-            placeholder="Zoek op naam, email of telefoon..."
+            placeholder={t("admin.placeholders.searchAppointments")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -175,7 +176,7 @@ export function AppointmentsList({
           }
         >
           <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t("admin.placeholders.status")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Alle</SelectItem>

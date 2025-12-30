@@ -22,6 +22,7 @@ import { IconSelect } from "@/components/admin/IconSelect";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { PageHeaderSection } from "@/types/sections";
 import { Separator } from "@/components/ui/separator";
+import { t } from "@/config/strings";
 
 interface ButtonItem {
   _key: string;
@@ -69,7 +70,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
           id="title"
           value={section.title || ""}
           onChange={(e) => onChange({ ...section, title: e.target.value })}
-          placeholder="Page titel"
+          placeholder={t("admin.placeholders.pageTitle2")}
         />
       </Field>
 

@@ -52,6 +52,7 @@ import {
 } from "lucide-react";
 import { formatDateWithTime } from "@/lib/format";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { t } from "@/config/strings";
 
 interface Page {
   id: string;
@@ -90,7 +91,7 @@ export default function PagesPage() {
       const data = await response.json();
       setPages(data);
     } catch {
-      toast.error("Kon pagina's niet ophalen");
+      toast.error(t("admin.messages.pagesLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -104,7 +105,7 @@ export default function PagesPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: "Nieuwe pagina",
+          title: t("admin.misc.newPage"),
           slug: `nieuwe-pagina-${Date.now()}`,
           is_homepage: false,
           siteId: currentSite.id,
@@ -120,7 +121,7 @@ export default function PagesPage() {
       router.push(`/admin/content/pages/${newPage.id}`);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Kon pagina niet aanmaken",
+        error instanceof Error ? error.message : t("admin.messages.somethingWentWrongShort"),
       );
       setCreating(false);
     }
@@ -142,9 +143,9 @@ export default function PagesPage() {
 
       setPages((prev) => prev.filter((p) => p.id !== deleteTarget.id));
       setDeleteTarget(null);
-      toast.success("Pagina verwijderd");
+      toast.success(t("admin.messages.pageDeleted"));
     } catch {
-      toast.error("Kon pagina niet verwijderen");
+      toast.error(t("admin.messages.pageDeleteFailed"));
     } finally {
       setDeleting(false);
     }
@@ -173,10 +174,10 @@ export default function PagesPage() {
             a.title.localeCompare(b.title),
         ),
       );
-      toast.success("Pagina gedupliceerd");
+      toast.success(t("admin.messages.pageDuplicated"));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Kon pagina niet dupliceren",
+        error instanceof Error ? error.message : t("admin.messages.somethingWentWrongShort"),
       );
     } finally {
       setDuplicating(null);
@@ -192,7 +193,7 @@ export default function PagesPage() {
         ) : (
           <PlusIcon className="size-4" />
         )}
-        Nieuwe pagina
+        {t("admin.misc.newPage")}
       </Button>
     ),
     [createPage, creating],
@@ -213,9 +214,9 @@ export default function PagesPage() {
             <EmptyMedia variant="icon">
               <FileTextIcon className="size-5" />
             </EmptyMedia>
-            <EmptyTitle>Nog geen pagina&apos;s</EmptyTitle>
+            <EmptyTitle>{t("admin.misc.noPagesYet")}</EmptyTitle>
             <EmptyDescription>
-              Maak je eerste pagina aan om te beginnen.
+              {t("admin.misc.noPagesDesc")}
             </EmptyDescription>
           </EmptyHeader>
           <Button size="sm" onClick={createPage} disabled={creating}>
@@ -224,7 +225,7 @@ export default function PagesPage() {
             ) : (
               <PlusIcon className="size-4" />
             )}
-            Pagina aanmaken
+            {t("admin.misc.createPage")}
           </Button>
         </Empty>
       ) : (
@@ -232,10 +233,10 @@ export default function PagesPage() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-10"></TableHead>
-              <TableHead>Titel</TableHead>
-              <TableHead className="hidden sm:table-cell">URL</TableHead>
+              <TableHead>{t("admin.labels.title")}</TableHead>
+              <TableHead className="hidden sm:table-cell">{t("admin.labels.url")}</TableHead>
               <TableHead className="hidden md:table-cell">
-                Laatst bewerkt
+                {t("admin.misc.lastEdited")}
               </TableHead>
               <TableHead className="w-10"></TableHead>
             </TableRow>
@@ -291,7 +292,7 @@ export default function PagesPage() {
                         ) : (
                           <CopyIcon className="size-4" />
                         )}
-                        Dupliceren
+                        {t("admin.buttons.duplicate")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         variant="destructive"
@@ -302,7 +303,7 @@ export default function PagesPage() {
                         disabled={page.is_homepage}
                       >
                         <Trash2Icon className="size-4" />
-                        Verwijderen
+                        {t("admin.buttons.delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -320,14 +321,13 @@ export default function PagesPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Pagina verwijderen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.misc.deletePageQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je &quot;{deleteTarget?.title}&quot; wilt
-              verwijderen? Dit kan niet ongedaan worden gemaakt.
+              {t("admin.misc.deletePageDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("admin.buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={deletePage}
               disabled={deleting}
@@ -336,10 +336,10 @@ export default function PagesPage() {
               {deleting ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Verwijderen...
+                  {t("admin.buttons.deleting")}
                 </>
               ) : (
-                "Verwijderen"
+                t("admin.buttons.delete")
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

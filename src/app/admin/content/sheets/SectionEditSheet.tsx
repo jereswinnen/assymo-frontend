@@ -12,6 +12,7 @@ import {
 import { CheckIcon, Loader2Icon } from "lucide-react";
 import { Section, getSectionLabel } from "@/types/sections";
 import { SectionForm } from "@/components/admin/SectionForm";
+import { t } from "@/config/strings";
 
 interface SectionEditSheetProps {
   section: Section | null;
@@ -50,7 +51,7 @@ export function SectionEditSheet({
             {section && getSectionLabel(section._type)}
           </SheetTitle>
           <SheetDescription>
-            Bewerk de inhoud van deze sectie.
+            {t("admin.misc.editSectionDesc")}
           </SheetDescription>
         </SheetHeader>
         {section && (
@@ -62,12 +63,12 @@ export function SectionEditSheet({
               {saving ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Opslaan...
+                  {t("admin.loading.saving")}
                 </>
               ) : (
                 <>
                   <CheckIcon className="size-4" />
-                  Opslaan
+                  {t("admin.buttons.save")}
                 </>
               )}
             </Button>

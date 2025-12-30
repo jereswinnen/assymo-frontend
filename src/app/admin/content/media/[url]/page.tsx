@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { formatFileSize } from "@/lib/format";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { t } from "@/config/strings";
 
 interface ImageData {
   url: string;
@@ -96,7 +97,7 @@ export default function ImageDetailPage({
 
       if (!response.ok) {
         if (response.status === 404) {
-          toast.error("Afbeelding niet gevonden");
+          toast.error(t("admin.messages.imageNotFound"));
           router.push("/admin/content/media");
           return;
         }
@@ -108,7 +109,7 @@ export default function ImageDetailPage({
       setDisplayName(data.displayName || data.pathname);
       setAltText(data.altText || "");
     } catch {
-      toast.error("Kon afbeelding niet ophalen");
+      toast.error(t("admin.messages.imageLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -136,9 +137,9 @@ export default function ImageDetailPage({
       const updated: ImageData = await response.json();
       setImage(updated);
       setHasChanges(false);
-      toast.success("Afbeelding opgeslagen");
+      toast.success(t("admin.messages.imageSaved"));
     } catch {
-      toast.error("Kon afbeelding niet opslaan");
+      toast.error(t("admin.messages.imageSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -162,17 +163,17 @@ export default function ImageDetailPage({
       setShowDeleteDialog(false);
 
       if (!response.ok) {
-        toast.error(data.error || "Kon afbeelding niet verwijderen");
+        toast.error(data.error || t("admin.messages.imageDeleteFailed"));
         return;
       }
 
-      toast.success("Afbeelding verwijderd");
+      toast.success(t("admin.messages.imageDeleted"));
       router.push("/admin/content/media");
     } catch (error) {
       console.error("Delete failed:", error);
       setDeleting(false);
       setShowDeleteDialog(false);
-      toast.error("Kon afbeelding niet verwijderen");
+      toast.error(t("admin.messages.imageDeleteFailed"));
     }
   };
 
@@ -197,9 +198,9 @@ export default function ImageDetailPage({
         setImage({ ...image, altText: newAltText });
       }
 
-      toast.success("Alt-tekst gegenereerd");
+      toast.success(t("admin.messages.altGenerated"));
     } catch {
-      toast.error("Kon alt-tekst niet genereren");
+      toast.error(t("admin.messages.altGenerateFailed"));
     } finally {
       setGenerating(false);
     }
@@ -215,18 +216,18 @@ export default function ImageDetailPage({
           onClick={() => setShowDeleteDialog(true)}
         >
           <Trash2Icon className="size-4" />
-          Verwijderen
+          {t("admin.buttons.delete")}
         </Button>
         <Button size="sm" onClick={saveImage} disabled={saving || !hasChanges}>
           {saving ? (
             <>
               <Loader2Icon className="size-4 animate-spin" />
-              Opslaan...
+              {t("admin.loading.saving")}
             </>
           ) : (
             <>
               <SaveIcon className="size-4" />
-              Opslaan
+              {t("admin.buttons.save")}
             </>
           )}
         </Button>
@@ -270,17 +271,17 @@ export default function ImageDetailPage({
             {/* Details */}
             <FieldSet>
               <Field>
-                <FieldLabel htmlFor="displayName">Bestandsnaam</FieldLabel>
+                <FieldLabel htmlFor="displayName">{t("admin.labels.filename")}</FieldLabel>
                 <Input
                   id="displayName"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Bestandsnaam"
+                  placeholder={t("admin.placeholders.filename")}
                 />
               </Field>
               <Field>
                 <div className="flex items-center justify-between">
-                  <FieldLabel htmlFor="altText">Alt tekst</FieldLabel>
+                  <FieldLabel htmlFor="altText">{t("admin.labels.altText")}</FieldLabel>
                   <Button
                     type="button"
                     variant="outline"
@@ -291,12 +292,12 @@ export default function ImageDetailPage({
                     {generating ? (
                       <>
                         <Loader2Icon className="size-3 animate-spin" />
-                        Genereren...
+                        {t("admin.loading.generating")}
                       </>
                     ) : (
                       <>
                         <SparklesIcon className="size-3" />
-                        Genereer
+                        {t("admin.misc.generateAlt")}
                       </>
                     )}
                   </Button>
@@ -305,11 +306,11 @@ export default function ImageDetailPage({
                   id="altText"
                   value={altText}
                   onChange={(e) => setAltText(e.target.value)}
-                  placeholder="Beschrijving van de afbeelding voor toegankelijkheid"
+                  placeholder={t("admin.placeholders.altDescription")}
                   rows={4}
                 />
                 <FieldDescription>
-                  Alt tekst wordt gebruikt voor toegankelijkheid en SEO
+                  {t("admin.misc.accessibilityDesc")}
                 </FieldDescription>
               </Field>
             </FieldSet>
@@ -319,11 +320,11 @@ export default function ImageDetailPage({
             {/* Meta info */}
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Bestandsgrootte</span>
+                <span className="text-muted-foreground">{t("admin.misc.fileSize")}</span>
                 <span>{formatFileSize(image.size)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Geupload op</span>
+                <span className="text-muted-foreground">{t("admin.misc.uploadedOn")}</span>
                 <span>
                   {new Date(image.uploadedAt).toLocaleDateString("nl-NL", {
                     year: "numeric",
@@ -343,14 +344,13 @@ export default function ImageDetailPage({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Afbeelding verwijderen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.misc.deleteImageQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je deze afbeelding wilt verwijderen? Dit kan
-              niet ongedaan worden gemaakt.
+              {t("admin.misc.deleteImageDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("admin.buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={deleteImage}
               disabled={deleting}
@@ -359,10 +359,10 @@ export default function ImageDetailPage({
               {deleting ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Verwijderen...
+                  {t("admin.loading.deleting")}
                 </>
               ) : (
-                "Verwijderen"
+                t("admin.buttons.delete")
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -38,6 +38,7 @@ import {
 import { getTestEmail, setTestEmail } from "@/lib/adminSettings";
 import { DEFAULT_TEST_EMAIL } from "@/config/resend";
 import type { DocumentInfo } from "@/types/chat";
+import { t } from "@/config/strings";
 
 export default function SettingsPage() {
   // General settings
@@ -74,13 +75,13 @@ export default function SettingsPage() {
   const handleSaveEmail = useCallback(async () => {
     const trimmed = testEmailValue.trim();
     if (!trimmed) {
-      toast.error("Vul een e-mailadres in");
+      toast.error(t("admin.messages.emailRequired"));
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmed)) {
-      toast.error("Vul een geldig e-mailadres in");
+      toast.error(t("admin.messages.emailInvalid"));
       return;
     }
 
@@ -88,7 +89,7 @@ export default function SettingsPage() {
     setTestEmail(trimmed);
     setTestEmailValue(trimmed);
     setOriginalEmail(trimmed);
-    toast.success("Instellingen opgeslagen");
+    toast.success(t("admin.messages.settingsSaved"));
     setSavingEmail(false);
   }, [testEmailValue]);
 
@@ -114,7 +115,7 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error("Failed to load document info:", error);
-      toast.error("Kon documentinformatie niet laden");
+      toast.error(t("admin.messages.documentInfoLoadFailed"));
     } finally {
       setLoadingDocument(false);
     }
@@ -125,7 +126,7 @@ export default function SettingsPage() {
     if (selectedFile) {
       const fileName = selectedFile.name.toLowerCase();
       if (!fileName.endsWith(".md")) {
-        toast.error("Selecteer een Markdown (.md) bestand");
+        toast.error(t("admin.messages.selectMarkdown"));
         return;
       }
       setFile(selectedFile);
@@ -134,7 +135,7 @@ export default function SettingsPage() {
 
   const handleUpload = async () => {
     if (!file) {
-      toast.error("Selecteer eerst een document");
+      toast.error(t("admin.messages.selectDocument"));
       return;
     }
 
@@ -151,7 +152,7 @@ export default function SettingsPage() {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Upload mislukt");
+      if (!response.ok) throw new Error(data.error || t("admin.messages.uploadFailed"));
 
       toast.success(
         `Document succesvol verwerkt: ${data.chunkCount} chunks aangemaakt`,
@@ -164,7 +165,7 @@ export default function SettingsPage() {
       if (fileInput) fileInput.value = "";
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error(error instanceof Error ? error.message : "Upload mislukt");
+      toast.error(error instanceof Error ? error.message : t("admin.messages.uploadFailed"));
     } finally {
       setUploading(false);
     }
@@ -178,13 +179,13 @@ export default function SettingsPage() {
       });
       if (!response.ok) throw new Error("Delete mislukt");
 
-      toast.success("Document verwijderd");
+      toast.success(t("admin.messages.documentDeleted"));
       await loadDocumentInfo();
       setTestResults(null);
       setDeleteDocumentDialogOpen(false);
     } catch (error) {
       console.error("Delete error:", error);
-      toast.error("Verwijderen mislukt");
+      toast.error(t("admin.messages.deleteFailed"));
     } finally {
       setDeletingDocument(false);
     }
@@ -193,7 +194,7 @@ export default function SettingsPage() {
   const handleTestRetrieval = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!testQuery.trim()) {
-      toast.error("Voer een test query in");
+      toast.error(t("admin.messages.enterTestQuery"));
       return;
     }
 
@@ -212,13 +213,13 @@ export default function SettingsPage() {
 
       setTestResults(data.chunks);
       if (data.chunks.length === 0) {
-        toast.warning("Geen relevante chunks gevonden");
+        toast.warning(t("admin.messages.searchFailed"));
       } else {
         toast.success(`${data.chunks.length} relevante chunks gevonden`);
       }
     } catch (error) {
       console.error("Test retrieval error:", error);
-      toast.error(error instanceof Error ? error.message : "Test mislukt");
+      toast.error(error instanceof Error ? error.message : t("admin.messages.searchFailed"));
     } finally {
       setTesting(false);
     }
@@ -237,7 +238,7 @@ export default function SettingsPage() {
         ) : (
           <CheckIcon className="size-4" />
         )}
-        Opslaan
+        {t("admin.buttons.save")}
       </Button>
     ),
     [savingEmail, hasEmailChanges, handleSaveEmail],
@@ -258,10 +259,10 @@ export default function SettingsPage() {
       <FieldSet>
         <FieldLegend className="flex items-center gap-1.5 font-semibold">
           <Settings2Icon className="size-4 opacity-80" />
-          Algemeen
+          {t("admin.misc.general")}
         </FieldLegend>
         <Field>
-          <FieldLabel htmlFor="testEmail">Test e-mailadres</FieldLabel>
+          <FieldLabel htmlFor="testEmail">{t("admin.misc.testEmail")}</FieldLabel>
           <Input
             id="testEmail"
             type="email"
@@ -270,7 +271,7 @@ export default function SettingsPage() {
             placeholder={DEFAULT_TEST_EMAIL}
           />
           <FieldDescription>
-            Dit e-mailadres wordt gebruikt voor nieuwsbrief tests
+            {t("admin.misc.testEmailDesc")}
           </FieldDescription>
         </Field>
       </FieldSet>
@@ -295,7 +296,7 @@ export default function SettingsPage() {
                   {documentInfo.chunkCount} chunks
                 </Badge>
                 <Badge variant="secondary">
-                  {documentInfo.totalCharacters.toLocaleString()} tekens
+                  {documentInfo.totalCharacters.toLocaleString()} {t("admin.misc.characters")}
                 </Badge>
                 <Badge variant="outline">
                   {new Date(documentInfo.uploadedAt).toLocaleDateString(
@@ -311,15 +312,14 @@ export default function SettingsPage() {
               onClick={() => setDeleteDocumentDialogOpen(true)}
             >
               <Trash2Icon className="size-4" />
-              Verwijderen
+              {t("admin.buttons.delete")}
             </Button>
           </div>
         ) : (
           <Alert>
             <AlertCircleIcon className="size-4" />
             <AlertDescription>
-              Geen document geüpload. Upload een Markdown bestand om te
-              beginnen.
+              {t("admin.misc.noDocumentUploaded")}
             </AlertDescription>
           </Alert>
         )}
@@ -335,7 +335,7 @@ export default function SettingsPage() {
 
           {file && (
             <div className="text-sm text-muted-foreground">
-              Geselecteerd: <span className="font-medium">{file.name}</span> (
+              {t("admin.misc.selected")}: <span className="font-medium">{file.name}</span> (
               {(file.size / 1024).toFixed(0)} KB)
             </div>
           )}
@@ -348,12 +348,12 @@ export default function SettingsPage() {
             {uploading ? (
               <>
                 <Loader2Icon className="size-4 animate-spin" />
-                Verwerken...
+                {t("admin.misc.processing")}
               </>
             ) : (
               <>
                 <CloudUploadIcon className="size-4" />
-                Uploaden
+                {t("admin.misc.uploading")}
               </>
             )}
           </Button>
@@ -362,10 +362,10 @@ export default function SettingsPage() {
         <Separator />
 
         <Field>
-          <FieldLabel htmlFor="test-query">Test retrieval</FieldLabel>
+          <FieldLabel htmlFor="test-query">{t("admin.misc.testRetrieval")}</FieldLabel>
           <Textarea
             id="test-query"
-            placeholder="bijv. Wat zijn jullie openingstijden?"
+            placeholder={t("admin.placeholders.testQuery")}
             value={testQuery}
             onChange={(e) => setTestQuery(e.target.value)}
             disabled={testing || !documentInfo}
@@ -378,7 +378,7 @@ export default function SettingsPage() {
             }}
           />
           <FieldDescription>
-            Test de vector search met een voorbeeldvraag
+            {t("admin.misc.testRetrievalDesc")}
           </FieldDescription>
         </Field>
 
@@ -391,12 +391,12 @@ export default function SettingsPage() {
           {testing ? (
             <>
               <Loader2Icon className="size-4 animate-spin" />
-              Zoeken...
+              {t("admin.misc.searching")}
             </>
           ) : (
             <>
               <BotMessageSquareIcon className="size-4" />
-              Versturen
+              {t("admin.buttons.send")}
             </>
           )}
         </Button>
@@ -404,7 +404,7 @@ export default function SettingsPage() {
         {testResults && testResults.length > 0 && (
           <div className="space-y-3">
             <p className="text-sm font-medium">
-              Gevonden chunks ({testResults.length}):
+              {t("admin.misc.foundChunks")} ({testResults.length}):
             </p>
             {testResults.map((chunk, index) => (
               <div
@@ -413,10 +413,10 @@ export default function SettingsPage() {
               >
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-xs">
-                    Chunk {index + 1}
+                    {t("admin.misc.chunk")} {index + 1}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
-                    {chunk.length} tekens
+                    {chunk.length} {t("admin.misc.characters")}
                   </span>
                 </div>
                 <p className="text-foreground whitespace-pre-wrap">{chunk}</p>
@@ -429,7 +429,7 @@ export default function SettingsPage() {
           <Alert>
             <AlertCircleIcon className="size-4" />
             <AlertDescription>
-              Geen relevante chunks gevonden voor deze query.
+              {t("admin.misc.noRelevantChunks")}
             </AlertDescription>
           </Alert>
         )}
@@ -442,10 +442,9 @@ export default function SettingsPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Document verwijderen</DialogTitle>
+            <DialogTitle>{t("admin.headings.deleteDocument")}</DialogTitle>
             <DialogDescription>
-              Weet je zeker dat je het huidige document wilt verwijderen? Deze
-              actie kan niet ongedaan worden gemaakt.
+              {t("admin.misc.deleteDocumentDesc")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -454,7 +453,7 @@ export default function SettingsPage() {
               onClick={() => setDeleteDocumentDialogOpen(false)}
               disabled={deletingDocument}
             >
-              Annuleren
+              {t("admin.buttons.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -464,12 +463,12 @@ export default function SettingsPage() {
               {deletingDocument ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Verwijderen...
+                  {t("admin.buttons.deleting")}
                 </>
               ) : (
                 <>
                   <Trash2Icon className="size-4" />
-                  Verwijderen
+                  {t("admin.buttons.delete")}
                 </>
               )}
             </Button>

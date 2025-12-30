@@ -25,6 +25,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
+import { t } from "@/config/strings";
 
 type SetupStep = "password" | "qr" | "backup-codes";
 
@@ -94,7 +95,7 @@ export default function Setup2FAPage() {
     setError(null);
 
     if (!password) {
-      setError("Vul je wachtwoord in.");
+      setError(t("admin.dialogs.enterYourPassword"));
       return;
     }
 
@@ -111,9 +112,9 @@ export default function Setup2FAPage() {
           error.message?.toLowerCase().includes("invalid") ||
           error.message?.toLowerCase().includes("incorrect")
         ) {
-          setError("Ongeldig wachtwoord.");
+          setError(t("admin.dialogs.invalidPassword"));
         } else {
-          setError(error.message || "Kon 2FA niet inschakelen.");
+          setError(error.message || t("admin.dialogs.could2faNotEnable"));
         }
         return;
       }
@@ -127,7 +128,7 @@ export default function Setup2FAPage() {
       }
     } catch (err) {
       console.error("2FA enable error:", err);
-      setError("Er is iets misgegaan. Probeer het opnieuw.");
+      setError(t("admin.messages.somethingWentWrong"));
     } finally {
       setEnabling(false);
     }
@@ -138,7 +139,7 @@ export default function Setup2FAPage() {
     setError(null);
 
     if (otpCode.length !== 6) {
-      setError("Vul een 6-cijferige code in.");
+      setError(t("admin.messages.enter6DigitCode"));
       return;
     }
 
@@ -151,7 +152,7 @@ export default function Setup2FAPage() {
 
       if (error) {
         console.error("2FA verification error:", error);
-        setError("Ongeldige code. Probeer opnieuw.");
+        setError(t("admin.messages.invalidCode"));
         setOtpCode("");
         return;
       }
@@ -171,7 +172,7 @@ export default function Setup2FAPage() {
       }
     } catch (err) {
       console.error("2FA verification error:", err);
-      setError("Er is iets misgegaan. Probeer opnieuw.");
+      setError(t("admin.messages.somethingWentWrong"));
       setOtpCode("");
     } finally {
       setVerifying(false);
@@ -203,7 +204,7 @@ export default function Setup2FAPage() {
     return (
       <div className="w-full max-w-lg space-y-6">
         <header className="flex items-center gap-2">
-          <p className="text-2xl font-semibold tracking-tight">Oeps, foutje</p>
+          <p className="text-2xl font-semibold tracking-tight">{t("admin.dialogs.errorOops")}</p>
         </header>
 
         <div className="space-y-4">
@@ -213,7 +214,7 @@ export default function Setup2FAPage() {
           </Alert>
 
           <Button onClick={() => router.push("/admin/auth")}>
-            Terug naar inloggen
+            {t("admin.buttons.backToLogin")}
           </Button>
         </div>
       </div>
@@ -228,12 +229,11 @@ export default function Setup2FAPage() {
           <div className="flex items-center gap-2">
             <ShieldCheckIcon className="size-6 opacity-80" />
             <p className="text-2xl font-semibold tracking-tight">
-              Backup codes
+              {t("admin.dialogs.backupCodes")}
             </p>
           </div>
           <p className="text-muted-foreground text-sm">
-            Bewaar deze codes op een veilige plek. Je kunt ze gebruiken als je
-            geen toegang hebt tot je authenticator app.
+            {t("admin.dialogs.backupCodesDesc")}
           </p>
         </header>
 
@@ -252,18 +252,18 @@ export default function Setup2FAPage() {
             {copied ? (
               <>
                 <CheckIcon className="size-4" />
-                Gekopieerd
+                {t("admin.buttons.copied")}
               </>
             ) : (
               <>
                 <CopyIcon className="size-4" />
-                Kopieer codes
+                {t("admin.buttons.copyCodes")}
               </>
             )}
           </Button>
           <Button onClick={handleComplete}>
             <CheckIcon className="size-4" />
-            Doorgaan
+            {t("admin.buttons.continue")}
           </Button>
         </div>
       </div>
@@ -277,7 +277,7 @@ export default function Setup2FAPage() {
         <header className="flex items-center gap-2">
           <KeyRoundIcon className="size-6 opacity-80" />
           <p className="text-2xl font-semibold tracking-tight">
-            Bevestig je wachtwoord
+            {t("admin.dialogs.confirmYourPassword")}
           </p>
         </header>
 
@@ -291,7 +291,7 @@ export default function Setup2FAPage() {
 
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="password">Wachtwoord</FieldLabel>
+              <FieldLabel htmlFor="password">{t("admin.labels.password")}</FieldLabel>
               <Input
                 id="password"
                 type="password"
@@ -312,12 +312,12 @@ export default function Setup2FAPage() {
               {enabling ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Laden...
+                  {t("admin.loading.default")}
                 </>
               ) : (
                 <>
                   <CheckIcon className="size-4" />
-                  Doorgaan
+                  {t("admin.buttons.continue")}
                 </>
               )}
             </Button>
@@ -333,11 +333,10 @@ export default function Setup2FAPage() {
       <header className="space-y-2">
         <div className="flex items-center gap-2">
           <ScanQrCodeIcon className="size-6 opacity-80" />
-          <p className="text-2xl font-semibold tracking-tight">Scan de code</p>
+          <p className="text-2xl font-semibold tracking-tight">{t("admin.dialogs.scanTheCode")}</p>
         </div>
         <p className="text-muted-foreground text-sm ">
-          Scan deze met je authenticator app (bijv. Google Authenticator, Authy,
-          1Password).
+          {t("admin.dialogs.scanTheCodeDesc")}
         </p>
       </header>
 
@@ -366,12 +365,12 @@ export default function Setup2FAPage() {
                 {secretCopied ? (
                   <>
                     <CheckCircleIcon className="size-4" />
-                    Gekopieerd
+                    {t("admin.buttons.copied")}
                   </>
                 ) : (
                   <>
                     <CopyIcon className="size-4" />
-                    Kopieer setup code
+                    {t("admin.buttons.copySetupCode")}
                   </>
                 )}
               </Button>
@@ -383,7 +382,7 @@ export default function Setup2FAPage() {
 
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">
-            Voer de 6-cijferige code in om te bevestigen
+            {t("admin.dialogs.enterCodeToConfirm")}
           </p>
           <InputOTP
             maxLength={6}
@@ -412,12 +411,12 @@ export default function Setup2FAPage() {
           {verifying ? (
             <>
               <Loader2Icon className="size-4 animate-spin" />
-              Verifiëren...
+              {t("admin.loading.verifying")}
             </>
           ) : (
             <>
               <CheckIcon className="size-4" />
-              Bevestigen
+              {t("admin.buttons.confirm")}
             </>
           )}
         </Button>

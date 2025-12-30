@@ -27,6 +27,7 @@ import { UserEditSheet } from "./sheets/UserEditSheet";
 import { UserCreateSheet } from "./sheets/UserCreateSheet";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import type { Role, FeatureOverrides } from "@/lib/permissions/types";
+import { t } from "@/config/strings";
 
 interface Site {
   id: string;
@@ -81,7 +82,7 @@ export default function UsersPage() {
       const response = await fetch("/api/admin/users");
       if (!response.ok) {
         if (response.status === 403) {
-          toast.error("Geen toegang tot gebruikersbeheer");
+          toast.error(t("admin.messages.noUserAccess"));
           return;
         }
         throw new Error("Failed to load users");
@@ -90,7 +91,7 @@ export default function UsersPage() {
       setUsers(data.users || []);
     } catch (error) {
       console.error("Failed to load users:", error);
-      toast.error("Kon gebruikers niet laden");
+      toast.error(t("admin.messages.usersLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -126,13 +127,13 @@ export default function UsersPage() {
         throw new Error(data.error || "Failed to delete");
       }
 
-      toast.success("Gebruiker verwijderd");
+      toast.success(t("admin.messages.userDeleted"));
       setDeleteTarget(null);
       loadUsers();
     } catch (error) {
       console.error("Failed to delete user:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon gebruiker niet verwijderen"
+        error instanceof Error ? error.message : t("admin.misc.userCouldNotDelete")
       );
     } finally {
       setDeleting(false);
@@ -144,7 +145,7 @@ export default function UsersPage() {
     () => (
       <Button size="sm" onClick={openCreateDialog}>
         <PlusIcon className="size-4" />
-        Nieuwe gebruiker
+        {t("admin.misc.newUser")}
       </Button>
     ),
     [openCreateDialog]
@@ -171,18 +172,18 @@ export default function UsersPage() {
     <div className="space-y-6">
       {users.length === 0 ? (
         <div className="text-muted-foreground text-center text-sm py-8">
-          Geen gebruikers gevonden.
+          {t("admin.misc.noUsersFound")}
         </div>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Naam</TableHead>
-              <TableHead>E-mail</TableHead>
-              <TableHead>Rol</TableHead>
-              <TableHead>Sites</TableHead>
+              <TableHead>{t("admin.labels.name")}</TableHead>
+              <TableHead>{t("admin.labels.email")}</TableHead>
+              <TableHead>{t("admin.labels.role")}</TableHead>
+              <TableHead>{t("admin.misc.sites")}</TableHead>
               <TableHead>2FA</TableHead>
-              <TableHead>Aangemaakt</TableHead>
+              <TableHead>{t("admin.misc.created")}</TableHead>
               <TableHead className="w-10"></TableHead>
             </TableRow>
           </TableHeader>
@@ -266,14 +267,13 @@ export default function UsersPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Gebruiker verwijderen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.misc.deleteUserQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je &quot;{deleteTarget?.name}&quot; wilt
-              verwijderen? De gebruiker verliest alle toegang en site-toewijzingen.
+              {t("admin.misc.deleteUserDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("admin.buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
@@ -282,10 +282,10 @@ export default function UsersPage() {
               {deleting ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Verwijderen...
+                  {t("admin.loading.deleting")}
                 </>
               ) : (
-                "Verwijderen"
+                t("admin.buttons.delete")
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

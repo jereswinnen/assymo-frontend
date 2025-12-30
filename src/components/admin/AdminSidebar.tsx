@@ -51,6 +51,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { type Feature, type Role } from "@/lib/permissions/types";
+import { t } from "@/config/strings";
 
 // Nav items with their required feature
 const navItems: {
@@ -224,12 +225,12 @@ export function AdminSidebar({
   const handleLogout = async () => {
     try {
       await authClient.signOut();
-      toast.success("Uitgelogd");
+      toast.success(t("admin.messages.loggedOut"));
       router.push("/admin/auth");
       router.refresh();
     } catch (error) {
       console.error("Logout error:", error);
-      toast.error("Er is iets misgegaan");
+      toast.error(t("admin.messages.somethingWentWrongShort"));
     }
   };
 
@@ -398,13 +399,13 @@ export function AdminSidebar({
                 <DropdownMenuItem asChild>
                   <Link href="/admin/account">
                     <UserRoundIcon />
-                    Account
+                    {t("admin.nav.account")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOutIcon />
-                  Uitloggen
+                  {t("admin.buttons.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

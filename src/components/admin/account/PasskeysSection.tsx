@@ -23,6 +23,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { t } from "@/config/strings";
 
 interface Passkey {
   id: string;
@@ -59,15 +60,15 @@ export function PasskeysSection() {
       const { error } = await authClient.passkey.addPasskey();
       if (error) {
         if (!error.message?.toLowerCase().includes("cancel")) {
-          toast.error("Kon passkey niet toevoegen");
+          toast.error(t("admin.messages.passkeyAddFailed"));
         }
         return;
       }
-      toast.success("Passkey toegevoegd");
+      toast.success(t("admin.messages.passkeyAdded"));
       loadPasskeys();
     } catch (err) {
       if (err instanceof Error && err.name !== "AbortError") {
-        toast.error("Kon passkey niet toevoegen");
+        toast.error(t("admin.messages.passkeyAddFailed"));
       }
     } finally {
       setAddingPasskey(false);
@@ -88,16 +89,16 @@ export function PasskeysSection() {
         id: passkeyToDelete.id,
       });
       if (error) {
-        toast.error("Kon passkey niet verwijderen");
+        toast.error(t("admin.messages.passkeyDeleteFailed"));
         return;
       }
-      toast.success("Passkey verwijderd");
+      toast.success(t("admin.messages.passkeyDeleted"));
       setPasskeys((prev) => prev.filter((p) => p.id !== passkeyToDelete.id));
       setDeleteDialogOpen(false);
       setPasskeyToDelete(null);
     } catch (err) {
       console.error("Failed to delete passkey:", err);
-      toast.error("Kon passkey niet verwijderen");
+      toast.error(t("admin.messages.passkeyDeleteFailed"));
     } finally {
       setDeletingPasskeyId(null);
     }
@@ -116,7 +117,7 @@ export function PasskeysSection() {
       <FieldSet>
         <FieldLegend className="flex items-center gap-1.5 font-semibold">
           <FingerprintIcon className="size-4 opacity-80" />
-          Passkeys
+          {t("admin.headings.passkeys")}
         </FieldLegend>
         <div className="flex items-center justify-center py-4">
           <Loader2Icon className="size-5 animate-spin text-muted-foreground" />
@@ -130,10 +131,10 @@ export function PasskeysSection() {
       <FieldSet>
         <FieldLegend className="flex items-center gap-1.5 font-semibold">
           <FingerprintIcon className="size-4 opacity-80" />
-          Passkeys
+          {t("admin.headings.passkeys")}
         </FieldLegend>
         <FieldDescription>
-          Log sneller in met Face ID, Touch ID of de toegangscode van je toestel.
+          {t("admin.misc.passkeysDesc")}
         </FieldDescription>
 
         <div className="space-y-4">
@@ -149,7 +150,7 @@ export function PasskeysSection() {
                       {passkey.name || "Passkey"}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Toegevoegd op {formatDate(passkey.createdAt)}
+                      {t("admin.misc.addedOn")} {formatDate(passkey.createdAt)}
                     </p>
                   </div>
                   <Button
@@ -163,14 +164,14 @@ export function PasskeysSection() {
                     ) : (
                       <Trash2Icon className="size-4" />
                     )}
-                    Verwijderen
+                    {t("admin.buttons.delete")}
                   </Button>
                 </div>
               ))}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Geen passkeys geregistreerd
+              {t("admin.misc.noPasskeysRegistered")}
             </p>
           )}
 
@@ -186,7 +187,7 @@ export function PasskeysSection() {
             ) : (
               <PlusIcon className="size-4" />
             )}
-            Passkey toevoegen
+            {t("admin.buttons.addPasskey")}
           </Button>
         </div>
       </FieldSet>
@@ -194,10 +195,9 @@ export function PasskeysSection() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Passkey verwijderen</DialogTitle>
+            <DialogTitle>{t("admin.misc.deletePasskeyQuestion")}</DialogTitle>
             <DialogDescription>
-              Weet je zeker dat je deze passkey wilt verwijderen? Je kunt dan
-              niet meer inloggen met deze passkey.
+              {t("admin.misc.deletePasskeyDesc")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -207,7 +207,7 @@ export function PasskeysSection() {
               onClick={() => setDeleteDialogOpen(false)}
               disabled={!!deletingPasskeyId}
             >
-              Annuleren
+              {t("admin.buttons.cancel")}
             </Button>
             <Button
               size="sm"
@@ -218,7 +218,7 @@ export function PasskeysSection() {
               {deletingPasskeyId ? (
                 <Loader2Icon className="size-4 animate-spin" />
               ) : (
-                "Verwijderen"
+                t("admin.buttons.delete")
               )}
             </Button>
           </DialogFooter>

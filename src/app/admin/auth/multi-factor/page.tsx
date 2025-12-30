@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Separator } from "@/components/ui/separator";
+import { t } from "@/config/strings";
 
 export default function MultiFactorChoicePage() {
   const [loading, setLoading] = useState(true);
@@ -91,11 +92,11 @@ export default function MultiFactorChoicePage() {
         <div className="flex items-center gap-2">
           <ShieldCheckIcon className="size-6 opacity-80" />
           <p className="text-2xl font-semibold tracking-tight">
-            Tweestapsverificatie
+            {t("admin.headings.twoStepVerification")}
           </p>
         </div>
         <p className="text-muted-foreground text-sm mt-1">
-          Stel een extra beveilingsmethode in om je account beter te beveiligen.
+          {t("admin.dialogs.twoStepDesc")}
         </p>
       </header>
 
@@ -108,10 +109,10 @@ export default function MultiFactorChoicePage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <RectangleEllipsisIcon className="size-5 opacity-80" />
-              <p className="text-base font-medium">Authenticator app</p>
+              <p className="text-base font-medium">{t("admin.dialogs.authenticatorApp")}</p>
             </div>
             <p className="text-sm text-muted-foreground text-left">
-              Gebruik een app zoals Google Authenticator of 1Password
+              {t("admin.dialogs.authenticatorAppDesc")}
             </p>
           </div>
         </Button>
@@ -126,10 +127,10 @@ export default function MultiFactorChoicePage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <FingerprintIcon className="size-5 opacity-80" />
-              <p className="text-base font-medium">Passkey</p>
+              <p className="text-base font-medium">{t("admin.dialogs.passkeyMethod")}</p>
             </div>
             <p className="text-sm text-muted-foreground text-left">
-              Gebruik je vingerafdruk, gezichtsscan of schermvergrendeling
+              {t("admin.dialogs.passkeyMethodDesc")}
             </p>
           </div>
         </Button>
@@ -139,10 +140,10 @@ export default function MultiFactorChoicePage() {
         {skipping ? (
           <>
             <Loader2Icon className="size-4 animate-spin" />
-            Laden...
+            {t("admin.loading.default")}
           </>
         ) : (
-          <>Overslaan</>
+          <>{t("admin.buttons.skip")}</>
         )}
       </Button>
     </div>

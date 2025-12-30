@@ -8,6 +8,7 @@ import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import type { AppointmentSettings as SettingsType } from "@/types/appointments";
 import { DAYS_OF_WEEK } from "@/types/appointments";
+import { t } from "@/config/strings";
 
 interface DaySettingRow {
   day_of_week: number;
@@ -75,7 +76,7 @@ export function OpeningHours({
       setHasChanges(false);
     } catch (error) {
       console.error("Failed to load settings:", error);
-      toast.error("Kon instellingen niet laden");
+      toast.error(t("admin.messages.settingsLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -119,7 +120,7 @@ export function OpeningHours({
         throw new Error(data.error || "Failed to save");
       }
 
-      toast.success("Instellingen opgeslagen");
+      toast.success(t("admin.messages.settingsSaved"));
       originalSettings.current = JSON.parse(JSON.stringify(settings));
       setHasChanges(false);
     } catch (error) {
@@ -127,7 +128,7 @@ export function OpeningHours({
       toast.error(
         error instanceof Error
           ? error.message
-          : "Kon instellingen niet opslaan",
+          : t("admin.messages.settingsSaveFailed"),
       );
     } finally {
       onSaveComplete();

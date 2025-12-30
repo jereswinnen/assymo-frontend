@@ -53,6 +53,7 @@ import {
   SITE_SCOPED_FEATURES,
 } from "@/lib/permissions/types";
 import { getEffectiveFeatures } from "@/lib/permissions/check";
+import { t } from "@/config/strings";
 
 interface Site {
   id: string;
@@ -167,13 +168,13 @@ export function UserEditSheet({
         throw new Error(data.error || "Failed to update");
       }
 
-      toast.success("Gebruiker bijgewerkt");
+      toast.success(t("admin.messages.userUpdated"));
       onOpenChange(false);
       onUpdate();
     } catch (error) {
       console.error("Failed to update user:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon gebruiker niet bijwerken",
+        error instanceof Error ? error.message : t("admin.misc.userCouldNotUpdate"),
       );
     } finally {
       setSaving(false);
@@ -194,7 +195,7 @@ export function UserEditSheet({
         throw new Error(data.error || "Failed to delete");
       }
 
-      toast.success("Gebruiker verwijderd");
+      toast.success(t("admin.messages.userDeleted"));
       setDeleteConfirmOpen(false);
       onOpenChange(false);
       onUpdate();
@@ -203,7 +204,7 @@ export function UserEditSheet({
       toast.error(
         error instanceof Error
           ? error.message
-          : "Kon gebruiker niet verwijderen",
+          : t("admin.misc.userCouldNotDelete"),
       );
     } finally {
       setDeleting(false);
@@ -299,7 +300,7 @@ export function UserEditSheet({
               <span className="flex items-center gap-2">
                 <KeyIcon className="size-3" />
                 2FA:{" "}
-                {user.two_factor_enabled ? "Ingeschakeld" : "Uitgeschakeld"}
+                {user.two_factor_enabled ? t("admin.misc.twoFaEnabled") : t("admin.misc.twoFaDisabled")}
               </span>
             </SheetDescription>
           </SheetHeader>
@@ -371,7 +372,7 @@ export function UserEditSheet({
                     ))}
                     {sites.length === 0 && (
                       <p className="text-sm text-muted-foreground">
-                        Geen sites beschikbaar
+                        {t("admin.misc.noSitesAvailable")}
                       </p>
                     )}
                   </div>
@@ -498,7 +499,7 @@ export function UserEditSheet({
               onClick={() => setDeleteConfirmOpen(true)}
             >
               <Trash2Icon className="size-4" />
-              Verwijderen
+              {t("admin.buttons.delete")}
             </Button>
             <Button
               size="sm"
@@ -510,7 +511,7 @@ export function UserEditSheet({
               ) : (
                 <CheckIcon className="size-4" />
               )}
-              Opslaan
+              {t("admin.buttons.save")}
             </Button>
           </SheetFooter>
         </SheetContent>
@@ -519,14 +520,13 @@ export function UserEditSheet({
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Gebruiker verwijderen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.misc.deleteUserQuestion")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je &quot;{user?.name}&quot; wilt verwijderen? De
-              gebruiker verliest alle toegang en site-toewijzingen.
+              {t("admin.misc.deleteUserDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("admin.buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
@@ -535,10 +535,10 @@ export function UserEditSheet({
               {deleting ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
-                  Verwijderen...
+                  {t("admin.loading.deleting")}
                 </>
               ) : (
-                "Verwijderen"
+                t("admin.buttons.delete")
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

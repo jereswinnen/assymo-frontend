@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { KeyRoundIcon, Loader2Icon, CheckIcon } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { t } from "@/config/strings";
 
 export function PasswordSection() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -22,17 +23,17 @@ export function PasswordSection() {
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error("Vul alle velden in");
+      toast.error(t("admin.messages.fillAllFields"));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error("Wachtwoorden komen niet overeen");
+      toast.error(t("admin.messages.passwordMismatch"));
       return;
     }
 
     if (newPassword.length < 8) {
-      toast.error("Wachtwoord moet minimaal 8 tekens zijn");
+      toast.error(t("admin.messages.passwordMinLength"));
       return;
     }
 
@@ -46,20 +47,20 @@ export function PasswordSection() {
 
       if (error) {
         if (error.message?.includes("incorrect") || error.message?.includes("Invalid")) {
-          toast.error("Huidig wachtwoord is onjuist");
+          toast.error(t("admin.messages.currentPasswordWrong"));
         } else {
-          toast.error(error.message || "Kon wachtwoord niet wijzigen");
+          toast.error(error.message || t("admin.messages.passwordChangeFailed"));
         }
         return;
       }
 
-      toast.success("Wachtwoord gewijzigd");
+      toast.success(t("admin.messages.passwordChanged"));
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
       console.error("Password change error:", error);
-      toast.error("Er is een fout opgetreden");
+      toast.error(t("admin.messages.errorOccurred"));
     } finally {
       setSaving(false);
     }
@@ -69,11 +70,11 @@ export function PasswordSection() {
     <FieldSet>
       <FieldLegend className="flex items-center gap-1.5 font-semibold">
         <KeyRoundIcon className="size-4 opacity-80" />
-        Wachtwoord
+        {t("admin.labels.password")}
       </FieldLegend>
 
       <Field>
-        <FieldLabel htmlFor="currentPassword">Huidig wachtwoord</FieldLabel>
+        <FieldLabel htmlFor="currentPassword">{t("admin.labels.currentPassword")}</FieldLabel>
         <Input
           id="currentPassword"
           type="password"
@@ -84,7 +85,7 @@ export function PasswordSection() {
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="newPassword">Nieuw wachtwoord</FieldLabel>
+        <FieldLabel htmlFor="newPassword">{t("admin.labels.newPassword")}</FieldLabel>
         <Input
           id="newPassword"
           type="password"
@@ -92,11 +93,11 @@ export function PasswordSection() {
           onChange={(e) => setNewPassword(e.target.value)}
           autoComplete="new-password"
         />
-        <FieldDescription>Minimaal 8 tekens</FieldDescription>
+        <FieldDescription>{t("admin.dialogs.minChars")}</FieldDescription>
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="confirmPassword">Bevestig nieuw wachtwoord</FieldLabel>
+        <FieldLabel htmlFor="confirmPassword">{t("admin.labels.confirmNewPassword")}</FieldLabel>
         <Input
           id="confirmPassword"
           type="password"
@@ -116,7 +117,7 @@ export function PasswordSection() {
         ) : (
           <CheckIcon className="size-4" />
         )}
-        Wachtwoord wijzigen
+        {t("admin.buttons.changePassword")}
       </Button>
     </FieldSet>
   );

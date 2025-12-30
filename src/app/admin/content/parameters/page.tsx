@@ -22,6 +22,7 @@ import {
   Share2Icon,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { t } from "@/config/strings";
 
 interface SiteParams {
   address: string;
@@ -70,7 +71,7 @@ export default function SiteParametersPage() {
         })
         .catch((error) => {
           console.error("Failed to load site parameters:", error);
-          toast.error("Kon instellingen niet laden");
+          toast.error(t("admin.messages.settingsLoadFailed"));
         })
         .finally(() => setLoading(false));
     }
@@ -91,10 +92,10 @@ export default function SiteParametersPage() {
       }
 
       setOriginalParams(params);
-      toast.success("Instellingen opgeslagen");
+      toast.success(t("admin.messages.settingsSaved"));
     } catch (error) {
       console.error("Failed to save site parameters:", error);
-      toast.error("Kon instellingen niet opslaan");
+      toast.error(t("admin.messages.settingsSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -114,7 +115,7 @@ export default function SiteParametersPage() {
         ) : (
           <CheckIcon className="size-4" />
         )}
-        Opslaan
+        {t("admin.buttons.save")}
       </Button>
     ),
     [saving, hasChanges, handleSave],
@@ -136,30 +137,30 @@ export default function SiteParametersPage() {
       <FieldSet>
         <FieldLegend className="flex items-center gap-1.5 font-semibold">
           <AtSignIcon className="size-4 opacity-80" />
-          Contactgegevens
+          {t("admin.misc.contactInfo")}
         </FieldLegend>
         <RichTextEditor
-          label="Adres"
+          label={t("admin.labels.address")}
           value={params.address}
           onChange={(value) => setParams((prev) => ({ ...prev, address: value }))}
         />
         <Field>
-          <FieldLabel htmlFor="phone">Telefoonnummer</FieldLabel>
+          <FieldLabel htmlFor="phone">{t("admin.labels.phone")}</FieldLabel>
           <Input
             id="phone"
             value={params.phone}
             onChange={updateField("phone")}
-            placeholder="+32 123 45 67 89"
+            placeholder={t("admin.placeholders.phoneFormat2")}
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="email">E-mailadres</FieldLabel>
+          <FieldLabel htmlFor="email">{t("admin.labels.email")}</FieldLabel>
           <Input
             id="email"
             type="email"
             value={params.email}
             onChange={updateField("email")}
-            placeholder="info@assymo.be"
+            placeholder={t("admin.placeholders.companyEmail")}
           />
         </Field>
       </FieldSet>
@@ -169,10 +170,10 @@ export default function SiteParametersPage() {
       <FieldSet>
         <FieldLegend className="flex items-center gap-1.5 font-semibold">
           <Share2Icon className="size-4 opacity-80" />
-          Sociale media
+          {t("admin.misc.socialMedia")}
         </FieldLegend>
         <Field>
-          <FieldLabel htmlFor="instagram">Instagram URL</FieldLabel>
+          <FieldLabel htmlFor="instagram">{t("admin.labels.instagramUrl")}</FieldLabel>
           <Input
             id="instagram"
             type="url"
@@ -182,7 +183,7 @@ export default function SiteParametersPage() {
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="facebook">Facebook URL</FieldLabel>
+          <FieldLabel htmlFor="facebook">{t("admin.labels.facebookUrl")}</FieldLabel>
           <Input
             id="facebook"
             type="url"
@@ -198,15 +199,15 @@ export default function SiteParametersPage() {
       <FieldSet>
         <FieldLegend className="flex items-center gap-1.5 font-semibold">
           <Building2Icon className="size-4 opacity-80" />
-          Bedrijfsgegevens
+          {t("admin.misc.companyInfo")}
         </FieldLegend>
         <Field>
-          <FieldLabel htmlFor="vat_number">BTW-nummer</FieldLabel>
+          <FieldLabel htmlFor="vat_number">{t("admin.labels.vatNumber")}</FieldLabel>
           <Input
             id="vat_number"
             value={params.vat_number}
             onChange={updateField("vat_number")}
-            placeholder="BE 0123.456.789"
+            placeholder={t("admin.placeholders.vatFormat")}
           />
         </Field>
       </FieldSet>

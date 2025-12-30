@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import type { MediaItem } from "@/app/api/admin/content/media/route";
 import type { MediaFolder } from "@/app/api/admin/content/media/folders/route";
+import { t } from "@/config/strings";
 
 interface MediaLibraryDialogProps {
   open: boolean;
@@ -134,7 +135,7 @@ export function MediaLibraryDialog({
         <div className="relative">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
-            placeholder="Zoeken op naam of alt tekst..."
+            placeholder={t("admin.placeholders.searchAlt")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
