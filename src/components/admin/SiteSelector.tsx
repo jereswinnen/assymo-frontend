@@ -7,7 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CompassIcon, Loader2Icon } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CompassIcon } from "lucide-react";
 import { useSiteContext } from "@/lib/permissions/site-context";
 
 interface SiteSelectorProps {
@@ -24,11 +25,8 @@ export function SiteSelector({ className }: SiteSelectorProps) {
 
   if (loading) {
     return (
-      <div
-        className={`flex items-center gap-2 text-sm text-muted-foreground ${className}`}
-      >
-        <Loader2Icon className="size-4 animate-spin" />
-        <span>Laden...</span>
+      <div className={className}>
+        <Skeleton className="h-9 w-full" />
       </div>
     );
   }
