@@ -17,12 +17,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   GlobeIcon,
   Loader2Icon,
@@ -277,33 +280,25 @@ export function DateOverrides({
         onCreated={loadOverrides}
       />
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog
+      {/* Delete Confirmation */}
+      <AlertDialog
         open={deleteConfirmId !== null}
         onOpenChange={(open) => !open && setDeleteConfirmId(null)}
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Trash2Icon className="size-4" />
-              Uitzondering verwijderen
-            </DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            Weet je zeker dat je deze uitzondering wilt verwijderen? Dit kan
-            niet ongedaan worden gemaakt.
-          </p>
-          <DialogFooter>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setDeleteConfirmId(null)}
-            >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Uitzondering verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je deze uitzondering wilt verwijderen? Dit kan
+              niet ongedaan worden gemaakt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting !== null}>
               Annuleren
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
               disabled={deleting !== null}
             >
@@ -311,10 +306,10 @@ export function DateOverrides({
                 <Loader2Icon className="size-4 animate-spin" />
               )}
               Verwijderen
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
