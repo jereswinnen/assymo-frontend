@@ -34,7 +34,18 @@ import {
   UserIcon,
   BuildingIcon,
   KeyIcon,
+  Trash2Icon,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import type { Role, Feature, FeatureOverrides } from "@/lib/permissions/types";
 import { FEATURES, ROLE_FEATURES, SITE_SCOPED_FEATURES } from "@/lib/permissions/types";
@@ -93,6 +104,8 @@ export function UserEditDialog({
   onUpdate,
 }: UserEditDialogProps) {
   const [saving, setSaving] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [editData, setEditData] = useState({
     role: "content_editor" as Role,
     siteIds: [] as string[],
@@ -136,6 +149,34 @@ export function UserEditDialog({
       );
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!user) return;
+
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/admin/users/${user.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete");
+      }
+
+      toast.success("Gebruiker verwijderd");
+      setDeleteConfirmOpen(false);
+      onOpenChange(false);
+      onUpdate();
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Kon gebruiker niet verwijderen"
+      );
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -458,7 +499,16 @@ export function UserEditDialog({
             Aangemaakt op {new Date(user.created_at).toLocaleString("nl-NL")}
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => setDeleteConfirmOpen(true)}
+              className="sm:mr-auto"
+            >
+              <Trash2Icon className="size-4" />
+              Verwijderen
+            </Button>
             <Button
               size="sm"
               variant="outline"
@@ -477,6 +527,36 @@ export function UserEditDialog({
           </DialogFooter>
         </div>
       </DialogContent>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Gebruiker verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je &quot;{user?.name}&quot; wilt verwijderen?
+              De gebruiker verliest alle toegang en site-toewijzingen.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Annuleren</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin" />
+                  Verwijderen...
+                </>
+              ) : (
+                "Verwijderen"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

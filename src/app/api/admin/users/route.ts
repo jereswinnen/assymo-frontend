@@ -120,10 +120,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Trigger password reset email using Better Auth's forgetPassword
+    // Trigger password reset email using Better Auth's forgotPassword
     // This will send the reset email to the user
     const baseUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    await fetch(`${baseUrl}/api/auth/forget-password`, {
+    await fetch(`${baseUrl}/api/auth/forgot-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
