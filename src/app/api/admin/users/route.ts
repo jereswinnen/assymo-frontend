@@ -121,9 +121,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Trigger password reset via Better Auth's API
-    // This uses Better Auth's own token generation and sendResetPassword callback
+    // Pass headers so Better Auth knows the correct origin for the reset URL
     try {
       await auth.api.requestPasswordReset({
+        headers: request.headers,
         body: {
           email,
           redirectTo: "/admin/auth/reset-password",
