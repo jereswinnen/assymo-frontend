@@ -50,6 +50,19 @@ Next.js 16 application with a custom admin CMS, AI chatbot with RAG, and appoint
 
 **Section Forms**: Each section type has a corresponding form component in `src/components/admin/section-forms/`. The `SectionForm.tsx` component routes to the appropriate form based on `_type`.
 
+**Admin UI Strings**: All Dutch UI text is centralized in `src/config/strings.ts`. Use the `t()` helper for string access:
+```typescript
+import { t } from '@/config/strings';
+t('admin.buttons.save')  // "Bewaren"
+```
+When building admin features, check `strings.ts` for existing keys before adding new ones. Add new strings to the appropriate category if needed. Standards: "Bewaren" for save (not "Opslaan"), "Versturen" for send.
+
+**Multi-Site & Permissions** (`src/lib/permissions/`):
+- Roles: `super_admin` > `admin` > `content_editor`
+- Site-scoped features: pages, solutions, navigation, filters, media, parameters
+- Global features: appointments, emails, conversations, settings, users, sites
+- Use `useSiteContext()` hook for current site, `usePermissions()` for access checks
+
 ### AI Chatbot
 
 The chatbot uses RAG with booking tools for appointment scheduling.
