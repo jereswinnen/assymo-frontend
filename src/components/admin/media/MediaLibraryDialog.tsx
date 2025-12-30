@@ -9,7 +9,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ArrowLeftIcon, FolderIcon, Loader2Icon, SearchIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  FolderIcon,
+  Loader2Icon,
+  SearchIcon,
+} from "lucide-react";
 import type { MediaItem } from "@/app/api/admin/content/media/route";
 import type { MediaFolder } from "@/app/api/admin/content/media/folders/route";
 
@@ -31,7 +36,9 @@ export function MediaLibraryDialog({
 
   // Folder navigation
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
-  const [currentFolderName, setCurrentFolderName] = useState<string | null>(null);
+  const [currentFolderName, setCurrentFolderName] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -84,7 +91,7 @@ export function MediaLibraryDialog({
   });
 
   const filteredFolders = folders.filter((folder) =>
-    folder.name.toLowerCase().includes(search.toLowerCase())
+    folder.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleSelect = (url: string) => {
@@ -106,7 +113,7 @@ export function MediaLibraryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-[70vw]! max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>
             {currentFolderName ? currentFolderName : "Selecteer afbeelding"}
@@ -148,7 +155,7 @@ export function MediaLibraryDialog({
                   : "Geen afbeeldingen in bibliotheek"}
             </div>
           ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 py-2">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-4 py-2">
               {/* Folders first (only at root level) */}
               {!currentFolderId &&
                 filteredFolders.map((folder) => (
@@ -198,7 +205,8 @@ export function MediaLibraryDialog({
                         {folder.name}
                       </p>
                       <p className="text-white/70 text-xs">
-                        {folder.itemCount} {folder.itemCount === 1 ? "item" : "items"}
+                        {folder.itemCount}{" "}
+                        {folder.itemCount === 1 ? "item" : "items"}
                       </p>
                     </div>
                   </button>
