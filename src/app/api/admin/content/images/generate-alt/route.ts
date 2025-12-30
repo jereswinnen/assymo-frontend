@@ -1,5 +1,5 @@
 import { NextResponse, after } from "next/server";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { neon } from "@neondatabase/serverless";
@@ -62,13 +62,9 @@ async function generateAndSaveAltText(
 }
 
 export async function POST(request: Request) {
-  const authenticated = await isAuthenticated();
-
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
+    const { authorized, response } = await protectRoute({ feature: "media" });
+    if (!authorized) return response;
     const { url, fileName, folderId } = await request.json();
 
     if (!url || typeof url !== "string") {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import { deleteImage } from "@/lib/storage";
 import { neon } from "@neondatabase/serverless";
 
@@ -7,11 +7,8 @@ const sql = neon(process.env.DATABASE_URL!);
 
 export async function POST(request: Request) {
   try {
-    const authenticated = await isAuthenticated();
-
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "media" });
+    if (!authorized) return response;
 
     const { url } = await request.json();
 

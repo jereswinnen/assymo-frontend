@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import { resend } from "@/lib/resend";
 import { RESEND_CONFIG } from "@/config/resend";
 
 // GET: Get subscriber count from Resend audience
 export async function GET(req: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "emails" });
+    if (!authorized) return response;
 
     if (!RESEND_CONFIG.audienceId) {
       return NextResponse.json(

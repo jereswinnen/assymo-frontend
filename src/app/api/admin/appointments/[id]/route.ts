@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import {
   getAppointmentById,
   updateAppointment,
@@ -25,10 +25,8 @@ interface RouteParams {
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "appointments" });
+    if (!authorized) return response;
 
     const { id } = await params;
     const appointmentId = parseInt(id, 10);
@@ -70,10 +68,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
  */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "appointments" });
+    if (!authorized) return response;
 
     const { id } = await params;
     const appointmentId = parseInt(id, 10);
@@ -245,10 +241,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "appointments" });
+    if (!authorized) return response;
 
     const { id } = await params;
     const appointmentId = parseInt(id, 10);

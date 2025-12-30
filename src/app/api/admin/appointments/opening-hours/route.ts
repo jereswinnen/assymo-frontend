@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import { getAppointmentSettings, updateSettings } from "@/lib/appointments";
 import type { UpdateSettingsInput } from "@/types/appointments";
 
@@ -10,10 +10,8 @@ import type { UpdateSettingsInput } from "@/types/appointments";
  */
 export async function GET() {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "appointments" });
+    if (!authorized) return response;
 
     const settings = await getAppointmentSettings();
 
@@ -41,10 +39,8 @@ export async function GET() {
  */
 export async function PUT(request: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "appointments" });
+    if (!authorized) return response;
 
     const body = await request.json();
 
@@ -138,10 +134,8 @@ export async function PUT(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "appointments" });
+    if (!authorized) return response;
 
     const body = await request.json();
 

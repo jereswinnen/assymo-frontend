@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { retrieveRelevantChunks } from '@/lib/retrieval';
-import { isAuthenticated } from '@/lib/auth-utils';
+import { protectRoute } from '@/lib/permissions';
 
 export async function POST(req: NextRequest) {
   try {
-    // Check authentication via session cookie
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "conversations" });
+    if (!authorized) return response;
 
     const body = await req.json();
     const { query } = body;

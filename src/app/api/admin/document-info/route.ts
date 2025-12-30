@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDocumentInfo } from '@/lib/embeddings';
-import { isAuthenticated } from '@/lib/auth-utils';
+import { protectRoute } from '@/lib/permissions';
 
 export async function GET(req: NextRequest) {
   try {
-    // Check authentication via session cookie
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "conversations" });
+    if (!authorized) return response;
 
     // Get current document info
     const documentInfo = await getDocumentInfo();

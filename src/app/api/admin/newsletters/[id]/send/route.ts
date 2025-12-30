@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import { resend } from "@/lib/resend";
 import { RESEND_CONFIG } from "@/config/resend";
 import { NewsletterBroadcast } from "@/emails";
@@ -14,10 +14,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "emails" });
+    if (!authorized) return response;
 
     const { id } = await params;
     const newsletterId = parseInt(id, 10);

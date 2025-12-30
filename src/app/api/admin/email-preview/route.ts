@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { render } from "@react-email/components";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import {
   AppointmentConfirmation,
   AppointmentAdminNotification,
@@ -133,10 +133,8 @@ const templateList = [
 // GET: Get list of available templates or render a specific one
 export async function GET(req: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "emails" });
+    if (!authorized) return response;
 
     const { searchParams } = new URL(req.url);
     const templateId = searchParams.get("template");

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import {
   getAllDateOverrides,
   getDateOverrides,
@@ -21,10 +21,8 @@ import type { CreateDateOverrideInput } from "@/types/appointments";
  */
 export async function GET(request: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "appointments" });
+    if (!authorized) return response;
 
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get("startDate");
@@ -65,10 +63,8 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "appointments" });
+    if (!authorized) return response;
 
     const body = await request.json();
 
@@ -188,10 +184,8 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "appointments" });
+    if (!authorized) return response;
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");

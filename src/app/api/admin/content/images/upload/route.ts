@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
 export async function POST(request: Request) {
-  const authenticated = await isAuthenticated();
-
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { authorized, response } = await protectRoute({ feature: "media" });
+  if (!authorized) return response;
 
   const body = (await request.json()) as HandleUploadBody;
 
