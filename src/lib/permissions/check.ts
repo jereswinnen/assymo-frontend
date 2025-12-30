@@ -3,6 +3,7 @@ import {
   type Role,
   type PermissionContext,
   ROLE_FEATURES,
+  ROLE_HIERARCHY,
   SITE_SCOPED_FEATURES,
 } from "./types";
 
@@ -94,13 +95,7 @@ export function hasAccess(
  * Check if user is at least a certain role level
  */
 export function hasRole(ctx: PermissionContext, role: Role): boolean {
-  const hierarchy: Record<Role, number> = {
-    super_admin: 100,
-    admin: 50,
-    content_editor: 10,
-  };
-
-  return hierarchy[ctx.user.role] >= hierarchy[role];
+  return ROLE_HIERARCHY[ctx.user.role] >= ROLE_HIERARCHY[role];
 }
 
 /**
