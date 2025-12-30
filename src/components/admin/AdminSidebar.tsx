@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -48,35 +48,25 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { type Feature, type Role, ROLE_FEATURES } from "@/lib/permissions/types";
 
-const navItems = [
-  { href: "/admin/appointments", label: "Afspraken", icon: CalendarDaysIcon },
-  { href: "/admin/emails", label: "E-mails", icon: MailboxIcon },
-  {
-    href: "/admin/conversations",
-    label: "Conversaties",
-    icon: MessagesSquareIcon,
-  },
-  { href: "/admin/users", label: "Gebruikers", icon: UsersRoundIcon },
-  { href: "/admin/sites", label: "Sites", icon: CompassIcon },
-  { href: "/admin/settings", label: "Instellingen", icon: SettingsIcon },
+// Nav items with their required feature
+const navItems: { href: string; label: string; icon: typeof CalendarDaysIcon; feature: Feature }[] = [
+  { href: "/admin/appointments", label: "Afspraken", icon: CalendarDaysIcon, feature: "appointments" },
+  { href: "/admin/emails", label: "E-mails", icon: MailboxIcon, feature: "emails" },
+  { href: "/admin/conversations", label: "Conversaties", icon: MessagesSquareIcon, feature: "conversations" },
+  { href: "/admin/users", label: "Gebruikers", icon: UsersRoundIcon, feature: "users" },
+  { href: "/admin/sites", label: "Sites", icon: CompassIcon, feature: "sites" },
+  { href: "/admin/settings", label: "Instellingen", icon: SettingsIcon, feature: "settings" },
 ];
 
-const contentItems = [
-  { href: "/admin/content/pages", label: "Pagina's", icon: FileTextIcon },
-  {
-    href: "/admin/content/solutions",
-    label: "Realisaties",
-    icon: FolderTreeIcon,
-  },
-  { href: "/admin/content/media", label: "Media", icon: ImageIcon },
-  { href: "/admin/content/filters", label: "Filters", icon: ToggleRightIcon },
-  { href: "/admin/content/navigation", label: "Navigatie", icon: MenuIcon },
-  {
-    href: "/admin/content/parameters",
-    label: "Parameters",
-    icon: ChevronsLeftRightEllipsisIcon,
-  },
+const contentItems: { href: string; label: string; icon: typeof FileTextIcon; feature: Feature }[] = [
+  { href: "/admin/content/pages", label: "Pagina's", icon: FileTextIcon, feature: "pages" },
+  { href: "/admin/content/solutions", label: "Realisaties", icon: FolderTreeIcon, feature: "solutions" },
+  { href: "/admin/content/media", label: "Media", icon: ImageIcon, feature: "media" },
+  { href: "/admin/content/filters", label: "Filters", icon: ToggleRightIcon, feature: "filters" },
+  { href: "/admin/content/navigation", label: "Navigatie", icon: MenuIcon, feature: "navigation" },
+  { href: "/admin/content/parameters", label: "Parameters", icon: ChevronsLeftRightEllipsisIcon, feature: "parameters" },
 ];
 
 function getInitials(name: string): string {
@@ -88,31 +78,67 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
+interface UserData {
+  name: string;
+  email: string;
+  image: string | null;
+  role: Role;
+  featureOverrides: { grants?: Feature[]; revokes?: Feature[] } | null;
+}
+
 export function AdminSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const router = useRouter();
   const { isMobile } = useSidebar();
-  const [user, setUser] = useState<{
-    name: string;
-    email: string;
-    image: string | null;
-  } | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
 
   useEffect(() => {
     async function loadUser() {
       const { data } = await authClient.getSession();
       if (data?.user) {
+        const u = data.user as {
+          name?: string;
+          email: string;
+          image?: string | null;
+          role?: string;
+          featureOverrides?: string | null;
+        };
         setUser({
-          name: data.user.name || "Gebruiker",
-          email: data.user.email,
-          image: data.user.image || null,
+          name: u.name || "Gebruiker",
+          email: u.email,
+          image: u.image || null,
+          role: (u.role as Role) || "content_editor",
+          featureOverrides: u.featureOverrides ? JSON.parse(u.featureOverrides) : null,
         });
       }
     }
     loadUser();
   }, []);
+
+  // Calculate effective features based on role + overrides
+  const effectiveFeatures = useMemo(() => {
+    if (!user) return [];
+    const roleFeatures = ROLE_FEATURES[user.role] || [];
+    const grants = user.featureOverrides?.grants || [];
+    const revokes = user.featureOverrides?.revokes || [];
+    return [
+      ...roleFeatures.filter((f) => !revokes.includes(f)),
+      ...grants.filter((f) => !roleFeatures.includes(f)),
+    ];
+  }, [user]);
+
+  // Filter nav items based on user's features
+  const visibleNavItems = useMemo(
+    () => navItems.filter((item) => effectiveFeatures.includes(item.feature)),
+    [effectiveFeatures]
+  );
+
+  const visibleContentItems = useMemo(
+    () => contentItems.filter((item) => effectiveFeatures.includes(item.feature)),
+    [effectiveFeatures]
+  );
 
   const handleLogout = async () => {
     try {
@@ -138,7 +164,7 @@ export function AdminSidebar({
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
+              {visibleNavItems.map((item) => {
                 const isActive =
                   pathname === item.href ||
                   pathname.startsWith(item.href + "/");
@@ -160,32 +186,34 @@ export function AdminSidebar({
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Content</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {contentItems.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  pathname.startsWith(item.href + "/");
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={item.label}
-                    >
-                      <Link href={item.href}>
-                        <item.icon />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {visibleContentItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Content</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {visibleContentItems.map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    pathname.startsWith(item.href + "/");
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        tooltip={item.label}
+                      >
+                        <Link href={item.href}>
+                          <item.icon />
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

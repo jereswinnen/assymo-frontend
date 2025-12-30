@@ -31,8 +31,13 @@ function ConversationsContent() {
         return;
       }
 
+      if (!response.ok) {
+        console.error("Failed to load conversations:", response.status);
+        return;
+      }
+
       const data = await response.json();
-      setConversations(data);
+      setConversations(data.conversations || []);
     } catch (error) {
       console.error("Failed to load conversations:", error);
     } finally {

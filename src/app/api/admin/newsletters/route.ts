@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import type { Newsletter, NewsletterSection } from "@/config/newsletter";
 
 const sql = neon(process.env.DATABASE_URL!);
@@ -8,10 +8,8 @@ const sql = neon(process.env.DATABASE_URL!);
 // GET: List newsletters (default: drafts, or sent if ?status=sent)
 export async function GET(req: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "emails" });
+    if (!authorized) return response;
 
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status") || "draft";
@@ -57,10 +55,8 @@ export async function GET(req: NextRequest) {
 // POST: Create a new draft newsletter
 export async function POST(req: NextRequest) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "emails" });
+    if (!authorized) return response;
 
     const body = await req.json();
     const { subject, preheader, sections } = body;

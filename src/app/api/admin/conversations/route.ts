@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
       LIMIT 50
     `;
 
-    return NextResponse.json(conversations);
+    return NextResponse.json({ conversations });
   } catch (error) {
     console.error("Failed to fetch conversations:", error);
     return NextResponse.json(

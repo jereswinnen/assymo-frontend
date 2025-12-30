@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { isAuthenticated } from "@/lib/auth-utils";
+import { protectRoute } from "@/lib/permissions";
 import type { Newsletter, NewsletterSection } from "@/config/newsletter";
 
 const sql = neon(process.env.DATABASE_URL!);
@@ -11,10 +11,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "emails" });
+    if (!authorized) return response;
 
     const { id } = await params;
     const newsletterId = parseInt(id, 10);
@@ -71,10 +69,8 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "emails" });
+    if (!authorized) return response;
 
     const { id } = await params;
     const newsletterId = parseInt(id, 10);
@@ -141,10 +137,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authenticated = await isAuthenticated();
-    if (!authenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { authorized, response } = await protectRoute({ feature: "emails" });
+    if (!authorized) return response;
 
     const { id } = await params;
     const newsletterId = parseInt(id, 10);
