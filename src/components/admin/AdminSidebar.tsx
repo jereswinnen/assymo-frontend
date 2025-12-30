@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import Logo from "@/components/layout/Logo";
 import { SiteSelector } from "@/components/admin/SiteSelector";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -156,6 +157,7 @@ export function AdminSidebar({
   const pathname = usePathname();
   const router = useRouter();
   const { isMobile } = useSidebar();
+  const { availableSites } = useSiteContext();
   const [user, setUser] = useState<UserData | null>(null);
   const [effectiveFeatures, setEffectiveFeatures] = useState<Feature[] | null>(
     null,
@@ -225,10 +227,17 @@ export function AdminSidebar({
   };
 
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader className="py-4 space-y-3">
         <Link href="/admin/appointments">
-          <Logo className="w-auto h-6" />
+          <Logo
+            className="w-auto h-6"
+            variant={
+              availableSites.length === 1 && availableSites[0].slug === "vpg"
+                ? "vpg"
+                : "assymo"
+            }
+          />
         </Link>
         <SiteSelector />
       </SidebarHeader>

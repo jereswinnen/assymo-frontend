@@ -93,9 +93,7 @@ export function UserCreateSheet({
         throw new Error(data.error || "Failed to create user");
       }
 
-      toast.success(
-        "Gebruiker aangemaakt. Er is een email verstuurd om het wachtwoord in te stellen.",
-      );
+      toast.success("Gebruiker aangemaakt.");
       handleOpenChange(false);
       onCreated();
     } catch (error) {
