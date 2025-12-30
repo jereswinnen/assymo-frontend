@@ -8,6 +8,7 @@ import { PasswordReset } from "@/emails/PasswordReset";
 
 export const auth = betterAuth({
   appName: "Assymo Admin",
+  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL,
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
   }),
