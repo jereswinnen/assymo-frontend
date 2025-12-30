@@ -23,17 +23,17 @@ import {
 import { Loader2Icon, CheckIcon } from "lucide-react";
 import { toast } from "sonner";
 
-interface CreateAppointmentFormProps {
+interface AppointmentCreateSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
 }
 
-export function CreateAppointmentForm({
+export function AppointmentCreateSheet({
   open,
   onOpenChange,
   onCreated,
-}: CreateAppointmentFormProps) {
+}: AppointmentCreateSheetProps) {
   const [saving, setSaving] = useState(false);
   const [sendConfirmation, setSendConfirmation] = useState(true);
 

@@ -23,8 +23,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { UserEditSheet } from "@/components/admin/UserEditSheet";
-import { UserCreateSheet } from "@/components/admin/UserCreateSheet";
+import { UserEditSheet } from "./sheets/UserEditSheet";
+import { UserCreateSheet } from "./sheets/UserCreateSheet";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import type { Role, FeatureOverrides } from "@/lib/permissions/types";
 

@@ -20,7 +20,7 @@ import {
 import { Loader2Icon, SearchIcon } from "lucide-react";
 import { toast } from "sonner";
 import { AppointmentDialog } from "./AppointmentDialog";
-import { CreateAppointmentForm } from "./CreateAppointmentForm";
+import { AppointmentCreateSheet } from "@/app/admin/appointments/sheets/AppointmentCreateSheet";
 import type { Appointment, AppointmentStatus } from "@/types/appointments";
 import { STATUS_LABELS } from "@/types/appointments";
 import {
@@ -240,8 +240,8 @@ export function AppointmentsList({
         onUpdate={handleAppointmentUpdated}
       />
 
-      {/* Create Dialog */}
-      <CreateAppointmentForm
+      {/* Create Sheet */}
+      <AppointmentCreateSheet
         open={createDialogOpen}
         onOpenChange={onCreateDialogOpenChange}
         onCreated={handleAppointmentCreated}

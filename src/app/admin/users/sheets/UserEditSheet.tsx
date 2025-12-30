@@ -173,7 +173,7 @@ export function UserEditSheet({
     } catch (error) {
       console.error("Failed to update user:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon gebruiker niet bijwerken"
+        error instanceof Error ? error.message : "Kon gebruiker niet bijwerken",
       );
     } finally {
       setSaving(false);
@@ -201,7 +201,9 @@ export function UserEditSheet({
     } catch (error) {
       console.error("Failed to delete user:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon gebruiker niet verwijderen"
+        error instanceof Error
+          ? error.message
+          : "Kon gebruiker niet verwijderen",
       );
     } finally {
       setDeleting(false);
@@ -262,13 +264,21 @@ export function UserEditSheet({
   const revokes = editData.featureOverrides?.revokes || [];
 
   // Calculate effective features
-  const effectiveFeatures = getEffectiveFeatures(editData.role, editData.featureOverrides);
+  const effectiveFeatures = getEffectiveFeatures(
+    editData.role,
+    editData.featureOverrides,
+  );
 
   // Content features (site-scoped)
   const contentFeatures = SITE_SCOPED_FEATURES;
 
   // Business features (exclude users and sites which are admin-only)
-  const businessFeatures: Feature[] = ["appointments", "emails", "conversations", "settings"];
+  const businessFeatures: Feature[] = [
+    "appointments",
+    "emails",
+    "conversations",
+    "settings",
+  ];
 
   if (!user) return null;
 
@@ -288,7 +298,8 @@ export function UserEditSheet({
               </span>
               <span className="flex items-center gap-2">
                 <KeyIcon className="size-3" />
-                2FA: {user.two_factor_enabled ? "Ingeschakeld" : "Uitgeschakeld"}
+                2FA:{" "}
+                {user.two_factor_enabled ? "Ingeschakeld" : "Uitgeschakeld"}
               </span>
             </SheetDescription>
           </SheetHeader>
@@ -314,14 +325,18 @@ export function UserEditSheet({
                     <SelectContent>
                       <SelectItem value="super_admin">Super Admin</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="content_editor">Content Editor</SelectItem>
+                      <SelectItem value="content_editor">
+                        Content Editor
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FieldDescription>
-                    {editData.role === "super_admin" && "Volledige toegang tot alles"}
+                    {editData.role === "super_admin" &&
+                      "Volledige toegang tot alles"}
                     {editData.role === "admin" &&
                       "Content + afspraken, e-mails, conversaties, instellingen"}
-                    {editData.role === "content_editor" && "Alleen content beheren"}
+                    {editData.role === "content_editor" &&
+                      "Alleen content beheren"}
                   </FieldDescription>
                 </Field>
               </FieldSet>
@@ -334,14 +349,16 @@ export function UserEditSheet({
                   <FieldDescription>
                     Content features zijn beperkt tot de toegewezen sites
                   </FieldDescription>
-                  <div className="space-y-3 mt-3">
+                  <div className="space-y-3">
                     {sites.map((site) => (
                       <div
                         key={site.id}
                         className="flex items-center justify-between"
                       >
                         <div className="space-y-0.5">
-                          <span className="text-sm font-medium">{site.name}</span>
+                          <span className="text-sm font-medium">
+                            {site.name}
+                          </span>
                           <p className="text-xs text-muted-foreground">
                             {site.slug}
                           </p>
@@ -371,7 +388,7 @@ export function UserEditSheet({
                       <FieldDescription>
                         Beheer van website inhoud
                       </FieldDescription>
-                      <div className="space-y-3 mt-3">
+                      <div className="space-y-3">
                         {contentFeatures.map((feature) => {
                           const isEnabled = effectiveFeatures.includes(feature);
                           const hasDefault = roleFeatures.includes(feature);
@@ -388,7 +405,10 @@ export function UserEditSheet({
                                 <span className="text-sm font-medium flex items-center gap-2">
                                   {FEATURE_LABELS[feature]}
                                   {isOverridden && (
-                                    <Badge variant="outline" className="text-[10px] px-1 py-0">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-[10px] px-1 py-0"
+                                    >
                                       aangepast
                                     </Badge>
                                   )}
@@ -416,9 +436,9 @@ export function UserEditSheet({
                     <Field>
                       <FieldLabel>Business features</FieldLabel>
                       <FieldDescription>
-                        Beheer van bedrijfsprocessen
+                        Beheer van bedrijfsapplicaties
                       </FieldDescription>
-                      <div className="space-y-3 mt-3">
+                      <div className="space-y-3">
                         {businessFeatures.map((feature) => {
                           const isEnabled = effectiveFeatures.includes(feature);
                           const hasDefault = roleFeatures.includes(feature);
@@ -435,7 +455,10 @@ export function UserEditSheet({
                                 <span className="text-sm font-medium flex items-center gap-2">
                                   {FEATURE_LABELS[feature]}
                                   {isOverridden && (
-                                    <Badge variant="outline" className="text-[10px] px-1 py-0">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-[10px] px-1 py-0"
+                                    >
                                       aangepast
                                     </Badge>
                                   )}
@@ -462,7 +485,8 @@ export function UserEditSheet({
               <FieldSeparator />
 
               <div className="text-xs text-muted-foreground">
-                Aangemaakt op {new Date(user.created_at).toLocaleString("nl-NL")}
+                Aangemaakt op{" "}
+                {new Date(user.created_at).toLocaleString("nl-NL")}
               </div>
             </FieldGroup>
           </div>
@@ -497,8 +521,8 @@ export function UserEditSheet({
           <AlertDialogHeader>
             <AlertDialogTitle>Gebruiker verwijderen?</AlertDialogTitle>
             <AlertDialogDescription>
-              Weet je zeker dat je &quot;{user?.name}&quot; wilt verwijderen?
-              De gebruiker verliest alle toegang en site-toewijzingen.
+              Weet je zeker dat je &quot;{user?.name}&quot; wilt verwijderen? De
+              gebruiker verliest alle toegang en site-toewijzingen.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

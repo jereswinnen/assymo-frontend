@@ -21,14 +21,6 @@ import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import {
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -40,9 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   BlocksIcon,
-  CheckIcon,
   GripVerticalIcon,
-  Loader2Icon,
   Trash2Icon,
 } from "lucide-react";
 import {
@@ -54,7 +44,7 @@ import {
 } from "@/components/ui/empty";
 import { Section, getSectionLabel } from "@/types/sections";
 import { AddSectionButton } from "./AddSectionButton";
-import { SectionForm } from "./SectionForm";
+import { SectionEditSheet } from "@/app/admin/content/sheets/SectionEditSheet";
 
 interface SortableSectionRowProps {
   section: Section;
@@ -231,44 +221,15 @@ export function SectionList({
       )}
 
       {/* Edit Section Sheet */}
-      <Sheet
+      <SectionEditSheet
+        section={editingSection}
         open={!!editingSection}
         onOpenChange={(open) => !open && setEditingSection(null)}
-      >
-        <SheetContent
-          side="right"
-          className="px-4 w-full md:max-w-xl overflow-y-auto"
-        >
-          <SheetHeader className="px-0">
-            <SheetTitle>
-              {editingSection && getSectionLabel(editingSection._type)}
-            </SheetTitle>
-            <SheetDescription>
-              Bewerk de inhoud van deze sectie.
-            </SheetDescription>
-          </SheetHeader>
-          {editingSection && (
-            <SectionForm section={editingSection} onChange={handleUpdate} />
-          )}
-          {onSave && (
-            <SheetFooter className="px-0">
-              <Button onClick={handleSave} disabled={saving || !hasChanges}>
-                {saving ? (
-                  <>
-                    <Loader2Icon className="size-4 animate-spin" />
-                    Opslaan...
-                  </>
-                ) : (
-                  <>
-                    <CheckIcon className="size-4" />
-                    Opslaan
-                  </>
-                )}
-              </Button>
-            </SheetFooter>
-          )}
-        </SheetContent>
-      </Sheet>
+        onChange={handleUpdate}
+        onSave={onSave ? handleSave : undefined}
+        saving={saving}
+        hasChanges={hasChanges}
+      />
 
       {/* Delete confirmation */}
       <AlertDialog

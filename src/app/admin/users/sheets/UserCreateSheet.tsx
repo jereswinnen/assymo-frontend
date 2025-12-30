@@ -93,13 +93,15 @@ export function UserCreateSheet({
         throw new Error(data.error || "Failed to create user");
       }
 
-      toast.success("Gebruiker aangemaakt. Er is een email verstuurd om het wachtwoord in te stellen.");
+      toast.success(
+        "Gebruiker aangemaakt. Er is een email verstuurd om het wachtwoord in te stellen.",
+      );
       handleOpenChange(false);
       onCreated();
     } catch (error) {
       console.error("Failed to create user:", error);
       toast.error(
-        error instanceof Error ? error.message : "Kon gebruiker niet aanmaken"
+        error instanceof Error ? error.message : "Kon gebruiker niet aanmaken",
       );
     } finally {
       setSaving(false);
@@ -169,14 +171,18 @@ export function UserCreateSheet({
                   <SelectContent>
                     <SelectItem value="super_admin">Super Admin</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="content_editor">Content Editor</SelectItem>
+                    <SelectItem value="content_editor">
+                      Content Editor
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FieldDescription>
-                  {formData.role === "super_admin" && "Volledige toegang tot alles"}
+                  {formData.role === "super_admin" &&
+                    "Volledige toegang tot alles"}
                   {formData.role === "admin" &&
                     "Content + afspraken, e-mails, conversaties, instellingen"}
-                  {formData.role === "content_editor" && "Alleen content beheren"}
+                  {formData.role === "content_editor" &&
+                    "Alleen content beheren"}
                 </FieldDescription>
               </Field>
             </FieldSet>
@@ -189,7 +195,7 @@ export function UserCreateSheet({
                 <FieldDescription>
                   Content features zijn beperkt tot de toegewezen sites
                 </FieldDescription>
-                <div className="space-y-3 mt-3">
+                <div className="space-y-3">
                   {sites.map((site) => (
                     <div
                       key={site.id}
