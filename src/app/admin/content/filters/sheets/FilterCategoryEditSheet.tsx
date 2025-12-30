@@ -70,7 +70,7 @@ interface FilterCategory {
   filters: Filter[];
 }
 
-interface FilterCategorySheetProps {
+interface FilterCategoryEditSheetProps {
   category: FilterCategory | null;
   siteId: string | undefined;
   open: boolean;
@@ -88,14 +88,14 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-export function FilterCategorySheet({
+export function FilterCategoryEditSheet({
   category,
   siteId,
   open,
   onOpenChange,
   onSaved,
   onCategoryUpdated,
-}: FilterCategorySheetProps) {
+}: FilterCategoryEditSheetProps) {
   const isNew = !category;
 
   // Category form state

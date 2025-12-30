@@ -54,7 +54,7 @@ import {
   EmptyTitle,
   EmptyDescription,
 } from "@/components/ui/empty";
-import { NavigationLinkSheet } from "./sheets/NavigationLinkSheet";
+import { NavLinkEditSheet } from "./sheets/NavLinkEditSheet";
 
 interface Solution {
   id: string;
@@ -297,7 +297,7 @@ export default function NavigationPage() {
       )}
 
       {/* Edit/Create Sheet */}
-      <NavigationLinkSheet
+      <NavLinkEditSheet
         link={editingLink}
         siteId={currentSite?.id}
         solutions={solutions}

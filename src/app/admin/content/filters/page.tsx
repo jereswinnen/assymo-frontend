@@ -54,7 +54,7 @@ import {
   PlusIcon,
   Trash2Icon,
 } from "lucide-react";
-import { FilterCategorySheet } from "./sheets/FilterCategorySheet";
+import { FilterCategoryEditSheet } from "./sheets/FilterCategoryEditSheet";
 
 interface Filter {
   id: string;
@@ -289,7 +289,7 @@ export default function FiltersPage() {
       )}
 
       {/* Edit/Create Sheet */}
-      <FilterCategorySheet
+      <FilterCategoryEditSheet
         category={editingCategory}
         siteId={currentSite?.id}
         open={sheetOpen}

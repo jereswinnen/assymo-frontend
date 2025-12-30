@@ -75,7 +75,7 @@ interface NavigationLink {
   sub_items: NavigationSubitem[];
 }
 
-interface NavigationLinkSheetProps {
+interface NavLinkEditSheetProps {
   link: NavigationLink | null;
   siteId: string | undefined;
   solutions: Solution[];
@@ -94,7 +94,7 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-export function NavigationLinkSheet({
+export function NavLinkEditSheet({
   link,
   siteId,
   solutions,
@@ -102,7 +102,7 @@ export function NavigationLinkSheet({
   onOpenChange,
   onSaved,
   onLinkUpdated,
-}: NavigationLinkSheetProps) {
+}: NavLinkEditSheetProps) {
   const isNew = !link;
 
   // Link form state
