@@ -118,8 +118,9 @@ export function AdminSidebar({
   }, []);
 
   // Calculate effective features based on role + overrides
+  // Show all items until user data is loaded to prevent hydration mismatch
   const effectiveFeatures = useMemo(() => {
-    if (!user) return [];
+    if (!user) return null; // null = not loaded yet, show all
     const roleFeatures = ROLE_FEATURES[user.role] || [];
     const grants = user.featureOverrides?.grants || [];
     const revokes = user.featureOverrides?.revokes || [];
@@ -129,14 +130,18 @@ export function AdminSidebar({
     ];
   }, [user]);
 
-  // Filter nav items based on user's features
+  // Filter nav items based on user's features (show all until loaded)
   const visibleNavItems = useMemo(
-    () => navItems.filter((item) => effectiveFeatures.includes(item.feature)),
+    () => effectiveFeatures === null
+      ? navItems
+      : navItems.filter((item) => effectiveFeatures.includes(item.feature)),
     [effectiveFeatures]
   );
 
   const visibleContentItems = useMemo(
-    () => contentItems.filter((item) => effectiveFeatures.includes(item.feature)),
+    () => effectiveFeatures === null
+      ? contentItems
+      : contentItems.filter((item) => effectiveFeatures.includes(item.feature)),
     [effectiveFeatures]
   );
 
@@ -161,31 +166,33 @@ export function AdminSidebar({
         <SiteSelector />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {visibleNavItems.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  pathname.startsWith(item.href + "/");
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={item.label}
-                    >
-                      <Link href={item.href}>
-                        <item.icon />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {visibleNavItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {visibleNavItems.map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    pathname.startsWith(item.href + "/");
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        tooltip={item.label}
+                      >
+                        <Link href={item.href}>
+                          <item.icon />
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
         {visibleContentItems.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel>Content</SidebarGroupLabel>
