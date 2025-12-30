@@ -23,8 +23,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { UserEditDialog } from "@/components/admin/UserEditDialog";
-import { UserCreateDialog } from "@/components/admin/UserCreateDialog";
+import { UserEditSheet } from "@/components/admin/UserEditSheet";
+import { UserCreateSheet } from "@/components/admin/UserCreateSheet";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import type { Role, FeatureOverrides } from "@/lib/permissions/types";
 
@@ -244,7 +244,7 @@ export default function UsersPage() {
         </Table>
       )}
 
-      <UserEditDialog
+      <UserEditSheet
         user={selectedUser}
         sites={sites}
         open={editDialogOpen}
@@ -252,7 +252,7 @@ export default function UsersPage() {
         onUpdate={loadUsers}
       />
 
-      <UserCreateDialog
+      <UserCreateSheet
         sites={sites}
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
