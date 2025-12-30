@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { DateAvailability } from "@/types/appointments";
 import { formatDateNL } from "@/lib/appointments/utils";
-import { actionVariants } from "../general/Action";
+import { actionVariants } from "../shared/Action";
 import { Label } from "../ui/label";
 
 type FormStep = "datetime" | "details";

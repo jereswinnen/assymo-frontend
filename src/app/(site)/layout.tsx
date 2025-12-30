@@ -1,7 +1,7 @@
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import ChatbotWrapper from "@/components/general/ChatbotWrapper";
+import ChatbotWrapper from "@/components/chatbot/ChatbotWrapper";
 import CookieBanner from "@/components/cookies/CookieBanner";
 import { ClosureBanner } from "@/components/layout/ClosureBanner";
 

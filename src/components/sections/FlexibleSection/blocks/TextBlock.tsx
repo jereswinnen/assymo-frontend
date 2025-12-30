@@ -1,7 +1,7 @@
 "use client";
 
 import { RichText } from "@/components/RichText";
-import { Action, actionVariants } from "@/components/general/Action";
+import { Action, actionVariants } from "@/components/shared/Action";
 import { iconMap } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import type { FlexTextBlock } from "../types";

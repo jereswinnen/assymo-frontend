@@ -42,7 +42,7 @@ import {
 } from "lucide-react";
 import { getTestEmail } from "@/lib/adminSettings";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
-import { ImageUpload } from "@/components/admin/ImageUpload";
+import { ImageUpload } from "@/components/admin/media/ImageUpload";
 import type { Newsletter, NewsletterSection } from "@/config/newsletter";
 
 export default function EditNewsletterPage() {

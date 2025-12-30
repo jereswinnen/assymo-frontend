@@ -1,6 +1,6 @@
 "use client";
 
-import { Action, actionVariants } from "@/components/general/Action";
+import { Action, actionVariants } from "@/components/shared/Action";
 import { iconMap } from "@/lib/icons";
 import Image from "next/image";
 import { RichText } from "@/components/RichText";

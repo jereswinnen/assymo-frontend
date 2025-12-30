@@ -52,22 +52,87 @@ import {
 import { type Feature, type Role } from "@/lib/permissions/types";
 
 // Nav items with their required feature
-const navItems: { href: string; label: string; icon: typeof CalendarDaysIcon; feature: Feature }[] = [
-  { href: "/admin/appointments", label: "Afspraken", icon: CalendarDaysIcon, feature: "appointments" },
-  { href: "/admin/emails", label: "E-mails", icon: MailboxIcon, feature: "emails" },
-  { href: "/admin/conversations", label: "Conversaties", icon: MessagesSquareIcon, feature: "conversations" },
-  { href: "/admin/users", label: "Gebruikers", icon: UsersRoundIcon, feature: "users" },
+const navItems: {
+  href: string;
+  label: string;
+  icon: typeof CalendarDaysIcon;
+  feature: Feature;
+}[] = [
+  {
+    href: "/admin/appointments",
+    label: "Afspraken",
+    icon: CalendarDaysIcon,
+    feature: "appointments",
+  },
+  {
+    href: "/admin/emails",
+    label: "E-mails",
+    icon: MailboxIcon,
+    feature: "emails",
+  },
+  {
+    href: "/admin/conversations",
+    label: "Conversaties",
+    icon: MessagesSquareIcon,
+    feature: "conversations",
+  },
+  {
+    href: "/admin/users",
+    label: "Gebruikers",
+    icon: UsersRoundIcon,
+    feature: "users",
+  },
   { href: "/admin/sites", label: "Sites", icon: CompassIcon, feature: "sites" },
-  { href: "/admin/settings", label: "Instellingen", icon: SettingsIcon, feature: "settings" },
+  {
+    href: "/admin/settings",
+    label: "Instellingen",
+    icon: SettingsIcon,
+    feature: "settings",
+  },
 ];
 
-const contentItems: { href: string; label: string; icon: typeof FileTextIcon; feature: Feature }[] = [
-  { href: "/admin/content/pages", label: "Pagina's", icon: FileTextIcon, feature: "pages" },
-  { href: "/admin/content/solutions", label: "Realisaties", icon: FolderTreeIcon, feature: "solutions" },
-  { href: "/admin/content/media", label: "Media", icon: ImageIcon, feature: "media" },
-  { href: "/admin/content/filters", label: "Filters", icon: ToggleRightIcon, feature: "filters" },
-  { href: "/admin/content/navigation", label: "Navigatie", icon: MenuIcon, feature: "navigation" },
-  { href: "/admin/content/parameters", label: "Parameters", icon: ChevronsLeftRightEllipsisIcon, feature: "parameters" },
+const contentItems: {
+  href: string;
+  label: string;
+  icon: typeof FileTextIcon;
+  feature: Feature;
+}[] = [
+  {
+    href: "/admin/content/pages",
+    label: "Pagina's",
+    icon: FileTextIcon,
+    feature: "pages",
+  },
+  {
+    href: "/admin/content/solutions",
+    label: "Realisaties",
+    icon: FolderTreeIcon,
+    feature: "solutions",
+  },
+  {
+    href: "/admin/content/media",
+    label: "Media",
+    icon: ImageIcon,
+    feature: "media",
+  },
+  {
+    href: "/admin/content/filters",
+    label: "Filters",
+    icon: ToggleRightIcon,
+    feature: "filters",
+  },
+  {
+    href: "/admin/content/navigation",
+    label: "Navigatie",
+    icon: MenuIcon,
+    feature: "navigation",
+  },
+  {
+    href: "/admin/content/parameters",
+    label: "Parameters",
+    icon: ChevronsLeftRightEllipsisIcon,
+    feature: "parameters",
+  },
 ];
 
 function getInitials(name: string): string {
@@ -92,7 +157,9 @@ export function AdminSidebar({
   const router = useRouter();
   const { isMobile } = useSidebar();
   const [user, setUser] = useState<UserData | null>(null);
-  const [effectiveFeatures, setEffectiveFeatures] = useState<Feature[] | null>(null);
+  const [effectiveFeatures, setEffectiveFeatures] = useState<Feature[] | null>(
+    null,
+  );
 
   // Load user info from session (for display)
   useEffect(() => {
@@ -128,17 +195,21 @@ export function AdminSidebar({
   // Filter nav items based on effective features
   // Show empty arrays while loading to prevent flash of all items
   const visibleNavItems = useMemo(
-    () => effectiveFeatures === null
-      ? []
-      : navItems.filter((item) => effectiveFeatures.includes(item.feature)),
-    [effectiveFeatures]
+    () =>
+      effectiveFeatures === null
+        ? []
+        : navItems.filter((item) => effectiveFeatures.includes(item.feature)),
+    [effectiveFeatures],
   );
 
   const visibleContentItems = useMemo(
-    () => effectiveFeatures === null
-      ? []
-      : contentItems.filter((item) => effectiveFeatures.includes(item.feature)),
-    [effectiveFeatures]
+    () =>
+      effectiveFeatures === null
+        ? []
+        : contentItems.filter((item) =>
+            effectiveFeatures.includes(item.feature),
+          ),
+    [effectiveFeatures],
   );
 
   const handleLogout = async () => {
@@ -154,7 +225,7 @@ export function AdminSidebar({
   };
 
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="py-4 space-y-3">
         <Link href="/admin/appointments">
           <Logo className="w-auto h-6" />

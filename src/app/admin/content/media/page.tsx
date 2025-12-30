@@ -55,10 +55,10 @@ import {
 } from "lucide-react";
 import { formatFileSize, formatDateShort } from "@/lib/format";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
-import { CreateFolderDialog } from "@/components/admin/CreateFolderDialog";
-import { RenameFolderDialog } from "@/components/admin/RenameFolderDialog";
-import { FolderThumbnail } from "@/components/admin/FolderThumbnail";
-import { DraggableImage } from "@/components/admin/DraggableImage";
+import { CreateFolderDialog } from "@/components/admin/media/CreateFolderDialog";
+import { RenameFolderDialog } from "@/components/admin/media/RenameFolderDialog";
+import { FolderThumbnail } from "@/components/admin/media/FolderThumbnail";
+import { DraggableImage } from "@/components/admin/media/DraggableImage";
 import type { MediaFolder } from "@/app/api/admin/content/media/folders/route";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB

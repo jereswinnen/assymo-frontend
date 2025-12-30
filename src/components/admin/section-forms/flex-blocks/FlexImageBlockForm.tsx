@@ -1,7 +1,7 @@
 "use client";
 
 import { Field, FieldLabel } from "@/components/ui/field";
-import { ImageUpload } from "@/components/admin/ImageUpload";
+import { ImageUpload } from "@/components/admin/media/ImageUpload";
 import { FlexImageBlock } from "@/types/sections";
 
 interface FlexImageBlockFormProps {

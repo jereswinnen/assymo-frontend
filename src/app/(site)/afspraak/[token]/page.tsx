@@ -3,7 +3,7 @@ import { getSiteParameters } from "@/lib/content";
 import { AppointmentView } from "./AppointmentView";
 import Link from "next/link";
 import { MailIcon, PhoneIcon } from "lucide-react";
-import Map from "@/components/general/Map";
+import Map from "@/components/shared/Map";
 import Logo from "@/components/layout/Logo";
 
 export const metadata: Metadata = {

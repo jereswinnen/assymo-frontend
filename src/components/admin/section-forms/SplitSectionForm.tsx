@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImageUpload } from "@/components/admin/ImageUpload";
+import { ImageUpload } from "@/components/admin/media/ImageUpload";
 import { IconSelect } from "@/components/admin/IconSelect";
 import { Separator } from "@/components/ui/separator";
 import { SplitSectionSection, SplitSectionItem } from "@/types/sections";

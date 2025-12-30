@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "./Logo";
 import { cn } from "@/lib/utils";
-import { Action } from "../general/Action";
+import { Action } from "../shared/Action";
 import {
   Calendar1Icon,
   FacebookIcon,

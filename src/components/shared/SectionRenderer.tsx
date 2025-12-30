@@ -1,4 +1,4 @@
-import Slideshow from "../sections/Slideshow";
+import Slideshow from "../sections/SlideshowSection";
 import PageHeader from "../sections/PageHeader";
 import { SplitSection } from "../sections/SplitSection";
 import UspSection from "../sections/UspSection";

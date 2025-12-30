@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion, useInView } from "motion/react";
 import { ChevronLeftIcon, ChevronRightIcon, InfoIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Action } from "../general/Action";
+import { Action } from "../shared/Action";
 import { RichText } from "@/components/RichText";
 
 // Animation tokens

@@ -2,10 +2,10 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ConversationList } from "@/components/admin/ConversationList";
-import { ConversationDialog } from "@/components/admin/ConversationDialog";
+import { ConversationList } from "@/components/admin/conversations/ConversationList";
+import { ConversationDialog } from "@/components/admin/conversations/ConversationDialog";
 import { Spinner } from "@/components/ui/spinner";
-import type { Conversation } from "@/components/admin/ConversationList";
+import type { Conversation } from "@/components/admin/conversations/ConversationList";
 
 function ConversationsContent() {
   const [conversations, setConversations] = useState<Conversation[]>([]);

@@ -1,6 +1,6 @@
 import { getSolutionBySlug } from "@/lib/content";
 import { notFound } from "next/navigation";
-import SectionRenderer from "@/components/general/SectionRenderer";
+import SectionRenderer from "@/components/shared/SectionRenderer";
 
 export async function generateMetadata({ params }: any) {
   const { slug } = await params;

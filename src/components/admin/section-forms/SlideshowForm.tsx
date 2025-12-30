@@ -20,7 +20,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { ImageUpload } from "@/components/admin/ImageUpload";
+import { ImageUpload } from "@/components/admin/media/ImageUpload";
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { SlideshowSection } from "@/types/sections";
 import { Separator } from "@/components/ui/separator";

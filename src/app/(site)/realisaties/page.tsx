@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { getPageBySlug, getAllSolutions, getFilterCategories } from "@/lib/content";
-import SectionRenderer from "@/components/general/SectionRenderer";
-import { ProjectsGrid } from "@/components/general/ProjectsGrid";
+import SectionRenderer from "@/components/shared/SectionRenderer";
+import { ProjectsGrid } from "@/components/shared/ProjectsGrid";
 
 export const metadata = {
   title: "Realisaties - Assymo",

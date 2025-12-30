@@ -28,7 +28,7 @@ import {
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "../ui/input-group";
+} from "../../ui/input-group";
 
 interface AppointmentsListProps {
   createDialogOpen: boolean;

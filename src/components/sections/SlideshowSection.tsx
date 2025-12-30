@@ -1,4 +1,4 @@
-import SlideshowComponent from "@/components/general/Slideshow";
+import SlideshowComponent from "@/components/shared/Carousel";
 
 interface SlideshowProps {
   section: {

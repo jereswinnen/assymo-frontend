@@ -1,6 +1,6 @@
 import { getPageMetadata } from "@/lib/getPageMetadata";
 import { getPageBySlug } from "@/lib/content";
-import SectionRenderer from "@/components/general/SectionRenderer";
+import SectionRenderer from "@/components/shared/SectionRenderer";
 
 export async function generateMetadata() {
   return getPageMetadata("over-ons");

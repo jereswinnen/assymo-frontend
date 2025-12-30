@@ -1,9 +1,9 @@
 import { getPageBySlug, getSiteParameters } from "@/lib/content";
-import SectionRenderer from "@/components/general/SectionRenderer";
+import SectionRenderer from "@/components/shared/SectionRenderer";
 import { BookingForm } from "@/components/appointments/BookingForm";
 import Link from "next/link";
 import { MailIcon, PhoneIcon } from "lucide-react";
-import Map from "@/components/general/Map";
+import Map from "@/components/shared/Map";
 import Logo from "@/components/layout/Logo";
 
 export const metadata = {

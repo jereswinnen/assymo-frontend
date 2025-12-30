@@ -13,9 +13,9 @@ import {
   Loader2Icon,
   SquareDashedMousePointerIcon,
 } from "lucide-react";
-import { AppointmentsList } from "@/components/admin/AppointmentsList";
-import { OpeningHours } from "@/components/admin/OpeningHours";
-import { DateOverrides } from "@/components/admin/DateOverrides";
+import { AppointmentsList } from "@/components/admin/appointments/AppointmentsList";
+import { OpeningHours } from "@/components/admin/appointments/OpeningHours";
+import { DateOverrides } from "@/components/admin/appointments/DateOverrides";
 
 export default function AppointmentsPage() {
   const [mounted, setMounted] = useState(false);

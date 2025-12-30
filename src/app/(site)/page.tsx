@@ -1,5 +1,5 @@
 import { getHomepage } from "@/lib/content";
-import SectionRenderer from "@/components/general/SectionRenderer";
+import SectionRenderer from "@/components/shared/SectionRenderer";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {

@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
-import { Action, actionVariants } from "@/components/general/Action";
+import { Action, actionVariants } from "@/components/shared/Action";
 import {
   Trash2Icon,
   Loader2Icon,

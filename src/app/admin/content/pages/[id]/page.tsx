@@ -28,7 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ImageUpload, ImageValue } from "@/components/admin/ImageUpload";
+import { ImageUpload, ImageValue } from "@/components/admin/media/ImageUpload";
 import { SectionList } from "@/components/admin/SectionList";
 import { AddSectionButton } from "@/components/admin/AddSectionButton";
 import { Section } from "@/types/sections";
