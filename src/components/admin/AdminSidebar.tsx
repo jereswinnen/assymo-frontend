@@ -156,12 +156,19 @@ export function AdminSidebar({
 }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
   const { availableSites } = useSiteContext();
   const [user, setUser] = useState<UserData | null>(null);
   const [effectiveFeatures, setEffectiveFeatures] = useState<Feature[] | null>(
     null,
   );
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [pathname, isMobile, setOpenMobile]);
 
   // Load user info from session (for display)
   useEffect(() => {
