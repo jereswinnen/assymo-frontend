@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { protectRoute } from "@/lib/permissions";
 import { auth } from "@/lib/auth";
-import { resend } from "@/lib/resend";
-import { RESEND_CONFIG } from "@/config/resend";
-import { PasswordReset } from "@/emails/PasswordReset";
 import crypto from "crypto";
 
 const sql = neon(process.env.DATABASE_URL!);
@@ -123,25 +120,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create password reset token and send email
-    const baseUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const token = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-
-    // Store verification token
-    await sql`
-      INSERT INTO "verification" (id, identifier, value, "expiresAt", "createdAt", "updatedAt")
-      VALUES (${crypto.randomUUID()}, ${email}, ${token}, ${expiresAt.toISOString()}, ${now.toISOString()}, ${now.toISOString()})
-    `;
-
-    // Build reset URL and send email
-    const resetUrl = `${baseUrl}/admin/auth/reset-password?token=${token}`;
-    await resend.emails.send({
-      from: RESEND_CONFIG.fromAddressAuth,
-      to: email,
-      subject: RESEND_CONFIG.subjects.passwordReset,
-      react: PasswordReset({ resetUrl }),
-    });
+    // Trigger password reset via Better Auth's API
+    // This uses Better Auth's own token generation and sendResetPassword callback
+    try {
+      await auth.api.requestPasswordReset({
+        body: {
+          email,
+          redirectTo: "/admin/auth/reset-password",
+        },
+      });
+    } catch (err) {
+      console.error("Failed to send password reset email:", err);
+      // Don't fail user creation - they can request a new reset later
+    }
 
     return NextResponse.json({ success: true, userId });
   } catch (error) {
