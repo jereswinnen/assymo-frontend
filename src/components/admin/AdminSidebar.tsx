@@ -125,16 +125,17 @@ export function AdminSidebar({
   }, []);
 
   // Filter nav items based on effective features
+  // Show empty arrays while loading to prevent flash of all items
   const visibleNavItems = useMemo(
     () => effectiveFeatures === null
-      ? navItems
+      ? []
       : navItems.filter((item) => effectiveFeatures.includes(item.feature)),
     [effectiveFeatures]
   );
 
   const visibleContentItems = useMemo(
     () => effectiveFeatures === null
-      ? contentItems
+      ? []
       : contentItems.filter((item) => effectiveFeatures.includes(item.feature)),
     [effectiveFeatures]
   );
