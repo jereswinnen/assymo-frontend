@@ -48,7 +48,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { type Feature, type Role, DEFAULT_ROLE } from "@/lib/permissions/types";
+import { type Feature, type FeatureOverrides, type Role, DEFAULT_ROLE } from "@/lib/permissions/types";
 import { getEffectiveFeatures, parseFeatureOverrides } from "@/lib/permissions/check";
 
 // Nav items with their required feature
@@ -94,6 +94,12 @@ export function AdminSidebar({
   const router = useRouter();
   const { isMobile } = useSidebar();
   const [user, setUser] = useState<UserData | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Track when component has mounted to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     async function loadUser() {
@@ -104,7 +110,7 @@ export function AdminSidebar({
           email: string;
           image?: string | null;
           role?: string;
-          featureOverrides?: string | null;
+          featureOverrides?: string | FeatureOverrides | null;
         };
         setUser({
           name: u.name || "Gebruiker",
@@ -119,25 +125,25 @@ export function AdminSidebar({
   }, []);
 
   // Calculate effective features based on role + overrides
-  // Returns null until user data is loaded to prevent hydration mismatch
   const effectiveFeatures = useMemo(
     () => (user ? getEffectiveFeatures(user.role, user.featureOverrides) : null),
     [user]
   );
 
-  // Filter nav items based on user's features (show all until loaded)
+  // Filter nav items only after mount to prevent hydration mismatch
+  // Server and initial client render show all items, then filter after mount
   const visibleNavItems = useMemo(
-    () => effectiveFeatures === null
+    () => (!mounted || effectiveFeatures === null)
       ? navItems
       : navItems.filter((item) => effectiveFeatures.includes(item.feature)),
-    [effectiveFeatures]
+    [mounted, effectiveFeatures]
   );
 
   const visibleContentItems = useMemo(
-    () => effectiveFeatures === null
+    () => (!mounted || effectiveFeatures === null)
       ? contentItems
       : contentItems.filter((item) => effectiveFeatures.includes(item.feature)),
-    [effectiveFeatures]
+    [mounted, effectiveFeatures]
   );
 
   const handleLogout = async () => {

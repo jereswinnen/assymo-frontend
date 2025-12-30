@@ -9,24 +9,38 @@ import {
 } from "./types";
 
 /**
- * Safely parse feature overrides from JSON string
+ * Safely parse feature overrides from JSON string or object
+ * Handles both string (from DB) and object (from Better Auth session)
  * Returns null if parsing fails or input is invalid
  */
 export function parseFeatureOverrides(
-  json: string | null | undefined
+  input: string | FeatureOverrides | null | undefined
 ): FeatureOverrides | null {
-  if (!json) return null;
-  try {
-    const parsed = JSON.parse(json);
-    // Validate structure
-    if (typeof parsed !== "object" || parsed === null) return null;
+  if (!input) return null;
+
+  // Already an object - validate and return
+  if (typeof input === "object") {
     return {
-      grants: Array.isArray(parsed.grants) ? parsed.grants : undefined,
-      revokes: Array.isArray(parsed.revokes) ? parsed.revokes : undefined,
+      grants: Array.isArray(input.grants) ? input.grants : undefined,
+      revokes: Array.isArray(input.revokes) ? input.revokes : undefined,
     };
-  } catch {
-    return null;
   }
+
+  // String - parse JSON
+  if (typeof input === "string") {
+    try {
+      const parsed = JSON.parse(input);
+      if (typeof parsed !== "object" || parsed === null) return null;
+      return {
+        grants: Array.isArray(parsed.grants) ? parsed.grants : undefined,
+        revokes: Array.isArray(parsed.revokes) ? parsed.revokes : undefined,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
 }
 
 /**
