@@ -71,18 +71,31 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Geen toegang tot deze site" }, { status: 403 });
     }
 
-    await sql`
-      INSERT INTO site_parameters (site_id, address, phone, email, instagram, facebook, vat_number, updated_at)
-      VALUES (${siteId}, ${data.address || null}, ${data.phone || null}, ${data.email || null}, ${data.instagram || null}, ${data.facebook || null}, ${data.vat_number || null}, NOW())
-      ON CONFLICT (site_id) DO UPDATE SET
-        address = ${data.address || null},
-        phone = ${data.phone || null},
-        email = ${data.email || null},
-        instagram = ${data.instagram || null},
-        facebook = ${data.facebook || null},
-        vat_number = ${data.vat_number || null},
-        updated_at = NOW()
+    // Check if row exists for this site
+    const existing = await sql`
+      SELECT id FROM site_parameters WHERE site_id = ${siteId}
     `;
+
+    if (existing.length > 0) {
+      await sql`
+        UPDATE site_parameters SET
+          address = ${data.address || null},
+          phone = ${data.phone || null},
+          email = ${data.email || null},
+          instagram = ${data.instagram || null},
+          facebook = ${data.facebook || null},
+          vat_number = ${data.vat_number || null},
+          updated_at = NOW()
+        WHERE site_id = ${siteId}
+      `;
+    } else {
+      // Get next id manually since column has bad default
+      const maxId = await sql`SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM site_parameters`;
+      await sql`
+        INSERT INTO site_parameters (id, site_id, address, phone, email, instagram, facebook, vat_number, updated_at)
+        VALUES (${maxId[0].next_id}, ${siteId}, ${data.address || null}, ${data.phone || null}, ${data.email || null}, ${data.instagram || null}, ${data.facebook || null}, ${data.vat_number || null}, NOW())
+      `;
+    }
 
     // Invalidate site parameters cache
     revalidateTag(CACHE_TAGS.siteParameters, "max");
