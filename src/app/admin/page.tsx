@@ -42,15 +42,7 @@ const FEATURE_PRIORITY: Feature[] = [
 ];
 
 export default async function AdminPage() {
-  const reqHeaders = await headers();
-  const session = await auth.api.getSession({ headers: reqHeaders });
-
-  // Debug: log session info
-  console.log("[AdminPage] Session check:", {
-    hasSession: !!session,
-    hasUser: !!session?.user,
-    cookieHeader: reqHeaders.get("cookie")?.substring(0, 100) + "...",
-  });
+  const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session?.user) {
     redirect("/admin/auth");

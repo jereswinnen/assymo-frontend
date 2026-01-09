@@ -9,8 +9,11 @@ export default function proxy(request: NextRequest) {
     pathname.startsWith("/admin") &&
     !pathname.startsWith("/admin/auth")
   ) {
-    // Check for session cookie (Better Auth uses "better-auth.session_token")
-    const sessionCookie = request.cookies.get("better-auth.session_token");
+    // Check for session cookie
+    // Better Auth uses "__Secure-" prefix on HTTPS (production)
+    const sessionCookie =
+      request.cookies.get("__Secure-better-auth.session_token") ||
+      request.cookies.get("better-auth.session_token");
 
     if (!sessionCookie) {
       return NextResponse.redirect(new URL("/admin/auth", request.url));
