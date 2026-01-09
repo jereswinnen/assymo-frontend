@@ -12,11 +12,9 @@ function getBaseURL() {
     return process.env.BETTER_AUTH_URL;
   }
 
-  // Vercel deployments - use production URL or preview URL
+  // Vercel deployments - always use VERCEL_URL for cookies to work correctly
+  // VERCEL_URL is the actual URL being accessed (e.g., assymo-frontend.vercel.app)
   if (process.env.VERCEL_URL) {
-    if (process.env.VERCEL_ENV === "production" && process.env.VERCEL_PROJECT_PRODUCTION_URL) {
-      return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-    }
     return `https://${process.env.VERCEL_URL}`;
   }
 
@@ -24,9 +22,26 @@ function getBaseURL() {
   return "http://localhost:3000";
 }
 
+function getTrustedOrigins(): string[] {
+  const origins: string[] = ["http://localhost:3000"];
+
+  if (process.env.VERCEL_URL) {
+    origins.push(`https://${process.env.VERCEL_URL}`);
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    origins.push(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`);
+  }
+  if (process.env.BETTER_AUTH_URL) {
+    origins.push(process.env.BETTER_AUTH_URL);
+  }
+
+  return origins;
+}
+
 export const auth = betterAuth({
   appName: "Assymo Admin",
   baseURL: getBaseURL(),
+  trustedOrigins: getTrustedOrigins(),
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
   }),
