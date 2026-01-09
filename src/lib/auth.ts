@@ -12,9 +12,13 @@ function getBaseURL() {
     return process.env.BETTER_AUTH_URL;
   }
 
-  // Vercel deployments - always use VERCEL_URL for cookies to work correctly
-  // VERCEL_URL is the actual URL being accessed (e.g., assymo-frontend.vercel.app)
+  // Vercel deployments
   if (process.env.VERCEL_URL) {
+    // Production: use the stable production URL (custom domain or main vercel.app URL)
+    if (process.env.VERCEL_ENV === "production" && process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+      return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+    }
+    // Preview/Development: use the deployment URL
     return `https://${process.env.VERCEL_URL}`;
   }
 
@@ -25,6 +29,7 @@ function getBaseURL() {
 function getTrustedOrigins(): string[] {
   const origins: string[] = ["http://localhost:3000"];
 
+  // Add all possible Vercel URLs
   if (process.env.VERCEL_URL) {
     origins.push(`https://${process.env.VERCEL_URL}`);
   }

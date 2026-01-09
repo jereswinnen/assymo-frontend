@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -43,7 +42,6 @@ export default function AdminLoginPage() {
   const [otpCode, setOtpCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   // Start passkey autofill listener when page loads
   useEffect(() => {
@@ -64,8 +62,7 @@ export default function AdminLoginPage() {
               autoFill: true,
             });
             if (!error) {
-              router.push("/admin");
-              router.refresh();
+              window.location.href = "/admin";
             }
           }
         }
@@ -76,7 +73,7 @@ export default function AdminLoginPage() {
     };
 
     startPasskeyAutofill();
-  }, [router]);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,14 +119,13 @@ export default function AdminLoginPage() {
         const user = session.data.user as { mfaChoiceCompleted?: boolean };
         if (!user.mfaChoiceCompleted) {
           // Redirect to MFA choice page
-          router.push("/admin/auth/multi-factor");
+          window.location.href = "/admin/auth/multi-factor";
           return;
         }
       }
 
-      // Login complete
-      router.push("/admin");
-      router.refresh();
+      // Login complete - use hard navigation to ensure cookies are sent
+      window.location.href = "/admin";
     } catch (err) {
       console.error("Login error:", err);
       setError(t("admin.messages.somethingWentWrong"));
@@ -161,9 +157,8 @@ export default function AdminLoginPage() {
         return;
       }
 
-      // 2FA verified, go to admin
-      router.push("/admin");
-      router.refresh();
+      // 2FA verified - use hard navigation to ensure cookies are sent
+      window.location.href = "/admin";
     } catch (err) {
       console.error("2FA verification error:", err);
       setError(t("admin.messages.somethingWentWrong"));
