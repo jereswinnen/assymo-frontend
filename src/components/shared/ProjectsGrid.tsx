@@ -153,7 +153,7 @@ export function ProjectsGrid({ solutions, categories }: ProjectsGridProps) {
               onClick={() => router.push(`/realisaties/${solution.slug}`)}
             >
               {/* Image */}
-              <div className="relative aspect-5/3 overflow-hidden bg-stone-100">
+              <div className="relative aspect-5/3 overflow-hidden bg-zinc-100">
                 {solution.header_image?.url && (
                   <Image
                     src={solution.header_image.url}
@@ -171,7 +171,7 @@ export function ProjectsGrid({ solutions, categories }: ProjectsGridProps) {
                   {cleanTitle(solution.name)}
                 </h3>
                 {solution.subtitle && (
-                  <p className="text-sm text-stone-600 mb-0!">
+                  <p className="text-sm text-zinc-600 mb-0!">
                     {solution.subtitle}
                   </p>
                 )}

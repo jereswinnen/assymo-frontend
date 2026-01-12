@@ -35,17 +35,17 @@ function UspCard({
     cta: "group bg-accent-dark text-white ease-circ duration-400 transition-all hover:-translate-y-1.5",
   };
 
-  const baseClasses = "p-5 flex flex-col gap-3 h-full text-stone-600";
+  const baseClasses = "p-5 flex flex-col gap-3 h-full text-zinc-600";
 
   if (variant === "primary") {
     return (
       <div className={`${baseClasses} ${variantClasses.primary}`}>
-        {IconComponent && <IconComponent className="size-6 text-stone-600" />}
+        {IconComponent && <IconComponent className="size-6 text-zinc-600" />}
         <div className="flex flex-col gap-1">
-          <p className="text-lg font-medium text-stone-800 mb-0!">
-            {usp.title}
-          </p>
-          {usp.text && <RichText html={usp.text} className="text-base [&_p]:mb-0!" />}
+          <p className="text-lg font-medium text-zinc-800 mb-0!">{usp.title}</p>
+          {usp.text && (
+            <RichText html={usp.text} className="text-base [&_p]:mb-0!" />
+          )}
         </div>
       </div>
     );
@@ -53,10 +53,12 @@ function UspCard({
 
   const content = (
     <>
-      {IconComponent && <IconComponent className="size-6 text-stone-600" />}
+      {IconComponent && <IconComponent className="size-6 text-zinc-600" />}
       <div className="flex flex-col gap-1">
-        <p className="text-lg font-medium text-stone-800 mb-0!">{usp.title}</p>
-        {usp.text && <RichText html={usp.text} className="text-sm [&_p]:mb-0!" />}
+        <p className="text-lg font-medium text-zinc-800 mb-0!">{usp.title}</p>
+        {usp.text && (
+          <RichText html={usp.text} className="text-sm [&_p]:mb-0!" />
+        )}
       </div>
     </>
   );
@@ -73,7 +75,12 @@ function UspCard({
         </header>
         <div className="flex flex-col gap-1">
           <p className="text-lg font-medium mb-0!">{usp.title}</p>
-          {usp.text && <RichText html={usp.text} className="text-sm opacity-70 [&_p]:mb-0!" />}
+          {usp.text && (
+            <RichText
+              html={usp.text}
+              className="text-sm opacity-70 [&_p]:mb-0!"
+            />
+          )}
         </div>
       </Link>
     );
@@ -92,8 +99,8 @@ export default function UspSection({ section }: UspSectionProps) {
   const [firstUsp, ...remainingUsps] = usps;
 
   return (
-    <section className="o-grid--bleed col-span-full grid grid-cols-subgrid gap-y-8 py-10 md:py-14 bg-stone-100">
-      {heading && <h2 className="col-span-full text-stone-700">{heading}</h2>}
+    <section className="o-grid--bleed col-span-full grid grid-cols-subgrid gap-y-8 py-10 md:py-14 bg-zinc-100">
+      {heading && <h2 className="col-span-full text-zinc-700">{heading}</h2>}
       <div className="col-span-full flex flex-col lg:flex-row gap-8 md:gap-2.5">
         {/* Left column: 40% */}
         <div className="md:basis-2/5 md:shrink-0">

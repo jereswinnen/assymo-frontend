@@ -39,7 +39,7 @@ export default function PageHeader({ section, headerImage }: PageHeaderProps) {
 
   return (
     <header
-      className={`col-span-full grid grid-cols-subgrid gap-y-8 items-start ${background ? "o-grid--bleed py-8 md:py-14 bg-stone-300" : ""}`}
+      className={`col-span-full grid grid-cols-subgrid gap-y-8 items-start ${background ? "o-grid--bleed py-8 md:py-14 bg-zinc-300" : ""}`}
     >
       <div
         className={`col-span-full ${hasImage ? "md:col-span-4" : ""} flex flex-col justify-center gap-4 md:gap-6`}
@@ -47,12 +47,12 @@ export default function PageHeader({ section, headerImage }: PageHeaderProps) {
         <div
           className={`flex flex-col gap-2 ${!hasImage ? "md:w-[900px]" : ""}`}
         >
-          <h1 className={`mb-0! ${background ? "text-stone-800" : ""}`}>
+          <h1 className={`mb-0! ${background ? "text-zinc-800" : ""}`}>
             {title}
           </h1>
           {subtitle && (
             <div
-              className={`font-[420] text-stone-600 ${!hasImage ? "text-lg md:text-xl" : "text-base md:text-lg"}`}
+              className={`font-[420] text-zinc-600 ${!hasImage ? "text-lg md:text-xl" : "text-base md:text-lg"}`}
             >
               <RichText html={subtitle} />
             </div>

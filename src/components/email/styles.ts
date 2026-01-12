@@ -7,10 +7,10 @@
 export const colors = {
   primary: "#1f3632",
   accent: "#22df90",
-  muted: "#78716c", //stone500
-  text: "#292524", //stone800
-  background: "#f5f5f4", //stone200
-  border: "#e7e5e4", //stone200
+  muted: "#78716c", //zinc500
+  text: "#292524", //zinc800
+  background: "#f5f5f4", //zinc200
+  border: "#e7e5e4", //zinc200
   white: "#ffffff",
 } as const;
 

@@ -254,7 +254,7 @@ export function AppointmentView({
         </p>
       </header>
 
-      <div className="flex gap-6 md:gap-8 p-6 md:p-8 rounded-lg bg-stone-100">
+      <div className="flex gap-6 md:gap-8 p-6 md:p-8 rounded-lg bg-zinc-100">
         <div className="flex flex-col h-fit bg-white shadow-sm rounded-[6px]">
           <span className="py-0.5 text-xs uppercase font-medium tracking-wider text-white text-center bg-red-500 rounded-tl-[6px] rounded-tr-[6px]">
             {new Date(appointment.appointment_date).toLocaleDateString(
@@ -269,7 +269,7 @@ export function AppointmentView({
         <div className="flex-1 flex flex-col gap-6 md:gap-8">
           <ul className="flex flex-col gap-6 md:gap-8 *:flex *:flex-col *:gap-1">
             <li>
-              <span className="text-xs font-medium uppercase tracking-wider text-stone-600">
+              <span className="text-xs font-medium uppercase tracking-wider text-zinc-600">
                 Datum en tijd
               </span>
               <p className="font-medium">
@@ -278,7 +278,7 @@ export function AppointmentView({
               </p>
             </li>
             <li>
-              <span className="text-xs font-medium uppercase tracking-wider text-stone-600">
+              <span className="text-xs font-medium uppercase tracking-wider text-zinc-600">
                 Locatie
               </span>
               <p className="font-medium">{APPOINTMENTS_CONFIG.storeAddress}</p>
@@ -293,7 +293,7 @@ export function AppointmentView({
             Toevoegen aan agenda
           </button>
 
-          <Separator className="bg-stone-200" />
+          <Separator className="bg-zinc-200" />
 
           {editing ? (
             <div className="flex flex-col gap-4">
@@ -425,30 +425,30 @@ export function AppointmentView({
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              <span className="text-xs font-medium uppercase tracking-wider text-stone-600">
+              <span className="text-xs font-medium uppercase tracking-wider text-zinc-600">
                 Uw gegevens
               </span>
               <ul className="flex flex-col gap-4 text-base *:flex *:flex-col *:gap-1">
                 <li>
-                  <span className="text-sm font-medium text-stone-600">
+                  <span className="text-sm font-medium text-zinc-600">
                     Naam
                   </span>
                   <span>{appointment.customer_name}</span>
                 </li>
                 <li>
-                  <span className="text-sm font-medium text-stone-600">
+                  <span className="text-sm font-medium text-zinc-600">
                     E-mailadres
                   </span>
                   {appointment.customer_email}
                 </li>
                 <li>
-                  <span className="text-sm font-medium text-stone-600">
+                  <span className="text-sm font-medium text-zinc-600">
                     Telefoonnummer
                   </span>
                   {appointment.customer_phone}
                 </li>
                 <li>
-                  <span className="text-sm font-medium text-stone-600">
+                  <span className="text-sm font-medium text-zinc-600">
                     Adres
                   </span>
                   {appointment.customer_street}
@@ -457,7 +457,7 @@ export function AppointmentView({
                 </li>
                 {appointment.remarks && (
                   <li>
-                    <span className="text-sm font-medium text-stone-600">
+                    <span className="text-sm font-medium text-zinc-600">
                       Opmerkingen
                     </span>
                     {appointment.remarks}
@@ -467,7 +467,7 @@ export function AppointmentView({
             </div>
           )}
 
-          <Separator className="bg-stone-200" />
+          <Separator className="bg-zinc-200" />
 
           {!isPast && !editing && (
             <>

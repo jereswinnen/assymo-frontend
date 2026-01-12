@@ -208,8 +208,8 @@ export function BookingForm({ className }: BookingFormProps) {
                 className={cn(
                   "flex items-center gap-1.5 text-sm",
                   isCompleted && "text-accent-dark",
-                  isActive && "text-stone-800 font-medium",
-                  !isActive && !isCompleted && "text-stone-600 font-normal",
+                  isActive && "text-zinc-800 font-medium",
+                  !isActive && !isCompleted && "text-zinc-600 font-normal",
                 )}
               >
                 <Icon className="size-4" />
@@ -219,8 +219,8 @@ export function BookingForm({ className }: BookingFormProps) {
                 className={cn(
                   "h-0.5",
                   isCompleted && "bg-accent-light",
-                  isActive && "bg-stone-500",
-                  !isActive && !isCompleted && "bg-stone-200",
+                  isActive && "bg-zinc-500",
+                  !isActive && !isCompleted && "bg-zinc-200",
                 )}
               />
             </div>
@@ -229,7 +229,7 @@ export function BookingForm({ className }: BookingFormProps) {
       </div>
 
       {/* Step content */}
-      <div className="rounded-xl border border-stone-200 p-6">
+      <div className="rounded-xl border border-zinc-200 p-6">
         {/* Date & time selection */}
         {currentStep === "datetime" && (
           <Calendar
@@ -370,12 +370,12 @@ export function BookingForm({ className }: BookingFormProps) {
                 {/* Selected date/time display */}
                 <div className="flex flex-col gap-3">
                   <Label>Datum &amp; tijd</Label>
-                  <div className="flex items-center justify-between bg-stone-100 rounded-lg p-4">
+                  <div className="flex items-center justify-between bg-zinc-100 rounded-lg p-4">
                     <p className="mb-0! font-medium">
                       {formatDateNL(formData.appointment_date)}{" "}
-                      <span className="font-normal text-stone-600">om</span>{" "}
+                      <span className="font-normal text-zinc-600">om</span>{" "}
                       {formData.appointment_time}{" "}
-                      <span className="font-normal text-stone-600">uur</span>
+                      <span className="font-normal text-zinc-600">uur</span>
                     </p>
                     <button
                       onClick={goBack}
@@ -408,7 +408,7 @@ export function BookingForm({ className }: BookingFormProps) {
                     )}
                   </Button>
 
-                  <p className="text-xs text-stone-500">
+                  <p className="text-xs text-zinc-500">
                     Na het bevestigen ontvangt u een e-mail met de details van
                     uw afspraak en een link om deze te wijzigen of te annuleren.
                   </p>

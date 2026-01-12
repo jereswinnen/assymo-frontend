@@ -60,8 +60,8 @@ export function AvailabilityCard({
   }
 
   return (
-    <div className="bg-stone-100 rounded-lg p-3 space-y-3">
-      <header className="flex items-center gap-1.5 text-sm font-medium text-stone-700">
+    <div className="bg-zinc-100 rounded-lg p-3 space-y-3">
+      <header className="flex items-center gap-1.5 text-sm font-medium text-zinc-700">
         <CalendarDaysIcon className="size-4" />
         <span>Beschikbare tijden</span>
       </header>
@@ -71,7 +71,7 @@ export function AvailabilityCard({
             key={day.date}
             className="flex flex-col gap-2 p-2 bg-background rounded-md"
           >
-            <div className="text-xs font-medium text-stone-700">
+            <div className="text-xs font-medium text-zinc-700">
               {day.date_formatted}
             </div>
             <div className="flex flex-wrap gap-1">
@@ -81,7 +81,7 @@ export function AvailabilityCard({
                   onClick={() =>
                     onSelectSlot?.(day.date, time, day.date_formatted)
                   }
-                  className="px-2 py-1 text-xs font-medium text-stone-800 bg-stone-200 hover:text-stone-700 hover:bg-stone-300 rounded transition-colors cursor-pointer"
+                  className="px-2 py-1 text-xs font-medium text-zinc-800 bg-zinc-200 hover:text-zinc-700 hover:bg-zinc-300 rounded transition-colors cursor-pointer"
                 >
                   {time}
                 </button>
@@ -173,8 +173,8 @@ export function BookingForm({
     formData.city;
 
   return (
-    <div className="bg-stone-100 rounded-lg p-3 space-y-3">
-      <header className="flex items-center gap-1.5 text-sm font-medium text-stone-700">
+    <div className="bg-zinc-100 rounded-lg p-3 space-y-3">
+      <header className="flex items-center gap-1.5 text-sm font-medium text-zinc-700">
         <CalendarIcon className="size-4" />
         <span>
           {selectedDate} om {selectedTime}

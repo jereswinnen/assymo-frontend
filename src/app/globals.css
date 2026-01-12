@@ -22,7 +22,7 @@
   --c-accent-dark: #1f3632;
   --c-accent-darkest: #1a2322;
   @media (min-width: 46em) {
-    --u-site-w: 70vw;
+    --u-site-w: 75vw;
     --u-grid-columns: 9;
   }
   --radius: 0.625rem;
@@ -133,10 +133,10 @@
 }
 
 @theme inline {
-  --color-accent-lightest: #ebf4f3;
-  --color-accent-light: #22df90;
-  --color-accent-dark: #1f3632;
-  --color-accent-darkest: #1a2322;
+  --color-accent-lightest: var(--c-accent-lightest);
+  --color-accent-light: var(--c-accent-light);
+  --color-accent-dark: var(--c-accent-dark);
+  --color-accent-darkest: var(--c-accent-darkest);
   --font-sans: var(--font-instrument-sans);
   --ease-circ: cubic-bezier(0.645, 0, 0.045, 1);
   --spacing-container-sm: 1.4rem;

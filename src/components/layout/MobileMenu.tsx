@@ -210,13 +210,13 @@ export default function MobileMenu({
                                 <button
                                   onClick={() => handleLinkClick(link)}
                                   className={cn(
-                                    "cursor-pointer w-full flex items-center justify-between text-2xl font-[560] text-stone-600 transition-colors hover:text-stone-900",
-                                    isActive && "text-stone-900",
+                                    "cursor-pointer w-full flex items-center justify-between text-2xl font-[560] text-zinc-600 transition-colors hover:text-zinc-900",
+                                    isActive && "text-zinc-900",
                                   )}
                                 >
                                   <span>{link.title}</span>
                                   <ChevronRightIcon
-                                    className="size-6 text-stone-400"
+                                    className="size-6 text-zinc-400"
                                     strokeWidth={1.5}
                                   />
                                 </button>
@@ -224,8 +224,8 @@ export default function MobileMenu({
                                 <Link
                                   href={`/${link.slug}`}
                                   className={cn(
-                                    "cursor-pointer block text-2xl font-[560] text-stone-600 transition-colors hover:text-stone-900",
-                                    isActive && "text-stone-900",
+                                    "cursor-pointer block text-2xl font-[560] text-zinc-600 transition-colors hover:text-zinc-900",
+                                    isActive && "text-zinc-900",
                                   )}
                                 >
                                   {link.title}
@@ -242,8 +242,8 @@ export default function MobileMenu({
                       settings?.phone ||
                       settings?.instagram ||
                       settings?.facebook) && (
-                      <div className="mt-auto pt-8 border-t border-stone-200 flex flex-col gap-3">
-                        <span className="text-xs font-medium text-stone-600">
+                      <div className="mt-auto pt-8 border-t border-zinc-200 flex flex-col gap-3">
+                        <span className="text-xs font-medium text-zinc-600">
                           Contacteer
                         </span>
                         <div className="flex flex-col gap-6">
@@ -257,7 +257,7 @@ export default function MobileMenu({
                               <li>
                                 <a
                                   href={`tel:${settings.phone}`}
-                                  className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                  className="flex items-center gap-2 text-zinc-500 hover:text-zinc-700 transition-colors duration-300"
                                 >
                                   <PhoneIcon className="size-4" />
                                   <span>{settings.phone}</span>
@@ -272,7 +272,7 @@ export default function MobileMenu({
                                 {settings?.instagram && (
                                   <li>
                                     <a
-                                      className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                      className="flex items-center gap-2 text-zinc-500 hover:text-zinc-700 transition-colors duration-300"
                                       href={settings.instagram}
                                       target="_blank"
                                       rel="noopener noreferrer"
@@ -285,7 +285,7 @@ export default function MobileMenu({
                                 {settings?.facebook && (
                                   <li>
                                     <a
-                                      className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                      className="flex items-center gap-2 text-zinc-500 hover:text-zinc-700 transition-colors duration-300"
                                       href={settings.facebook}
                                       target="_blank"
                                       rel="noopener noreferrer"
@@ -332,12 +332,12 @@ export default function MobileMenu({
                     {/* Back button */}
                     <button
                       onClick={handleBack}
-                      className="cursor-pointer size-9 flex items-center justify-center rounded-full text-stone-800 bg-stone-200 hover:text-stone-700 transition-colors"
+                      className="cursor-pointer size-9 flex items-center justify-center rounded-full text-zinc-800 bg-zinc-200 hover:text-zinc-700 transition-colors"
                     >
                       <ChevronLeftIcon className="size-6" strokeWidth={1.5} />
                     </button>
 
-                    <Separator className="hidden text-stone-200" />
+                    <Separator className="hidden text-zinc-200" />
 
                     {/* Sub-items list */}
                     <nav className="flex-1">
@@ -346,7 +346,7 @@ export default function MobileMenu({
                           <li key={item.slug}>
                             <Link
                               href={`/realisaties/${item.slug}`}
-                              className="cursor-pointer block text-xl font-medium text-stone-600 transition-colors hover:text-stone-900"
+                              className="cursor-pointer block text-xl font-medium text-zinc-600 transition-colors hover:text-zinc-900"
                             >
                               {item.name}
                             </Link>
@@ -381,7 +381,7 @@ export function HamburgerIcon({
     <button
       onClick={onClick}
       className={cn(
-        "relative flex items-center justify-center size-10 rounded-full bg-stone-100 hover:bg-stone-200 transition-colors",
+        "relative flex items-center justify-center size-10 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors",
         className,
       )}
       aria-label={isOpen ? "Sluit menu" : "Open menu"}
@@ -389,7 +389,7 @@ export function HamburgerIcon({
     >
       <div className="relative w-5 h-3.5 flex flex-col justify-between">
         <motion.span
-          className="absolute top-0 left-0 w-full h-0.5 bg-stone-700 rounded-full origin-center"
+          className="absolute top-0 left-0 w-full h-0.5 bg-zinc-700 rounded-full origin-center"
           animate={{
             rotate: isOpen ? 45 : 0,
             y: isOpen ? 6 : 0,
@@ -397,7 +397,7 @@ export function HamburgerIcon({
           transition={{ duration: 0.3, ease: easing }}
         />
         <motion.span
-          className="absolute top-1/2 -translate-y-1/2 left-0 w-full h-0.5 bg-stone-700 rounded-full"
+          className="absolute top-1/2 -translate-y-1/2 left-0 w-full h-0.5 bg-zinc-700 rounded-full"
           animate={{
             opacity: isOpen ? 0 : 1,
             scaleX: isOpen ? 0 : 1,
@@ -405,7 +405,7 @@ export function HamburgerIcon({
           transition={{ duration: 0.2, ease: easing }}
         />
         <motion.span
-          className="absolute bottom-0 left-0 w-full h-0.5 bg-stone-700 rounded-full origin-center"
+          className="absolute bottom-0 left-0 w-full h-0.5 bg-zinc-700 rounded-full origin-center"
           animate={{
             rotate: isOpen ? -45 : 0,
             y: isOpen ? -6 : 0,

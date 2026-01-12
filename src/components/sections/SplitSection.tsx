@@ -75,7 +75,9 @@ export function SplitSection({ section, className }: SplitSectionProps) {
                 <div className="absolute inset-0 flex items-center justify-center bg-accent-dark/60 opacity-0 transition-opacity duration-500 ease-circ group-hover:opacity-100">
                   <Action
                     className="translate-y-1.5 blur-xs transition-all duration-600 ease-circ group-hover:translate-y-0 group-hover:blur-none"
-                    href={item.actionType === "openChatbot" ? "#" : item.href || "#"}
+                    href={
+                      item.actionType === "openChatbot" ? "#" : item.href || "#"
+                    }
                     icon={IconComponent ? <IconComponent /> : undefined}
                     label={item.action.label}
                     variant={item.action.variant || "secondary"}
@@ -83,7 +85,9 @@ export function SplitSection({ section, className }: SplitSectionProps) {
                       item.actionType === "openChatbot"
                         ? (e) => {
                             e.preventDefault();
-                            window.dispatchEvent(new CustomEvent("openChatbot"));
+                            window.dispatchEvent(
+                              new CustomEvent("openChatbot"),
+                            );
                           }
                         : undefined
                     }
@@ -96,7 +100,7 @@ export function SplitSection({ section, className }: SplitSectionProps) {
                 <h3 className="text-lg font-medium">{item.title}</h3>
               )}
               {item.subtitle && (
-                <p className="text-sm text-stone-600">{item.subtitle}</p>
+                <p className="text-sm text-zinc-600">{item.subtitle}</p>
               )}
             </div>
           </div>

@@ -67,10 +67,10 @@ export function NewsletterForm({ className }: NewsletterFormProps) {
       className={cn("flex flex-col gap-4", className)}
     >
       <div className="*:mb-0!">
-        <p className="text-lg font-medium text-stone-800">
+        <p className="text-lg font-medium text-zinc-800">
           Abonneer je op onze nieuwsbrief
         </p>
-        <p className="text-sm text-stone-600">
+        <p className="text-sm text-zinc-600">
           Ontvang handige weetjes en blijf op de hoogte van promoties.
         </p>
       </div>
@@ -93,9 +93,9 @@ export function NewsletterForm({ className }: NewsletterFormProps) {
             className={cn(
               "text-accent-light bg-accent-dark transition-colors duration-250 hover:text-accent-dark hover:bg-accent-light",
               isSubmitting &&
-                "text-stone-600 bg-stone-200 hover:text-stone-600 hover:bg-stone-200",
+                "text-zinc-600 bg-zinc-200 hover:text-zinc-600 hover:bg-zinc-200",
               isSuccess &&
-                "text-stone-600 bg-stone-200 hover:text-stone-600 hover:bg-stone-200",
+                "text-zinc-600 bg-zinc-200 hover:text-zinc-600 hover:bg-zinc-200",
             )}
           >
             {isSubmitting && (

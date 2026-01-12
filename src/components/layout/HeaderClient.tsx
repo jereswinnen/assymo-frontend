@@ -161,7 +161,7 @@ export default function HeaderClient({
           <AnimatePresence>
             {isSubmenuOpen && (
               <motion.div
-                className="hidden md:block fixed inset-0 bg-stone-50/80 backdrop-blur-[20px] z-40"
+                className="hidden md:block fixed inset-0 bg-zinc-50/80 backdrop-blur-[20px] z-40"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -195,14 +195,14 @@ export default function HeaderClient({
           <Link href="/" className="relative flex flex-col gap-0.5">
             <Logo className="w-28" />
             {pathname !== "/" && (
-              <p className="text-xs md:text-sm font-medium text-stone-600">
+              <p className="text-xs md:text-sm font-medium text-zinc-600">
                 Maatwerk voor binnen en buiten
               </p>
             )}
           </Link>
 
           {/* Desktop navigation */}
-          <nav className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm p-2 px-4 rounded-full text-stone-700 bg-stone-100">
+          <nav className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm p-2 px-4 rounded-full text-zinc-700 bg-zinc-100">
             <ul className="flex gap-6 group/nav">
               {links.map((link, index) => {
                 const isActive =
@@ -217,7 +217,7 @@ export default function HeaderClient({
                       href={`/${link.slug}`}
                       className={cn(
                         "font-medium transition-opacity duration-200 group-hover/nav:opacity-60 hover:opacity-100!",
-                        isActive && "font-semibold text-stone-900 opacity-100!",
+                        isActive && "font-semibold text-zinc-900 opacity-100!",
                       )}
                     >
                       {link.title}
@@ -348,7 +348,7 @@ export default function HeaderClient({
                     </figure>
                     <div className="flex flex-col gap-3">
                       {activeLink?.submenuHeading && (
-                        <span className="text-xs font-medium text-stone-600">
+                        <span className="text-xs font-medium text-zinc-600">
                           {activeLink.submenuHeading}
                         </span>
                       )}
@@ -369,22 +369,24 @@ export default function HeaderClient({
                       </ul>
                     </div>
                     <div className="ml-auto w-3xs flex flex-col gap-3">
-                      <span className="text-xs font-medium text-stone-600">
+                      <span className="text-xs font-medium text-zinc-600">
                         Contacteer
                       </span>
                       <div className="flex flex-col gap-6">
                         <ul className="flex flex-col gap-3 text-base font-medium">
                           {settings?.address && (
                             <li
-                              className="[&_p]:mb-0! [&_p+p]:mt-0.5 [&_a]:underline [&_a]:hover:text-stone-700"
-                              dangerouslySetInnerHTML={{ __html: settings.address }}
+                              className="[&_p]:mb-0! [&_p+p]:mt-0.5 [&_a]:underline [&_a]:hover:text-zinc-700"
+                              dangerouslySetInnerHTML={{
+                                __html: settings.address,
+                              }}
                             />
                           )}
                           {settings?.phone && (
                             <li>
                               <a
                                 href={`tel:${settings.phone}`}
-                                className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                className="flex items-center gap-2 text-zinc-500 hover:text-zinc-700 transition-colors duration-300"
                               >
                                 <PhoneIcon className="size-4" />
                                 <span>{settings.phone}</span>
@@ -395,7 +397,7 @@ export default function HeaderClient({
                             <li>
                               <a
                                 href={`mailto:${settings.email}`}
-                                className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                className="flex items-center gap-2 text-zinc-500 hover:text-zinc-700 transition-colors duration-300"
                               >
                                 <MailIcon className="size-4" />
                                 <span>{settings.email}</span>
@@ -410,7 +412,7 @@ export default function HeaderClient({
                               {settings?.instagram && (
                                 <li>
                                   <a
-                                    className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                    className="flex items-center gap-2 text-zinc-500 hover:text-zinc-700 transition-colors duration-300"
                                     href={settings.instagram}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -423,7 +425,7 @@ export default function HeaderClient({
                               {settings?.facebook && (
                                 <li>
                                   <a
-                                    className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                    className="flex items-center gap-2 text-zinc-500 hover:text-zinc-700 transition-colors duration-300"
                                     href={settings.facebook}
                                     target="_blank"
                                     rel="noopener noreferrer"

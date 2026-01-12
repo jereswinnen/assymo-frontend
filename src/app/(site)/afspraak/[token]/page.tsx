@@ -39,7 +39,7 @@ export default async function AppointmentTokenPage({
 
         <div className="flex flex-col gap-6">
           <Link href="/">
-            <Logo className="w-28 text-stone-900" />
+            <Logo className="w-28 text-zinc-900" />
           </Link>
 
           <ul className="flex flex-col gap-3 text-base font-medium">
@@ -50,7 +50,7 @@ export default async function AppointmentTokenPage({
               <li>
                 <a
                   href={`tel:${settings.phone}`}
-                  className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                  className="flex items-center gap-2 text-zinc-500 hover:text-zinc-700 transition-colors duration-300"
                 >
                   <PhoneIcon className="size-4" />
                   <span>{settings.phone}</span>
@@ -61,7 +61,7 @@ export default async function AppointmentTokenPage({
               <li>
                 <a
                   href={`mailto:${settings.email}`}
-                  className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                  className="flex items-center gap-2 text-zinc-500 hover:text-zinc-700 transition-colors duration-300"
                 >
                   <MailIcon className="size-4" />
                   <span>{settings.email}</span>
