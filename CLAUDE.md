@@ -17,11 +17,14 @@ npx tsc --noEmit      # Type checking
 ## Git Commits
 
 Use conventional commit prefixes:
-- `fix:` - Bug fixes
 - `feat:` - New features
+- `fix:` - Bug fixes
 - `docs:` - Documentation changes
-- `chore:` - Maintenance tasks
-- `refactor:` - Code refactoring without behavior change
+- `chore:` - Maintenance tasks, dependencies
+- `refactor:` - Code restructuring without behavior change
+- `style:` - Formatting, whitespace
+- `test:` - Adding or updating tests
+- `perf:` - Performance improvements
 
 ## Architecture Overview
 
