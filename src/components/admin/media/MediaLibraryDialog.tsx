@@ -18,6 +18,7 @@ import {
 import type { MediaItem } from "@/app/api/admin/content/media/route";
 import type { MediaFolder } from "@/app/api/admin/content/media/folders/route";
 import { t } from "@/config/strings";
+import { useSiteContext } from "@/lib/permissions/site-context";
 
 interface MediaLibraryDialogProps {
   open: boolean;
@@ -34,6 +35,7 @@ export function MediaLibraryDialog({
   const [folders, setFolders] = useState<MediaFolder[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const { currentSite } = useSiteContext();
 
   // Folder navigation
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export function MediaLibraryDialog({
   );
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !currentSite?.id) return;
 
     const fetchData = async () => {
       setLoading(true);
@@ -51,8 +53,8 @@ export function MediaLibraryDialog({
         const [foldersRes, mediaRes] = await Promise.all([
           currentFolderId
             ? Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
-            : fetch("/api/admin/content/media/folders"),
-          fetch(`/api/admin/content/media?folderId=${folderParam}`),
+            : fetch(`/api/admin/content/media/folders?siteId=${currentSite.id}`),
+          fetch(`/api/admin/content/media?folderId=${folderParam}&siteId=${currentSite.id}`),
         ]);
 
         if (foldersRes.ok && !currentFolderId) {
@@ -70,7 +72,7 @@ export function MediaLibraryDialog({
     };
 
     fetchData();
-  }, [open, currentFolderId]);
+  }, [open, currentFolderId, currentSite?.id]);
 
   // Reset state when dialog closes
   useEffect(() => {

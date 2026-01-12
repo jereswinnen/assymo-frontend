@@ -10,8 +10,38 @@ const sql = neon(process.env.DATABASE_URL!);
 async function generateAndSaveAltText(
   imageUrl: string,
   fileName: string,
-  folderId: string | null
+  folderId: string | null,
+  siteId: string,
+  imageBase64: string
 ): Promise<void> {
+  // First, save metadata immediately so the image shows up
+  try {
+    if (folderId) {
+      await sql`
+        INSERT INTO image_metadata (url, display_name, folder_id, site_id)
+        VALUES (${imageUrl}, ${fileName}, ${folderId}::uuid, ${siteId})
+        ON CONFLICT (url) DO UPDATE SET
+          display_name = COALESCE(image_metadata.display_name, ${fileName}),
+          folder_id = COALESCE(image_metadata.folder_id, ${folderId}::uuid),
+          site_id = COALESCE(image_metadata.site_id, ${siteId}),
+          updated_at = NOW()
+      `;
+    } else {
+      await sql`
+        INSERT INTO image_metadata (url, display_name, site_id)
+        VALUES (${imageUrl}, ${fileName}, ${siteId})
+        ON CONFLICT (url) DO UPDATE SET
+          display_name = COALESCE(image_metadata.display_name, ${fileName}),
+          site_id = COALESCE(image_metadata.site_id, ${siteId}),
+          updated_at = NOW()
+      `;
+    }
+  } catch (error) {
+    console.error("Failed to save image metadata:", error);
+    return;
+  }
+
+  // Then generate alt text
   try {
     const { text } = await generateText({
       model: openai(CHATBOT_CONFIG.model),
@@ -25,7 +55,7 @@ async function generateAndSaveAltText(
             },
             {
               type: "image",
-              image: imageUrl,
+              image: imageBase64,
             },
           ],
         },
@@ -34,41 +64,54 @@ async function generateAndSaveAltText(
 
     const altText = text.trim();
 
-    if (folderId) {
-      await sql`
-        INSERT INTO image_metadata (url, alt_text, display_name, folder_id)
-        VALUES (${imageUrl}, ${altText}, ${fileName}, ${folderId}::uuid)
-        ON CONFLICT (url) DO UPDATE SET
-          alt_text = ${altText},
-          display_name = ${fileName},
-          folder_id = ${folderId}::uuid,
-          updated_at = NOW()
-      `;
-    } else {
-      await sql`
-        INSERT INTO image_metadata (url, alt_text, display_name)
-        VALUES (${imageUrl}, ${altText}, ${fileName})
-        ON CONFLICT (url) DO UPDATE SET
-          alt_text = ${altText},
-          display_name = ${fileName},
-          updated_at = NOW()
-      `;
-    }
+    await sql`
+      UPDATE image_metadata
+      SET alt_text = ${altText}, updated_at = NOW()
+      WHERE url = ${imageUrl}
+    `;
 
     console.log("Alt text generated:", altText);
   } catch (error) {
     console.error("Alt text generation failed:", error);
+    // Metadata is already saved, so image will still show up
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const { authorized, response } = await protectRoute({ feature: "media" });
+    const { authorized, response, ctx } = await protectRoute({ feature: "media" });
     if (!authorized) return response;
-    const { url, fileName, folderId } = await request.json();
+    const { url, fileName, folderId, siteId } = await request.json();
 
     if (!url || typeof url !== "string") {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
+    }
+
+    if (!siteId) {
+      return NextResponse.json({ error: "Site is required" }, { status: 400 });
+    }
+
+    // Verify site access
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+    if (!isSuperAdmin && !ctx!.userSites.includes(siteId)) {
+      return NextResponse.json({ error: "Geen toegang tot deze site" }, { status: 403 });
+    }
+
+    // Fetch image and convert to base64 before background task
+    // (avoids timing issues where OpenAI can't download fresh blob URLs)
+    let imageBase64: string;
+    try {
+      const imageResponse = await fetch(url);
+      if (!imageResponse.ok) {
+        return NextResponse.json({ error: "Failed to fetch image" }, { status: 400 });
+      }
+      const arrayBuffer = await imageResponse.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString("base64");
+      const contentType = imageResponse.headers.get("content-type") || "image/jpeg";
+      imageBase64 = `data:${contentType};base64,${base64}`;
+    } catch (error) {
+      console.error("Failed to fetch image for base64:", error);
+      return NextResponse.json({ error: "Failed to process image" }, { status: 400 });
     }
 
     // Generate alt text in background after response is sent
@@ -76,7 +119,9 @@ export async function POST(request: Request) {
       await generateAndSaveAltText(
         url,
         fileName || url.split("/").pop() || "",
-        folderId || null
+        folderId || null,
+        siteId,
+        imageBase64
       );
     });
 

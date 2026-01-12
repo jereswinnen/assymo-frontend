@@ -210,6 +210,11 @@ function MediaPageContent() {
     async (files: File[]) => {
       if (files.length === 0) return;
 
+      if (!currentSite?.id) {
+        toast.error("Site niet geladen. Ververs de pagina.");
+        return;
+      }
+
       setUploading(true);
       const uploadedItems: MediaItem[] = [];
       let errorCount = 0;
@@ -231,17 +236,21 @@ function MediaPageContent() {
             handleUploadUrl: "/api/admin/content/images/upload",
           });
 
-          // Trigger alt text generation with folder and site context
-          fetch("/api/admin/content/media/generate-alt", {
+          // Create metadata with site context (awaited to ensure it completes)
+          const metadataResponse = await fetch("/api/admin/content/media/generate-alt", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               url: blob.url,
               fileName: file.name,
               folderId: currentFolderId,
-              siteId: currentSite?.id,
+              siteId: currentSite.id,
             }),
           });
+
+          if (!metadataResponse.ok) {
+            console.error("Failed to create image metadata:", await metadataResponse.text());
+          }
 
           uploadedItems.push({
             url: blob.url,
@@ -286,7 +295,7 @@ function MediaPageContent() {
         );
       }
     },
-    [currentFolderId, pollForAltText]
+    [currentFolderId, currentSite, pollForAltText]
   );
 
   const handleUpload = useCallback(

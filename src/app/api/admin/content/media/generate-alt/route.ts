@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { protectRoute } from "@/lib/permissions";
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
@@ -7,12 +7,66 @@ import { CHATBOT_CONFIG } from "@/config/chatbot";
 
 const sql = neon(process.env.DATABASE_URL!);
 
+async function generateAltTextInBackground(
+  imageUrl: string,
+  fileName: string
+): Promise<void> {
+  // Wait a moment for blob to propagate
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  try {
+    // Fetch the image and convert to base64
+    const imageResponse = await fetch(imageUrl);
+    if (!imageResponse.ok) {
+      console.error("Failed to fetch image for alt text:", imageUrl);
+      return;
+    }
+
+    const arrayBuffer = await imageResponse.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString("base64");
+    const contentType = imageResponse.headers.get("content-type") || "image/jpeg";
+    const dataUrl = `data:${contentType};base64,${base64}`;
+
+    // Generate alt text
+    const { text } = await generateText({
+      model: openai(CHATBOT_CONFIG.model),
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Maak een beknopte alt-tekst voor deze afbeelding in het Nederlands. Wees bondig. Gebruik alleen bijvoeglijke naamwoorden als dat nodig is. Maximaal 160 tekens. Gebruik eenvoudige taal. Antwoord alleen met de alt-tekst, niets anders.",
+            },
+            {
+              type: "image",
+              image: dataUrl,
+            },
+          ],
+        },
+      ],
+    });
+
+    const altText = text.trim();
+
+    await sql`
+      UPDATE image_metadata
+      SET alt_text = ${altText}, updated_at = NOW()
+      WHERE url = ${imageUrl}
+    `;
+
+    console.log("Alt text generated:", altText);
+  } catch (error) {
+    console.error("Alt text generation failed:", error);
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { authorized, response, ctx } = await protectRoute({ feature: "media" });
     if (!authorized) return response;
 
-    const { url, folderId, siteId } = await request.json();
+    const { url, fileName, folderId, siteId } = await request.json();
 
     if (!url) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
@@ -44,69 +98,39 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fetch the image and convert to base64
-    const imageResponse = await fetch(url);
-    if (!imageResponse.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch image" },
-        { status: 400 }
-      );
-    }
-
-    const arrayBuffer = await imageResponse.arrayBuffer();
-    const base64 = Buffer.from(arrayBuffer).toString("base64");
-    const contentType = imageResponse.headers.get("content-type") || "image/jpeg";
-    const dataUrl = `data:${contentType};base64,${base64}`;
-
-    // Generate alt text
-    const { text } = await generateText({
-      model: openai(CHATBOT_CONFIG.model),
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: "Maak een beknopte alt-tekst voor deze afbeelding in het Nederlands. Wees bondig. Gebruik alleen bijvoeglijke naamwoorden als dat nodig is. Maximaal 160 tekens. Gebruik eenvoudige taal. Antwoord alleen met de alt-tekst, niets anders.",
-            },
-            {
-              type: "image",
-              image: dataUrl,
-            },
-          ],
-        },
-      ],
-    });
-
-    const altText = text.trim();
-
-    // Save to database with site_id (include folder_id if provided)
+    // Save metadata immediately so image shows up
+    const displayName = fileName || url.split("/").pop() || "";
     if (validFolderId) {
       await sql`
-        INSERT INTO image_metadata (url, alt_text, folder_id, site_id)
-        VALUES (${url}, ${altText}, ${validFolderId}::uuid, ${siteId})
+        INSERT INTO image_metadata (url, display_name, folder_id, site_id)
+        VALUES (${url}, ${displayName}, ${validFolderId}::uuid, ${siteId})
         ON CONFLICT (url) DO UPDATE SET
-          alt_text = ${altText},
+          display_name = COALESCE(image_metadata.display_name, ${displayName}),
           folder_id = COALESCE(image_metadata.folder_id, ${validFolderId}::uuid),
           site_id = COALESCE(image_metadata.site_id, ${siteId}),
           updated_at = NOW()
       `;
     } else {
       await sql`
-        INSERT INTO image_metadata (url, alt_text, site_id)
-        VALUES (${url}, ${altText}, ${siteId})
+        INSERT INTO image_metadata (url, display_name, site_id)
+        VALUES (${url}, ${displayName}, ${siteId})
         ON CONFLICT (url) DO UPDATE SET
-          alt_text = ${altText},
+          display_name = COALESCE(image_metadata.display_name, ${displayName}),
           site_id = COALESCE(image_metadata.site_id, ${siteId}),
           updated_at = NOW()
       `;
     }
 
-    return NextResponse.json({ altText });
+    // Generate alt text in background after response is sent
+    after(async () => {
+      await generateAltTextInBackground(url, displayName);
+    });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Alt text generation failed:", error);
+    console.error("Metadata creation failed:", error);
     return NextResponse.json(
-      { error: "Failed to generate alt text" },
+      { error: "Failed to create image metadata" },
       { status: 500 }
     );
   }

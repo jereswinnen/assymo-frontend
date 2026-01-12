@@ -14,6 +14,7 @@ import { ImageIcon, Loader2Icon, Trash2Icon, UploadIcon } from "lucide-react";
 import { toast } from "sonner";
 import { MediaLibraryDialog } from "./MediaLibraryDialog";
 import { t } from "@/config/strings";
+import { useSiteContext } from "@/lib/permissions/site-context";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
@@ -31,6 +32,7 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { currentSite } = useSiteContext();
 
   const handleSelectFromLibrary = (url: string) => {
     onChange({ url });
@@ -39,6 +41,11 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!currentSite?.id) {
+      toast.error("Site niet geladen. Ververs de pagina.");
+      return;
+    }
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
@@ -60,12 +67,20 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
         handleUploadUrl: "/api/admin/content/images/upload",
       });
 
-      // Trigger alt text generation in background
-      fetch("/api/admin/content/images/generate-alt", {
+      // Trigger metadata creation and alt text generation
+      const response = await fetch("/api/admin/content/images/generate-alt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: blob.url, fileName: file.name }),
+        body: JSON.stringify({
+          url: blob.url,
+          fileName: file.name,
+          siteId: currentSite.id,
+        }),
       });
+
+      if (!response.ok) {
+        console.error("Failed to create image metadata:", await response.text());
+      }
 
       onChange({ url: blob.url });
       toast.success(t("admin.messages.imageUploaded"));
