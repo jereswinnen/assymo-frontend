@@ -1,4 +1,4 @@
-import { SpeedInsights } from "@vercel/speed-insights/next";
+// import { SpeedInsights } from "@vercel/speed-insights/next";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ChatbotWrapper from "@/components/chatbot/ChatbotWrapper";
@@ -22,7 +22,7 @@ export default function SiteLayout({
         <ChatbotWrapper />
         <CookieBanner />
       </div>
-      <SpeedInsights />
+      {/*<SpeedInsights />*/}
     </div>
   );
 }
