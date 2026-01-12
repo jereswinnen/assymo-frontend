@@ -66,6 +66,7 @@ interface SolutionData {
   header_image: ImageValue | null;
   sections: Section[];
   filters: Filter[];
+  site_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -147,10 +148,8 @@ export default function SolutionEditorPage({
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [solutionRes, categoriesRes] = await Promise.all([
-        fetch(`/api/admin/content/solutions/${id}`),
-        fetch("/api/admin/content/filter-categories"),
-      ]);
+      // Fetch solution first to get site_id
+      const solutionRes = await fetch(`/api/admin/content/solutions/${id}`);
 
       if (!solutionRes.ok) {
         if (solutionRes.status === 404) {
@@ -161,8 +160,13 @@ export default function SolutionEditorPage({
         throw new Error("Failed to fetch solution");
       }
 
-      const [solutionData, categoriesData]: [SolutionData, FilterCategory[]] =
-        await Promise.all([solutionRes.json(), categoriesRes.json()]);
+      const solutionData: SolutionData = await solutionRes.json();
+
+      // Fetch filter categories for the solution's site
+      const categoriesRes = await fetch(
+        `/api/admin/content/filter-categories?siteId=${solutionData.site_id}`,
+      );
+      const categoriesData: FilterCategory[] = await categoriesRes.json();
 
       setSolution(solutionData);
       setFilterCategories(categoriesData);

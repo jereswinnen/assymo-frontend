@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   DndContext,
   closestCenter,
@@ -119,6 +119,22 @@ export function FilterCategoryEditSheet({
     name: string;
   } | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Initialize form when sheet opens - use useEffect because onOpenChange
+  // is not called when the open prop changes programmatically
+  useEffect(() => {
+    if (open && category) {
+      setCategoryName(category.name);
+      setCategorySlug(category.slug);
+      setOriginalValues({ name: category.name, slug: category.slug });
+      setEditingCategory(category);
+    } else if (open && !category) {
+      setCategoryName("");
+      setCategorySlug("");
+      setOriginalValues({ name: "", slug: "" });
+      setEditingCategory(null);
+    }
+  }, [open, category]);
 
   const filterSensors = useSensors(
     useSensor(PointerSensor),
