@@ -9,7 +9,7 @@ export default function Logo({
   className = "",
   variant = "assymo",
 }: LogoProps) {
-  if (variant === "vpg") {
+  if (variant === "assymo") {
     return (
       <svg
         viewBox="0 0 64 24"
