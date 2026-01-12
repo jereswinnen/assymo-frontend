@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   DndContext,
   closestCenter,
@@ -129,9 +129,10 @@ export function NavLinkEditSheet({
     }),
   );
 
-  // Initialize form when sheet opens
-  const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen && link) {
+  // Initialize form when sheet opens - use useEffect because onOpenChange
+  // is not called when the open prop changes programmatically
+  useEffect(() => {
+    if (open && link) {
       setLinkTitle(link.title);
       setLinkSlug(link.slug);
       setLinkSubmenuHeading(link.submenu_heading || "");
@@ -141,15 +142,14 @@ export function NavLinkEditSheet({
         submenuHeading: link.submenu_heading || "",
       });
       setEditingLink(link);
-    } else if (newOpen && !link) {
+    } else if (open && !link) {
       setLinkTitle("");
       setLinkSlug("");
       setLinkSubmenuHeading("");
       setOriginalValues({ title: "", slug: "", submenuHeading: "" });
       setEditingLink(null);
     }
-    onOpenChange(newOpen);
-  };
+  }, [open, link]);
 
   // Check if form has changes
   const hasChanges = useMemo(() => {
@@ -321,7 +321,7 @@ export function NavLinkEditSheet({
     : solutions;
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
         className="px-4 w-full md:max-w-xl overflow-y-auto"
