@@ -92,7 +92,7 @@ export default function SiteParametersPage() {
       }
 
       setOriginalParams(params);
-      toast.success(t("admin.messages.settingsSaved"));
+      toast.success(t("admin.messages.parametersSaved"));
     } catch (error) {
       console.error("Failed to save site parameters:", error);
       toast.error(t("admin.messages.settingsSaveFailed"));

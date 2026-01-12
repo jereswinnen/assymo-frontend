@@ -190,6 +190,7 @@ export const ADMIN_STRINGS = {
     messages: {
       // Success messages
       settingsSaved: "Instellingen opgeslagen",
+      parametersSaved: "Parameters opgeslagen",
       appointmentCreated: "Afspraak aangemaakt",
       appointmentUpdated: "Afspraak bijgewerkt",
       appointmentCancelled: "Afspraak geannuleerd",
