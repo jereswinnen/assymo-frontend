@@ -14,6 +14,15 @@ pnpm test --run       # Run tests once
 npx tsc --noEmit      # Type checking
 ```
 
+## Git Commits
+
+Use conventional commit prefixes:
+- `fix:` - Bug fixes
+- `feat:` - New features
+- `docs:` - Documentation changes
+- `chore:` - Maintenance tasks
+- `refactor:` - Code refactoring without behavior change
+
 ## Architecture Overview
 
 Next.js 16 application with a custom admin CMS, AI chatbot with RAG, and appointment booking system. Content is stored in Neon Postgres with images in Vercel Blob.
