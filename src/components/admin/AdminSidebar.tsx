@@ -158,7 +158,7 @@ export function AdminSidebar({
   const pathname = usePathname();
   const router = useRouter();
   const { isMobile, setOpenMobile } = useSidebar();
-  const { availableSites } = useSiteContext();
+  const { currentSite, availableSites } = useSiteContext();
   const [user, setUser] = useState<UserData | null>(null);
   const [effectiveFeatures, setEffectiveFeatures] = useState<Feature[] | null>(
     null,
@@ -240,11 +240,7 @@ export function AdminSidebar({
         <Link href="/admin/appointments">
           <Logo
             className="w-auto h-6"
-            variant={
-              availableSites.length === 1 && availableSites[0].slug === "vpg"
-                ? "vpg"
-                : "assymo"
-            }
+            variant={currentSite?.slug === "vpg" ? "vpg" : "assymo"}
           />
         </Link>
         <SiteSelector />
