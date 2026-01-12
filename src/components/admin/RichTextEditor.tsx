@@ -6,12 +6,15 @@ import Link from "@tiptap/extension-link";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
-  Bold,
-  Italic,
-  List,
-  ListOrdered,
-  Link as LinkIcon,
-  Unlink,
+  BoldIcon,
+  ItalicIcon,
+  ListIcon,
+  ListOrderedIcon,
+  LinkIcon,
+  UnlinkIcon,
+  Heading2Icon,
+  Heading3Icon,
+  Heading4Icon,
 } from "lucide-react";
 import { useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -33,7 +36,7 @@ export function RichTextEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({
-        heading: false, // Keep it simple - no headings in rich text fields
+        heading: { levels: [2, 3, 4] },
       }),
       Link.configure({
         openOnClick: false,
@@ -95,10 +98,53 @@ export function RichTextEditor({
             type="button"
             variant="ghost"
             size="sm"
+            className={cn(
+              "size-8 p-0",
+              editor.isActive("heading", { level: 2 }) && "bg-muted",
+            )}
+            onClick={() =>
+              editor.chain().focus().toggleHeading({ level: 2 }).run()
+            }
+          >
+            <Heading2Icon className="size-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "size-8 p-0",
+              editor.isActive("heading", { level: 3 }) && "bg-muted",
+            )}
+            onClick={() =>
+              editor.chain().focus().toggleHeading({ level: 3 }).run()
+            }
+          >
+            <Heading3Icon className="size-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "size-8 p-0",
+              editor.isActive("heading", { level: 4 }) && "bg-muted",
+            )}
+            onClick={() =>
+              editor.chain().focus().toggleHeading({ level: 4 }).run()
+            }
+          >
+            <Heading4Icon className="size-4" />
+          </Button>
+          <div className="w-px bg-border mx-1" />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
             className={cn("size-8 p-0", editor.isActive("bold") && "bg-muted")}
             onClick={() => editor.chain().focus().toggleBold().run()}
           >
-            <Bold className="size-4" />
+            <BoldIcon className="size-4" />
           </Button>
           <Button
             type="button"
@@ -110,7 +156,7 @@ export function RichTextEditor({
             )}
             onClick={() => editor.chain().focus().toggleItalic().run()}
           >
-            <Italic className="size-4" />
+            <ItalicIcon className="size-4" />
           </Button>
           <div className="w-px bg-border mx-1" />
           <Button
@@ -123,7 +169,7 @@ export function RichTextEditor({
             )}
             onClick={() => editor.chain().focus().toggleBulletList().run()}
           >
-            <List className="size-4" />
+            <ListIcon className="size-4" />
           </Button>
           <Button
             type="button"
@@ -135,7 +181,7 @@ export function RichTextEditor({
             )}
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
           >
-            <ListOrdered className="size-4" />
+            <ListOrderedIcon className="size-4" />
           </Button>
           <div className="w-px bg-border mx-1" />
           <Button
@@ -155,7 +201,7 @@ export function RichTextEditor({
               className="size-8 p-0"
               onClick={() => editor.chain().focus().unsetLink().run()}
             >
-              <Unlink className="size-4" />
+              <UnlinkIcon className="size-4" />
             </Button>
           )}
         </div>
