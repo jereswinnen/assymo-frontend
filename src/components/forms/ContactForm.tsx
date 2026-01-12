@@ -250,9 +250,9 @@ export default function ContactForm({ className }: ContactFormProps) {
           className={cn(
             "w-fit px-3.5 py-2 flex items-center gap-1.5 text-accent-light bg-accent-dark transition-colors duration-250 hover:text-accent-dark hover:bg-accent-light rounded-full",
             isSubmitting &&
-              "text-zinc-600 bg-zinc-200 hover:text-zinc-600 hover:bg-zinc-200",
+              "text-stone-600 bg-stone-200 hover:text-stone-600 hover:bg-stone-200",
             isSuccess &&
-              "text-zinc-600 bg-zinc-200 hover:text-zinc-600 hover:bg-zinc-200",
+              "text-stone-600 bg-stone-200 hover:text-stone-600 hover:bg-stone-200",
           )}
         >
           {isSubmitting && (

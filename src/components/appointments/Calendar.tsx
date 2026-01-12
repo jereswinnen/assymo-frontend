@@ -224,11 +224,11 @@ export function Calendar({
       </div>
 
       {/* Day headers */}
-      <div className="py-2 grid grid-cols-7 bg-zinc-100 rounded-full">
+      <div className="py-2 grid grid-cols-7 bg-stone-100 rounded-full">
         {DAYS_OF_WEEK.map((day) => (
           <div
             key={day.value}
-            className="text-center text-sm font-medium text-zinc-700"
+            className="text-center text-sm font-medium text-stone-700"
           >
             {day.shortName}
           </div>
@@ -237,7 +237,7 @@ export function Calendar({
 
       <div className="flex flex-col gap-8 md:gap-10">
         {/* Calendar grid */}
-        <div className="grid grid-cols-7 border-l border-t border-zinc-200 relative">
+        <div className="grid grid-cols-7 border-l border-t border-stone-200 relative">
           {loading && (
             <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
               <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
@@ -256,15 +256,15 @@ export function Calendar({
                 disabled={!isClickable}
                 onClick={() => isClickable && handleDateClick(day.date!)}
                 className={cn(
-                  "aspect-3/2 relative border-r border-b border-zinc-200 p-1",
+                  "aspect-3/2 relative border-r border-b border-stone-200 p-1",
                   "focus:outline-none",
                   !day.date && "bg-transparent",
-                  day.date && day.isPast && "bg-zinc-50 cursor-not-allowed",
+                  day.date && day.isPast && "bg-stone-50 cursor-not-allowed",
                   day.date &&
                     !day.isPast &&
                     day.isAvailable &&
                     !showSelectedStyle &&
-                    "hover:bg-zinc-50 cursor-pointer",
+                    "hover:bg-stone-50 cursor-pointer",
                   day.date &&
                     !day.isPast &&
                     !day.isAvailable &&
@@ -277,12 +277,12 @@ export function Calendar({
                   <span
                     className={cn(
                       "absolute top-1 right-2 text-sm",
-                      day.isPast && "text-zinc-300",
+                      day.isPast && "text-stone-300",
                       !day.isPast &&
                         day.isAvailable &&
                         !showSelectedStyle &&
-                        "text-zinc-800 font-medium",
-                      !day.isPast && !day.isAvailable && "text-zinc-400",
+                        "text-stone-800 font-medium",
+                      !day.isPast && !day.isAvailable && "text-stone-400",
                       day.isToday &&
                         !showSelectedStyle &&
                         "text-accent-dark font-semibold",
@@ -300,7 +300,7 @@ export function Calendar({
                     aria-hidden="true"
                   >
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-[141%] h-px bg-zinc-200 origin-center rotate-32" />
+                      <div className="w-[141%] h-px bg-stone-200 origin-center rotate-32" />
                     </div>
                   </div>
                 )}
@@ -314,7 +314,7 @@ export function Calendar({
           <div ref={timeSlotsRef} className="flex flex-col gap-3">
             <div className="flex items-center gap-1.5">
               <ClockIcon className="size-4" />
-              <p className="mb-0! text-base font-medium text-zinc-700">
+              <p className="mb-0! text-base font-medium text-stone-700">
                 Kies een tijdslot
               </p>
             </div>
@@ -325,10 +325,10 @@ export function Calendar({
                   type="button"
                   onClick={() => handleTimeSelect(slot.time)}
                   className={cn(
-                    "px-3 py-2.5 rounded-md text-sm font-medium text-zinc-700 transition-colors",
+                    "px-3 py-2.5 rounded-md text-sm font-medium text-stone-700 transition-colors",
                     "focus:outline-none",
-                    "border border-zinc-200",
-                    "hover:border-zinc-300 hover:bg-zinc-100 cursor-pointer",
+                    "border border-stone-200",
+                    "hover:border-stone-300 hover:bg-stone-100 cursor-pointer",
                     selectedDate === expandedDate &&
                       selectedTime === slot.time &&
                       "bg-accent-dark text-accent-light border-accent-dark hover:bg-accent-dark",

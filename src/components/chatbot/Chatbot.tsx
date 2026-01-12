@@ -220,7 +220,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                       onClick={() => {
                         sendMessage({ text: question });
                       }}
-                      className="cursor-pointer text-left flex text-sm font-medium rounded-lg p-2 bg-zinc-100 hover:bg-zinc-200 transition-colors"
+                      className="cursor-pointer text-left flex text-sm font-medium rounded-lg p-2 bg-stone-100 hover:bg-stone-200 transition-colors"
                       //disabled={status !== "ready"}
                     >
                       {question}
@@ -419,7 +419,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
                 </InputGroupAddon>
               </InputGroup>
             </form>
-            <p className="hidden mb-0! text-xs text-zinc-500 text-center">
+            <p className="hidden mb-0! text-xs text-stone-500 text-center">
               Kan fouten maken.
             </p>
           </div>

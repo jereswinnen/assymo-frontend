@@ -37,7 +37,7 @@ export default function TextBlock({ block }: TextBlockProps) {
       <div className="flex flex-col gap-2">
         {renderHeading()}
         {text && (
-          <div className="font-[420] text-zinc-600 text-base md:text-lg">
+          <div className="font-[420] text-stone-600 text-base md:text-lg">
             <RichText html={text} />
           </div>
         )}

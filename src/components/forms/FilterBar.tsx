@@ -72,7 +72,7 @@ function CategoryFilter({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="cursor-pointer rounded-full gap-1.5 text-zinc-700"
+          className="cursor-pointer rounded-full gap-1.5 text-stone-700"
           aria-expanded={open}
         >
           {category.name}
@@ -157,7 +157,7 @@ export function FilterBar({
 
   return (
     <div className="flex flex-wrap items-center gap-4">
-      <p className="mb-0! text-sm font-medium text-zinc-600">Filter op:</p>
+      <p className="mb-0! text-sm font-medium text-stone-600">Filter op:</p>
       <div className="flex flex-wrap items-center gap-3">
         {visibleCategories.map((category) => (
           <CategoryFilter
@@ -173,7 +173,7 @@ export function FilterBar({
         <Button
           variant="outline"
           size="sm"
-          className="cursor-pointer ml-auto text-zinc-500 rounded-full"
+          className="cursor-pointer ml-auto text-stone-500 rounded-full"
           onClick={handleClearAll}
         >
           <CircleXIcon className="size-4" />

@@ -8,7 +8,7 @@ export function CookieSettingsButton() {
   return (
     <button
       onClick={resetConsent}
-      className="cursor-pointer transition-all duration-200 hover:text-zinc-700"
+      className="cursor-pointer transition-all duration-200 hover:text-stone-700"
     >
       Cookie-instellingen
     </button>

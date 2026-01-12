@@ -85,9 +85,9 @@ export default function Slideshow({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-100"
+              className="absolute inset-0 z-10 flex items-center justify-center bg-stone-100"
             >
-              <Spinner className="size-8 text-zinc-400" />
+              <Spinner className="size-8 text-stone-400" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -127,21 +127,21 @@ export default function Slideshow({
         )}
 
         {hasMultiple && (
-          <div className="absolute bottom-0 left-0 z-10 flex items-center gap-4 bg-zinc-200 px-3 p-2.5">
-            <span className="text-sm font-medium text-zinc-600 tabular-nums">
+          <div className="absolute bottom-0 left-0 z-10 flex items-center gap-4 bg-stone-200 px-3 p-2.5">
+            <span className="text-sm font-medium text-stone-600 tabular-nums">
               {currentIndex + 1}/{images.length}
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={goToPrevious}
-                className="cursor-pointer text-zinc-600 transition-all duration-400 ease-circ hover:-translate-x-0.5 hover:text-zinc-800"
+                className="cursor-pointer text-stone-600 transition-all duration-400 ease-circ hover:-translate-x-0.5 hover:text-stone-800"
                 aria-label="Previous image"
               >
                 <ArrowLeftIcon className="size-4" />
               </button>
               <button
                 onClick={goToNext}
-                className="cursor-pointer text-zinc-600 transition-all duration-400 ease-circ hover:translate-x-0.5 hover:text-zinc-800"
+                className="cursor-pointer text-stone-600 transition-all duration-400 ease-circ hover:translate-x-0.5 hover:text-stone-800"
                 aria-label="Next image"
               >
                 <ArrowRightIcon className="size-4" />
@@ -155,7 +155,7 @@ export default function Slideshow({
         <AnimatePresence mode="wait">
           <motion.p
             key={currentIndex}
-            className="mt-2 text-sm text-zinc-600 text-center"
+            className="mt-2 text-sm text-stone-600 text-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

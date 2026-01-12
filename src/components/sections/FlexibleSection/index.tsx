@@ -44,7 +44,7 @@ export default function FlexibleSection({ section }: FlexibleSectionProps) {
     <section
       className={cn(
         "col-span-full grid grid-cols-subgrid gap-y-8",
-        background && "o-grid--bleed bg-zinc-200 py-8 md:py-14",
+        background && "o-grid--bleed bg-stone-200 py-8 md:py-14",
       )}
     >
       {isSingleColumn ? (

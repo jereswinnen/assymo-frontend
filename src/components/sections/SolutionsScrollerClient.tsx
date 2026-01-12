@@ -48,12 +48,12 @@ function ScrollerNavigation({
 }: ScrollerNavigationProps) {
   return (
     <div
-      className={cn("flex gap-2 p-1.25 rounded-full bg-zinc-200", className)}
+      className={cn("flex gap-2 p-1.25 rounded-full bg-stone-200", className)}
     >
       <button
         onClick={onPrevious}
         disabled={!canGoPrevious}
-        className="group cursor-pointer bg-white text-zinc-800 rounded-full p-1.25 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:*:translate-0"
+        className="group cursor-pointer bg-white text-stone-800 rounded-full p-1.25 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:*:translate-0"
         aria-label="Vorige oplossingen"
       >
         <ChevronLeftIcon
@@ -64,7 +64,7 @@ function ScrollerNavigation({
       <button
         onClick={onNext}
         disabled={!canGoNext}
-        className="group cursor-pointer bg-white text-zinc-800 rounded-full p-1.25 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:*:translate-0"
+        className="group cursor-pointer bg-white text-stone-800 rounded-full p-1.25 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:*:translate-0"
         aria-label="Volgende oplossingen"
       >
         <ChevronRightIcon
@@ -181,7 +181,7 @@ export default function SolutionsScrollerClient({
           {subtitle && (
             <RichText
               html={subtitle}
-              className="md:max-w-[60%] text-lg text-zinc-600 [&_p]:mb-0!"
+              className="md:max-w-[60%] text-lg text-stone-600 [&_p]:mb-0!"
             />
           )}
         </div>
@@ -214,11 +214,11 @@ export default function SolutionsScrollerClient({
             data-card
             initial="idle"
             whileHover="hover"
-            className="group relative shrink-0 w-[80vw] sm:w-[calc((var(--u-site-w)-var(--u-grid-gap))/3)] min-w-[280px] flex flex-col gap-4 p-4 pt-0 border-l border-zinc-200 hover:border-zinc-300 transition-all ease-circ duration-300 cursor-pointer"
+            className="group relative shrink-0 w-[80vw] sm:w-[calc((var(--u-site-w)-var(--u-grid-gap))/3)] min-w-[280px] flex flex-col gap-4 p-4 pt-0 border-l border-stone-200 hover:border-stone-300 transition-all ease-circ duration-300 cursor-pointer"
           >
             {/* Animated background layer */}
             <motion.div
-              className="absolute inset-0 bg-zinc-100 -z-10"
+              className="absolute inset-0 bg-stone-100 -z-10"
               variants={{
                 idle: { clipPath: "inset(0 100% 0 0)" },
                 hover: { clipPath: "inset(0 0% 0 0)" },
@@ -227,7 +227,7 @@ export default function SolutionsScrollerClient({
             />
 
             {/* Image */}
-            <div className="relative max-w-[90%] aspect-5/3 overflow-hidden bg-zinc-100">
+            <div className="relative max-w-[90%] aspect-5/3 overflow-hidden bg-stone-100">
               {solution.imageUrl && (
                 <Image
                   src={solution.imageUrl}
@@ -243,7 +243,7 @@ export default function SolutionsScrollerClient({
             <div className="flex flex-col gap-1">
               <h3 className="mb-0! text-lg font-medium">{solution.name}</h3>
               {solution.subtitle && (
-                <p className="text-sm text-zinc-600 mb-0!">
+                <p className="text-sm text-stone-600 mb-0!">
                   {solution.subtitle}
                 </p>
               )}

@@ -25,7 +25,7 @@ export default function Slideshow({ section }: SlideshowProps) {
 
   if (background) {
     return (
-      <section className="o-grid--bleed col-span-full grid grid-cols-subgrid py-8 md:py-14 bg-zinc-200">
+      <section className="o-grid--bleed col-span-full grid grid-cols-subgrid py-8 md:py-14 bg-stone-200">
         <div className="col-span-full">
           {images.length > 0 ? (
             <SlideshowComponent images={images} variant="fullwidth" />

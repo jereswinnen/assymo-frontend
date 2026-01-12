@@ -100,7 +100,7 @@ export function SplitSection({ section, className }: SplitSectionProps) {
                 <h3 className="text-lg font-medium">{item.title}</h3>
               )}
               {item.subtitle && (
-                <p className="text-sm text-zinc-600">{item.subtitle}</p>
+                <p className="text-sm text-stone-600">{item.subtitle}</p>
               )}
             </div>
           </div>

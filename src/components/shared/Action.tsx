@@ -12,7 +12,7 @@ const actionVariants = cva(
         primary:
           "text-accent-light bg-accent-dark hover:text-accent-dark hover:bg-accent-light disabled:hover:bg-accent-dark disabled:hover:text-accent-light",
         secondary:
-          "text-zinc-800 bg-zinc-300 hover:text-zinc-700 hover:bg-zinc-200 disabled:hover:bg-zinc-300 disabled:hover:text-zinc-800",
+          "text-stone-800 bg-stone-300 hover:text-stone-700 hover:bg-stone-200 disabled:hover:bg-stone-300 disabled:hover:text-stone-800",
       },
     },
     defaultVariants: {

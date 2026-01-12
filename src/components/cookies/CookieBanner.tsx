@@ -36,12 +36,12 @@ export default function CookieBanner() {
         >
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1 *:mb-0!">
-              <h3 className="text-zinc-800">Fijn dat je er bent!</h3>
-              <p className="text-sm text-zinc-600">
+              <h3 className="text-stone-800">Fijn dat je er bent!</h3>
+              <p className="text-sm text-stone-600">
                 Op onze website maken we gebruik van cookies voor statistieken
                 en om de chatfunctie goed te laten werken. Door op &apos;Alles
                 accepteren&apos; te klikken, ga je akkoord met ons{" "}
-                <Link href="/privacy" className="font-medium text-zinc-800">
+                <Link href="/privacy" className="font-medium text-stone-800">
                   privacybeleid
                 </Link>
                 .
