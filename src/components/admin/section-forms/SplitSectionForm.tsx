@@ -19,6 +19,7 @@ import { ImageUpload } from "@/components/admin/media/ImageUpload";
 import { IconSelect } from "@/components/admin/IconSelect";
 import { Separator } from "@/components/ui/separator";
 import { SplitSectionSection, SplitSectionItem } from "@/types/sections";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
 
 interface SplitSectionFormProps {
@@ -27,6 +28,8 @@ interface SplitSectionFormProps {
 }
 
 export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
+  const { currentSite } = useSiteContext();
+
   // Ensure we always have exactly 2 items
   const items: [SplitSectionItem, SplitSectionItem] = section.items || [
     { _key: crypto.randomUUID() },
@@ -95,7 +98,7 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
               placeholder="/pagina"
             />
             <FieldDescription>
-              {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
+              {currentSite?.domain || "https://..."}
               {item.href || "/..."}
             </FieldDescription>
           </Field>

@@ -42,6 +42,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
 
 interface Filter {
@@ -87,6 +88,7 @@ export default function SolutionEditorPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const { currentSite } = useSiteContext();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -379,8 +381,8 @@ export default function SolutionEditorPage({
                   onChange={(e) => handleSlugChange(e.target.value)}
                 />
                 <FieldDescription>
-                  {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
-                  /realisaties/{slug || "..."}
+                  {currentSite?.domain || "https://..."}/realisaties/
+                  {slug || "..."}
                 </FieldDescription>
               </Field>
             </FieldSet>

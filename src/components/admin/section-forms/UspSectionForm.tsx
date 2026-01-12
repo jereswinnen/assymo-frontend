@@ -9,6 +9,7 @@ import { IconSelect } from "@/components/admin/IconSelect";
 import { Separator } from "@/components/ui/separator";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { UspSectionSection, UspItem } from "@/types/sections";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
 
 interface UspSectionFormProps {
@@ -19,6 +20,7 @@ interface UspSectionFormProps {
 const MAX_ITEMS = 5;
 
 export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
+  const { currentSite } = useSiteContext();
   const usps = section.usps || [];
 
   const addUsp = () => {
@@ -148,7 +150,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                         placeholder={t("admin.placeholders.contactUrl")}
                       />
                       <FieldDescription>
-                        {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
+                        {currentSite?.domain || "https://..."}
                         {usp.link?.url || "/..."}
                       </FieldDescription>
                     </Field>

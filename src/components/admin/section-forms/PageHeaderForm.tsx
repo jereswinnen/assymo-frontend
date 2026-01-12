@@ -22,6 +22,7 @@ import { IconSelect } from "@/components/admin/IconSelect";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { PageHeaderSection } from "@/types/sections";
 import { Separator } from "@/components/ui/separator";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
 
 interface ButtonItem {
@@ -39,6 +40,7 @@ interface PageHeaderFormProps {
 }
 
 export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
+  const { currentSite } = useSiteContext();
   const buttons = section.buttons || [];
 
   const addButton = () => {
@@ -186,8 +188,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                           placeholder="/contact"
                         />
                         <FieldDescription>
-                          {process.env.NEXT_PUBLIC_BASE_URL ||
-                            "https://assymo.be"}
+                          {currentSite?.domain || "https://..."}
                           {button.url || "/..."}
                         </FieldDescription>
                       </Field>

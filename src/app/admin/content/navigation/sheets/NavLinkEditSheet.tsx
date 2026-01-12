@@ -51,6 +51,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
 
 interface Solution {
@@ -105,6 +106,7 @@ export function NavLinkEditSheet({
   onLinkUpdated,
 }: NavLinkEditSheetProps) {
   const isNew = !link;
+  const { currentSite } = useSiteContext();
 
   // Link form state
   const [linkTitle, setLinkTitle] = useState("");
@@ -363,8 +365,7 @@ export function NavLinkEditSheet({
                 placeholder={t("admin.placeholders.linkSlug")}
               />
               <FieldDescription>
-                {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}/
-                {linkSlug || "..."}
+                {currentSite?.domain || "https://..."}/{linkSlug || "..."}
               </FieldDescription>
             </Field>
 

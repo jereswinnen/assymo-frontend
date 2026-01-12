@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
 
 interface PageData {
@@ -71,6 +72,7 @@ export default function PageEditorPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const { currentSite } = useSiteContext();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -312,8 +314,8 @@ export default function PageEditorPage({
                     onChange={(e) => handleSlugChange(e.target.value)}
                   />
                   <FieldDescription>
-                    {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}/
-                    {slug || "..."}
+                    {currentSite?.domain || "https://..."}
+                    /{slug || "..."}
                   </FieldDescription>
                 </Field>
               )}

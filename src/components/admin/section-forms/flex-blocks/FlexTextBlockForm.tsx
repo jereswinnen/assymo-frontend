@@ -14,6 +14,7 @@ import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { IconSelect } from "@/components/admin/IconSelect";
 import { Separator } from "@/components/ui/separator";
 import { FlexTextBlock } from "@/types/sections";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
 
 interface FlexTextBlockFormProps {
@@ -22,6 +23,8 @@ interface FlexTextBlockFormProps {
 }
 
 export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
+  const { currentSite } = useSiteContext();
+
   return (
     <FieldGroup>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -126,7 +129,7 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
                   placeholder="/contact"
                 />
                 <FieldDescription>
-                  {process.env.NEXT_PUBLIC_BASE_URL || "https://assymo.be"}
+                  {currentSite?.domain || "https://..."}
                   {block.button?.url || "/..."}
                 </FieldDescription>
               </Field>

@@ -13,6 +13,7 @@ interface Site {
   id: string;
   name: string;
   slug: string;
+  domain: string | null;
 }
 
 interface SiteContextType {
