@@ -31,8 +31,8 @@ function UspCard({
 
   const variantClasses = {
     primary: "bg-white justify-between",
-    secondary: "bg-whie",
-    cta: "group bg-accent-dark text-white ease-circ duration-400 transition-all hover:-translate-y-1.5",
+    secondary: "bg-transparent",
+    cta: "group bg-accent-dark text-white! ease-circ duration-400 transition-all hover:-translate-y-1.5",
   };
 
   const baseClasses = "p-5 flex flex-col gap-3 h-full text-stone-600";
