@@ -26,14 +26,16 @@ interface SplitItem {
 
 interface SplitSectionProps {
   section: {
-    items: [SplitItem, SplitItem];
+    items: [SplitItem, SplitItem, SplitItem?];
   };
   className?: string;
 }
 
 export function SplitSection({ section, className }: SplitSectionProps) {
   const router = useRouter();
-  const { items } = section;
+  const rawItems = section.items;
+  const items = rawItems.filter((item): item is SplitItem => item !== undefined);
+  const itemCount = items.length;
 
   const handleItemClick = (item: SplitItem) => {
     if (item.actionType === "openChatbot") {
@@ -59,7 +61,14 @@ export function SplitSection({ section, className }: SplitSectionProps) {
           <div
             key={index}
             onClick={() => handleItemClick(item)}
-            className="group flex flex-col gap-3 md:basis-1/2 overflow-hidden md:transition-[flex-basis] duration-700 ease-circ md:group-hover/split:hover:basis-[54%] md:group-hover/split:not-[&:hover]:basis-[46%] cursor-pointer"
+            className={cn(
+              "group flex flex-col gap-3 overflow-hidden cursor-pointer",
+              "md:transition-[flex-basis] duration-700 ease-circ",
+              itemCount === 2 &&
+                "md:basis-1/2 md:group-hover/split:hover:basis-[54%] md:group-hover/split:not-[&:hover]:basis-[46%]",
+              itemCount === 3 &&
+                "md:basis-1/3 md:group-hover/split:hover:basis-[42%] md:group-hover/split:not-[&:hover]:basis-[29%]"
+            )}
           >
             <div className="relative h-[220px] md:h-[400px] overflow-hidden">
               {item.image?.url && (

@@ -1,7 +1,25 @@
 "use client";
 
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
@@ -21,41 +39,67 @@ import { Separator } from "@/components/ui/separator";
 import { SplitSectionSection, SplitSectionItem } from "@/types/sections";
 import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
+import { GripVertical, Plus, Trash2, Trash2Icon } from "lucide-react";
 
-interface SplitSectionFormProps {
-  section: SplitSectionSection;
-  onChange: (section: SplitSectionSection) => void;
+interface SortableItemProps {
+  item: SplitSectionItem;
+  index: number;
+  isThirdItem: boolean;
+  currentSiteDomain: string | null;
+  onUpdate: (updates: Partial<SplitSectionItem>) => void;
+  onRemove: () => void;
 }
 
-export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
-  const { currentSite } = useSiteContext();
+function SortableItem({
+  item,
+  index,
+  isThirdItem,
+  currentSiteDomain,
+  onUpdate,
+  onRemove,
+}: SortableItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item._key });
 
-  // Ensure we always have exactly 2 items
-  const items: [SplitSectionItem, SplitSectionItem] = section.items || [
-    { _key: crypto.randomUUID() },
-    { _key: crypto.randomUUID() },
-  ];
-
-  const updateItem = (index: 0 | 1, updates: Partial<SplitSectionItem>) => {
-    const newItems: [SplitSectionItem, SplitSectionItem] = [...items] as [
-      SplitSectionItem,
-      SplitSectionItem,
-    ];
-    newItems[index] = { ...newItems[index], ...updates };
-    onChange({ ...section, items: newItems });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
   };
 
-  const renderItemForm = (item: SplitSectionItem, index: 0 | 1) => (
-    <div key={item._key} className="space-y-3">
-      <FieldLabel className="font-medium">Item {index + 1}</FieldLabel>
+  return (
+    <div ref={setNodeRef} style={style} className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            className="cursor-grab touch-none text-muted-foreground hover:text-foreground"
+          >
+            <GripVertical className="size-4" />
+          </button>
+          <FieldLabel className="font-medium">Item {index + 1}</FieldLabel>
+        </div>
+        {isThirdItem && (
+          <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
+            <Trash2Icon className="size-4" />
+            Verwijderen
+          </Button>
+        )}
+      </div>
       <div className="p-4 space-y-4 border rounded-lg">
         <Field>
           <FieldLabel>Afbeelding</FieldLabel>
           <ImageUpload
             value={item.image || null}
-            onChange={(value) =>
-              updateItem(index, { image: value || undefined })
-            }
+            onChange={(value) => onUpdate({ image: value || undefined })}
           />
         </Field>
 
@@ -63,7 +107,7 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
           <FieldLabel>Titel</FieldLabel>
           <Input
             value={item.title || ""}
-            onChange={(e) => updateItem(index, { title: e.target.value })}
+            onChange={(e) => onUpdate({ title: e.target.value })}
             placeholder={t("admin.placeholders.itemTitle")}
           />
         </Field>
@@ -71,7 +115,7 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
           <FieldLabel>Subtitel</FieldLabel>
           <Input
             value={item.subtitle || ""}
-            onChange={(e) => updateItem(index, { subtitle: e.target.value })}
+            onChange={(e) => onUpdate({ subtitle: e.target.value })}
             placeholder={t("admin.placeholders.optionalSubtitle")}
           />
         </Field>
@@ -81,7 +125,7 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
           <Switch
             checked={item.actionType === "openChatbot"}
             onCheckedChange={(checked) =>
-              updateItem(index, {
+              onUpdate({
                 actionType: checked ? "openChatbot" : "link",
                 href: checked ? undefined : item.href,
               })
@@ -94,11 +138,11 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
             <FieldLabel>Link URL</FieldLabel>
             <Input
               value={item.href || ""}
-              onChange={(e) => updateItem(index, { href: e.target.value })}
+              onChange={(e) => onUpdate({ href: e.target.value })}
               placeholder="/pagina"
             />
             <FieldDescription>
-              {currentSite?.domain || "https://..."}
+              {currentSiteDomain || "https://..."}
               {item.href || "/..."}
             </FieldDescription>
           </Field>
@@ -114,7 +158,7 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
               <Input
                 value={item.action?.label || ""}
                 onChange={(e) =>
-                  updateItem(index, {
+                  onUpdate({
                     action: { ...item.action, label: e.target.value },
                   })
                 }
@@ -126,7 +170,7 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
               <IconSelect
                 value={item.action?.icon || ""}
                 onValueChange={(value) =>
-                  updateItem(index, {
+                  onUpdate({
                     action: { ...item.action, icon: value || undefined },
                   })
                 }
@@ -138,7 +182,7 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
               <Select
                 value={item.action?.variant || "secondary"}
                 onValueChange={(value) =>
-                  updateItem(index, {
+                  onUpdate({
                     action: {
                       ...item.action,
                       variant: value as "primary" | "secondary",
@@ -160,11 +204,118 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
       </div>
     </div>
   );
+}
+
+interface SplitSectionFormProps {
+  section: SplitSectionSection;
+  onChange: (section: SplitSectionSection) => void;
+}
+
+export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
+  const { currentSite } = useSiteContext();
+
+  // Ensure we always have at least 2 items (work with array for dnd)
+  const items: SplitSectionItem[] = section.items?.filter(
+    (item): item is SplitSectionItem => item !== undefined,
+  ) || [{ _key: crypto.randomUUID() }, { _key: crypto.randomUUID() }];
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = items.findIndex((item) => item._key === active.id);
+    const newIndex = items.findIndex((item) => item._key === over.id);
+    const reordered = arrayMove(items, oldIndex, newIndex);
+
+    // Convert back to tuple type
+    const newItems: [SplitSectionItem, SplitSectionItem, SplitSectionItem?] =
+      reordered.length === 3
+        ? [reordered[0], reordered[1], reordered[2]]
+        : [reordered[0], reordered[1]];
+
+    onChange({ ...section, items: newItems });
+  };
+
+  const updateItem = (index: number, updates: Partial<SplitSectionItem>) => {
+    const newItems = [...items];
+    newItems[index] = { ...newItems[index], ...updates };
+
+    const tupleItems: [SplitSectionItem, SplitSectionItem, SplitSectionItem?] =
+      newItems.length === 3
+        ? [newItems[0], newItems[1], newItems[2]]
+        : [newItems[0], newItems[1]];
+
+    onChange({ ...section, items: tupleItems });
+  };
+
+  const addThirdItem = () => {
+    const newItems: [SplitSectionItem, SplitSectionItem, SplitSectionItem] = [
+      items[0],
+      items[1],
+      { _key: crypto.randomUUID() },
+    ];
+    onChange({ ...section, items: newItems });
+  };
+
+  const removeItem = (index: number) => {
+    // Only allow removing if we have 3 items (keeps minimum of 2)
+    if (items.length !== 3) return;
+    const newItems: [SplitSectionItem, SplitSectionItem] =
+      index === 0
+        ? [items[1], items[2]!]
+        : index === 1
+          ? [items[0], items[2]!]
+          : [items[0], items[1]];
+    onChange({ ...section, items: newItems });
+  };
+
+  const hasThirdItem = items.length === 3;
 
   return (
     <div className="space-y-6">
-      {renderItemForm(items[0], 0)}
-      {renderItemForm(items[1], 1)}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={items.map((item) => item._key)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-6">
+            {items.map((item, index) => (
+              <SortableItem
+                key={item._key}
+                item={item}
+                index={index}
+                isThirdItem={hasThirdItem}
+                currentSiteDomain={currentSite?.domain ?? null}
+                onUpdate={(updates) => updateItem(index, updates)}
+                onRemove={() => removeItem(index)}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+
+      {!hasThirdItem && (
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={addThirdItem}
+        >
+          <Plus className="mr-1.5 h-4 w-4" />
+          Derde item toevoegen
+        </Button>
+      )}
     </div>
   );
 }

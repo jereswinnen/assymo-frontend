@@ -62,7 +62,7 @@ export interface SplitSectionItem {
 
 export interface SplitSectionSection extends BaseSection {
   _type: "splitSection";
-  items?: [SplitSectionItem, SplitSectionItem];
+  items?: [SplitSectionItem, SplitSectionItem, SplitSectionItem?];
 }
 
 export interface UspItem {
@@ -175,7 +175,7 @@ export const SECTION_TYPES: {
   {
     type: "splitSection",
     label: "Split Section",
-    description: "Twee items naast elkaar",
+    description: "Twee of drie items naast elkaar",
   },
   {
     type: "uspSection",
