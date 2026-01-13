@@ -23,7 +23,7 @@ export function SolutionsScrollerForm({
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="heading">Titel</FieldLabel>
+        <FieldLabel htmlFor="heading">{t("admin.labels.title")}</FieldLabel>
         <Input
           id="heading"
           value={section.heading || ""}
@@ -32,7 +32,7 @@ export function SolutionsScrollerForm({
         />
       </Field>
       <RichTextEditor
-        label="Subtitel"
+        label={t("admin.labels.subtitle")}
         value={section.subtitle || ""}
         onChange={(value) => onChange({ ...section, subtitle: value })}
         placeholder={t("admin.placeholders.solutionsSubtitle")}

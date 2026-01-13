@@ -24,6 +24,7 @@ import { ImageUpload } from "@/components/admin/media/ImageUpload";
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { SlideshowSection } from "@/types/sections";
 import { Separator } from "@/components/ui/separator";
+import { t } from "@/config/strings";
 
 interface SlideshowImage {
   _key: string;
@@ -88,7 +89,7 @@ function SortableImageItem({
           onClick={onRemove}
         >
           <Trash2Icon className="size-4" />
-          Item verwijderen
+          {t("admin.buttons.removeItem")}
         </Button>
       </div>
     </div>
@@ -143,7 +144,7 @@ export function SlideshowForm({ section, onChange }: SlideshowFormProps) {
   return (
     <FieldGroup>
       <Field orientation="horizontal">
-        <FieldLabel htmlFor="background">Achtergrond</FieldLabel>
+        <FieldLabel htmlFor="background">{t("admin.labels.background")}</FieldLabel>
         <Switch
           id="background"
           checked={section.background || false}
@@ -157,16 +158,16 @@ export function SlideshowForm({ section, onChange }: SlideshowFormProps) {
 
       <div className="space-y-4">
         <header className="flex items-center justify-between">
-          <FieldLabel>Afbeeldingen</FieldLabel>
+          <FieldLabel>{t("admin.labels.images")}</FieldLabel>
           <Button type="button" variant="outline" size="sm" onClick={addImage}>
             <PlusIcon className="size-4" />
-            Afbeelding toevoegen
+            {t("admin.buttons.addImage")}
           </Button>
         </header>
 
         {images.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4 text-center">
-            Nog geen afbeeldingen toegevoegd
+            {t("admin.empty.noImages")}
           </p>
         ) : (
           <DndContext

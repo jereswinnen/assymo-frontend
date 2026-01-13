@@ -67,7 +67,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="title">Titel</FieldLabel>
+        <FieldLabel htmlFor="title">{t("admin.labels.title")}</FieldLabel>
         <Input
           id="title"
           value={section.title || ""}
@@ -77,7 +77,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
       </Field>
 
       <RichTextEditor
-        label="Subtitel"
+        label={t("admin.labels.subtitle")}
         value={section.subtitle || ""}
         onChange={(value) => onChange({ ...section, subtitle: value })}
       />
@@ -86,7 +86,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
 
       <div className="space-y-4">
         <Field orientation="horizontal">
-          <FieldLabel htmlFor="background">Toon achtergrond</FieldLabel>
+          <FieldLabel htmlFor="background">{t("admin.labels.showBackground")}</FieldLabel>
           <Switch
             id="background"
             checked={section.background || false}
@@ -97,7 +97,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
         </Field>
 
         <Field orientation="horizontal">
-          <FieldLabel htmlFor="showImage">Toon afbeelding</FieldLabel>
+          <FieldLabel htmlFor="showImage">{t("admin.labels.showImage")}</FieldLabel>
           <Switch
             id="showImage"
             checked={section.showImage || false}
@@ -108,7 +108,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
         </Field>
 
         <Field orientation="horizontal">
-          <FieldLabel htmlFor="showButtons">Toon acties</FieldLabel>
+          <FieldLabel htmlFor="showButtons">{t("admin.labels.showButtons")}</FieldLabel>
           <Switch
             id="showButtons"
             checked={section.showButtons || false}
@@ -124,7 +124,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
       {section.showButtons && (
         <div className="space-y-4">
           <header className="flex items-center justify-between">
-            <FieldLabel>Acties</FieldLabel>
+            <FieldLabel>{t("admin.labels.actions")}</FieldLabel>
             {buttons.length < 2 && (
               <Button
                 type="button"
@@ -133,14 +133,14 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                 onClick={addButton}
               >
                 <PlusIcon className="size-4" />
-                Knop toevoegen
+                {t("admin.buttons.addButton")}
               </Button>
             )}
           </header>
 
           {buttons.length === 0 ? (
             <p className="text-sm text-muted-foreground py-2 text-center">
-              Nog geen knoppen toegevoegd
+              {t("admin.empty.noButtons")}
             </p>
           ) : (
             <div className="space-y-6">
@@ -150,7 +150,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                   className="p-4 space-y-4 border rounded-lg"
                 >
                   <Field orientation="horizontal">
-                    <FieldLabel>Open chatbot</FieldLabel>
+                    <FieldLabel>{t("admin.labels.openChatbot")}</FieldLabel>
                     <Switch
                       checked={button.action === "openChatbot"}
                       onCheckedChange={(checked) =>
@@ -164,7 +164,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <Field>
-                      <FieldLabel>Label</FieldLabel>
+                      <FieldLabel>{t("admin.labels.label")}</FieldLabel>
                       <Input
                         value={button.label || ""}
                         onChange={(e) =>
@@ -172,14 +172,14 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                         }
                         placeholder={
                           button.action === "openChatbot"
-                            ? "Stel een vraag"
-                            : "Knop tekst"
+                            ? t("admin.placeholders.askQuestion")
+                            : t("admin.placeholders.buttonText")
                         }
                       />
                     </Field>
                     {button.action !== "openChatbot" && (
                       <Field>
-                        <FieldLabel>URL</FieldLabel>
+                        <FieldLabel>{t("admin.labels.url")}</FieldLabel>
                         <Input
                           value={button.url || ""}
                           onChange={(e) =>
@@ -197,7 +197,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <Field>
-                      <FieldLabel>Icoon</FieldLabel>
+                      <FieldLabel>{t("admin.labels.icon")}</FieldLabel>
                       <IconSelect
                         value={button.icon || ""}
                         onValueChange={(value) =>
@@ -207,7 +207,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                       />
                     </Field>
                     <Field>
-                      <FieldLabel>Variant</FieldLabel>
+                      <FieldLabel>{t("admin.labels.variant")}</FieldLabel>
                       <Select
                         value={button.variant || "primary"}
                         onValueChange={(value) =>
@@ -220,8 +220,12 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="primary">Primair</SelectItem>
-                          <SelectItem value="secondary">Secundair</SelectItem>
+                          <SelectItem value="primary">
+                            {t("admin.misc.primary")}
+                          </SelectItem>
+                          <SelectItem value="secondary">
+                            {t("admin.misc.secondary")}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </Field>
@@ -234,7 +238,7 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                     onClick={() => removeButton(index)}
                   >
                     <Trash2Icon className="size-4" />
-                    Knop verwijderen
+                    {t("admin.buttons.removeButton")}
                   </Button>
                 </div>
               ))}

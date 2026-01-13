@@ -47,7 +47,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="heading">Titel</FieldLabel>
+        <FieldLabel htmlFor="heading">{t("admin.labels.title")}</FieldLabel>
         <Input
           id="heading"
           value={section.heading || ""}
@@ -58,7 +58,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
 
       <div className="space-y-4">
         <header className="flex items-center justify-between">
-          <FieldLabel>Items</FieldLabel>
+          <FieldLabel>{t("admin.labels.items")}</FieldLabel>
           <Button
             type="button"
             variant="outline"
@@ -67,13 +67,13 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
             disabled={usps.length >= MAX_ITEMS}
           >
             <PlusIcon className="size-4" />
-            Item toevoegen
+            {t("admin.buttons.addItem")}
           </Button>
         </header>
 
         {usps.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4 text-center">
-            Nog geen USPs toegevoegd
+            {t("admin.empty.noUsps")}
           </p>
         ) : (
           <div className="space-y-6">
@@ -81,7 +81,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
               <div key={usp._key} className="p-4 space-y-4 border rounded-lg">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Field>
-                    <FieldLabel>Titel</FieldLabel>
+                    <FieldLabel>{t("admin.labels.title")}</FieldLabel>
                     <Input
                       value={usp.title || ""}
                       onChange={(e) =>
@@ -91,7 +91,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                     />
                   </Field>
                   <Field>
-                    <FieldLabel>Icoon</FieldLabel>
+                    <FieldLabel>{t("admin.labels.icon")}</FieldLabel>
                     <IconSelect
                       value={usp.icon || ""}
                       onValueChange={(value) =>
@@ -102,7 +102,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                 </div>
 
                 <RichTextEditor
-                  label="Tekst"
+                  label={t("admin.labels.text")}
                   value={usp.text || ""}
                   onChange={(value) => updateUsp(index, { text: value })}
                   placeholder={t("admin.placeholders.description")}
@@ -111,7 +111,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                 <Separator />
 
                 <Field orientation="horizontal">
-                  <FieldLabel>Actie</FieldLabel>
+                  <FieldLabel>{t("admin.labels.action")}</FieldLabel>
                   <Switch
                     checked={!!usp.link}
                     onCheckedChange={(checked) => {
@@ -127,7 +127,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                 {usp.link && (
                   <div className="grid gap-3 sm:grid-cols-2">
                     <Field>
-                      <FieldLabel>Label</FieldLabel>
+                      <FieldLabel>{t("admin.labels.label")}</FieldLabel>
                       <Input
                         value={usp.link?.label || ""}
                         onChange={(e) =>
@@ -139,7 +139,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                       />
                     </Field>
                     <Field>
-                      <FieldLabel>URL</FieldLabel>
+                      <FieldLabel>{t("admin.labels.url")}</FieldLabel>
                       <Input
                         value={usp.link?.url || ""}
                         onChange={(e) =>
@@ -166,7 +166,7 @@ export function UspSectionForm({ section, onChange }: UspSectionFormProps) {
                   onClick={() => removeUsp(index)}
                 >
                   <Trash2Icon className="size-4" />
-                  Item verwijderen
+                  {t("admin.buttons.removeItem")}
                 </Button>
               </div>
             ))}

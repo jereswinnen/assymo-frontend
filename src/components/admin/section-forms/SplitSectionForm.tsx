@@ -90,13 +90,13 @@ function SortableItem({
         {isThirdItem && (
           <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
             <Trash2Icon className="size-4" />
-            Verwijderen
+            {t("admin.buttons.delete")}
           </Button>
         )}
       </div>
       <div className="p-4 space-y-4 border rounded-lg">
         <Field>
-          <FieldLabel>Afbeelding</FieldLabel>
+          <FieldLabel>{t("admin.labels.image")}</FieldLabel>
           <ImageUpload
             value={item.image || null}
             onChange={(value) => onUpdate({ image: value || undefined })}
@@ -104,7 +104,7 @@ function SortableItem({
         </Field>
 
         <Field>
-          <FieldLabel>Titel</FieldLabel>
+          <FieldLabel>{t("admin.labels.title")}</FieldLabel>
           <Input
             value={item.title || ""}
             onChange={(e) => onUpdate({ title: e.target.value })}
@@ -112,7 +112,7 @@ function SortableItem({
           />
         </Field>
         <Field>
-          <FieldLabel>Subtitel</FieldLabel>
+          <FieldLabel>{t("admin.labels.subtitle")}</FieldLabel>
           <Input
             value={item.subtitle || ""}
             onChange={(e) => onUpdate({ subtitle: e.target.value })}
@@ -121,7 +121,7 @@ function SortableItem({
         </Field>
 
         <Field orientation="horizontal">
-          <FieldLabel>Open chatbot</FieldLabel>
+          <FieldLabel>{t("admin.labels.openChatbot")}</FieldLabel>
           <Switch
             checked={item.actionType === "openChatbot"}
             onCheckedChange={(checked) =>
@@ -135,7 +135,7 @@ function SortableItem({
 
         {item.actionType !== "openChatbot" && (
           <Field>
-            <FieldLabel>Link URL</FieldLabel>
+            <FieldLabel>{t("admin.labels.linkUrl")}</FieldLabel>
             <Input
               value={item.href || ""}
               onChange={(e) => onUpdate({ href: e.target.value })}
@@ -151,10 +151,12 @@ function SortableItem({
         <Separator />
 
         <div className="space-y-4">
-          <FieldLabel>Actie (optioneel)</FieldLabel>
+          <FieldLabel>{t("admin.labels.actionOptional")}</FieldLabel>
           <div className="grid gap-3 sm:grid-cols-2">
             <Field>
-              <FieldLabel className="text-muted-foreground">Label</FieldLabel>
+              <FieldLabel className="text-muted-foreground">
+                {t("admin.labels.label")}
+              </FieldLabel>
               <Input
                 value={item.action?.label || ""}
                 onChange={(e) =>
@@ -166,7 +168,9 @@ function SortableItem({
               />
             </Field>
             <Field>
-              <FieldLabel className="text-muted-foreground">Icoon</FieldLabel>
+              <FieldLabel className="text-muted-foreground">
+                {t("admin.labels.icon")}
+              </FieldLabel>
               <IconSelect
                 value={item.action?.icon || ""}
                 onValueChange={(value) =>
@@ -178,7 +182,9 @@ function SortableItem({
               />
             </Field>
             <Field>
-              <FieldLabel className="text-muted-foreground">Variant</FieldLabel>
+              <FieldLabel className="text-muted-foreground">
+                {t("admin.labels.variant")}
+              </FieldLabel>
               <Select
                 value={item.action?.variant || "secondary"}
                 onValueChange={(value) =>
@@ -194,8 +200,12 @@ function SortableItem({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="primary">Primair</SelectItem>
-                  <SelectItem value="secondary">Secundair</SelectItem>
+                  <SelectItem value="primary">
+                    {t("admin.misc.primary")}
+                  </SelectItem>
+                  <SelectItem value="secondary">
+                    {t("admin.misc.secondary")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </Field>
@@ -313,7 +323,7 @@ export function SplitSectionForm({ section, onChange }: SplitSectionFormProps) {
           onClick={addThirdItem}
         >
           <Plus className="mr-1.5 h-4 w-4" />
-          Derde item toevoegen
+          {t("admin.buttons.addItem")}
         </Button>
       )}
     </div>

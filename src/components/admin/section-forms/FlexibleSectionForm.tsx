@@ -30,34 +30,35 @@ import {
   FlexibleSectionLayout,
   FlexibleBlock,
 } from "@/types/sections";
+import { t } from "@/config/strings";
 import { FlexTextBlockForm } from "./flex-blocks/FlexTextBlockForm";
 import { FlexImageBlockForm } from "./flex-blocks/FlexImageBlockForm";
 import { FlexMapBlockForm } from "./flex-blocks/FlexMapBlockForm";
 import { FlexFormBlockForm } from "./flex-blocks/FlexFormBlockForm";
 import { Separator } from "@/components/ui/separator";
 
-const LAYOUT_OPTIONS: { value: FlexibleSectionLayout; label: string }[] = [
-  { value: "1-col", label: "1 kolom" },
-  { value: "2-col-equal", label: "2 kolommen (gelijk)" },
-  { value: "2-col-left-wide", label: "2 kolommen (links breed)" },
-  { value: "2-col-right-wide", label: "2 kolommen (rechts breed)" },
+const LAYOUT_OPTIONS: { value: FlexibleSectionLayout; labelKey: string }[] = [
+  { value: "1-col", labelKey: "admin.misc.col1" },
+  { value: "2-col-equal", labelKey: "admin.misc.col2Equal" },
+  { value: "2-col-left-wide", labelKey: "admin.misc.col2LeftWide" },
+  { value: "2-col-right-wide", labelKey: "admin.misc.col2RightWide" },
 ];
 
 const VERTICAL_ALIGN_OPTIONS = [
-  { value: "top", label: "Boven" },
-  { value: "center", label: "Midden" },
-  { value: "bottom", label: "Onder" },
+  { value: "top", labelKey: "admin.misc.top" },
+  { value: "center", labelKey: "admin.misc.center" },
+  { value: "bottom", labelKey: "admin.misc.bottom" },
 ];
 
 const BLOCK_TYPES: {
   type: FlexibleBlock["_type"];
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
 }[] = [
-  { type: "flexTextBlock", label: "Tekst", icon: TextInitialIcon },
-  { type: "flexImageBlock", label: "Afbeelding", icon: ImageIcon },
-  { type: "flexMapBlock", label: "Kaart", icon: MapIcon },
-  { type: "flexFormBlock", label: "Formulier", icon: FormIcon },
+  { type: "flexTextBlock", labelKey: "admin.misc.text", icon: TextInitialIcon },
+  { type: "flexImageBlock", labelKey: "admin.misc.image", icon: ImageIcon },
+  { type: "flexMapBlock", labelKey: "admin.misc.map", icon: MapIcon },
+  { type: "flexFormBlock", labelKey: "admin.misc.form", icon: FormIcon },
 ];
 
 interface FlexibleSectionFormProps {
@@ -151,14 +152,14 @@ function BlockList({ blocks, onChange, title }: BlockListProps) {
           <DropdownMenuTrigger asChild>
             <Button type="button" variant="outline" size="sm">
               <PlusIcon className="size-4" />
-              Blok toevoegen
+              {t("admin.buttons.addBlock")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {BLOCK_TYPES.map(({ type, label, icon: Icon }) => (
+            {BLOCK_TYPES.map(({ type, labelKey, icon: Icon }) => (
               <DropdownMenuItem key={type} onClick={() => addBlock(type)}>
                 <Icon className="size-4" />
-                {label}
+                {t(labelKey as Parameters<typeof t>[0])}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -167,7 +168,7 @@ function BlockList({ blocks, onChange, title }: BlockListProps) {
 
       {blocks.length === 0 ? (
         <p className="text-sm text-muted-foreground py-4 text-center border border-dashed rounded-md">
-          Geen blokken toegevoegd
+          {t("admin.empty.noBlocks")}
         </p>
       ) : (
         <div className="space-y-6">
@@ -179,7 +180,9 @@ function BlockList({ blocks, onChange, title }: BlockListProps) {
                 <header className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-sm font-medium">
                     {Icon && <Icon className="size-4" />}
-                    {blockInfo?.label || block._type}
+                    {blockInfo
+                      ? t(blockInfo.labelKey as Parameters<typeof t>[0])
+                      : block._type}
                   </span>
                   <Button
                     className="text-destructive"
@@ -188,7 +191,7 @@ function BlockList({ blocks, onChange, title }: BlockListProps) {
                     onClick={() => removeBlock(index)}
                   >
                     <Trash2Icon className="size-4" />
-                    Blok verwijderen
+                    {t("admin.buttons.removeBlock")}
                   </Button>
                 </header>
                 <BlockForm
@@ -215,7 +218,7 @@ export function FlexibleSectionForm({
     <FieldGroup>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field>
-          <FieldLabel>Layout</FieldLabel>
+          <FieldLabel>{t("admin.labels.layout")}</FieldLabel>
           <Select
             value={layout}
             onValueChange={(value) =>
@@ -228,7 +231,7 @@ export function FlexibleSectionForm({
             <SelectContent>
               {LAYOUT_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
+                  {t(opt.labelKey as Parameters<typeof t>[0])}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -236,7 +239,7 @@ export function FlexibleSectionForm({
         </Field>
 
         <Field>
-          <FieldLabel>Verticale uitlijning</FieldLabel>
+          <FieldLabel>{t("admin.labels.verticalAlign")}</FieldLabel>
           <Select
             value={section.verticalAlign || "top"}
             onValueChange={(value) =>
@@ -252,7 +255,7 @@ export function FlexibleSectionForm({
             <SelectContent>
               {VERTICAL_ALIGN_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
+                  {t(opt.labelKey as Parameters<typeof t>[0])}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -261,7 +264,7 @@ export function FlexibleSectionForm({
       </div>
 
       <Field orientation="horizontal">
-        <FieldLabel htmlFor="background">Achtergrond</FieldLabel>
+        <FieldLabel htmlFor="background">{t("admin.labels.background")}</FieldLabel>
         <Switch
           id="background"
           checked={section.background || false}
@@ -276,19 +279,19 @@ export function FlexibleSectionForm({
       {isTwoColumn ? (
         <div className="space-y-6">
           <BlockList
-            title="Linker kolom"
+            title={t("admin.labels.leftColumn")}
             blocks={section.blockLeft || []}
             onChange={(blocks) => onChange({ ...section, blockLeft: blocks })}
           />
           <BlockList
-            title="Rechter kolom"
+            title={t("admin.labels.rightColumn")}
             blocks={section.blockRight || []}
             onChange={(blocks) => onChange({ ...section, blockRight: blocks })}
           />
         </div>
       ) : (
         <BlockList
-          title="Blokken"
+          title={t("admin.labels.blocks")}
           blocks={section.blockMain || []}
           onChange={(blocks) => onChange({ ...section, blockMain: blocks })}
         />
