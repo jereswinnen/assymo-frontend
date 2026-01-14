@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   BlocksIcon,
+  ClipboardCopyIcon,
   ClipboardPasteIcon,
   CopyIcon,
   GripVerticalIcon,
@@ -130,7 +131,7 @@ function SortableSectionRow({
               {t("admin.buttons.duplicate")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onCopy}>
-              <CopyIcon className="size-4" />
+              <ClipboardCopyIcon className="size-4" />
               {t("admin.buttons.copy")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -138,7 +139,7 @@ function SortableSectionRow({
               onClick={onDelete}
               className="text-destructive focus:text-destructive"
             >
-              <Trash2Icon className="size-4" />
+              <Trash2Icon className="size-4 text-destructive" />
               {t("admin.buttons.delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -300,23 +301,15 @@ export function SectionList({
           {showAddButton && (
             <div className="flex items-center gap-2">
               <AddSectionButton onAdd={handleAdd} />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="size-9">
-                    <MoreVerticalIcon className="size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  <DropdownMenuItem
-                    onClick={handlePaste}
-                    disabled={!hasClipboard}
-                    className={!hasClipboard ? "opacity-50" : ""}
-                  >
-                    <ClipboardPasteIcon className="size-4" />
-                    {t("admin.buttons.paste")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-9"
+                onClick={handlePaste}
+                disabled={!hasClipboard}
+              >
+                <ClipboardPasteIcon className="size-4" />
+              </Button>
             </div>
           )}
         </Empty>
@@ -350,23 +343,15 @@ export function SectionList({
           {showAddButton && (
             <div className="flex items-center gap-2">
               <AddSectionButton onAdd={handleAdd} />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="size-9">
-                    <MoreVerticalIcon className="size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  <DropdownMenuItem
-                    onClick={handlePaste}
-                    disabled={!hasClipboard}
-                    className={!hasClipboard ? "opacity-50" : ""}
-                  >
-                    <ClipboardPasteIcon className="size-4" />
-                    {t("admin.buttons.paste")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-9"
+                onClick={handlePaste}
+                disabled={!hasClipboard}
+              >
+                <ClipboardPasteIcon className="size-4" />
+              </Button>
             </div>
           )}
         </>
