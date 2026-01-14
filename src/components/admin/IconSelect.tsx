@@ -57,8 +57,8 @@ export function IconSelect({
           <ChevronsUpDownIcon className="size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[276px] p-2" align="start">
-        <div className="grid grid-cols-6 gap-1">
+      <PopoverContent className="w-[316px] p-2" align="start">
+        <div className="grid grid-cols-7 gap-1">
           {allowNone && (
             <button
               onClick={() => handleSelect("")}
