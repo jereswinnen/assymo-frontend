@@ -117,8 +117,8 @@ export default async function Footer({ className }: FooterProps) {
           </div>
 
           <nav className="flex flex-col md:flex-row gap-8 justify-between basis-full md:basis-[65%]">
-            {links.map((link) => (
-              <div key={link.slug} className="flex flex-col gap-3">
+            {links.map((link, index) => (
+              <div key={index} className="flex flex-col gap-3">
                 <Link
                   href={`/${link.slug}`}
                   className="text-sm font-medium text-stone-600 hover:text-stone-800 transition-colors duration-300"
