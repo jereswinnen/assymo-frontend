@@ -32,6 +32,7 @@ import {
 import { ImageUpload, ImageValue } from "@/components/admin/media/ImageUpload";
 import { SectionList } from "@/components/admin/SectionList";
 import { AddSectionButton } from "@/components/admin/AddSectionButton";
+import { PasteSectionButton } from "@/components/admin/PasteSectionButton";
 import { Section } from "@/types/sections";
 import { toast } from "sonner";
 import {
@@ -336,9 +337,14 @@ export default function SolutionEditorPage({
         <div className="space-y-4 md:col-span-2">
           <div className="flex items-center justify-between">
             <h3 className="mb-0! text-sm font-medium">{t("admin.misc.sections")}</h3>
-            <AddSectionButton
-              onAdd={(section) => setSections([...sections, section])}
-            />
+            <div className="flex items-center gap-2">
+              <AddSectionButton
+                onAdd={(section) => setSections([...sections, section])}
+              />
+              <PasteSectionButton
+                onPaste={(section) => setSections([...sections, section])}
+              />
+            </div>
           </div>
           <SectionList
             sections={sections}

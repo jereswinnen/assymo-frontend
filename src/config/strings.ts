@@ -688,6 +688,7 @@ export const ADMIN_STRINGS = {
       noSitesAvailable: "Geen sites beschikbaar",
       noUsersFound: "Geen gebruikers gevonden.",
       noSections: "Geen secties",
+      clipboardEmpty: "Geen sectie gekopieerd",
       noExceptions: "Geen uitzonderingen",
       noAppointmentsFound: "Geen afspraken gevonden",
       noPasskeysRegistered: "Geen passkeys geregistreerd",

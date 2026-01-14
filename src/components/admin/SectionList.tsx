@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -40,7 +40,6 @@ import {
 import {
   BlocksIcon,
   ClipboardCopyIcon,
-  ClipboardPasteIcon,
   CopyIcon,
   GripVerticalIcon,
   MoreVerticalIcon,
@@ -56,10 +55,9 @@ import {
 import { toast } from "sonner";
 import { Section, getSectionLabel } from "@/types/sections";
 import { AddSectionButton } from "./AddSectionButton";
+import { PasteSectionButton, CLIPBOARD_KEY } from "./PasteSectionButton";
 import { SectionEditSheet } from "@/app/admin/content/sheets/SectionEditSheet";
 import { t } from "@/config/strings";
-
-const CLIPBOARD_KEY = "assymo_copied_section";
 
 interface SortableSectionRowProps {
   section: Section;
@@ -168,31 +166,6 @@ export function SectionList({
 }: SectionListProps) {
   const [editingSection, setEditingSection] = useState<Section | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [hasClipboard, setHasClipboard] = useState(false);
-
-  // Check clipboard state on mount and when storage changes
-  const checkClipboard = useCallback(() => {
-    try {
-      const stored = localStorage.getItem(CLIPBOARD_KEY);
-      setHasClipboard(!!stored);
-    } catch {
-      setHasClipboard(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    checkClipboard();
-
-    // Listen for storage changes from other tabs/windows
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === CLIPBOARD_KEY) {
-        checkClipboard();
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, [checkClipboard]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -253,29 +226,16 @@ export function SectionList({
   const handleCopy = (section: Section) => {
     try {
       localStorage.setItem(CLIPBOARD_KEY, JSON.stringify(section));
-      setHasClipboard(true);
+      // Dispatch custom event for same-tab updates (storage event only fires cross-tab)
+      window.dispatchEvent(new CustomEvent("sectionClipboardChange"));
       toast.success(t("admin.messages.sectionCopied"));
     } catch {
       toast.error(t("admin.messages.somethingWentWrongShort"));
     }
   };
 
-  const handlePaste = () => {
-    try {
-      const stored = localStorage.getItem(CLIPBOARD_KEY);
-      if (!stored) return;
-
-      const section = JSON.parse(stored) as Section;
-      const pasted = {
-        ...section,
-        _key: crypto.randomUUID(),
-      } as Section;
-
-      onChange([...sections, pasted]);
-      toast.success(t("admin.messages.sectionPasted"));
-    } catch {
-      toast.error(t("admin.messages.somethingWentWrongShort"));
-    }
+  const handlePaste = (section: Section) => {
+    onChange([...sections, section]);
   };
 
   const handleSave = async () => {
@@ -301,15 +261,7 @@ export function SectionList({
           {showAddButton && (
             <div className="flex items-center gap-2">
               <AddSectionButton onAdd={handleAdd} />
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-9"
-                onClick={handlePaste}
-                disabled={!hasClipboard}
-              >
-                <ClipboardPasteIcon className="size-4" />
-              </Button>
+              <PasteSectionButton onPaste={handlePaste} />
             </div>
           )}
         </Empty>
@@ -343,15 +295,7 @@ export function SectionList({
           {showAddButton && (
             <div className="flex items-center gap-2">
               <AddSectionButton onAdd={handleAdd} />
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-9"
-                onClick={handlePaste}
-                disabled={!hasClipboard}
-              >
-                <ClipboardPasteIcon className="size-4" />
-              </Button>
+              <PasteSectionButton onPaste={handlePaste} />
             </div>
           )}
         </>
