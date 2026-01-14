@@ -8,6 +8,7 @@ import {
   Calendar1Icon,
   DownloadIcon,
   EyeIcon,
+  FenceIcon,
   HardHatIcon,
   HousePlusIcon,
   InfoIcon,
@@ -21,7 +22,9 @@ import {
   RouteIcon,
   RulerDimensionLineIcon,
   SolarPanelIcon,
+  SparklesIcon,
   SplinePointerIcon,
+  TreesIcon,
   WarehouseIcon,
 } from "lucide-react";
 
@@ -35,6 +38,7 @@ const iconDefinitions = {
   cursor: { label: "Cursor", icon: SplinePointerIcon },
   download: { label: "Download", icon: DownloadIcon },
   eye: { label: "Eye", icon: EyeIcon },
+  fence: { label: "Fence", icon: FenceIcon },
   hardhat: { label: "Hard Hat", icon: HardHatIcon },
   houseplus: { label: "House Plus", icon: HousePlusIcon },
   info: { label: "Info", icon: InfoIcon },
@@ -47,6 +51,8 @@ const iconDefinitions = {
   ruler: { label: "Ruler", icon: RulerDimensionLineIcon },
   solarpanel: { label: "Solar Panel", icon: SolarPanelIcon },
   sort: { label: "Sort", icon: ArrowDownAZIcon },
+  sparkles: { label: "Sparkles", icon: SparklesIcon },
+  trees: { label: "Trees", icon: TreesIcon },
   warehouse: { label: "Warehouse", icon: WarehouseIcon },
 } as const;
 
