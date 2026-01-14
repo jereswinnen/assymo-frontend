@@ -210,7 +210,7 @@ export default function HeaderClient({
                   pathname.startsWith(`/${link.slug}/`);
                 return (
                   <li
-                    key={link.slug}
+                    key={index}
                     onMouseEnter={() => handleLinkHover(link, index)}
                   >
                     <Link
