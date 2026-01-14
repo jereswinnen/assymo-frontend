@@ -6,6 +6,19 @@ import { MailIcon, PhoneIcon } from "lucide-react";
 import Map from "@/components/shared/Map";
 import Logo from "@/components/layout/Logo";
 import { buildMetadata } from "@/lib/getPageMetadata";
+import OpeningHoursDisplay from "@/components/shared/OpeningHoursDisplay";
+import { Separator } from "@/components/ui/separator";
+
+/**
+ * Strip HTML tags and convert to plain text with line breaks
+ */
+function stripHtml(html: string): string {
+  return html
+    .replace(/<\/p>\s*<p>/gi, "\n") // Convert </p><p> to newline
+    .replace(/<br\s*\/?>/gi, "\n") // Convert <br> to newline
+    .replace(/<[^>]+>/g, "") // Remove remaining HTML tags
+    .trim();
+}
 
 export const metadata = buildMetadata({
   title: "Maak een afspraak",
@@ -40,7 +53,9 @@ export default async function AppointmentPage() {
 
             <ul className="flex flex-col gap-3 text-base font-medium">
               {settings?.address && (
-                <li className="whitespace-pre-line">{settings.address}</li>
+                <li className="whitespace-pre-line">
+                  {stripHtml(settings.address)}
+                </li>
               )}
               {settings?.phone && (
                 <li>
@@ -65,6 +80,10 @@ export default async function AppointmentPage() {
                 </li>
               )}
             </ul>
+
+            <Separator className="border-stone-200" />
+
+            <OpeningHoursDisplay />
           </div>
         </section>
       </section>
