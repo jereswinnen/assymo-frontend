@@ -34,12 +34,16 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
   BlocksIcon,
+  ClipboardPasteIcon,
+  CopyIcon,
   GripVerticalIcon,
   MoreVerticalIcon,
+  Trash2Icon,
 } from "lucide-react";
 import {
   Empty,
@@ -122,15 +126,19 @@ function SortableSectionRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem onClick={onDuplicate}>
+              <CopyIcon className="size-4" />
               {t("admin.buttons.duplicate")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onCopy}>
+              <CopyIcon className="size-4" />
               {t("admin.buttons.copy")}
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={onDelete}
               className="text-destructive focus:text-destructive"
             >
+              <Trash2Icon className="size-4" />
               {t("admin.buttons.delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -304,6 +312,7 @@ export function SectionList({
                     disabled={!hasClipboard}
                     className={!hasClipboard ? "opacity-50" : ""}
                   >
+                    <ClipboardPasteIcon className="size-4" />
                     {t("admin.buttons.paste")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -353,6 +362,7 @@ export function SectionList({
                     disabled={!hasClipboard}
                     className={!hasClipboard ? "opacity-50" : ""}
                   >
+                    <ClipboardPasteIcon className="size-4" />
                     {t("admin.buttons.paste")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
