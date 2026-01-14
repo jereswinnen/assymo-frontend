@@ -20,6 +20,7 @@ import {
   PhoneIcon,
   RouteIcon,
   RulerDimensionLineIcon,
+  SolarPanelIcon,
   SplinePointerIcon,
   WarehouseIcon,
 } from "lucide-react";
@@ -44,6 +45,7 @@ const iconDefinitions = {
   phone: { label: "Phone", icon: PhoneIcon },
   route: { label: "Route", icon: RouteIcon },
   ruler: { label: "Ruler", icon: RulerDimensionLineIcon },
+  solarpanel: { label: "Solar Panel", icon: SolarPanelIcon },
   sort: { label: "Sort", icon: ArrowDownAZIcon },
   warehouse: { label: "Warehouse", icon: WarehouseIcon },
 } as const;
