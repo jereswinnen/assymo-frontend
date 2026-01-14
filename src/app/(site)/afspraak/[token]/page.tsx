@@ -1,15 +1,16 @@
-import { Metadata } from "next";
 import { getSiteParameters } from "@/lib/content";
 import { AppointmentView } from "./AppointmentView";
 import Link from "next/link";
 import { MailIcon, PhoneIcon } from "lucide-react";
 import Map from "@/components/shared/Map";
 import Logo from "@/components/layout/Logo";
+import { buildMetadata } from "@/lib/getPageMetadata";
 
-export const metadata: Metadata = {
-  title: "Uw afspraak - Assymo",
+export const metadata = buildMetadata({
+  title: "Uw afspraak",
   description: "Bekijk, wijzig of annuleer uw afspraak.",
-};
+  path: "/afspraak",
+});
 
 interface AppointmentTokenPageProps {
   params: Promise<{ token: string }>;

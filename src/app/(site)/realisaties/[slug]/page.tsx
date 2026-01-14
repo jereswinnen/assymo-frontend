@@ -1,21 +1,27 @@
 import { getSolutionBySlug } from "@/lib/content";
 import { notFound } from "next/navigation";
 import SectionRenderer from "@/components/shared/SectionRenderer";
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/getPageMetadata";
 
-export async function generateMetadata({ params }: any) {
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const solution = await getSolutionBySlug(slug);
 
   if (!solution) {
-    return {
-      title: "Product Not Found",
-    };
+    return { title: "Realisatie niet gevonden — Assymo" };
   }
 
-  return {
-    title: solution.name || "Solution",
-    description: `View details about ${solution.name || "our solution"}`,
-  };
+  return buildMetadata({
+    title: solution.name,
+    path: `/realisaties/${slug}`,
+    image: (solution.header_image as any)?.url,
+    type: "article",
+  });
 }
 
 export default async function SolutionPage({ params }: any) {

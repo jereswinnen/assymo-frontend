@@ -5,11 +5,13 @@ import Link from "next/link";
 import { MailIcon, PhoneIcon } from "lucide-react";
 import Map from "@/components/shared/Map";
 import Logo from "@/components/layout/Logo";
+import { buildMetadata } from "@/lib/getPageMetadata";
 
-export const metadata = {
-  title: "Maak een afspraak - Assymo",
+export const metadata = buildMetadata({
+  title: "Maak een afspraak",
   description: "Breng een bezoekje aan onze toonzaal.",
-};
+  path: "/afspraak",
+});
 
 export default async function AppointmentPage() {
   const [page, settings] = await Promise.all([

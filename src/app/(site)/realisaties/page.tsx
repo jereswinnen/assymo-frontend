@@ -6,11 +6,18 @@ import {
 } from "@/lib/content";
 import SectionRenderer from "@/components/shared/SectionRenderer";
 import { ProjectsGrid } from "@/components/shared/ProjectsGrid";
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/getPageMetadata";
 
-export const metadata = {
-  title: "Realisaties - Assymo",
-  description: "Bekijk onze realisaties",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getPageBySlug("realisaties");
+  return buildMetadata({
+    title: page?.title || "Realisaties",
+    description: "Bekijk onze realisaties",
+    path: "/realisaties",
+    image: (page?.header_image as any)?.url,
+  });
+}
 
 export default async function RealisatiesPage() {
   const [page, solutions, categories] = await Promise.all([

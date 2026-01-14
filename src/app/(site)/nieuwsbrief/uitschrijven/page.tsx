@@ -1,11 +1,12 @@
-import { Metadata } from "next";
 import { unsubscribeContact } from "@/lib/newsletter";
 import Link from "next/link";
+import { buildMetadata } from "@/lib/getPageMetadata";
 
-export const metadata: Metadata = {
-  title: "Uitschrijven - Assymo",
+export const metadata = buildMetadata({
+  title: "Uitschrijven",
   description: "Schrijf u uit van de Assymo nieuwsbrief",
-};
+  path: "/nieuwsbrief/uitschrijven",
+});
 
 interface PageProps {
   searchParams: Promise<{ id?: string }>;
