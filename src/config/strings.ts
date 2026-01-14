@@ -52,6 +52,8 @@ export const ADMIN_STRINGS = {
       generating: "Genereren...",
       sendTest: "Test versturen",
       duplicate: "Dupliceren",
+      copy: "Kopiëren",
+      paste: "Plakken",
       skip: "Overslaan",
       continue: "Doorgaan",
       confirm: "Bevestigen",
@@ -239,6 +241,9 @@ export const ADMIN_STRINGS = {
       twoFactorDisabled: "Twee-factor authenticatie uitgeschakeld",
       loggedOut: "Uitgelogd",
       documentDeleted: "Document verwijderd",
+      sectionCopied: "Sectie gekopieerd",
+      sectionDuplicated: "Sectie gedupliceerd",
+      sectionPasted: "Sectie geplakt",
 
       // Validation errors
       fillAllFields: "Vul alle velden in",

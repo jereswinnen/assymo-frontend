@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   DndContext,
   closestCenter,
@@ -31,9 +31,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   BlocksIcon,
   GripVerticalIcon,
-  Trash2Icon,
+  MoreVerticalIcon,
 } from "lucide-react";
 import {
   Empty,
@@ -42,21 +48,28 @@ import {
   EmptyTitle,
   EmptyDescription,
 } from "@/components/ui/empty";
+import { toast } from "sonner";
 import { Section, getSectionLabel } from "@/types/sections";
 import { AddSectionButton } from "./AddSectionButton";
 import { SectionEditSheet } from "@/app/admin/content/sheets/SectionEditSheet";
 import { t } from "@/config/strings";
 
+const CLIPBOARD_KEY = "assymo_copied_section";
+
 interface SortableSectionRowProps {
   section: Section;
   onEdit: () => void;
   onDelete: () => void;
+  onDuplicate: () => void;
+  onCopy: () => void;
 }
 
 function SortableSectionRow({
   section,
   onEdit,
   onDelete,
+  onDuplicate,
+  onCopy,
 }: SortableSectionRowProps) {
   const {
     attributes,
@@ -96,17 +109,32 @@ function SortableSectionRow({
         {getSectionLabel(section._type)}
       </TableCell>
       <TableCell className="w-10">
-        <Button
-          size="icon"
-          variant="ghost"
-          className="size-8 text-destructive hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-        >
-          <Trash2Icon className="size-4" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="size-8 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVerticalIcon className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onClick={onDuplicate}>
+              {t("admin.buttons.duplicate")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onCopy}>
+              {t("admin.buttons.copy")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={onDelete}
+              className="text-destructive focus:text-destructive"
+            >
+              {t("admin.buttons.delete")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </TableCell>
     </TableRow>
   );
@@ -131,6 +159,31 @@ export function SectionList({
 }: SectionListProps) {
   const [editingSection, setEditingSection] = useState<Section | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [hasClipboard, setHasClipboard] = useState(false);
+
+  // Check clipboard state on mount and when storage changes
+  const checkClipboard = useCallback(() => {
+    try {
+      const stored = localStorage.getItem(CLIPBOARD_KEY);
+      setHasClipboard(!!stored);
+    } catch {
+      setHasClipboard(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkClipboard();
+
+    // Listen for storage changes from other tabs/windows
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === CLIPBOARD_KEY) {
+        checkClipboard();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [checkClipboard]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -168,14 +221,60 @@ export function SectionList({
     setDeleteTarget(null);
   };
 
+  const handleDuplicate = (sectionKey: string) => {
+    const sectionIndex = sections.findIndex((s) => s._key === sectionKey);
+    if (sectionIndex === -1) return;
+
+    const section = sections[sectionIndex];
+    const duplicated = {
+      ...JSON.parse(JSON.stringify(section)),
+      _key: crypto.randomUUID(),
+    } as Section;
+
+    // Insert the duplicate right after the original
+    const newSections = [
+      ...sections.slice(0, sectionIndex + 1),
+      duplicated,
+      ...sections.slice(sectionIndex + 1),
+    ];
+    onChange(newSections);
+    toast.success(t("admin.messages.sectionDuplicated"));
+  };
+
+  const handleCopy = (section: Section) => {
+    try {
+      localStorage.setItem(CLIPBOARD_KEY, JSON.stringify(section));
+      setHasClipboard(true);
+      toast.success(t("admin.messages.sectionCopied"));
+    } catch {
+      toast.error(t("admin.messages.somethingWentWrongShort"));
+    }
+  };
+
+  const handlePaste = () => {
+    try {
+      const stored = localStorage.getItem(CLIPBOARD_KEY);
+      if (!stored) return;
+
+      const section = JSON.parse(stored) as Section;
+      const pasted = {
+        ...section,
+        _key: crypto.randomUUID(),
+      } as Section;
+
+      onChange([...sections, pasted]);
+      toast.success(t("admin.messages.sectionPasted"));
+    } catch {
+      toast.error(t("admin.messages.somethingWentWrongShort"));
+    }
+  };
+
   const handleSave = async () => {
     if (onSave) {
       onSave();
       setEditingSection(null);
     }
   };
-
-  const sectionToDelete = sections.find((s) => s._key === deleteTarget);
 
   return (
     <div className="space-y-4">
@@ -190,7 +289,27 @@ export function SectionList({
               {t("admin.messages.addSections")}
             </EmptyDescription>
           </EmptyHeader>
-          {showAddButton && <AddSectionButton onAdd={handleAdd} />}
+          {showAddButton && (
+            <div className="flex items-center gap-2">
+              <AddSectionButton onAdd={handleAdd} />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="size-9">
+                    <MoreVerticalIcon className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem
+                    onClick={handlePaste}
+                    disabled={!hasClipboard}
+                    className={!hasClipboard ? "opacity-50" : ""}
+                  >
+                    {t("admin.buttons.paste")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
         </Empty>
       ) : (
         <>
@@ -211,13 +330,35 @@ export function SectionList({
                       section={section}
                       onEdit={() => setEditingSection(section)}
                       onDelete={() => setDeleteTarget(section._key)}
+                      onDuplicate={() => handleDuplicate(section._key)}
+                      onCopy={() => handleCopy(section)}
                     />
                   ))}
                 </TableBody>
               </Table>
             </SortableContext>
           </DndContext>
-          {showAddButton && <AddSectionButton onAdd={handleAdd} />}
+          {showAddButton && (
+            <div className="flex items-center gap-2">
+              <AddSectionButton onAdd={handleAdd} />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="size-9">
+                    <MoreVerticalIcon className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem
+                    onClick={handlePaste}
+                    disabled={!hasClipboard}
+                    className={!hasClipboard ? "opacity-50" : ""}
+                  >
+                    {t("admin.buttons.paste")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
         </>
       )}
 
