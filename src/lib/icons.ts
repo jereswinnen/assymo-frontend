@@ -2,14 +2,17 @@
 // Add new icons here and they'll be available everywhere
 
 import {
+  AnvilIcon,
   ArrowDownAZIcon,
   ArrowRightIcon,
   BadgeCheckIcon,
+  BicepsFlexedIcon,
   Calendar1Icon,
   DownloadIcon,
   EyeIcon,
   FenceIcon,
   HardHatIcon,
+  HeartHandshakeIcon,
   HousePlusIcon,
   InfoIcon,
   LeafIcon,
@@ -21,6 +24,8 @@ import {
   PhoneIcon,
   RouteIcon,
   RulerDimensionLineIcon,
+  ScaleIcon,
+  SmileIcon,
   SolarPanelIcon,
   SparklesIcon,
   SplinePointerIcon,
@@ -31,8 +36,10 @@ import {
 // Icon definitions with display labels
 // Add new icons here - they'll automatically appear in admin forms
 const iconDefinitions = {
+  anvil: { label: "Anvil", icon: AnvilIcon },
   arrow: { label: "Arrow", icon: ArrowRightIcon },
   badgecheck: { label: "Badge Check", icon: BadgeCheckIcon },
+  bicepsflexed: { label: "Biceps Flexed", icon: BicepsFlexedIcon },
   calendar: { label: "Calendar", icon: Calendar1Icon },
   chat: { label: "Chat", icon: MessagesSquareIcon },
   cursor: { label: "Cursor", icon: SplinePointerIcon },
@@ -40,6 +47,7 @@ const iconDefinitions = {
   eye: { label: "Eye", icon: EyeIcon },
   fence: { label: "Fence", icon: FenceIcon },
   hardhat: { label: "Hard Hat", icon: HardHatIcon },
+  hearthandshake: { label: "Heart Handshake", icon: HeartHandshakeIcon },
   houseplus: { label: "House Plus", icon: HousePlusIcon },
   info: { label: "Info", icon: InfoIcon },
   leaf: { label: "Leaf", icon: LeafIcon },
@@ -49,6 +57,8 @@ const iconDefinitions = {
   phone: { label: "Phone", icon: PhoneIcon },
   route: { label: "Route", icon: RouteIcon },
   ruler: { label: "Ruler", icon: RulerDimensionLineIcon },
+  scale: { label: "Scale", icon: ScaleIcon },
+  smile: { label: "Smile", icon: SmileIcon },
   solarpanel: { label: "Solar Panel", icon: SolarPanelIcon },
   sort: { label: "Sort", icon: ArrowDownAZIcon },
   sparkles: { label: "Sparkles", icon: SparklesIcon },

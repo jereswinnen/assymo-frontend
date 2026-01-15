@@ -29,11 +29,11 @@ export async function POST(request: NextRequest) {
 Titel: ${title}
 ${content ? `Inhoud: ${content}` : ""}
 
-Vereisten:
-- Maximaal 155 tekens
+STRIKTE VEREISTEN:
+- MAXIMUM 150 tekens (dit is cruciaal - langere teksten worden afgeknipt in Google)
 - Wervend en informatief
 - Bevat een call-to-action indien passend
-- Geef alleen de meta description terug, niets anders.`,
+- Geef ALLEEN de meta description terug, geen aanhalingstekens of andere tekst`,
         },
       ],
     });

@@ -486,14 +486,6 @@ export default function SolutionEditorPage({
               </>
             )}
 
-            {/* Header image */}
-            <Field>
-              <FieldLabel>{t("admin.misc.headerImage")}</FieldLabel>
-              <ImageUpload value={headerImage} onChange={setHeaderImage} />
-            </Field>
-
-            <FieldSeparator />
-
             {/* SEO */}
             <SeoPanel
               title={name}
@@ -508,6 +500,14 @@ export default function SolutionEditorPage({
               basePath="/realisaties"
               siteName="Assymo"
             />
+
+            <FieldSeparator />
+
+            {/* Header image */}
+            <Field>
+              <FieldLabel>{t("admin.misc.headerImage")}</FieldLabel>
+              <ImageUpload value={headerImage} onChange={setHeaderImage} />
+            </Field>
 
             <FieldSeparator />
 

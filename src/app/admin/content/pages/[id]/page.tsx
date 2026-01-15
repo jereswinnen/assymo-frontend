@@ -391,14 +391,6 @@ export default function PageEditorPage({
 
             <FieldSeparator />
 
-            {/* Header image */}
-            <Field>
-              <FieldLabel>{t("admin.misc.headerImage")}</FieldLabel>
-              <ImageUpload value={headerImage} onChange={setHeaderImage} />
-            </Field>
-
-            <FieldSeparator />
-
             {/* SEO */}
             <SeoPanel
               title={title}
@@ -413,6 +405,14 @@ export default function PageEditorPage({
               basePath=""
               siteName="Assymo"
             />
+
+            <FieldSeparator />
+
+            {/* Header image */}
+            <Field>
+              <FieldLabel>{t("admin.misc.headerImage")}</FieldLabel>
+              <ImageUpload value={headerImage} onChange={setHeaderImage} />
+            </Field>
 
             <FieldSeparator />
 
