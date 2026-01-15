@@ -3,7 +3,6 @@ import { neon } from "@neondatabase/serverless";
 import { revalidateTag } from "next/cache";
 import { protectRoute } from "@/lib/permissions";
 import { CACHE_TAGS } from "@/lib/content";
-import { revalidateExternalSite } from "@/lib/revalidate-external";
 import type { SiteParameters } from "@/types/content";
 
 const sql = neon(process.env.DATABASE_URL!);
@@ -100,7 +99,6 @@ export async function PUT(request: NextRequest) {
 
     // Invalidate site parameters cache
     revalidateTag(CACHE_TAGS.siteParameters, "max");
-    await revalidateExternalSite(siteId, CACHE_TAGS.siteParameters);
 
     return NextResponse.json({ success: true });
   } catch (error) {
