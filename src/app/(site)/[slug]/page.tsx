@@ -17,7 +17,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return buildMetadata({
-    title: page.title,
+    title: page.meta_title || page.title,
+    description: page.meta_description,
     path: `/${slug}`,
     image: (page.header_image as any)?.url,
   });

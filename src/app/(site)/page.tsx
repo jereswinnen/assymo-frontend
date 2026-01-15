@@ -6,7 +6,8 @@ import { buildMetadata } from "@/lib/getPageMetadata";
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getHomepage();
   return buildMetadata({
-    title: page?.title,
+    title: page?.meta_title || page?.title,
+    description: page?.meta_description,
     path: "/",
     image: (page?.header_image as any)?.url,
   });

@@ -143,6 +143,8 @@ export const ADMIN_STRINGS = {
       filename: "Bestandsnaam",
       altText: "Alt-tekst",
       profilePhoto: "Profielfoto",
+      metaTitle: "SEO titel",
+      metaDescription: "Meta beschrijving",
     },
 
     /**
@@ -185,6 +187,7 @@ export const ADMIN_STRINGS = {
       passkeys: "Passkeys",
       twoFactorAuth: "Twee-factor authenticatie",
       deletePasskey: "Passkey verwijderen",
+      seo: "SEO",
     },
 
     /**
@@ -244,6 +247,8 @@ export const ADMIN_STRINGS = {
       sectionCopied: "Sectie gekopieerd",
       sectionDuplicated: "Sectie gedupliceerd",
       sectionPasted: "Sectie geplakt",
+      metaDescriptionGenerated: "Meta beschrijving gegenereerd",
+      metaDescriptionGenerateFailed: "Kon meta beschrijving niet genereren",
 
       // Validation errors
       fillAllFields: "Vul alle velden in",
@@ -422,6 +427,8 @@ export const ADMIN_STRINGS = {
       makeAppointment: "Maak een afspraak",
       buttonText: "Knop tekst",
       optional: "Optioneel",
+      metaTitlePlaceholder: "Aangepaste titel voor zoekmachines",
+      metaDescriptionPlaceholder: "Korte beschrijving voor zoekmachines (max 160 tekens)",
     },
 
     /**
@@ -827,6 +834,9 @@ export const ADMIN_STRINGS = {
       subitems: "Subitems",
       noSubitemsYet: "Nog geen subitems",
       deleteLinkDesc: "Deze link en alle subitems worden permanent verwijderd.",
+      seoPreview: "Google preview",
+      seoTitleHint: "Laat leeg om de paginatitel te gebruiken",
+      generateDescription: "Genereer met AI",
     },
   },
 } as const;

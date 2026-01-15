@@ -33,6 +33,8 @@ export interface Page {
   slug: string;
   header_image: ContentImage | null;
   sections: Section[];
+  meta_title: string | null;
+  meta_description: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -57,6 +59,8 @@ export interface Solution {
   sections: Section[];
   order_rank: number;
   filters: Filter[];
+  meta_title: string | null;
+  meta_description: string | null;
   created_at: Date;
   updated_at: Date;
 }

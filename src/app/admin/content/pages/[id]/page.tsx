@@ -32,6 +32,7 @@ import { ImageUpload, ImageValue } from "@/components/admin/media/ImageUpload";
 import { SectionList } from "@/components/admin/SectionList";
 import { AddSectionButton } from "@/components/admin/AddSectionButton";
 import { PasteSectionButton } from "@/components/admin/PasteSectionButton";
+import { SeoPanel } from "@/components/admin/SeoPanel";
 import { Section } from "@/types/sections";
 import { toast } from "sonner";
 import {
@@ -53,6 +54,8 @@ interface PageData {
   is_homepage: boolean;
   header_image: ImageValue | null;
   sections: Section[];
+  meta_title: string | null;
+  meta_description: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -86,6 +89,9 @@ export default function PageEditorPage({
   const [autoSlug, setAutoSlug] = useState(false);
   const [headerImage, setHeaderImage] = useState<ImageValue | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [generatingMeta, setGeneratingMeta] = useState(false);
 
   // Delete confirmation
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -107,10 +113,12 @@ export default function PageEditorPage({
       slug !== (page.slug || "") ||
       isHomepage !== page.is_homepage ||
       JSON.stringify(headerImage) !== JSON.stringify(page.header_image) ||
-      JSON.stringify(sections) !== JSON.stringify(page.sections);
+      JSON.stringify(sections) !== JSON.stringify(page.sections) ||
+      metaTitle !== (page.meta_title || "") ||
+      metaDescription !== (page.meta_description || "");
 
     setHasChanges(changed);
-  }, [title, slug, isHomepage, headerImage, sections, page]);
+  }, [title, slug, isHomepage, headerImage, sections, metaTitle, metaDescription, page]);
 
   const fetchPage = async () => {
     setLoading(true);
@@ -131,6 +139,8 @@ export default function PageEditorPage({
       setIsHomepage(data.is_homepage);
       setHeaderImage(data.header_image);
       setSections(data.sections || []);
+      setMetaTitle(data.meta_title || "");
+      setMetaDescription(data.meta_description || "");
     } catch {
       toast.error(t("admin.messages.pageLoadFailed"));
     } finally {
@@ -172,6 +182,8 @@ export default function PageEditorPage({
           is_homepage: isHomepage,
           header_image: headerImage,
           sections,
+          meta_title: metaTitle.trim() || null,
+          meta_description: metaDescription.trim() || null,
         }),
       });
 
@@ -185,6 +197,8 @@ export default function PageEditorPage({
       setSlug(updatedPage.slug || "");
       setIsHomepage(updatedPage.is_homepage);
       setSections(updatedPage.sections || []);
+      setMetaTitle(updatedPage.meta_title || "");
+      setMetaDescription(updatedPage.meta_description || "");
       setHasChanges(false);
       toast.success(t("admin.messages.pageSaved"));
     } catch (error) {
@@ -194,7 +208,45 @@ export default function PageEditorPage({
     } finally {
       setSaving(false);
     }
-  }, [id, title, slug, isHomepage, headerImage, sections]);
+  }, [id, title, slug, isHomepage, headerImage, sections, metaTitle, metaDescription]);
+
+  const generateMetaDescription = async () => {
+    setGeneratingMeta(true);
+    try {
+      // Extract text content from sections for context
+      const textContent = sections
+        .map((section) => {
+          const texts: string[] = [];
+          const s = section as unknown as Record<string, unknown>;
+          if (s.heading) texts.push(String(s.heading));
+          if (s.text) texts.push(String(s.text));
+          if (s.subtitle) texts.push(String(s.subtitle));
+          return texts.join(" ");
+        })
+        .filter(Boolean)
+        .join(" ")
+        .slice(0, 1000);
+
+      const response = await fetch("/api/admin/content/generate-meta-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content: textContent,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to generate");
+
+      const { metaDescription: generated } = await response.json();
+      setMetaDescription(generated);
+      toast.success(t("admin.messages.metaDescriptionGenerated"));
+    } catch {
+      toast.error(t("admin.messages.metaDescriptionGenerateFailed"));
+    } finally {
+      setGeneratingMeta(false);
+    }
+  };
 
   const deletePage = async () => {
     setDeleting(true);
@@ -344,6 +396,23 @@ export default function PageEditorPage({
               <FieldLabel>{t("admin.misc.headerImage")}</FieldLabel>
               <ImageUpload value={headerImage} onChange={setHeaderImage} />
             </Field>
+
+            <FieldSeparator />
+
+            {/* SEO */}
+            <SeoPanel
+              title={title}
+              slug={slug}
+              metaTitle={metaTitle}
+              metaDescription={metaDescription}
+              onMetaTitleChange={setMetaTitle}
+              onMetaDescriptionChange={setMetaDescription}
+              onGenerateDescription={generateMetaDescription}
+              generating={generatingMeta}
+              domain={currentSite?.domain ?? undefined}
+              basePath=""
+              siteName="Assymo"
+            />
 
             <FieldSeparator />
 

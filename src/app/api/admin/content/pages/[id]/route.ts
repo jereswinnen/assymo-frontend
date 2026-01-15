@@ -49,7 +49,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (!authorized) return response;
 
     const { id } = await params;
-    const { title, slug, is_homepage, header_image, sections } = await request.json();
+    const { title, slug, is_homepage, header_image, sections, meta_title, meta_description } = await request.json();
 
     if (!title) {
       return NextResponse.json(
@@ -107,6 +107,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         is_homepage = ${is_homepage || false},
         header_image = ${header_image ? JSON.stringify(header_image) : null}::jsonb,
         sections = ${JSON.stringify(sections || [])}::jsonb,
+        meta_title = ${meta_title || null},
+        meta_description = ${meta_description || null},
         updated_at = NOW()
       WHERE id = ${id}
       RETURNING *

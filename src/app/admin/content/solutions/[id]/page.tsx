@@ -33,6 +33,7 @@ import { ImageUpload, ImageValue } from "@/components/admin/media/ImageUpload";
 import { SectionList } from "@/components/admin/SectionList";
 import { AddSectionButton } from "@/components/admin/AddSectionButton";
 import { PasteSectionButton } from "@/components/admin/PasteSectionButton";
+import { SeoPanel } from "@/components/admin/SeoPanel";
 import { Section } from "@/types/sections";
 import { toast } from "sonner";
 import {
@@ -68,6 +69,8 @@ interface SolutionData {
   header_image: ImageValue | null;
   sections: Section[];
   filters: Filter[];
+  meta_title: string | null;
+  meta_description: string | null;
   site_id: string;
   created_at: string;
   updated_at: string;
@@ -108,6 +111,9 @@ export default function SolutionEditorPage({
   const [selectedFilterIds, setSelectedFilterIds] = useState<Set<string>>(
     new Set(),
   );
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [generatingMeta, setGeneratingMeta] = useState(false);
 
   // Delete confirmation
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -135,7 +141,9 @@ export default function SolutionEditorPage({
       slug !== solution.slug ||
       JSON.stringify(headerImage) !== JSON.stringify(solution.header_image) ||
       JSON.stringify(sections) !== JSON.stringify(solution.sections) ||
-      filtersChanged;
+      filtersChanged ||
+      metaTitle !== (solution.meta_title || "") ||
+      metaDescription !== (solution.meta_description || "");
 
     setHasChanges(changed);
   }, [
@@ -145,6 +153,8 @@ export default function SolutionEditorPage({
     headerImage,
     sections,
     selectedFilterIds,
+    metaTitle,
+    metaDescription,
     solution,
   ]);
 
@@ -181,6 +191,8 @@ export default function SolutionEditorPage({
       setHeaderImage(solutionData.header_image);
       setSections(solutionData.sections || []);
       setSelectedFilterIds(new Set(solutionData.filters.map((f) => f.id)));
+      setMetaTitle(solutionData.meta_title || "");
+      setMetaDescription(solutionData.meta_description || "");
     } catch {
       toast.error(t("admin.messages.dataLoadFailed"));
     } finally {
@@ -230,6 +242,8 @@ export default function SolutionEditorPage({
           header_image: headerImage,
           sections,
           filter_ids: [...selectedFilterIds],
+          meta_title: metaTitle.trim() || null,
+          meta_description: metaDescription.trim() || null,
         }),
       });
 
@@ -241,6 +255,8 @@ export default function SolutionEditorPage({
       const updatedSolution = await response.json();
       setSolution(updatedSolution);
       setSections(updatedSolution.sections || []);
+      setMetaTitle(updatedSolution.meta_title || "");
+      setMetaDescription(updatedSolution.meta_description || "");
       setHasChanges(false);
       toast.success(t("admin.messages.solutionSaved"));
     } catch (error) {
@@ -250,7 +266,45 @@ export default function SolutionEditorPage({
     } finally {
       setSaving(false);
     }
-  }, [id, name, subtitle, slug, headerImage, sections, selectedFilterIds]);
+  }, [id, name, subtitle, slug, headerImage, sections, selectedFilterIds, metaTitle, metaDescription]);
+
+  const generateMetaDescription = async () => {
+    setGeneratingMeta(true);
+    try {
+      // Extract text content from sections for context
+      const textContent = sections
+        .map((section) => {
+          const texts: string[] = [];
+          const s = section as unknown as Record<string, unknown>;
+          if (s.heading) texts.push(String(s.heading));
+          if (s.text) texts.push(String(s.text));
+          if (s.subtitle) texts.push(String(s.subtitle));
+          return texts.join(" ");
+        })
+        .filter(Boolean)
+        .join(" ")
+        .slice(0, 1000);
+
+      const response = await fetch("/api/admin/content/generate-meta-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: name,
+          content: textContent || subtitle,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to generate");
+
+      const { metaDescription: generated } = await response.json();
+      setMetaDescription(generated);
+      toast.success(t("admin.messages.metaDescriptionGenerated"));
+    } catch {
+      toast.error(t("admin.messages.metaDescriptionGenerateFailed"));
+    } finally {
+      setGeneratingMeta(false);
+    }
+  };
 
   const deleteSolution = async () => {
     setDeleting(true);
@@ -437,6 +491,23 @@ export default function SolutionEditorPage({
               <FieldLabel>{t("admin.misc.headerImage")}</FieldLabel>
               <ImageUpload value={headerImage} onChange={setHeaderImage} />
             </Field>
+
+            <FieldSeparator />
+
+            {/* SEO */}
+            <SeoPanel
+              title={name}
+              slug={slug}
+              metaTitle={metaTitle}
+              metaDescription={metaDescription}
+              onMetaTitleChange={setMetaTitle}
+              onMetaDescriptionChange={setMetaDescription}
+              onGenerateDescription={generateMetaDescription}
+              generating={generatingMeta}
+              domain={currentSite?.domain ?? undefined}
+              basePath="/realisaties"
+              siteName="Assymo"
+            />
 
             <FieldSeparator />
 

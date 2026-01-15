@@ -59,7 +59,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (!authorized) return response;
 
     const { id } = await params;
-    const { name, subtitle, slug, header_image, sections, filter_ids } =
+    const { name, subtitle, slug, header_image, sections, filter_ids, meta_title, meta_description } =
       await request.json();
 
     if (!name || !slug) {
@@ -102,6 +102,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         slug = ${slug},
         header_image = ${header_image ? JSON.stringify(header_image) : null}::jsonb,
         sections = ${JSON.stringify(sections || [])}::jsonb,
+        meta_title = ${meta_title || null},
+        meta_description = ${meta_description || null},
         updated_at = NOW()
       WHERE id = ${id}
       RETURNING *
