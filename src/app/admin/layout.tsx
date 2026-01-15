@@ -15,6 +15,7 @@ const AdminSidebar = dynamic(
 import {
   AdminHeaderProvider,
   AdminHeaderActions,
+  useAdminBreadcrumb,
 } from "@/components/admin/AdminHeaderContext";
 import { SiteProvider } from "@/lib/permissions/site-context";
 import {
@@ -40,7 +41,8 @@ interface BreadcrumbSegment {
 
 function getBreadcrumbs(
   pathname: string,
-  folderName: string | null
+  folderName: string | null,
+  dynamicTitle: string | null
 ): BreadcrumbSegment[] {
   const routes: Record<string, string> = {
     "/admin/appointments": "Afspraken",
@@ -82,16 +84,22 @@ function getBreadcrumbs(
     ];
   }
   if (pathname.startsWith("/admin/content/pages/")) {
-    return [
+    const crumbs: BreadcrumbSegment[] = [
       { label: "Pagina's", href: "/admin/content/pages" },
-      { label: "Pagina bewerken" },
     ];
+    if (dynamicTitle !== null) {
+      crumbs.push({ label: dynamicTitle || "Pagina bewerken" });
+    }
+    return crumbs;
   }
   if (pathname.startsWith("/admin/content/solutions/")) {
-    return [
+    const crumbs: BreadcrumbSegment[] = [
       { label: "Realisaties", href: "/admin/content/solutions" },
-      { label: "Realisatie bewerken" },
     ];
+    if (dynamicTitle !== null) {
+      crumbs.push({ label: dynamicTitle || "Realisatie bewerken" });
+    }
+    return crumbs;
   }
   if (pathname.startsWith("/admin/content/media/")) {
     return [
@@ -107,7 +115,8 @@ function AdminBreadcrumbs() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const folderName = searchParams.get("name");
-  const breadcrumbs = getBreadcrumbs(pathname, folderName);
+  const dynamicTitle = useAdminBreadcrumb();
+  const breadcrumbs = getBreadcrumbs(pathname, folderName, dynamicTitle);
 
   return (
     <Breadcrumb>

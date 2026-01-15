@@ -14,6 +14,8 @@ interface AdminHeaderContextType {
   setActions: (actions: ReactNode) => void;
   tabs: ReactNode;
   setTabs: (tabs: ReactNode) => void;
+  breadcrumbTitle: string | null;
+  setBreadcrumbTitle: (title: string | null) => void;
 }
 
 const AdminHeaderContext = createContext<AdminHeaderContextType | null>(null);
@@ -21,9 +23,12 @@ const AdminHeaderContext = createContext<AdminHeaderContextType | null>(null);
 export function AdminHeaderProvider({ children }: { children: ReactNode }) {
   const [actions, setActions] = useState<ReactNode>(null);
   const [tabs, setTabs] = useState<ReactNode>(null);
+  const [breadcrumbTitle, setBreadcrumbTitle] = useState<string | null>(null);
 
   return (
-    <AdminHeaderContext.Provider value={{ actions, setActions, tabs, setTabs }}>
+    <AdminHeaderContext.Provider
+      value={{ actions, setActions, tabs, setTabs, breadcrumbTitle, setBreadcrumbTitle }}
+    >
       {children}
     </AdminHeaderContext.Provider>
   );
@@ -59,6 +64,27 @@ export function useAdminHeaderTabs(tabs: ReactNode) {
     setTabs(tabs);
     return () => setTabs(null);
   }, [tabs, setTabs]);
+}
+
+export function useAdminBreadcrumbTitle(title: string | null) {
+  const context = useContext(AdminHeaderContext);
+  if (!context) {
+    throw new Error(
+      "useAdminBreadcrumbTitle must be used within AdminHeaderProvider",
+    );
+  }
+
+  const { setBreadcrumbTitle } = context;
+
+  useEffect(() => {
+    setBreadcrumbTitle(title);
+    return () => setBreadcrumbTitle(null);
+  }, [title, setBreadcrumbTitle]);
+}
+
+export function useAdminBreadcrumb() {
+  const context = useContext(AdminHeaderContext);
+  return context?.breadcrumbTitle ?? null;
 }
 
 export function AdminHeaderActions() {

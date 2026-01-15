@@ -44,7 +44,10 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import {
+  useAdminHeaderActions,
+  useAdminBreadcrumbTitle,
+} from "@/components/admin/AdminHeaderContext";
 import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
 
@@ -387,6 +390,7 @@ export default function SolutionEditorPage({
     [slug, saving, hasChanges, saveSolution],
   );
   useAdminHeaderActions(headerActions);
+  useAdminBreadcrumbTitle(solution ? name : null);
 
   if (loading) {
     return (

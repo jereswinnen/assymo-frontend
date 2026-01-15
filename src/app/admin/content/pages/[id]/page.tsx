@@ -44,7 +44,10 @@ import {
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import {
+  useAdminHeaderActions,
+  useAdminBreadcrumbTitle,
+} from "@/components/admin/AdminHeaderContext";
 import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
 
@@ -334,6 +337,7 @@ export default function PageEditorPage({
     [isHomepage, slug, saving, hasChanges, savePage],
   );
   useAdminHeaderActions(headerActions);
+  useAdminBreadcrumbTitle(page ? title : null);
 
   if (loading) {
     return (
