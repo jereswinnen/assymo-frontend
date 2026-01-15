@@ -14,6 +14,17 @@ import {
 import { cn } from "@/lib/utils";
 import { Separator } from "../ui/separator";
 
+/**
+ * Strip HTML tags and convert to plain text with line breaks
+ */
+function stripHtml(html: string): string {
+  return html
+    .replace(/<\/p>\s*<p>/gi, "\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .trim();
+}
+
 // Animation tokens (matching HeaderClient)
 const easing: [number, number, number, number] = [0.645, 0, 0.045, 1];
 const menuDuration = 0.5;
@@ -179,7 +190,7 @@ export default function MobileMenu({
                           },
                         }}
                       >
-                        {links.map((link) => {
+                        {links.map((link, index) => {
                           const isActive =
                             pathname === `/${link.slug}` ||
                             pathname.startsWith(`/${link.slug}/`);
@@ -188,7 +199,7 @@ export default function MobileMenu({
 
                           return (
                             <motion.li
-                              key={link.slug}
+                              key={index}
                               variants={{
                                 hidden: {
                                   opacity: 0,
@@ -250,7 +261,7 @@ export default function MobileMenu({
                           <ul className="flex flex-col gap-3 text-base font-medium">
                             {settings?.address && (
                               <li className="whitespace-pre-line">
-                                {settings.address}
+                                {stripHtml(settings.address)}
                               </li>
                             )}
                             {settings?.phone && (
@@ -342,8 +353,8 @@ export default function MobileMenu({
                     {/* Sub-items list */}
                     <nav className="flex-1">
                       <ul className="flex flex-col gap-4">
-                        {currentPage.subItems?.map((item) => (
-                          <li key={item.slug}>
+                        {currentPage.subItems?.map((item, index) => (
+                          <li key={index}>
                             <Link
                               href={`/realisaties/${item.slug}`}
                               className="cursor-pointer block text-xl font-medium text-stone-600 transition-colors hover:text-stone-900"
