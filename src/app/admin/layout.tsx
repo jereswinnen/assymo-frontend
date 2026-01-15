@@ -33,10 +33,12 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Toaster } from "@/components/ui/sonner";
 import { Separator } from "@/components/ui/separator";
+import { BreadcrumbDropdown } from "@/components/admin/BreadcrumbDropdown";
 
 interface BreadcrumbSegment {
   label: string;
   href?: string;
+  dropdown?: "pages" | "solutions";
 }
 
 function getBreadcrumbs(
@@ -88,7 +90,10 @@ function getBreadcrumbs(
       { label: "Pagina's", href: "/admin/content/pages" },
     ];
     if (dynamicTitle !== null) {
-      crumbs.push({ label: dynamicTitle || "Pagina bewerken" });
+      crumbs.push({
+        label: dynamicTitle || "Pagina bewerken",
+        dropdown: "pages",
+      });
     }
     return crumbs;
   }
@@ -97,7 +102,10 @@ function getBreadcrumbs(
       { label: "Realisaties", href: "/admin/content/solutions" },
     ];
     if (dynamicTitle !== null) {
-      crumbs.push({ label: dynamicTitle || "Realisatie bewerken" });
+      crumbs.push({
+        label: dynamicTitle || "Realisatie bewerken",
+        dropdown: "solutions",
+      });
     }
     return crumbs;
   }
@@ -129,6 +137,11 @@ function AdminBreadcrumbs() {
                 <BreadcrumbLink asChild>
                   <Link href={crumb.href}>{crumb.label}</Link>
                 </BreadcrumbLink>
+              ) : crumb.dropdown ? (
+                <BreadcrumbDropdown
+                  type={crumb.dropdown}
+                  currentTitle={crumb.label}
+                />
               ) : (
                 <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
               )}

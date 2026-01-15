@@ -16,6 +16,12 @@ interface AdminHeaderContextType {
   setTabs: (tabs: ReactNode) => void;
   breadcrumbTitle: string | null;
   setBreadcrumbTitle: (title: string | null) => void;
+  hasUnsavedChanges: boolean;
+  setHasUnsavedChanges: (value: boolean) => void;
+  saveBeforeNavigate: (() => Promise<boolean>) | null;
+  setSaveBeforeNavigate: React.Dispatch<
+    React.SetStateAction<(() => Promise<boolean>) | null>
+  >;
 }
 
 const AdminHeaderContext = createContext<AdminHeaderContextType | null>(null);
@@ -24,10 +30,25 @@ export function AdminHeaderProvider({ children }: { children: ReactNode }) {
   const [actions, setActions] = useState<ReactNode>(null);
   const [tabs, setTabs] = useState<ReactNode>(null);
   const [breadcrumbTitle, setBreadcrumbTitle] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [saveBeforeNavigate, setSaveBeforeNavigate] = useState<
+    (() => Promise<boolean>) | null
+  >(null);
 
   return (
     <AdminHeaderContext.Provider
-      value={{ actions, setActions, tabs, setTabs, breadcrumbTitle, setBreadcrumbTitle }}
+      value={{
+        actions,
+        setActions,
+        tabs,
+        setTabs,
+        breadcrumbTitle,
+        setBreadcrumbTitle,
+        hasUnsavedChanges,
+        setHasUnsavedChanges,
+        saveBeforeNavigate,
+        setSaveBeforeNavigate,
+      }}
     >
       {children}
     </AdminHeaderContext.Provider>
@@ -85,6 +106,37 @@ export function useAdminBreadcrumbTitle(title: string | null) {
 export function useAdminBreadcrumb() {
   const context = useContext(AdminHeaderContext);
   return context?.breadcrumbTitle ?? null;
+}
+
+export function useAdminUnsavedChanges(
+  hasChanges: boolean,
+  saveFn: () => Promise<boolean>
+) {
+  const context = useContext(AdminHeaderContext);
+  if (!context) {
+    throw new Error(
+      "useAdminUnsavedChanges must be used within AdminHeaderProvider",
+    );
+  }
+
+  const { setHasUnsavedChanges, setSaveBeforeNavigate } = context;
+
+  useEffect(() => {
+    setHasUnsavedChanges(hasChanges);
+  }, [hasChanges, setHasUnsavedChanges]);
+
+  useEffect(() => {
+    setSaveBeforeNavigate(() => saveFn);
+    return () => setSaveBeforeNavigate(null);
+  }, [saveFn, setSaveBeforeNavigate]);
+}
+
+export function useAdminNavigationGuard() {
+  const context = useContext(AdminHeaderContext);
+  return {
+    hasUnsavedChanges: context?.hasUnsavedChanges ?? false,
+    saveBeforeNavigate: context?.saveBeforeNavigate ?? null,
+  };
 }
 
 export function AdminHeaderActions() {

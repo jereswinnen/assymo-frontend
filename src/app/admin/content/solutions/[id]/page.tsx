@@ -47,6 +47,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useAdminHeaderActions,
   useAdminBreadcrumbTitle,
+  useAdminUnsavedChanges,
 } from "@/components/admin/AdminHeaderContext";
 import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
@@ -228,10 +229,10 @@ export default function SolutionEditorPage({
     });
   };
 
-  const saveSolution = useCallback(async () => {
+  const saveSolution = useCallback(async (): Promise<boolean> => {
     if (!name.trim() || !slug.trim()) {
       toast.error(t("admin.messages.nameSlugRequired"));
-      return;
+      return false;
     }
 
     setSaving(true);
@@ -263,12 +264,14 @@ export default function SolutionEditorPage({
       setMetaDescription(updatedSolution.meta_description || "");
       setHasChanges(false);
       toast.success(t("admin.messages.solutionSaved"));
+      return true;
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
           : t("admin.misc.solutionCouldNotSave"),
       );
+      return false;
     } finally {
       setSaving(false);
     }
@@ -391,6 +394,7 @@ export default function SolutionEditorPage({
   );
   useAdminHeaderActions(headerActions);
   useAdminBreadcrumbTitle(solution ? name : null);
+  useAdminUnsavedChanges(hasChanges, saveSolution);
 
   if (loading) {
     return (

@@ -47,6 +47,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useAdminHeaderActions,
   useAdminBreadcrumbTitle,
+  useAdminUnsavedChanges,
 } from "@/components/admin/AdminHeaderContext";
 import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
@@ -173,15 +174,15 @@ export default function PageEditorPage({
     setAutoSlug(false);
   };
 
-  const savePage = useCallback(async () => {
+  const savePage = useCallback(async (): Promise<boolean> => {
     if (!title.trim()) {
       toast.error(t("admin.messages.titleRequired"));
-      return;
+      return false;
     }
 
     if (!isHomepage && !slug.trim()) {
       toast.error(t("admin.messages.slugRequired"));
-      return;
+      return false;
     }
 
     setSaving(true);
@@ -214,12 +215,14 @@ export default function PageEditorPage({
       setMetaDescription(updatedPage.meta_description || "");
       setHasChanges(false);
       toast.success(t("admin.messages.pageSaved"));
+      return true;
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
           : t("admin.messages.pageSaveFailed"),
       );
+      return false;
     } finally {
       setSaving(false);
     }
@@ -338,6 +341,7 @@ export default function PageEditorPage({
   );
   useAdminHeaderActions(headerActions);
   useAdminBreadcrumbTitle(page ? title : null);
+  useAdminUnsavedChanges(hasChanges, savePage);
 
   if (loading) {
     return (
