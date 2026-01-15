@@ -25,12 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import {
-  Loader2Icon,
-  SaveIcon,
-  SparklesIcon,
-  Trash2Icon,
-} from "lucide-react";
+import { Loader2Icon, SaveIcon, SparklesIcon, Trash2Icon } from "lucide-react";
 import { formatFileSize } from "@/lib/format";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import { t } from "@/config/strings";
@@ -271,7 +266,9 @@ export default function ImageDetailPage({
             {/* Details */}
             <FieldSet>
               <Field>
-                <FieldLabel htmlFor="displayName">{t("admin.labels.filename")}</FieldLabel>
+                <FieldLabel htmlFor="displayName">
+                  {t("admin.labels.filename")}
+                </FieldLabel>
                 <Input
                   id="displayName"
                   value={displayName}
@@ -281,7 +278,9 @@ export default function ImageDetailPage({
               </Field>
               <Field>
                 <div className="flex items-center justify-between">
-                  <FieldLabel htmlFor="altText">{t("admin.labels.altText")}</FieldLabel>
+                  <FieldLabel htmlFor="altText">
+                    {t("admin.labels.altText")}
+                  </FieldLabel>
                   <Button
                     type="button"
                     variant="outline"
@@ -297,7 +296,7 @@ export default function ImageDetailPage({
                     ) : (
                       <>
                         <SparklesIcon className="size-3" />
-                        {t("admin.misc.generateAlt")}
+                        {t("admin.misc.generateWithAI")}
                       </>
                     )}
                   </Button>
@@ -320,11 +319,15 @@ export default function ImageDetailPage({
             {/* Meta info */}
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("admin.misc.fileSize")}</span>
+                <span className="text-muted-foreground">
+                  {t("admin.misc.fileSize")}
+                </span>
                 <span>{formatFileSize(image.size)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("admin.misc.uploadedOn")}</span>
+                <span className="text-muted-foreground">
+                  {t("admin.misc.uploadedOn")}
+                </span>
                 <span>
                   {new Date(image.uploadedAt).toLocaleDateString("nl-NL", {
                     year: "numeric",
@@ -344,13 +347,17 @@ export default function ImageDetailPage({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("admin.misc.deleteImageQuestion")}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("admin.misc.deleteImageQuestion")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
               {t("admin.misc.deleteImageDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>{t("admin.buttons.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>
+              {t("admin.buttons.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={deleteImage}
               disabled={deleting}

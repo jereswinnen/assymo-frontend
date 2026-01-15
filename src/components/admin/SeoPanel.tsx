@@ -36,7 +36,7 @@ const DESC_MAX = 160;
 function getCharacterStatus(
   length: number,
   min: number,
-  max: number
+  max: number,
 ): "good" | "warning" | "error" {
   if (length === 0) return "warning";
   if (length < min) return "warning";
@@ -61,7 +61,7 @@ function CharacterCounter({
         "text-xs tabular-nums",
         status === "good" && "text-green-600",
         status === "warning" && "text-amber-600",
-        status === "error" && "text-red-600"
+        status === "error" && "text-red-600",
       )}
     >
       {current}/{max} {t("admin.misc.characters")}
@@ -99,7 +99,7 @@ export function SeoPanel({
         <div className="space-y-1">
           {/* Title - Google blue link */}
           <p
-            className="line-clamp-1 text-lg leading-tight text-[#1a0dab] hover:underline"
+            className="mb-0! line-clamp-1 text-lg leading-tight text-[#1a0dab] hover:underline"
             style={{ fontFamily: "arial, sans-serif" }}
           >
             {fullTitle}
@@ -140,9 +140,7 @@ export function SeoPanel({
             onChange={(e) => onMetaTitleChange(e.target.value)}
             placeholder={title || t("admin.placeholders.metaTitlePlaceholder")}
           />
-          <FieldDescription>
-            {t("admin.misc.seoTitleHint")}
-          </FieldDescription>
+          <FieldDescription>{t("admin.misc.seoTitleHint")}</FieldDescription>
         </Field>
 
         <Field>
@@ -180,7 +178,7 @@ export function SeoPanel({
               ) : (
                 <>
                   <SparklesIcon className="size-3" />
-                  {t("admin.misc.generateDescription")}
+                  {t("admin.misc.generateWithAI")}
                 </>
               )}
             </Button>

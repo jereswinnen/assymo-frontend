@@ -262,12 +262,24 @@ export default function SolutionEditorPage({
       toast.success(t("admin.messages.solutionSaved"));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t("admin.misc.solutionCouldNotSave"),
+        error instanceof Error
+          ? error.message
+          : t("admin.misc.solutionCouldNotSave"),
       );
     } finally {
       setSaving(false);
     }
-  }, [id, name, subtitle, slug, headerImage, sections, selectedFilterIds, metaTitle, metaDescription]);
+  }, [
+    id,
+    name,
+    subtitle,
+    slug,
+    headerImage,
+    sections,
+    selectedFilterIds,
+    metaTitle,
+    metaDescription,
+  ]);
 
   const generateMetaDescription = async () => {
     setGeneratingMeta(true);
@@ -286,14 +298,17 @@ export default function SolutionEditorPage({
         .join(" ")
         .slice(0, 1000);
 
-      const response = await fetch("/api/admin/content/generate-meta-description", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: name,
-          content: textContent || subtitle,
-        }),
-      });
+      const response = await fetch(
+        "/api/admin/content/generate-meta-description",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: name,
+            content: textContent || subtitle,
+          }),
+        },
+      );
 
       if (!response.ok) throw new Error("Failed to generate");
 
@@ -391,7 +406,9 @@ export default function SolutionEditorPage({
         {/* Main content - Sections */}
         <div className="space-y-4 md:col-span-2">
           <div className="flex items-center justify-between">
-            <h3 className="mb-0! text-sm font-medium">{t("admin.misc.sections")}</h3>
+            <h3 className="mb-0! text-sm font-medium">
+              {t("admin.misc.sections")}
+            </h3>
             <div className="flex items-center gap-2">
               <AddSectionButton
                 onAdd={(section) => setSections([...sections, section])}
@@ -412,18 +429,25 @@ export default function SolutionEditorPage({
         </div>
 
         {/* Sidebar */}
-        <div className="bg-muted sticky top-4 flex max-h-[calc(100vh-6rem)] flex-col rounded-lg p-4">
+        <div className="bg-muted sticky top-4 flex h-[calc(100vh-6rem)] flex-col rounded-lg p-4">
           <Tabs defaultValue="general" className="flex min-h-0 flex-1 flex-col">
-            <TabsList className="w-full shrink-0">
-              <TabsTrigger value="general">{t("admin.headings.general")}</TabsTrigger>
+            <TabsList className="w-full shrink-0 bg-muted-foreground/10">
+              <TabsTrigger value="general">
+                {t("admin.headings.general")}
+              </TabsTrigger>
               <TabsTrigger value="seo">{t("admin.headings.seo")}</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="general" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+            <TabsContent
+              value="general"
+              className="mt-4 min-h-0 flex-1 overflow-y-auto"
+            >
               <FieldGroup>
                 <FieldSet>
                   <Field>
-                    <FieldLabel htmlFor="name">{t("admin.labels.name")}</FieldLabel>
+                    <FieldLabel htmlFor="name">
+                      {t("admin.labels.name")}
+                    </FieldLabel>
                     <Input
                       id="name"
                       value={name}
@@ -432,7 +456,9 @@ export default function SolutionEditorPage({
                     />
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="subtitle">{t("admin.labels.subtitle")}</FieldLabel>
+                    <FieldLabel htmlFor="subtitle">
+                      {t("admin.labels.subtitle")}
+                    </FieldLabel>
                     <Input
                       id="subtitle"
                       value={subtitle}
@@ -478,7 +504,9 @@ export default function SolutionEditorPage({
                                 >
                                   <Checkbox
                                     checked={selectedFilterIds.has(filter.id)}
-                                    onCheckedChange={() => toggleFilter(filter.id)}
+                                    onCheckedChange={() =>
+                                      toggleFilter(filter.id)
+                                    }
                                   />
                                   <span className="text-sm">{filter.name}</span>
                                 </label>
@@ -504,32 +532,45 @@ export default function SolutionEditorPage({
                 {/* Meta info */}
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t("admin.misc.created")}</span>
+                    <span className="text-muted-foreground">
+                      {t("admin.misc.created")}
+                    </span>
                     <span>
-                      {new Date(solution.created_at).toLocaleDateString("nl-NL", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
+                      {new Date(solution.created_at).toLocaleDateString(
+                        "nl-NL",
+                        {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        },
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t("admin.misc.lastEdited")}</span>
+                    <span className="text-muted-foreground">
+                      {t("admin.misc.lastEdited")}
+                    </span>
                     <span>
-                      {new Date(solution.updated_at).toLocaleDateString("nl-NL", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {new Date(solution.updated_at).toLocaleDateString(
+                        "nl-NL",
+                        {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        },
+                      )}
                     </span>
                   </div>
                 </div>
               </FieldGroup>
             </TabsContent>
 
-            <TabsContent value="seo" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+            <TabsContent
+              value="seo"
+              className="mt-4 min-h-0 flex-1 overflow-y-auto"
+            >
               <SeoPanel
                 title={name}
                 slug={slug}
@@ -552,13 +593,17 @@ export default function SolutionEditorPage({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("admin.misc.deleteSolutionQuestion")}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("admin.misc.deleteSolutionQuestion")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
               {t("admin.misc.deleteSolutionDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>{t("admin.buttons.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>
+              {t("admin.buttons.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={deleteSolution}
               disabled={deleting}

@@ -429,7 +429,8 @@ export const ADMIN_STRINGS = {
       buttonText: "Knop tekst",
       optional: "Optioneel",
       metaTitlePlaceholder: "Aangepaste titel voor zoekmachines",
-      metaDescriptionPlaceholder: "Korte beschrijving voor zoekmachines (max 160 tekens)",
+      metaDescriptionPlaceholder:
+        "Korte beschrijving voor zoekmachines (max 160 tekens)",
     },
 
     /**
@@ -716,7 +717,6 @@ export const ADMIN_STRINGS = {
       uploadedImages: "afbeelding(en) geupload",
       failedImages: "afbeelding(en) mislukt",
       altTextLabel: "Alt-tekst",
-      generateAlt: "Genereer",
       fileSize: "Bestandsgrootte",
       uploadedOn: "Geupload op",
       accessibilityDesc:
@@ -837,7 +837,7 @@ export const ADMIN_STRINGS = {
       deleteLinkDesc: "Deze link en alle subitems worden permanent verwijderd.",
       seoPreview: "Google preview",
       seoTitleHint: "Laat leeg om de paginatitel te gebruiken",
-      generateDescription: "Genereer met AI",
+      generateWithAI: "Genereer met AI",
     },
   },
 } as const;

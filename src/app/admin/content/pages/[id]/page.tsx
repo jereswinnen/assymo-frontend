@@ -119,7 +119,16 @@ export default function PageEditorPage({
       metaDescription !== (page.meta_description || "");
 
     setHasChanges(changed);
-  }, [title, slug, isHomepage, headerImage, sections, metaTitle, metaDescription, page]);
+  }, [
+    title,
+    slug,
+    isHomepage,
+    headerImage,
+    sections,
+    metaTitle,
+    metaDescription,
+    page,
+  ]);
 
   const fetchPage = async () => {
     setLoading(true);
@@ -204,12 +213,23 @@ export default function PageEditorPage({
       toast.success(t("admin.messages.pageSaved"));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t("admin.messages.pageSaveFailed"),
+        error instanceof Error
+          ? error.message
+          : t("admin.messages.pageSaveFailed"),
       );
     } finally {
       setSaving(false);
     }
-  }, [id, title, slug, isHomepage, headerImage, sections, metaTitle, metaDescription]);
+  }, [
+    id,
+    title,
+    slug,
+    isHomepage,
+    headerImage,
+    sections,
+    metaTitle,
+    metaDescription,
+  ]);
 
   const generateMetaDescription = async () => {
     setGeneratingMeta(true);
@@ -228,14 +248,17 @@ export default function PageEditorPage({
         .join(" ")
         .slice(0, 1000);
 
-      const response = await fetch("/api/admin/content/generate-meta-description", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          content: textContent,
-        }),
-      });
+      const response = await fetch(
+        "/api/admin/content/generate-meta-description",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title,
+            content: textContent,
+          }),
+        },
+      );
 
       if (!response.ok) throw new Error("Failed to generate");
 
@@ -330,7 +353,9 @@ export default function PageEditorPage({
         {/* Main content - Sections */}
         <div className="space-y-4 md:col-span-2">
           <div className="flex items-center justify-between">
-            <h3 className="mb-0! text-sm font-medium">{t("admin.misc.sections")}</h3>
+            <h3 className="mb-0! text-sm font-medium">
+              {t("admin.misc.sections")}
+            </h3>
             <div className="flex items-center gap-2">
               <AddSectionButton
                 onAdd={(section) => setSections([...sections, section])}
@@ -351,18 +376,25 @@ export default function PageEditorPage({
         </div>
 
         {/* Sidebar */}
-        <div className="bg-muted sticky top-4 flex max-h-[calc(100vh-6rem)] flex-col rounded-lg p-4">
+        <div className="bg-muted sticky top-4 flex h-[calc(100vh-6rem)] flex-col rounded-lg p-4">
           <Tabs defaultValue="general" className="flex min-h-0 flex-1 flex-col">
-            <TabsList className="w-full shrink-0">
-              <TabsTrigger value="general">{t("admin.headings.general")}</TabsTrigger>
+            <TabsList className="w-full shrink-0 bg-muted-foreground/10">
+              <TabsTrigger value="general">
+                {t("admin.headings.general")}
+              </TabsTrigger>
               <TabsTrigger value="seo">{t("admin.headings.seo")}</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="general" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+            <TabsContent
+              value="general"
+              className="mt-4 min-h-0 flex-1 overflow-y-auto"
+            >
               <FieldGroup>
                 <FieldSet>
                   <Field>
-                    <FieldLabel htmlFor="title">{t("admin.labels.title")}</FieldLabel>
+                    <FieldLabel htmlFor="title">
+                      {t("admin.labels.title")}
+                    </FieldLabel>
                     <Input
                       id="title"
                       value={title}
@@ -379,8 +411,7 @@ export default function PageEditorPage({
                         onChange={(e) => handleSlugChange(e.target.value)}
                       />
                       <FieldDescription>
-                        {currentSite?.domain || "https://..."}
-                        /{slug || "..."}
+                        {currentSite?.domain || "https://..."}/{slug || "..."}
                       </FieldDescription>
                     </Field>
                   )}
@@ -409,7 +440,9 @@ export default function PageEditorPage({
                 {/* Meta info */}
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t("admin.misc.created")}</span>
+                    <span className="text-muted-foreground">
+                      {t("admin.misc.created")}
+                    </span>
                     <span>
                       {new Date(page.created_at).toLocaleDateString("nl-NL", {
                         year: "numeric",
@@ -419,7 +452,9 @@ export default function PageEditorPage({
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t("admin.misc.lastEdited")}</span>
+                    <span className="text-muted-foreground">
+                      {t("admin.misc.lastEdited")}
+                    </span>
                     <span>
                       {new Date(page.updated_at).toLocaleDateString("nl-NL", {
                         year: "numeric",
@@ -434,7 +469,10 @@ export default function PageEditorPage({
               </FieldGroup>
             </TabsContent>
 
-            <TabsContent value="seo" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+            <TabsContent
+              value="seo"
+              className="mt-4 min-h-0 flex-1 overflow-y-auto"
+            >
               <SeoPanel
                 title={title}
                 slug={slug}
@@ -457,13 +495,17 @@ export default function PageEditorPage({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("admin.misc.deletePageQuestion")}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("admin.misc.deletePageQuestion")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
               {t("admin.misc.deletePageDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>{t("admin.buttons.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>
+              {t("admin.buttons.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={deletePage}
               disabled={deleting}
