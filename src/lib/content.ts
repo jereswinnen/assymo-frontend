@@ -77,7 +77,7 @@ async function _getPageBySlug(slug: string, siteSlug: string = DEFAULT_SITE_SLUG
 export const getPageBySlug = (slug: string, siteSlug: string = DEFAULT_SITE_SLUG) =>
   unstable_cache(_getPageBySlug, [`page-${siteSlug}-${slug}`], {
     tags: [CACHE_TAGS.pages],
-    revalidate: 3600,
+    revalidate: 60,
   })(slug, siteSlug);
 
 /**
@@ -116,7 +116,7 @@ async function _getHomepage(siteSlug: string = DEFAULT_SITE_SLUG): Promise<Page 
 export const getHomepage = (siteSlug: string = DEFAULT_SITE_SLUG) =>
   unstable_cache(_getHomepage, [`homepage-${siteSlug}`], {
     tags: [CACHE_TAGS.pages],
-    revalidate: 3600,
+    revalidate: 60,
   })(siteSlug);
 
 /**
@@ -181,7 +181,7 @@ async function _getSolutionBySlug(slug: string, siteSlug: string = DEFAULT_SITE_
 export const getSolutionBySlug = (slug: string, siteSlug: string = DEFAULT_SITE_SLUG) =>
   unstable_cache(_getSolutionBySlug, [`solution-${siteSlug}-${slug}`], {
     tags: [CACHE_TAGS.solutions],
-    revalidate: 3600,
+    revalidate: 60,
   })(slug, siteSlug);
 
 /**
@@ -230,7 +230,7 @@ async function _getAllSolutions(siteSlug: string = DEFAULT_SITE_SLUG): Promise<S
 export const getAllSolutions = (siteSlug: string = DEFAULT_SITE_SLUG) =>
   unstable_cache(_getAllSolutions, [`all-solutions-${siteSlug}`], {
     tags: [CACHE_TAGS.solutions],
-    revalidate: 3600,
+    revalidate: 60,
   })(siteSlug);
 
 // =============================================================================
@@ -266,7 +266,7 @@ async function _getFilterCategories(siteSlug: string = DEFAULT_SITE_SLUG): Promi
 export const getFilterCategories = (siteSlug: string = DEFAULT_SITE_SLUG) =>
   unstable_cache(_getFilterCategories, [`filter-categories-${siteSlug}`], {
     tags: [CACHE_TAGS.filters],
-    revalidate: 3600,
+    revalidate: 60,
   })(siteSlug);
 
 // =============================================================================
@@ -357,7 +357,7 @@ async function _getNavigation(
 export const getNavigation = (location: "header" | "footer", siteSlug: string = DEFAULT_SITE_SLUG) =>
   unstable_cache(_getNavigation, [`navigation-${siteSlug}-${location}`], {
     tags: [CACHE_TAGS.navigation],
-    revalidate: 3600,
+    revalidate: 60,
   })(location, siteSlug);
 
 // =============================================================================
@@ -381,7 +381,7 @@ async function _getSiteParameters(siteSlug: string = DEFAULT_SITE_SLUG): Promise
 export const getSiteParameters = (siteSlug: string = DEFAULT_SITE_SLUG) =>
   unstable_cache(_getSiteParameters, [`site-parameters-${siteSlug}`], {
     tags: [CACHE_TAGS.siteParameters],
-    revalidate: 3600,
+    revalidate: 60,
   })(siteSlug);
 
 // =============================================================================
