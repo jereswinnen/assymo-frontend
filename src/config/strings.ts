@@ -188,6 +188,7 @@ export const ADMIN_STRINGS = {
       twoFactorAuth: "Twee-factor authenticatie",
       deletePasskey: "Passkey verwijderen",
       seo: "SEO",
+      general: "Algemeen",
     },
 
     /**

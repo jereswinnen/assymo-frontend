@@ -43,6 +43,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
@@ -350,98 +351,105 @@ export default function PageEditorPage({
         </div>
 
         {/* Sidebar */}
-        <div className="bg-muted rounded-lg p-4">
-          <FieldGroup>
-            {/* Algemeen */}
-            <FieldSet>
-              <Field>
-                <FieldLabel htmlFor="title">{t("admin.labels.title")}</FieldLabel>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => handleTitleChange(e.target.value)}
-                  placeholder={t("admin.placeholders.pageTitle")}
-                />
-              </Field>
-              {!isHomepage && (
+        <div className="bg-muted sticky top-4 flex max-h-[calc(100vh-6rem)] flex-col rounded-lg p-4">
+          <Tabs defaultValue="general" className="flex min-h-0 flex-1 flex-col">
+            <TabsList className="w-full shrink-0">
+              <TabsTrigger value="general">{t("admin.headings.general")}</TabsTrigger>
+              <TabsTrigger value="seo">{t("admin.headings.seo")}</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="general" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+              <FieldGroup>
+                <FieldSet>
+                  <Field>
+                    <FieldLabel htmlFor="title">{t("admin.labels.title")}</FieldLabel>
+                    <Input
+                      id="title"
+                      value={title}
+                      onChange={(e) => handleTitleChange(e.target.value)}
+                      placeholder={t("admin.placeholders.pageTitle")}
+                    />
+                  </Field>
+                  {!isHomepage && (
+                    <Field>
+                      <FieldLabel htmlFor="slug">URL</FieldLabel>
+                      <Input
+                        id="slug"
+                        value={slug}
+                        onChange={(e) => handleSlugChange(e.target.value)}
+                      />
+                      <FieldDescription>
+                        {currentSite?.domain || "https://..."}
+                        /{slug || "..."}
+                      </FieldDescription>
+                    </Field>
+                  )}
+                  <Field orientation="horizontal">
+                    <FieldLabel htmlFor="is_homepage">
+                      {t("admin.misc.setAsHomepage")}
+                    </FieldLabel>
+                    <Switch
+                      id="is_homepage"
+                      checked={isHomepage}
+                      onCheckedChange={setIsHomepage}
+                    />
+                  </Field>
+                </FieldSet>
+
+                <FieldSeparator />
+
+                {/* Header image */}
                 <Field>
-                  <FieldLabel htmlFor="slug">URL</FieldLabel>
-                  <Input
-                    id="slug"
-                    value={slug}
-                    onChange={(e) => handleSlugChange(e.target.value)}
-                  />
-                  <FieldDescription>
-                    {currentSite?.domain || "https://..."}
-                    /{slug || "..."}
-                  </FieldDescription>
+                  <FieldLabel>{t("admin.misc.headerImage")}</FieldLabel>
+                  <ImageUpload value={headerImage} onChange={setHeaderImage} />
                 </Field>
-              )}
-              <Field orientation="horizontal">
-                <FieldLabel htmlFor="is_homepage">
-                  {t("admin.misc.setAsHomepage")}
-                </FieldLabel>
-                <Switch
-                  id="is_homepage"
-                  checked={isHomepage}
-                  onCheckedChange={setIsHomepage}
-                />
-              </Field>
-            </FieldSet>
 
-            <FieldSeparator />
+                <FieldSeparator />
 
-            {/* SEO */}
-            <SeoPanel
-              title={title}
-              slug={slug}
-              metaTitle={metaTitle}
-              metaDescription={metaDescription}
-              onMetaTitleChange={setMetaTitle}
-              onMetaDescriptionChange={setMetaDescription}
-              onGenerateDescription={generateMetaDescription}
-              generating={generatingMeta}
-              domain={currentSite?.domain ?? undefined}
-              basePath=""
-              siteName="Assymo"
-            />
+                {/* Meta info */}
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("admin.misc.created")}</span>
+                    <span>
+                      {new Date(page.created_at).toLocaleDateString("nl-NL", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("admin.misc.lastEdited")}</span>
+                    <span>
+                      {new Date(page.updated_at).toLocaleDateString("nl-NL", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                </div>
+              </FieldGroup>
+            </TabsContent>
 
-            <FieldSeparator />
-
-            {/* Header image */}
-            <Field>
-              <FieldLabel>{t("admin.misc.headerImage")}</FieldLabel>
-              <ImageUpload value={headerImage} onChange={setHeaderImage} />
-            </Field>
-
-            <FieldSeparator />
-
-            {/* Meta info */}
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("admin.misc.created")}</span>
-                <span>
-                  {new Date(page.created_at).toLocaleDateString("nl-NL", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("admin.misc.lastEdited")}</span>
-                <span>
-                  {new Date(page.updated_at).toLocaleDateString("nl-NL", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
-            </div>
-          </FieldGroup>
+            <TabsContent value="seo" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+              <SeoPanel
+                title={title}
+                slug={slug}
+                metaTitle={metaTitle}
+                metaDescription={metaDescription}
+                onMetaTitleChange={setMetaTitle}
+                onMetaDescriptionChange={setMetaDescription}
+                onGenerateDescription={generateMetaDescription}
+                generating={generatingMeta}
+                domain={currentSite?.domain ?? undefined}
+                basePath=""
+                siteName="Assymo"
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 

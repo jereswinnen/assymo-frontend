@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,12 +9,7 @@ import {
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ChevronDownIcon, Loader2Icon, SparklesIcon } from "lucide-react";
+import { Loader2Icon, SparklesIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { t } from "@/config/strings";
 
@@ -88,8 +82,6 @@ export function SeoPanel({
   basePath = "",
   siteName = "Assymo",
 }: SeoPanelProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
   // Display title for preview (use metaTitle or fall back to title)
   const displayTitle = metaTitle || title || "Pagina titel";
   const fullTitle = `${displayTitle} — ${siteName}`;
@@ -98,119 +90,103 @@ export function SeoPanel({
     metaDescription || "Voeg een meta beschrijving toe voor zoekmachines...";
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger asChild>
-        <button
-          type="button"
-          className="flex w-full items-center justify-between py-2 text-sm font-medium hover:text-foreground/80"
-        >
-          {t("admin.headings.seo")}
-          <ChevronDownIcon
-            className={cn(
-              "size-4 text-muted-foreground transition-transform",
-              isOpen && "rotate-180"
-            )}
-          />
-        </button>
-      </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-4 pt-2">
-        {/* Google Preview */}
-        <div className="rounded-lg border bg-white p-4">
-          <p className="mb-2 text-xs font-medium text-muted-foreground">
-            {t("admin.misc.seoPreview")}
+    <div className="space-y-4">
+      {/* Google Preview */}
+      <div className="rounded-lg border bg-white p-4">
+        <p className="mb-2 text-xs font-medium text-muted-foreground">
+          {t("admin.misc.seoPreview")}
+        </p>
+        <div className="space-y-1">
+          {/* Title - Google blue link */}
+          <p
+            className="line-clamp-1 text-lg leading-tight text-[#1a0dab] hover:underline"
+            style={{ fontFamily: "arial, sans-serif" }}
+          >
+            {fullTitle}
           </p>
-          <div className="space-y-1">
-            {/* Title - Google blue link */}
-            <p
-              className="line-clamp-1 text-lg leading-tight text-[#1a0dab] hover:underline"
-              style={{ fontFamily: "arial, sans-serif" }}
-            >
-              {fullTitle}
-            </p>
-            {/* URL - Google green */}
-            <p
-              className="text-sm text-[#006621]"
-              style={{ fontFamily: "arial, sans-serif" }}
-            >
-              {displayUrl}
-            </p>
-            {/* Description */}
-            <p
-              className="line-clamp-2 text-sm text-[#545454]"
-              style={{ fontFamily: "arial, sans-serif" }}
-            >
-              {displayDescription}
-            </p>
-          </div>
+          {/* URL - Google green */}
+          <p
+            className="text-sm text-[#006621]"
+            style={{ fontFamily: "arial, sans-serif" }}
+          >
+            {displayUrl}
+          </p>
+          {/* Description */}
+          <p
+            className="line-clamp-2 text-sm text-[#545454]"
+            style={{ fontFamily: "arial, sans-serif" }}
+          >
+            {displayDescription}
+          </p>
         </div>
+      </div>
 
-        {/* SEO Fields */}
-        <FieldSet>
-          <Field>
-            <div className="flex items-center justify-between">
-              <FieldLabel htmlFor="meta_title">
-                {t("admin.labels.metaTitle")}
-              </FieldLabel>
-              <CharacterCounter
-                current={metaTitle.length}
-                min={TITLE_MIN}
-                max={TITLE_MAX}
-              />
-            </div>
-            <Input
-              id="meta_title"
-              value={metaTitle}
-              onChange={(e) => onMetaTitleChange(e.target.value)}
-              placeholder={title || t("admin.placeholders.metaTitlePlaceholder")}
+      {/* SEO Fields */}
+      <FieldSet>
+        <Field>
+          <div className="flex items-center justify-between">
+            <FieldLabel htmlFor="meta_title">
+              {t("admin.labels.metaTitle")}
+            </FieldLabel>
+            <CharacterCounter
+              current={metaTitle.length}
+              min={TITLE_MIN}
+              max={TITLE_MAX}
             />
-            <FieldDescription>
-              {t("admin.misc.seoTitleHint")}
-            </FieldDescription>
-          </Field>
+          </div>
+          <Input
+            id="meta_title"
+            value={metaTitle}
+            onChange={(e) => onMetaTitleChange(e.target.value)}
+            placeholder={title || t("admin.placeholders.metaTitlePlaceholder")}
+          />
+          <FieldDescription>
+            {t("admin.misc.seoTitleHint")}
+          </FieldDescription>
+        </Field>
 
-          <Field>
-            <div className="flex items-center justify-between">
-              <FieldLabel htmlFor="meta_description">
-                {t("admin.labels.metaDescription")}
-              </FieldLabel>
-              <CharacterCounter
-                current={metaDescription.length}
-                min={DESC_MIN}
-                max={DESC_MAX}
-              />
-            </div>
-            <div className="space-y-2">
-              <Textarea
-                id="meta_description"
-                value={metaDescription}
-                onChange={(e) => onMetaDescriptionChange(e.target.value)}
-                placeholder={t("admin.placeholders.metaDescriptionPlaceholder")}
-                rows={3}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={onGenerateDescription}
-                disabled={generating}
-                className="w-full"
-              >
-                {generating ? (
-                  <>
-                    <Loader2Icon className="size-3 animate-spin" />
-                    {t("admin.loading.generating")}
-                  </>
-                ) : (
-                  <>
-                    <SparklesIcon className="size-3" />
-                    {t("admin.misc.generateDescription")}
-                  </>
-                )}
-              </Button>
-            </div>
-          </Field>
-        </FieldSet>
-      </CollapsibleContent>
-    </Collapsible>
+        <Field>
+          <div className="flex items-center justify-between">
+            <FieldLabel htmlFor="meta_description">
+              {t("admin.labels.metaDescription")}
+            </FieldLabel>
+            <CharacterCounter
+              current={metaDescription.length}
+              min={DESC_MIN}
+              max={DESC_MAX}
+            />
+          </div>
+          <div className="space-y-2">
+            <Textarea
+              id="meta_description"
+              value={metaDescription}
+              onChange={(e) => onMetaDescriptionChange(e.target.value)}
+              placeholder={t("admin.placeholders.metaDescriptionPlaceholder")}
+              rows={3}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onGenerateDescription}
+              disabled={generating}
+              className="w-full"
+            >
+              {generating ? (
+                <>
+                  <Loader2Icon className="size-3 animate-spin" />
+                  {t("admin.loading.generating")}
+                </>
+              ) : (
+                <>
+                  <SparklesIcon className="size-3" />
+                  {t("admin.misc.generateDescription")}
+                </>
+              )}
+            </Button>
+          </div>
+        </Field>
+      </FieldSet>
+    </div>
   );
 }

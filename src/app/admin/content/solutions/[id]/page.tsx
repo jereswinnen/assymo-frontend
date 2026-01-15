@@ -43,6 +43,7 @@ import {
   MoreHorizontalIcon,
   Trash2Icon,
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import { useSiteContext } from "@/lib/permissions/site-context";
 import { t } from "@/config/strings";
@@ -411,132 +412,139 @@ export default function SolutionEditorPage({
         </div>
 
         {/* Sidebar */}
-        <div className="bg-muted rounded-lg p-4">
-          <FieldGroup>
-            {/* Algemeen */}
-            <FieldSet>
-              <Field>
-                <FieldLabel htmlFor="name">{t("admin.labels.name")}</FieldLabel>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => handleNameChange(e.target.value)}
-                  placeholder={t("admin.placeholders.solutionName")}
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="subtitle">{t("admin.labels.subtitle")}</FieldLabel>
-                <Input
-                  id="subtitle"
-                  value={subtitle}
-                  onChange={(e) => setSubtitle(e.target.value)}
-                  placeholder={t("admin.placeholders.optionalSubtitle")}
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="slug">URL</FieldLabel>
-                <Input
-                  id="slug"
-                  value={slug}
-                  onChange={(e) => handleSlugChange(e.target.value)}
-                />
-                <FieldDescription>
-                  {currentSite?.domain || "https://..."}/realisaties/
-                  {slug || "..."}
-                </FieldDescription>
-              </Field>
-            </FieldSet>
+        <div className="bg-muted sticky top-4 flex max-h-[calc(100vh-6rem)] flex-col rounded-lg p-4">
+          <Tabs defaultValue="general" className="flex min-h-0 flex-1 flex-col">
+            <TabsList className="w-full shrink-0">
+              <TabsTrigger value="general">{t("admin.headings.general")}</TabsTrigger>
+              <TabsTrigger value="seo">{t("admin.headings.seo")}</TabsTrigger>
+            </TabsList>
 
-            <FieldSeparator />
+            <TabsContent value="general" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+              <FieldGroup>
+                <FieldSet>
+                  <Field>
+                    <FieldLabel htmlFor="name">{t("admin.labels.name")}</FieldLabel>
+                    <Input
+                      id="name"
+                      value={name}
+                      onChange={(e) => handleNameChange(e.target.value)}
+                      placeholder={t("admin.placeholders.solutionName")}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="subtitle">{t("admin.labels.subtitle")}</FieldLabel>
+                    <Input
+                      id="subtitle"
+                      value={subtitle}
+                      onChange={(e) => setSubtitle(e.target.value)}
+                      placeholder={t("admin.placeholders.optionalSubtitle")}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="slug">URL</FieldLabel>
+                    <Input
+                      id="slug"
+                      value={slug}
+                      onChange={(e) => handleSlugChange(e.target.value)}
+                    />
+                    <FieldDescription>
+                      {currentSite?.domain || "https://..."}/realisaties/
+                      {slug || "..."}
+                    </FieldDescription>
+                  </Field>
+                </FieldSet>
 
-            {/* Filters */}
-            {filterCategories.length > 0 && (
-              <>
-                <div className="space-y-4">
-                  <FieldLabel>{t("admin.labels.filters")}</FieldLabel>
-                  {filterCategories.map((category) => (
-                    <div key={category.id}>
-                      <p className="text-sm font-medium mb-2">
-                        {category.name}
-                      </p>
-                      {category.filters.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">
-                          {t("admin.misc.noFiltersInCategory")}
-                        </p>
-                      ) : (
-                        <div className="space-y-2">
-                          {category.filters.map((filter) => (
-                            <label
-                              key={filter.id}
-                              className="flex items-center gap-2 cursor-pointer"
-                            >
-                              <Checkbox
-                                checked={selectedFilterIds.has(filter.id)}
-                                onCheckedChange={() => toggleFilter(filter.id)}
-                              />
-                              <span className="text-sm">{filter.name}</span>
-                            </label>
-                          ))}
+                {/* Filters */}
+                {filterCategories.length > 0 && (
+                  <>
+                    <FieldSeparator />
+                    <div className="space-y-4">
+                      <FieldLabel>{t("admin.labels.filters")}</FieldLabel>
+                      {filterCategories.map((category) => (
+                        <div key={category.id}>
+                          <p className="text-sm font-medium mb-2">
+                            {category.name}
+                          </p>
+                          {category.filters.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                              {t("admin.misc.noFiltersInCategory")}
+                            </p>
+                          ) : (
+                            <div className="space-y-2">
+                              {category.filters.map((filter) => (
+                                <label
+                                  key={filter.id}
+                                  className="flex items-center gap-2 cursor-pointer"
+                                >
+                                  <Checkbox
+                                    checked={selectedFilterIds.has(filter.id)}
+                                    onCheckedChange={() => toggleFilter(filter.id)}
+                                  />
+                                  <span className="text-sm">{filter.name}</span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </>
+                )}
+
                 <FieldSeparator />
-              </>
-            )}
 
-            {/* SEO */}
-            <SeoPanel
-              title={name}
-              slug={slug}
-              metaTitle={metaTitle}
-              metaDescription={metaDescription}
-              onMetaTitleChange={setMetaTitle}
-              onMetaDescriptionChange={setMetaDescription}
-              onGenerateDescription={generateMetaDescription}
-              generating={generatingMeta}
-              domain={currentSite?.domain ?? undefined}
-              basePath="/realisaties"
-              siteName="Assymo"
-            />
+                {/* Header image */}
+                <Field>
+                  <FieldLabel>{t("admin.misc.headerImage")}</FieldLabel>
+                  <ImageUpload value={headerImage} onChange={setHeaderImage} />
+                </Field>
 
-            <FieldSeparator />
+                <FieldSeparator />
 
-            {/* Header image */}
-            <Field>
-              <FieldLabel>{t("admin.misc.headerImage")}</FieldLabel>
-              <ImageUpload value={headerImage} onChange={setHeaderImage} />
-            </Field>
+                {/* Meta info */}
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("admin.misc.created")}</span>
+                    <span>
+                      {new Date(solution.created_at).toLocaleDateString("nl-NL", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("admin.misc.lastEdited")}</span>
+                    <span>
+                      {new Date(solution.updated_at).toLocaleDateString("nl-NL", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                </div>
+              </FieldGroup>
+            </TabsContent>
 
-            <FieldSeparator />
-
-            {/* Meta info */}
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("admin.misc.created")}</span>
-                <span>
-                  {new Date(solution.created_at).toLocaleDateString("nl-NL", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("admin.misc.lastEdited")}</span>
-                <span>
-                  {new Date(solution.updated_at).toLocaleDateString("nl-NL", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
-            </div>
-          </FieldGroup>
+            <TabsContent value="seo" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+              <SeoPanel
+                title={name}
+                slug={slug}
+                metaTitle={metaTitle}
+                metaDescription={metaDescription}
+                onMetaTitleChange={setMetaTitle}
+                onMetaDescriptionChange={setMetaDescription}
+                onGenerateDescription={generateMetaDescription}
+                generating={generatingMeta}
+                domain={currentSite?.domain ?? undefined}
+                basePath="/realisaties"
+                siteName="Assymo"
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
