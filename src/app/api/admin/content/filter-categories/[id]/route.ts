@@ -3,6 +3,7 @@ import { neon } from "@neondatabase/serverless";
 import { revalidateTag } from "next/cache";
 import { protectRoute } from "@/lib/permissions";
 import { CACHE_TAGS } from "@/lib/content";
+import { revalidateExternalSite } from "@/lib/revalidate-external";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -88,6 +89,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     // Invalidate filters cache
     revalidateTag(CACHE_TAGS.filters, "max");
+    await revalidateExternalSite(existing[0].site_id, CACHE_TAGS.filters);
 
     return NextResponse.json(rows[0]);
   } catch (error) {
@@ -121,6 +123,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     // Invalidate filters cache
     revalidateTag(CACHE_TAGS.filters, "max");
+    await revalidateExternalSite(existing[0].site_id, CACHE_TAGS.filters);
 
     return NextResponse.json({ success: true });
   } catch (error) {
