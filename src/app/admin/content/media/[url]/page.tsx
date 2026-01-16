@@ -37,6 +37,8 @@ interface ImageData {
   uploadedAt: string;
   altText: string | null;
   displayName: string | null;
+  folderId: string | null;
+  siteId: string | null;
 }
 
 export default function ImageDetailPage({
@@ -67,6 +69,9 @@ export default function ImageDetailPage({
   // Track changes
   const [hasChanges, setHasChanges] = useState(false);
 
+  // Sibling navigation
+  const [siblingUrls, setSiblingUrls] = useState<string[]>([]);
+
   useEffect(() => {
     fetchImage();
   }, [imageUrl]);
@@ -82,6 +87,40 @@ export default function ImageDetailPage({
 
     setHasChanges(changed);
   }, [displayName, altText, image]);
+
+  // Keyboard navigation between images
+  useEffect(() => {
+    if (siblingUrls.length <= 1) return;
+
+    const currentIndex = siblingUrls.indexOf(imageUrl);
+    if (currentIndex === -1) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't navigate if user is typing in an input
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      if (e.key === "ArrowLeft" && currentIndex > 0) {
+        router.push(
+          `/admin/content/media/${encodeURIComponent(siblingUrls[currentIndex - 1])}`,
+        );
+      } else if (
+        e.key === "ArrowRight" &&
+        currentIndex < siblingUrls.length - 1
+      ) {
+        router.push(
+          `/admin/content/media/${encodeURIComponent(siblingUrls[currentIndex + 1])}`,
+        );
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [siblingUrls, imageUrl, router]);
 
   const fetchImage = async () => {
     setLoading(true);
@@ -103,6 +142,16 @@ export default function ImageDetailPage({
       setImage(data);
       setDisplayName(data.displayName || data.pathname);
       setAltText(data.altText || "");
+
+      // Fetch sibling images for keyboard navigation
+      const folderParam = data.folderId || "root";
+      const siblingsRes = await fetch(
+        `/api/admin/content/media?folderId=${folderParam}${data.siteId ? `&siteId=${data.siteId}` : ""}`,
+      );
+      if (siblingsRes.ok) {
+        const siblings = await siblingsRes.json();
+        setSiblingUrls(siblings.map((s: { url: string }) => s.url));
+      }
     } catch {
       toast.error(t("admin.messages.imageLoadFailed"));
     } finally {
@@ -245,11 +294,11 @@ export default function ImageDetailPage({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-3">
+    <div className="h-[calc(100vh-theme(spacing.16)-theme(spacing.8))] flex flex-col gap-6">
+      <div className="grid gap-6 md:grid-cols-3 flex-1 min-h-0">
         {/* Image preview */}
-        <div className="md:col-span-2">
-          <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-muted">
+        <div className="md:col-span-2 min-h-0">
+          <div className="relative h-full w-full overflow-hidden rounded-lg bg-muted">
             <Image
               src={image.url}
               alt={altText || image.pathname}

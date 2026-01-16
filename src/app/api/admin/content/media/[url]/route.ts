@@ -53,6 +53,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       uploadedAt: blobInfo.uploadedAt.toISOString(),
       altText: metadata?.alt_text || null,
       displayName: metadata?.display_name || null,
+      folderId: metadata?.folder_id || null,
+      siteId: metadata?.site_id || null,
     });
   } catch (error) {
     console.error("Failed to get image:", error);
