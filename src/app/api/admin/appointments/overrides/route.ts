@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
  * - close_time: "HH:MM" (optional, for special hours)
  * - reason: String (optional, e.g., "Feestdag", "Vakantie")
  * - is_recurring: Boolean (optional, repeat yearly)
+ * - recurrence_day_of_week: Number 0-6 (optional, for weekly recurring)
  * - show_on_website: Boolean (optional, publish to public API)
  */
 export async function POST(request: NextRequest) {
@@ -68,7 +69,21 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Validate date
+    // Validate recurrence_day_of_week if provided
+    const recurrenceDayOfWeek = body.recurrence_day_of_week;
+    const isWeeklyRecurring = recurrenceDayOfWeek !== null && recurrenceDayOfWeek !== undefined;
+
+    if (isWeeklyRecurring) {
+      const dayNum = Number(recurrenceDayOfWeek);
+      if (isNaN(dayNum) || dayNum < 0 || dayNum > 6) {
+        return NextResponse.json(
+          { error: "Ongeldige dag van de week (0-6 verwacht)" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate date (required, but for weekly recurring it's just a placeholder)
     if (!body.date) {
       return NextResponse.json(
         { error: "Datum is verplicht" },
@@ -84,8 +99,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate end_date if provided
-    if (body.end_date) {
+    // Validate end_date if provided (not valid for weekly recurring)
+    if (body.end_date && !isWeeklyRecurring) {
       if (!dateRegex.test(body.end_date)) {
         return NextResponse.json(
           { error: "Ongeldige einddatum (YYYY-MM-DD verwacht)" },
@@ -107,8 +122,8 @@ export async function POST(request: NextRequest) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Allow past dates for recurring overrides (e.g., setting up Christmas for next year)
-    if (overrideDate < today && !body.is_recurring) {
+    // Allow past dates for recurring overrides (yearly or weekly)
+    if (overrideDate < today && !body.is_recurring && !isWeeklyRecurring) {
       return NextResponse.json(
         { error: "Kan geen override maken voor datum in het verleden" },
         { status: 400 }
@@ -138,12 +153,13 @@ export async function POST(request: NextRequest) {
 
     const input: CreateDateOverrideInput = {
       date: body.date,
-      end_date: body.end_date || null,
+      end_date: isWeeklyRecurring ? null : (body.end_date || null),
       is_closed: isClosed,
       open_time: isClosed ? null : body.open_time,
       close_time: isClosed ? null : body.close_time,
       reason: body.reason?.trim() || undefined,
-      is_recurring: body.is_recurring ?? false,
+      is_recurring: isWeeklyRecurring ? false : (body.is_recurring ?? false),
+      recurrence_day_of_week: isWeeklyRecurring ? Number(recurrenceDayOfWeek) : null,
       show_on_website: body.show_on_website ?? false,
     };
 

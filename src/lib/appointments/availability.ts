@@ -21,13 +21,19 @@ import {
 } from "./utils";
 
 /**
- * Check if a date matches an override (handles single dates, ranges, and recurring)
+ * Check if a date matches an override (handles single dates, ranges, weekly recurring, and yearly recurring)
  */
 function doesOverrideApply(override: DateOverride, dateStr: string): boolean {
   const checkDate = new Date(dateStr);
   const overrideStart = new Date(override.date);
 
-  // For recurring overrides, match by month and day
+  // For weekly recurring overrides, match by day of week
+  if (override.recurrence_day_of_week !== null) {
+    const checkDayOfWeek = getDayOfWeek(dateStr);
+    return checkDayOfWeek === override.recurrence_day_of_week;
+  }
+
+  // For yearly recurring overrides, match by month and day
   if (override.is_recurring) {
     const checkMonth = checkDate.getMonth();
     const checkDay = checkDate.getDate();
@@ -78,7 +84,7 @@ function doesOverrideApply(override: DateOverride, dateStr: string): boolean {
 
 /**
  * Find the applicable override for a date from a list of overrides
- * Returns the most specific match (exact date > range > recurring)
+ * Returns the most specific match (exact date > range > weekly recurring > yearly recurring)
  */
 function findApplicableOverride(
   overrides: DateOverride[],
@@ -86,24 +92,37 @@ function findApplicableOverride(
 ): DateOverride | undefined {
   let exactMatch: DateOverride | undefined;
   let rangeMatch: DateOverride | undefined;
-  let recurringMatch: DateOverride | undefined;
+  let weeklyRecurringMatch: DateOverride | undefined;
+  let yearlyRecurringMatch: DateOverride | undefined;
 
   for (const override of overrides) {
     if (!doesOverrideApply(override, dateStr)) continue;
 
-    if (!override.is_recurring && !override.end_date && override.date === dateStr) {
+    if (
+      !override.is_recurring &&
+      override.recurrence_day_of_week === null &&
+      !override.end_date &&
+      override.date === dateStr
+    ) {
       // Exact date match - highest priority
       exactMatch = override;
-    } else if (!override.is_recurring && override.end_date) {
+    } else if (
+      !override.is_recurring &&
+      override.recurrence_day_of_week === null &&
+      override.end_date
+    ) {
       // Date range match
       rangeMatch = override;
+    } else if (override.recurrence_day_of_week !== null) {
+      // Weekly recurring match
+      weeklyRecurringMatch = override;
     } else if (override.is_recurring) {
-      // Recurring match - lowest priority
-      recurringMatch = override;
+      // Yearly recurring match - lowest priority
+      yearlyRecurringMatch = override;
     }
   }
 
-  return exactMatch || rangeMatch || recurringMatch;
+  return exactMatch || rangeMatch || weeklyRecurringMatch || yearlyRecurringMatch;
 }
 
 /**

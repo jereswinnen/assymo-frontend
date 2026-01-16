@@ -825,6 +825,9 @@ export const ADMIN_STRINGS = {
       addOverrideDesc:
         "Sluit de zaak op een specifieke datum of wijzig de openingsuren.",
       repeatYearly: "Jaarlijks herhalen",
+      repeatWeekly: "Wekelijks herhalen",
+      weekly: "Wekelijks",
+      dayOfWeek: "Dag",
       showOnWebsite: "Toon op website",
       from: "Van",
       to: "Tot",

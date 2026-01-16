@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  CalendarDaysIcon,
   GlobeIcon,
   Loader2Icon,
   RefreshCwIcon,
@@ -34,6 +35,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { DateOverride } from "@/types/appointments";
+import { DAYS_OF_WEEK } from "@/types/appointments";
 import { DateOverrideCreateSheet } from "@/app/admin/appointments/sheets/DateOverrideCreateSheet";
 import { t } from "@/config/strings";
 
@@ -122,6 +124,11 @@ export function DateOverrides({
   };
 
   const formatDateRange = (override: DateOverride) => {
+    // For weekly recurring, show day name
+    if (override.recurrence_day_of_week !== null) {
+      const day = DAYS_OF_WEEK.find((d) => d.value === override.recurrence_day_of_week);
+      return day?.name ?? `Dag ${override.recurrence_day_of_week}`;
+    }
     if (override.end_date) {
       // Show range
       return `${formatDateShort(override.date)} - ${formatDateShort(override.end_date)}`;
@@ -132,6 +139,8 @@ export function DateOverrides({
   const isPast = (override: DateOverride) => {
     // Recurring overrides are never "past"
     if (override.is_recurring) return false;
+    // Weekly recurring overrides are never "past"
+    if (override.recurrence_day_of_week !== null) return false;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -193,6 +202,15 @@ export function DateOverrides({
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         <span>{formatDateRange(override)}</span>
+                        {override.recurrence_day_of_week !== null && (
+                          <Badge
+                            variant="outline"
+                            className="w-fit text-xs gap-1"
+                          >
+                            <CalendarDaysIcon className="size-3" />
+                            {t("admin.misc.weekly")}
+                          </Badge>
+                        )}
                         {override.is_recurring && (
                           <Badge
                             variant="outline"

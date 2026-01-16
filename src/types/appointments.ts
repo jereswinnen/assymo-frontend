@@ -32,6 +32,7 @@ export interface DateOverride {
   close_time: string | null;
   reason: string | null; // e.g., "Feestdag", "Vakantie"
   is_recurring: boolean; // Repeat yearly (matches month/day regardless of year)
+  recurrence_day_of_week: number | null; // 0-6 (Mon-Sun) for weekly recurring, null = not weekly
   show_on_website: boolean; // Publish to public website closures API
   created_at: Date;
 }
@@ -121,6 +122,7 @@ export interface CreateDateOverrideInput {
   close_time?: string | null;
   reason?: string;
   is_recurring?: boolean; // Repeat yearly
+  recurrence_day_of_week?: number | null; // 0-6 (Mon-Sun) for weekly recurring
   show_on_website?: boolean; // Publish to public website
 }
 
