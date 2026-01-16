@@ -43,7 +43,7 @@ export default async function OpeningHoursDisplay() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h3 className="mb-0! text-stone-900">Openingsuren</h3>
+      <h3 className="mb-0! text-stone-900">Openingsuren kantoor</h3>
       <ul className="flex flex-col gap-1 text-sm text-stone-600">
         {groupedHours.map((group, index) => (
           <li key={index} className="flex justify-between gap-4">
