@@ -30,21 +30,6 @@ import {
   type FormDataState,
 } from "@/config/contactForm";
 
-function RequiredLabel({
-  children,
-  required = false,
-}: {
-  children: React.ReactNode;
-  required?: boolean;
-}) {
-  return (
-    <>
-      {children}
-      {required && <span className="text-red-500">*</span>}
-    </>
-  );
-}
-
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
 interface ContactFormProps {
@@ -133,9 +118,7 @@ export default function ContactForm({ className }: ContactFormProps) {
         return (
           <Field key={field.name}>
             <FieldLabel htmlFor={field.name}>
-              <RequiredLabel required={field.required}>
-                {field.label}
-              </RequiredLabel>
+              {field.label}{field.required && " *"}
             </FieldLabel>
             <Input
               id={field.name}
@@ -153,9 +136,7 @@ export default function ContactForm({ className }: ContactFormProps) {
         return (
           <Field key={field.name}>
             <FieldLabel htmlFor={field.name}>
-              <RequiredLabel required={field.required}>
-                {field.label}
-              </RequiredLabel>
+              {field.label}{field.required && " *"}
             </FieldLabel>
             <Textarea
               id={field.name}
@@ -172,9 +153,7 @@ export default function ContactForm({ className }: ContactFormProps) {
         return (
           <Field key={field.name}>
             <FieldLabel htmlFor={field.name}>
-              <RequiredLabel required={field.required}>
-                {field.label}
-              </RequiredLabel>
+              {field.label}{field.required && " *"}
             </FieldLabel>
             <Select
               value={String(value || "")}
@@ -199,9 +178,7 @@ export default function ContactForm({ className }: ContactFormProps) {
         return (
           <Field key={field.name}>
             <FieldLabel htmlFor={field.name}>
-              <RequiredLabel required={field.required}>
-                {field.label}
-              </RequiredLabel>
+              {field.label}{field.required && " *"}
             </FieldLabel>
             <Input
               id={field.name}

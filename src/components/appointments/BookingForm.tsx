@@ -53,21 +53,6 @@ const initialFormData: FormData = {
   remarks: "",
 };
 
-function RequiredLabel({
-  children,
-  required = false,
-}: {
-  children: React.ReactNode;
-  required?: boolean;
-}) {
-  return (
-    <>
-      {children}
-      {required && <span className="text-red-500 ml-0.5">*</span>}
-    </>
-  );
-}
-
 interface BookingFormProps {
   className?: string;
 }
@@ -250,7 +235,7 @@ export function BookingForm({ className }: BookingFormProps) {
               <FieldGroup>
                 <Field>
                   <FieldLabel htmlFor="customer_name">
-                    <RequiredLabel required>Naam</RequiredLabel>
+                    Naam *
                   </FieldLabel>
                   <Input
                     id="customer_name"
@@ -267,7 +252,7 @@ export function BookingForm({ className }: BookingFormProps) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel htmlFor="customer_email">
-                      <RequiredLabel required>E-mailadres</RequiredLabel>
+                      E-mailadres *
                     </FieldLabel>
                     <Input
                       id="customer_email"
@@ -284,7 +269,7 @@ export function BookingForm({ className }: BookingFormProps) {
 
                   <Field>
                     <FieldLabel htmlFor="customer_phone">
-                      <RequiredLabel required>Telefoonnummer</RequiredLabel>
+                      Telefoonnummer *
                     </FieldLabel>
                     <Input
                       id="customer_phone"
@@ -302,7 +287,7 @@ export function BookingForm({ className }: BookingFormProps) {
 
                 <Field>
                   <FieldLabel htmlFor="customer_street">
-                    <RequiredLabel required>Straat en huisnummer</RequiredLabel>
+                    Straat en huisnummer *
                   </FieldLabel>
                   <Input
                     id="customer_street"
@@ -319,7 +304,7 @@ export function BookingForm({ className }: BookingFormProps) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel htmlFor="customer_postal_code">
-                      <RequiredLabel required>Postcode</RequiredLabel>
+                      Postcode *
                     </FieldLabel>
                     <Input
                       id="customer_postal_code"
@@ -335,7 +320,7 @@ export function BookingForm({ className }: BookingFormProps) {
 
                   <Field>
                     <FieldLabel htmlFor="customer_city">
-                      <RequiredLabel required>Plaats</RequiredLabel>
+                      Plaats *
                     </FieldLabel>
                     <Input
                       id="customer_city"
