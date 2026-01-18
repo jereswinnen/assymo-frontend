@@ -234,7 +234,7 @@ export default function HeaderClient({
               className="relative"
               href="/afspraak"
               icon={<Calendar1Icon />}
-              label="Maak een afspraak"
+              label="Afspraak maken"
             />
 
             {/* Mobile hamburger */}

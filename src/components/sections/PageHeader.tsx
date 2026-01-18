@@ -59,7 +59,7 @@ export default function PageHeader({ section, headerImage }: PageHeaderProps) {
           )}
         </div>
         {showButtons && buttons && buttons.length > 0 && (
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             {buttons.map((button, index) => {
               const IconComponent = button.icon ? iconMap[button.icon] : null;
 
