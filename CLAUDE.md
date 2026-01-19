@@ -149,8 +149,8 @@ function MyComponent() {
 | `contact_form_submitted` | `subject`, `has_attachment` | ContactForm |
 | `contact_form_error` | `error_type` | ContactForm |
 | `project_card_clicked` | `project_slug`, `project_name` | ProjectsGrid |
-| `filter_applied` | `category`, `value` | FilterBar |
-| `filter_cleared` | `category` | FilterBar |
+| `filter_applied` | `category_slug`, `category_name`, `filter_slug`, `filter_name` | FilterBar |
+| `filter_cleared` | `category_slug`, `category_name` | FilterBar |
 | `cta_clicked` | `location`, `label`, `href` | HeaderClient |
 | `outbound_clicked` | `type` (phone/email/instagram/facebook) | Footer, HeaderClient |
 | `carousel_navigated` | `direction`, `index` | Carousel |

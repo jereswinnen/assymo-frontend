@@ -40,8 +40,8 @@ interface CategoryFilterProps {
   options: FilterOption[];
   selectedOptions: string[];
   onSelectionChange: (categorySlug: string, optionSlugs: string[]) => void;
-  onFilterApplied: (category: string, value: string) => void;
-  onFilterCleared: (category: string) => void;
+  onFilterApplied: (categorySlug: string, categoryName: string, filterSlug: string, filterName: string) => void;
+  onFilterCleared: (categorySlug: string, categoryName: string) => void;
 }
 
 function CategoryFilter({
@@ -54,20 +54,20 @@ function CategoryFilter({
 }: CategoryFilterProps) {
   const [open, setOpen] = useState(false);
 
-  const handleToggle = (optionSlug: string) => {
-    const isAdding = !selectedOptions.includes(optionSlug);
+  const handleToggle = (option: FilterOption) => {
+    const isAdding = !selectedOptions.includes(option.slug);
     const newSelection = isAdding
-      ? [...selectedOptions, optionSlug]
-      : selectedOptions.filter((s) => s !== optionSlug);
+      ? [...selectedOptions, option.slug]
+      : selectedOptions.filter((s) => s !== option.slug);
     onSelectionChange(category.slug, newSelection);
     if (isAdding) {
-      onFilterApplied(category.slug, optionSlug);
+      onFilterApplied(category.slug, category.name, option.slug, option.name);
     }
     setOpen(false);
   };
 
   const handleClear = () => {
-    onFilterCleared(category.slug);
+    onFilterCleared(category.slug, category.name);
     onSelectionChange(category.slug, []);
   };
 
@@ -102,12 +102,12 @@ function CategoryFilter({
             <div
               key={option.id}
               className="flex items-center gap-2 p-2 rounded-md hover:bg-accent cursor-pointer"
-              onClick={() => handleToggle(option.slug)}
+              onClick={() => handleToggle(option)}
             >
               <Checkbox
                 id={option.id}
                 checked={selectedOptions.includes(option.slug)}
-                onCheckedChange={() => handleToggle(option.slug)}
+                onCheckedChange={() => handleToggle(option)}
               />
               <Label
                 htmlFor={option.id}
@@ -152,16 +152,26 @@ export function FilterBar({
     });
   };
 
-  const handleFilterApplied = (category: string, value: string) => {
-    track("filter_applied", { category, value });
+  const handleFilterApplied = (
+    categorySlug: string,
+    categoryName: string,
+    filterSlug: string,
+    filterName: string
+  ) => {
+    track("filter_applied", {
+      category_slug: categorySlug,
+      category_name: categoryName,
+      filter_slug: filterSlug,
+      filter_name: filterName,
+    });
   };
 
-  const handleFilterCleared = (category: string) => {
-    track("filter_cleared", { category });
+  const handleFilterCleared = (categorySlug: string, categoryName: string) => {
+    track("filter_cleared", { category_slug: categorySlug, category_name: categoryName });
   };
 
   const handleClearAll = () => {
-    track("filter_cleared", { category: "all" });
+    track("filter_cleared", { category_slug: "all", category_name: "Alle filters" });
     onFiltersChange({});
   };
 
