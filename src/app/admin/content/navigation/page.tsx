@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import { useSiteContext } from "@/lib/permissions/site-context";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import {
   DndContext,
   closestCenter,
@@ -82,6 +83,7 @@ interface NavigationLink {
 
 export default function NavigationPage() {
   const { currentSite, loading: siteLoading } = useSiteContext();
+  const { authorized, loading: permissionLoading } = useRequireFeature("navigation");
   const [links, setLinks] = useState<NavigationLink[]>([]);
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -224,6 +226,10 @@ export default function NavigationPage() {
     [openNewLinkSheet],
   );
   useAdminHeaderActions(headerActions);
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   const isLoading = loading || siteLoading;
 

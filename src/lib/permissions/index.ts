@@ -50,3 +50,6 @@ export {
 // Route protection middleware
 export { protectRoute, requireAuth } from "./middleware";
 export type { ProtectRouteOptions, ProtectRouteResult } from "./middleware";
+
+// Note: useRequireFeature is a client-only hook
+// Import directly from "@/lib/permissions/useRequireFeature" in client components

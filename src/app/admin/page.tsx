@@ -1,13 +1,9 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import {
-  type Role,
-  type Feature,
-  DEFAULT_ROLE,
-  getEffectiveFeatures,
-  parseFeatureOverrides,
-} from "@/lib/permissions";
+import { type Feature, DEFAULT_ROLE } from "@/lib/permissions/types";
+import { getEffectiveFeatures } from "@/lib/permissions/check";
+import { getUserPermissions } from "@/lib/permissions/queries";
 
 // Map features to their routes
 const FEATURE_ROUTES: Record<Feature, string> = {
@@ -48,15 +44,14 @@ export default async function AdminPage() {
     redirect("/admin/auth");
   }
 
-  // Calculate effective features
-  const user = session.user as { role?: string; featureOverrides?: string };
-  const role = (user.role as Role) || DEFAULT_ROLE;
-  const overrides = parseFeatureOverrides(user.featureOverrides);
-  const effectiveFeatures = getEffectiveFeatures(role, overrides);
+  // Query fresh permissions from database (not cached session)
+  const permissions = await getUserPermissions(session.user.id);
+  const role = permissions?.role || DEFAULT_ROLE;
+  const effectiveFeatures = getEffectiveFeatures(role, permissions?.featureOverrides || null);
 
   // Find first available feature by priority
   const firstFeature = FEATURE_PRIORITY.find((f) => effectiveFeatures.includes(f));
-  const targetRoute = firstFeature ? FEATURE_ROUTES[firstFeature] : "/admin/content/pages";
+  const targetRoute = firstFeature ? FEATURE_ROUTES[firstFeature] : "/admin/auth";
 
   redirect(targetRoute);
 }

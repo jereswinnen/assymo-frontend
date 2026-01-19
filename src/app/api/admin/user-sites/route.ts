@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth-utils";
 import { getUserSites, getAllSites } from "@/lib/permissions/queries";
 import { isSuperAdmin } from "@/lib/permissions/check";
-import type { Role } from "@/lib/permissions/types";
+import type { Role, Feature } from "@/lib/permissions/types";
 
 /**
  * GET /api/admin/user-sites
@@ -33,12 +33,28 @@ export async function GET() {
       })
     ) {
       const sites = await getAllSites();
-      return NextResponse.json({ sites });
+      // Map to API format with capabilities
+      const sitesWithCapabilities = sites.map((s) => ({
+        id: s.id,
+        name: s.name,
+        slug: s.slug,
+        domain: s.domain,
+        capabilities: s.capabilities || [],
+      }));
+      return NextResponse.json({ sites: sitesWithCapabilities });
     }
 
     // Others get their assigned sites
     const sites = await getUserSites(user.id);
-    return NextResponse.json({ sites });
+    // Map to API format with capabilities
+    const sitesWithCapabilities = sites.map((s) => ({
+      id: s.id,
+      name: s.name,
+      slug: s.slug,
+      domain: s.domain,
+      capabilities: s.capabilities || [],
+    }));
+    return NextResponse.json({ sites: sitesWithCapabilities });
   } catch (error) {
     console.error("Error fetching user sites:", error);
     return NextResponse.json(

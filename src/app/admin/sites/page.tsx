@@ -5,6 +5,7 @@ import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -34,7 +35,9 @@ import {
   Field,
   FieldGroup,
   FieldLabel,
+  FieldDescription,
   FieldSet,
+  FieldSeparator,
 } from "@/components/ui/field";
 import {
   CheckIcon,
@@ -45,6 +48,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { t } from "@/config/strings";
+import { type Feature } from "@/lib/permissions/types";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 
 interface Site {
   id: string;
@@ -52,10 +57,46 @@ interface Site {
   slug: string;
   domain: string | null;
   is_active: boolean;
+  capabilities: Feature[];
   created_at: string;
 }
 
+// Feature labels for display
+const FEATURE_LABELS: Record<Feature, string> = {
+  pages: "Pagina's",
+  solutions: "Realisaties",
+  navigation: "Navigatie",
+  filters: "Filters",
+  media: "Media",
+  parameters: "Parameters",
+  appointments: "Afspraken",
+  emails: "E-mails",
+  conversations: "Conversaties",
+  settings: "Instellingen",
+  users: "Gebruikers",
+  sites: "Sites",
+};
+
+// Content features that can be enabled per site
+const CONTENT_CAPABILITIES: Feature[] = [
+  "pages",
+  "solutions",
+  "navigation",
+  "filters",
+  "media",
+  "parameters",
+];
+
+// Business features that can be enabled per site
+const BUSINESS_CAPABILITIES: Feature[] = [
+  "appointments",
+  "emails",
+  "conversations",
+  "settings",
+];
+
 export default function SitesPage() {
+  const { authorized, loading: permissionLoading } = useRequireFeature("sites");
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -65,6 +106,7 @@ export default function SitesPage() {
     name: "",
     slug: "",
     domain: "",
+    capabilities: [] as Feature[],
   });
   const [deleteTarget, setDeleteTarget] = useState<Site | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -95,7 +137,12 @@ export default function SitesPage() {
 
   const openCreateDialog = () => {
     setEditingSite(null);
-    setFormData({ name: "", slug: "", domain: "" });
+    setFormData({
+      name: "",
+      slug: "",
+      domain: "",
+      capabilities: [...CONTENT_CAPABILITIES], // Default to content features
+    });
     setDialogOpen(true);
   };
 
@@ -105,6 +152,7 @@ export default function SitesPage() {
       name: site.name,
       slug: site.slug,
       domain: site.domain || "",
+      capabilities: site.capabilities || [],
     });
     setDialogOpen(true);
   };
@@ -180,6 +228,15 @@ export default function SitesPage() {
       .replace(/^-|-$/g, "");
   };
 
+  const toggleCapability = (feature: Feature) => {
+    setFormData((prev) => ({
+      ...prev,
+      capabilities: prev.capabilities.includes(feature)
+        ? prev.capabilities.filter((f) => f !== feature)
+        : [...prev.capabilities, feature],
+    }));
+  };
+
   // Header actions
   const headerActions = useMemo(
     () => (
@@ -199,6 +256,10 @@ export default function SitesPage() {
       year: "numeric",
     }).format(new Date(date));
   };
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -277,7 +338,7 @@ export default function SitesPage() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingSite ? t("admin.headings.editSite") : t("admin.headings.newSite")}
@@ -333,6 +394,60 @@ export default function SitesPage() {
                   }
                   placeholder={t("admin.placeholders.hostname")}
                 />
+              </Field>
+            </FieldSet>
+
+            <FieldSeparator />
+
+            <FieldSet>
+              <Field>
+                <FieldLabel>Content features</FieldLabel>
+                <FieldDescription>
+                  Functies beschikbaar voor contentbeheer
+                </FieldDescription>
+                <div className="space-y-3 mt-2">
+                  {CONTENT_CAPABILITIES.map((feature) => (
+                    <div
+                      key={feature}
+                      className="flex items-center justify-between"
+                    >
+                      <span className="text-sm font-medium">
+                        {FEATURE_LABELS[feature]}
+                      </span>
+                      <Switch
+                        checked={formData.capabilities.includes(feature)}
+                        onCheckedChange={() => toggleCapability(feature)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </Field>
+            </FieldSet>
+
+            <FieldSeparator />
+
+            <FieldSet>
+              <Field>
+                <FieldLabel>Business features</FieldLabel>
+                <FieldDescription>
+                  Functies voor bedrijfsapplicaties
+                </FieldDescription>
+                <div className="space-y-3 mt-2">
+                  {BUSINESS_CAPABILITIES.map((feature) => (
+                    <div
+                      key={feature}
+                      className="flex items-center justify-between"
+                    >
+                      <span className="text-sm font-medium">
+                        {FEATURE_LABELS[feature]}
+                      </span>
+                      <Switch
+                        checked={formData.capabilities.includes(feature)}
+                        onCheckedChange={() => toggleCapability(feature)}
+                      />
+                    </div>
+                  ))}
+                </div>
               </Field>
             </FieldSet>
           </FieldGroup>

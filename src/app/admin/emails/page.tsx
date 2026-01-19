@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -37,6 +38,7 @@ import type { Newsletter } from "@/config/newsletter";
 import { t } from "@/config/strings";
 
 export default function EmailsPage() {
+  const { authorized, loading: permissionLoading } = useRequireFeature("emails");
   const router = useRouter();
   const [drafts, setDrafts] = useState<Newsletter[]>([]);
   const [sentNewsletters, setSentNewsletters] = useState<Newsletter[]>([]);
@@ -181,6 +183,10 @@ export default function EmailsPage() {
     const dateB = new Date(b.sentAt || b.createdAt);
     return dateB.getTime() - dateA.getTime();
   });
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   if (loading) {
     return (

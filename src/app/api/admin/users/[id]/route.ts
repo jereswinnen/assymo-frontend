@@ -88,7 +88,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     // Update role if provided
     if (role) {
-      const validRoles: Role[] = ["super_admin", "admin", "content_editor"];
+      const validRoles: Role[] = ["super_admin", "admin", "content_editor", "user"];
       if (!validRoles.includes(role)) {
         return NextResponse.json(
           { error: "Ongeldige rol" },

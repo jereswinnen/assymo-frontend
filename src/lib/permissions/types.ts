@@ -7,6 +7,7 @@ export const ROLES = {
   super_admin: "super_admin",
   admin: "admin",
   content_editor: "content_editor",
+  user: "user",
 } as const;
 
 export type Role = (typeof ROLES)[keyof typeof ROLES];
@@ -19,6 +20,7 @@ export const ROLE_HIERARCHY: Record<Role, number> = {
   super_admin: 100,
   admin: 50,
   content_editor: 10,
+  user: 1,
 };
 
 // All available features in the admin
@@ -92,6 +94,9 @@ export const ROLE_FEATURES: Record<Role, Feature[]> = {
     "media",
     "parameters",
   ],
+
+  // User role has no default features - all access must be explicitly granted
+  user: [],
 };
 
 // Structure for per-user feature overrides
@@ -107,9 +112,13 @@ export interface Site {
   slug: string;
   domain: string | null;
   isActive: boolean;
+  capabilities: Feature[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+// Helper type for site capabilities - features a site supports
+export type SiteCapabilities = Feature[];
 
 // User with permissions
 export interface UserWithPermissions {

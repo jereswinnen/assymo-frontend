@@ -64,7 +64,7 @@ interface Page {
 
 export default function PagesPage() {
   const router = useRouter();
-  const { currentSite, loading: siteLoading } = useSiteContext();
+  const { currentSite, loading: siteLoading, visibleFeatures } = useSiteContext();
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -75,6 +75,13 @@ export default function PagesPage() {
 
   // Duplicate
   const [duplicating, setDuplicating] = useState<string | null>(null);
+
+  // Check permission - redirect if user doesn't have access to pages
+  useEffect(() => {
+    if (!siteLoading && !visibleFeatures.includes("pages")) {
+      router.replace("/admin");
+    }
+  }, [siteLoading, visibleFeatures, router]);
 
   useEffect(() => {
     if (!siteLoading && currentSite) {

@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { Loader2Icon, SaveIcon, SparklesIcon, Trash2Icon } from "lucide-react";
 import { formatFileSize } from "@/lib/format";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import { t } from "@/config/strings";
 
 interface ImageData {
@@ -50,6 +51,7 @@ export default function ImageDetailPage({
   // Decode the URL param for display and API operations
   const imageUrl = decodeURIComponent(urlParam);
   const router = useRouter();
+  const { authorized, loading: permissionLoading } = useRequireFeature("media");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -280,6 +282,10 @@ export default function ImageDetailPage({
     [saving, hasChanges, saveImage],
   );
   useAdminHeaderActions(headerActions);
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   if (loading) {
     return (

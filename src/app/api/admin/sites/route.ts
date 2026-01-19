@@ -15,7 +15,7 @@ export async function GET() {
     if (!authorized) return response;
 
     const sites = await sql`
-      SELECT id, name, slug, domain, is_active, created_at
+      SELECT id, name, slug, domain, is_active, capabilities, created_at
       FROM sites
       ORDER BY name
     `;
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     if (!authorized) return response;
 
     const body = await request.json();
-    const { name, slug, domain } = body;
+    const { name, slug, domain, capabilities } = body;
 
     if (!name || !slug) {
       return NextResponse.json(
@@ -67,10 +67,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Default capabilities to content features for new sites
+    const defaultCapabilities = capabilities || [
+      "pages",
+      "solutions",
+      "navigation",
+      "filters",
+      "media",
+      "parameters",
+    ];
+
     const result = await sql`
-      INSERT INTO sites (name, slug, domain, is_active)
-      VALUES (${name}, ${slug}, ${domain || null}, true)
-      RETURNING id, name, slug, domain, is_active, created_at
+      INSERT INTO sites (name, slug, domain, is_active, capabilities)
+      VALUES (${name}, ${slug}, ${domain || null}, true, ${JSON.stringify(defaultCapabilities)}::jsonb)
+      RETURNING id, name, slug, domain, is_active, capabilities, created_at
     `;
 
     return NextResponse.json({ site: result[0] });

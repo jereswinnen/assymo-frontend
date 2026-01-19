@@ -50,7 +50,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { type Feature, type Role } from "@/lib/permissions/types";
+import { type Feature } from "@/lib/permissions/types";
 import { t } from "@/config/strings";
 
 // Nav items with their required feature
@@ -158,11 +158,8 @@ export function AdminSidebar({
   const pathname = usePathname();
   const router = useRouter();
   const { isMobile, setOpenMobile } = useSidebar();
-  const { currentSite, availableSites } = useSiteContext();
+  const { currentSite, visibleFeatures, loading } = useSiteContext();
   const [user, setUser] = useState<UserData | null>(null);
-  const [effectiveFeatures, setEffectiveFeatures] = useState<Feature[] | null>(
-    null,
-  );
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -171,7 +168,7 @@ export function AdminSidebar({
     }
   }, [pathname, isMobile, setOpenMobile]);
 
-  // Load user info from session (for display)
+  // Load user info from session (for display only)
   useEffect(() => {
     async function loadUser() {
       const { data } = await authClient.getSession();
@@ -186,40 +183,15 @@ export function AdminSidebar({
     loadUser();
   }, []);
 
-  // Load effective features from API (fresh from database)
-  useEffect(() => {
-    async function loadPermissions() {
-      try {
-        const response = await fetch("/api/admin/user-permissions");
-        if (response.ok) {
-          const data = await response.json();
-          setEffectiveFeatures(data.effectiveFeatures);
-        }
-      } catch (error) {
-        console.error("Failed to load permissions:", error);
-      }
-    }
-    loadPermissions();
-  }, []);
-
-  // Filter nav items based on effective features
-  // Show empty arrays while loading to prevent flash of all items
+  // Filter nav items based on visible features from context
   const visibleNavItems = useMemo(
-    () =>
-      effectiveFeatures === null
-        ? []
-        : navItems.filter((item) => effectiveFeatures.includes(item.feature)),
-    [effectiveFeatures],
+    () => navItems.filter((item) => visibleFeatures.includes(item.feature)),
+    [visibleFeatures]
   );
 
   const visibleContentItems = useMemo(
-    () =>
-      effectiveFeatures === null
-        ? []
-        : contentItems.filter((item) =>
-            effectiveFeatures.includes(item.feature),
-          ),
-    [effectiveFeatures],
+    () => contentItems.filter((item) => visibleFeatures.includes(item.feature)),
+    [visibleFeatures]
   );
 
   const handleLogout = async () => {
@@ -246,7 +218,7 @@ export function AdminSidebar({
         <SiteSelector />
       </SidebarHeader>
       <SidebarContent>
-        {effectiveFeatures === null ? (
+        {loading ? (
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>

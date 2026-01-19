@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import { useSiteContext } from "@/lib/permissions/site-context";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import {
   DndContext,
   closestCenter,
@@ -74,6 +75,7 @@ interface FilterCategory {
 
 export default function FiltersPage() {
   const { currentSite, loading: siteLoading } = useSiteContext();
+  const { authorized, loading: permissionLoading } = useRequireFeature("filters");
   const [categories, setCategories] = useState<FilterCategory[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -209,6 +211,10 @@ export default function FiltersPage() {
     [openNewCategorySheet],
   );
   useAdminHeaderActions(headerActions);
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   const isLoading = loading || siteLoading;
 

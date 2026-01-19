@@ -1,5 +1,5 @@
 import { neon } from "@neondatabase/serverless";
-import type { Site, Role, FeatureOverrides } from "./types";
+import type { Site, Role, FeatureOverrides, Feature } from "./types";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -18,7 +18,7 @@ export async function getUserSiteIds(userId: string): Promise<string[]> {
  */
 export async function getUserSites(userId: string): Promise<Site[]> {
   const rows = await sql`
-    SELECT s.id, s.name, s.slug, s.domain, s.is_active, s.created_at, s.updated_at
+    SELECT s.id, s.name, s.slug, s.domain, s.is_active, s.capabilities, s.created_at, s.updated_at
     FROM sites s
     JOIN user_sites us ON s.id = us.site_id
     WHERE us.user_id = ${userId}
@@ -31,6 +31,7 @@ export async function getUserSites(userId: string): Promise<Site[]> {
     slug: row.slug as string,
     domain: row.domain as string | null,
     isActive: row.is_active as boolean,
+    capabilities: (row.capabilities as Feature[]) || [],
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
   }));
@@ -41,7 +42,7 @@ export async function getUserSites(userId: string): Promise<Site[]> {
  */
 export async function getAllSites(): Promise<Site[]> {
   const rows = await sql`
-    SELECT id, name, slug, domain, is_active, created_at, updated_at
+    SELECT id, name, slug, domain, is_active, capabilities, created_at, updated_at
     FROM sites
     WHERE is_active = true
     ORDER BY name
@@ -53,6 +54,7 @@ export async function getAllSites(): Promise<Site[]> {
     slug: row.slug as string,
     domain: row.domain as string | null,
     isActive: row.is_active as boolean,
+    capabilities: (row.capabilities as Feature[]) || [],
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
   }));
@@ -63,7 +65,7 @@ export async function getAllSites(): Promise<Site[]> {
  */
 export async function getSiteById(siteId: string): Promise<Site | null> {
   const rows = await sql`
-    SELECT id, name, slug, domain, is_active, created_at, updated_at
+    SELECT id, name, slug, domain, is_active, capabilities, created_at, updated_at
     FROM sites
     WHERE id = ${siteId}
   `;
@@ -77,6 +79,7 @@ export async function getSiteById(siteId: string): Promise<Site | null> {
     slug: row.slug as string,
     domain: row.domain as string | null,
     isActive: row.is_active as boolean,
+    capabilities: (row.capabilities as Feature[]) || [],
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
   };
@@ -87,7 +90,7 @@ export async function getSiteById(siteId: string): Promise<Site | null> {
  */
 export async function getSiteBySlug(slug: string): Promise<Site | null> {
   const rows = await sql`
-    SELECT id, name, slug, domain, is_active, created_at, updated_at
+    SELECT id, name, slug, domain, is_active, capabilities, created_at, updated_at
     FROM sites
     WHERE slug = ${slug}
   `;
@@ -101,6 +104,7 @@ export async function getSiteBySlug(slug: string): Promise<Site | null> {
     slug: row.slug as string,
     domain: row.domain as string | null,
     isActive: row.is_active as boolean,
+    capabilities: (row.capabilities as Feature[]) || [],
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
   };

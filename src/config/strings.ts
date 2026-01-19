@@ -92,7 +92,6 @@ export const ADMIN_STRINGS = {
       actions: "Acties",
       status: "Status",
       date: "Datum",
-      dateTime: "Datum & tijd",
       time: "Tijd",
       from: "Van",
       to: "Tot",
@@ -111,7 +110,6 @@ export const ADMIN_STRINGS = {
       headingLevel: "Titel niveau",
       subject: "Onderwerp",
       preview: "Preview",
-      customer: "Klant",
       customerDetails: "Klantgegevens",
       remarks: "Opmerkingen",
       adminNotes: "Interne notities",
@@ -847,6 +845,71 @@ export const ADMIN_STRINGS = {
       seoPreview: "Google preview",
       seoTitleHint: "Laat leeg om de paginatitel te gebruiken",
       generateWithAI: "Genereer met AI",
+      // User role strings
+      assignSitesFirst: "Wijs eerst sites toe om beschikbare features te zien.",
+      contentFeaturesLabel: "Content features",
+      contentFeaturesDesc: "Beheer van website inhoud",
+      businessFeaturesLabel: "Business features",
+      businessFeaturesDesc: "Beheer van bedrijfsapplicaties",
+      featuresAvailableForContent: "Functies beschikbaar voor contentbeheer",
+      featuresForBusiness: "Functies voor bedrijfsapplicaties",
+      modified: "aangepast",
+      assignedSites: "Toegewezen sites",
+      assignedSitesDesc: "Content features zijn beperkt tot de toegewezen sites",
+    },
+
+    /**
+     * Role display names
+     */
+    roles: {
+      superAdmin: "Super Admin",
+      admin: "Admin",
+      contentEditor: "Content Editor",
+      user: "Gebruiker",
+    },
+
+    /**
+     * Role descriptions
+     */
+    roleDescriptions: {
+      superAdmin: "Volledige toegang tot alles",
+      admin: "Content + afspraken, e-mails, conversaties, instellingen",
+      contentEditor: "Alleen content beheren",
+      user: "Geen standaard toegang - features moeten expliciet worden toegekend",
+    },
+
+    /**
+     * Feature display names
+     */
+    features: {
+      pages: "Pagina's",
+      solutions: "Realisaties",
+      navigation: "Navigatie",
+      filters: "Filters",
+      media: "Media",
+      parameters: "Parameters",
+      appointments: "Afspraken",
+      emails: "E-mails",
+      conversations: "Conversaties",
+      settings: "Instellingen",
+      users: "Gebruikers",
+      sites: "Sites",
+    },
+
+    /**
+     * Feature descriptions
+     */
+    featureDescriptions: {
+      pages: "Beheer website pagina's",
+      solutions: "Beheer realisaties/projecten",
+      navigation: "Beheer menu structuur",
+      filters: "Beheer filter categorieën",
+      media: "Beheer afbeeldingen en bestanden",
+      parameters: "Beheer site parameters",
+      appointments: "Bekijk en beheer afspraken",
+      emails: "Verstuur nieuwsbrieven",
+      conversations: "Bekijk chatbot gesprekken",
+      settings: "Beheer site instellingen",
     },
   },
 } as const;

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -19,12 +20,9 @@ import { DateOverrides } from "@/components/admin/appointments/DateOverrides";
 import { t } from "@/config/strings";
 
 export default function AppointmentsPage() {
+  const { authorized, loading: permissionLoading } = useRequireFeature("appointments");
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Lifted state for AppointmentsList
   const [createAppointmentOpen, setCreateAppointmentOpen] = useState(false);
@@ -37,14 +35,18 @@ export default function AppointmentsPage() {
   // Lifted state for DateOverrides
   const [createOverrideOpen, setCreateOverrideOpen] = useState(false);
 
-  const handleSaveSettings = () => {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleSaveSettings = useCallback(() => {
     setSettingsSaving(true);
     setTriggerSettingsSave((n) => n + 1);
-  };
+  }, []);
 
-  const handleSettingsSaveComplete = () => {
+  const handleSettingsSaveComplete = useCallback(() => {
     setSettingsSaving(false);
-  };
+  }, []);
 
   // Header actions based on active tab
   const headerActions = useMemo(() => {
@@ -84,9 +86,13 @@ export default function AppointmentsPage() {
     }
 
     return null;
-  }, [activeTab, settingsSaving, settingsHasChanges]);
+  }, [activeTab, settingsSaving, settingsHasChanges, handleSaveSettings]);
 
   useAdminHeaderActions(headerActions);
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   if (!mounted) {
     return null;

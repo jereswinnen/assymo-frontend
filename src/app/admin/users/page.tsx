@@ -26,13 +26,15 @@ import { toast } from "sonner";
 import { UserEditSheet } from "./sheets/UserEditSheet";
 import { UserCreateSheet } from "./sheets/UserCreateSheet";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
-import type { Role, FeatureOverrides } from "@/lib/permissions/types";
+import type { Role, FeatureOverrides, Feature } from "@/lib/permissions/types";
 import { t } from "@/config/strings";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 
 interface Site {
   id: string;
   name: string;
   slug: string;
+  capabilities?: Feature[];
 }
 
 interface User {
@@ -50,15 +52,18 @@ const ROLE_LABELS: Record<Role, string> = {
   super_admin: "Super Admin",
   admin: "Admin",
   content_editor: "Content Editor",
+  user: "Gebruiker",
 };
 
 const ROLE_VARIANTS: Record<Role, "default" | "secondary" | "outline"> = {
   super_admin: "default",
   admin: "secondary",
   content_editor: "outline",
+  user: "outline",
 };
 
 export default function UsersPage() {
+  const { authorized, loading: permissionLoading } = useRequireFeature("users");
   const [users, setUsers] = useState<User[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,6 +164,10 @@ export default function UsersPage() {
       year: "numeric",
     }).format(new Date(date));
   };
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   if (loading) {
     return (

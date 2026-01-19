@@ -50,6 +50,7 @@ import {
   useAdminUnsavedChanges,
 } from "@/components/admin/AdminHeaderContext";
 import { useSiteContext } from "@/lib/permissions/site-context";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import { t } from "@/config/strings";
 
 interface Filter {
@@ -98,6 +99,7 @@ export default function SolutionEditorPage({
   const { id } = use(params);
   const router = useRouter();
   const { currentSite } = useSiteContext();
+  const { authorized, loading: permissionLoading } = useRequireFeature("solutions");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -395,6 +397,10 @@ export default function SolutionEditorPage({
   useAdminHeaderActions(headerActions);
   useAdminBreadcrumbTitle(solution ? name : null);
   useAdminUnsavedChanges(hasChanges, saveSolution);
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   if (loading) {
     return (

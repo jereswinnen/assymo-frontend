@@ -21,7 +21,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
 
     const sites = await sql`
-      SELECT id, name, slug, domain, is_active, created_at
+      SELECT id, name, slug, domain, is_active, capabilities, created_at
       FROM sites
       WHERE id = ${id}
     `;
@@ -55,7 +55,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
     const body = await request.json();
-    const { name, slug, domain, is_active } = body;
+    const { name, slug, domain, is_active, capabilities } = body;
 
     // Check if site exists
     const existing = await sql`SELECT id FROM sites WHERE id = ${id}`;
@@ -87,10 +87,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       }
     }
 
-    // Build update query dynamically
-    const updates: string[] = [];
-    const values: unknown[] = [];
-
+    // Update each field individually
     if (name !== undefined) {
       await sql`UPDATE sites SET name = ${name} WHERE id = ${id}`;
     }
@@ -103,10 +100,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (is_active !== undefined) {
       await sql`UPDATE sites SET is_active = ${is_active} WHERE id = ${id}`;
     }
+    if (capabilities !== undefined) {
+      await sql`UPDATE sites SET capabilities = ${JSON.stringify(capabilities)}::jsonb WHERE id = ${id}`;
+    }
 
     // Fetch updated site
     const result = await sql`
-      SELECT id, name, slug, domain, is_active, created_at
+      SELECT id, name, slug, domain, is_active, capabilities, created_at
       FROM sites
       WHERE id = ${id}
     `;

@@ -173,6 +173,7 @@ export function UserCreateSheet({
                     <SelectItem value="content_editor">
                       Content Editor
                     </SelectItem>
+                    <SelectItem value="user">Gebruiker</SelectItem>
                   </SelectContent>
                 </Select>
                 <FieldDescription>
@@ -182,6 +183,8 @@ export function UserCreateSheet({
                     "Content + afspraken, e-mails, conversaties, instellingen"}
                   {formData.role === "content_editor" &&
                     "Alleen content beheren"}
+                  {formData.role === "user" &&
+                    "Geen standaard toegang - features moeten expliciet worden toegekend"}
                 </FieldDescription>
               </Field>
             </FieldSet>

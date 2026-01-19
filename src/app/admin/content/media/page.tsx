@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import { useSiteContext } from "@/lib/permissions/site-context";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import {
   DndContext,
   DragEndEvent,
@@ -78,6 +79,7 @@ function MediaPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { currentSite, loading: siteLoading } = useSiteContext();
+  const { authorized, loading: permissionLoading } = useRequireFeature("media");
 
   // Read folder from URL params
   const currentFolderId = searchParams.get("folder");
@@ -585,6 +587,10 @@ function MediaPageContent() {
     [uploading, handleUpload, currentFolderId]
   );
   useAdminHeaderActions(headerActions);
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   return (
     <DndContext

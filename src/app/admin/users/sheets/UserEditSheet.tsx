@@ -59,6 +59,7 @@ interface Site {
   id: string;
   name: string;
   slug: string;
+  capabilities?: Feature[];
 }
 
 interface User {
@@ -84,6 +85,14 @@ const ROLE_LABELS: Record<Role, string> = {
   super_admin: "Super Admin",
   admin: "Admin",
   content_editor: "Content Editor",
+  user: "Gebruiker",
+};
+
+const ROLE_DESCRIPTIONS: Record<Role, string> = {
+  super_admin: "Volledige toegang tot alles",
+  admin: "Content + afspraken, e-mails, conversaties, instellingen",
+  content_editor: "Alleen content beheren",
+  user: "Geen standaard toegang - features moeten expliciet worden toegekend",
 };
 
 const FEATURE_LABELS: Record<Feature, string> = {
@@ -151,6 +160,25 @@ export function UserEditSheet({
     if (!initialData) return false;
     return JSON.stringify(editData) !== JSON.stringify(initialData);
   }, [editData, initialData]);
+
+  // Get available features based on assigned sites' capabilities
+  // For 'user' role, only show features that are available on at least one assigned site
+  const availableFeatures = useMemo(() => {
+    if (editData.role === "super_admin") {
+      return Object.values(FEATURE_LABELS).map((_, i) => Object.keys(FEATURE_LABELS)[i]) as Feature[];
+    }
+
+    // Get all assigned sites
+    const assignedSites = sites.filter((s) => editData.siteIds.includes(s.id));
+
+    // Get union of all capabilities from assigned sites
+    const allCapabilities = new Set<Feature>();
+    assignedSites.forEach((site) => {
+      (site.capabilities || []).forEach((cap) => allCapabilities.add(cap));
+    });
+
+    return Array.from(allCapabilities);
+  }, [editData.siteIds, editData.role, sites]);
 
   const handleSave = async () => {
     if (!user) return;
@@ -270,16 +298,18 @@ export function UserEditSheet({
     editData.featureOverrides,
   );
 
-  // Content features (site-scoped)
-  const contentFeatures = SITE_SCOPED_FEATURES;
+  // Content features (site-scoped) - filtered by available features
+  const contentFeatures = SITE_SCOPED_FEATURES.filter((f) =>
+    availableFeatures.includes(f)
+  );
 
-  // Business features (exclude users and sites which are admin-only)
+  // Business features (exclude users and sites which are admin-only) - filtered by available features
   const businessFeatures: Feature[] = [
     "appointments",
     "emails",
     "conversations",
     "settings",
-  ];
+  ].filter((f) => availableFeatures.includes(f as Feature)) as Feature[];
 
   if (!user) return null;
 
@@ -329,15 +359,11 @@ export function UserEditSheet({
                       <SelectItem value="content_editor">
                         Content Editor
                       </SelectItem>
+                      <SelectItem value="user">Gebruiker</SelectItem>
                     </SelectContent>
                   </Select>
                   <FieldDescription>
-                    {editData.role === "super_admin" &&
-                      "Volledige toegang tot alles"}
-                    {editData.role === "admin" &&
-                      "Content + afspraken, e-mails, conversaties, instellingen"}
-                    {editData.role === "content_editor" &&
-                      "Alleen content beheren"}
+                    {ROLE_DESCRIPTIONS[editData.role]}
                   </FieldDescription>
                 </Field>
               </FieldSet>
@@ -383,103 +409,115 @@ export function UserEditSheet({
                 <>
                   <FieldSeparator />
 
-                  <FieldSet>
-                    <Field>
-                      <FieldLabel>Content features</FieldLabel>
-                      <FieldDescription>
-                        Beheer van website inhoud
-                      </FieldDescription>
-                      <div className="space-y-3">
-                        {contentFeatures.map((feature) => {
-                          const isEnabled = effectiveFeatures.includes(feature);
-                          const hasDefault = roleFeatures.includes(feature);
-                          const isOverridden = hasDefault
-                            ? revokes.includes(feature)
-                            : grants.includes(feature);
+                  {editData.role === "user" && editData.siteIds.length === 0 && (
+                    <div className="text-sm text-muted-foreground bg-muted/50 rounded-md p-3 mb-4">
+                      Wijs eerst sites toe om beschikbare features te zien.
+                    </div>
+                  )}
 
-                          return (
-                            <div
-                              key={feature}
-                              className="flex items-center justify-between"
-                            >
-                              <div className="space-y-0.5">
-                                <span className="text-sm font-medium flex items-center gap-2">
-                                  {FEATURE_LABELS[feature]}
-                                  {isOverridden && (
-                                    <Badge
-                                      variant="outline"
-                                      className="text-[10px] px-1 py-0"
-                                    >
-                                      aangepast
-                                    </Badge>
+                  {contentFeatures.length > 0 && (
+                    <FieldSet>
+                      <Field>
+                        <FieldLabel>Content features</FieldLabel>
+                        <FieldDescription>
+                          Beheer van website inhoud
+                        </FieldDescription>
+                        <div className="space-y-3">
+                          {contentFeatures.map((feature) => {
+                            const isEnabled = effectiveFeatures.includes(feature);
+                            const hasDefault = roleFeatures.includes(feature);
+                            const isOverridden = hasDefault
+                              ? revokes.includes(feature)
+                              : grants.includes(feature);
+
+                            return (
+                              <div
+                                key={feature}
+                                className="flex items-center justify-between"
+                              >
+                                <div className="space-y-0.5">
+                                  <span className="text-sm font-medium flex items-center gap-2">
+                                    {FEATURE_LABELS[feature]}
+                                    {isOverridden && (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-[10px] px-1 py-0"
+                                      >
+                                        aangepast
+                                      </Badge>
+                                    )}
+                                  </span>
+                                  {FEATURE_DESCRIPTIONS[feature] && (
+                                    <p className="text-xs text-muted-foreground">
+                                      {FEATURE_DESCRIPTIONS[feature]}
+                                    </p>
                                   )}
-                                </span>
-                                {FEATURE_DESCRIPTIONS[feature] && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {FEATURE_DESCRIPTIONS[feature]}
-                                  </p>
-                                )}
+                                </div>
+                                <Switch
+                                  checked={isEnabled}
+                                  onCheckedChange={() => toggleFeature(feature)}
+                                />
                               </div>
-                              <Switch
-                                checked={isEnabled}
-                                onCheckedChange={() => toggleFeature(feature)}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </Field>
-                  </FieldSet>
+                            );
+                          })}
+                        </div>
+                      </Field>
+                    </FieldSet>
+                  )}
 
-                  <FieldSeparator />
+                  {businessFeatures.length > 0 && (
+                    <>
+                      <FieldSeparator />
 
-                  <FieldSet>
-                    <Field>
-                      <FieldLabel>Business features</FieldLabel>
-                      <FieldDescription>
-                        Beheer van bedrijfsapplicaties
-                      </FieldDescription>
-                      <div className="space-y-3">
-                        {businessFeatures.map((feature) => {
-                          const isEnabled = effectiveFeatures.includes(feature);
-                          const hasDefault = roleFeatures.includes(feature);
-                          const isOverridden = hasDefault
-                            ? revokes.includes(feature)
-                            : grants.includes(feature);
+                      <FieldSet>
+                        <Field>
+                          <FieldLabel>Business features</FieldLabel>
+                          <FieldDescription>
+                            Beheer van bedrijfsapplicaties
+                          </FieldDescription>
+                          <div className="space-y-3">
+                            {businessFeatures.map((feature) => {
+                              const isEnabled = effectiveFeatures.includes(feature);
+                              const hasDefault = roleFeatures.includes(feature);
+                              const isOverridden = hasDefault
+                                ? revokes.includes(feature)
+                                : grants.includes(feature);
 
-                          return (
-                            <div
-                              key={feature}
-                              className="flex items-center justify-between"
-                            >
-                              <div className="space-y-0.5">
-                                <span className="text-sm font-medium flex items-center gap-2">
-                                  {FEATURE_LABELS[feature]}
-                                  {isOverridden && (
-                                    <Badge
-                                      variant="outline"
-                                      className="text-[10px] px-1 py-0"
-                                    >
-                                      aangepast
-                                    </Badge>
-                                  )}
-                                </span>
-                                {FEATURE_DESCRIPTIONS[feature] && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {FEATURE_DESCRIPTIONS[feature]}
-                                  </p>
-                                )}
-                              </div>
-                              <Switch
-                                checked={isEnabled}
-                                onCheckedChange={() => toggleFeature(feature)}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </Field>
-                  </FieldSet>
+                              return (
+                                <div
+                                  key={feature}
+                                  className="flex items-center justify-between"
+                                >
+                                  <div className="space-y-0.5">
+                                    <span className="text-sm font-medium flex items-center gap-2">
+                                      {FEATURE_LABELS[feature]}
+                                      {isOverridden && (
+                                        <Badge
+                                          variant="outline"
+                                          className="text-[10px] px-1 py-0"
+                                        >
+                                          aangepast
+                                        </Badge>
+                                      )}
+                                    </span>
+                                    {FEATURE_DESCRIPTIONS[feature] && (
+                                      <p className="text-xs text-muted-foreground">
+                                        {FEATURE_DESCRIPTIONS[feature]}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <Switch
+                                    checked={isEnabled}
+                                    onCheckedChange={() => toggleFeature(feature)}
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </Field>
+                      </FieldSet>
+                    </>
+                  )}
                 </>
               )}
 

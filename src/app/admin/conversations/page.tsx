@@ -2,12 +2,14 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import { ConversationList } from "@/components/admin/conversations/ConversationList";
 import { ConversationDialog } from "@/components/admin/conversations/ConversationDialog";
 import { Spinner } from "@/components/ui/spinner";
 import type { Conversation } from "@/components/admin/conversations/ConversationList";
 
 function ConversationsContent() {
+  const { authorized, loading: permissionLoading } = useRequireFeature("conversations");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -54,6 +56,10 @@ function ConversationsContent() {
       router.push("/admin/conversations");
     }
   };
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   if (loading) {
     return (

@@ -39,8 +39,11 @@ import { getTestEmail, setTestEmail } from "@/lib/adminSettings";
 import { DEFAULT_TEST_EMAIL } from "@/config/resend";
 import type { DocumentInfo } from "@/types/chat";
 import { t } from "@/config/strings";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 
 export default function SettingsPage() {
+  const { authorized, loading: permissionLoading } = useRequireFeature("settings");
+
   // General settings
   const [testEmailValue, setTestEmailValue] = useState(DEFAULT_TEST_EMAIL);
   const [originalEmail, setOriginalEmail] = useState(DEFAULT_TEST_EMAIL);
@@ -244,6 +247,10 @@ export default function SettingsPage() {
     [savingEmail, hasEmailChanges, handleSaveEmail],
   );
   useAdminHeaderActions(headerActions);
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   if (loadingDocument) {
     return (

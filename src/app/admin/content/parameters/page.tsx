@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import { useSiteContext } from "@/lib/permissions/site-context";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
@@ -44,6 +45,7 @@ const defaultParams: SiteParams = {
 
 export default function SiteParametersPage() {
   const { currentSite, loading: siteLoading } = useSiteContext();
+  const { authorized, loading: permissionLoading } = useRequireFeature("parameters");
   const [params, setParams] = useState<SiteParams>(defaultParams);
   const [originalParams, setOriginalParams] =
     useState<SiteParams>(defaultParams);
@@ -121,6 +123,10 @@ export default function SiteParametersPage() {
     [saving, hasChanges, handleSave],
   );
   useAdminHeaderActions(headerActions);
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   const isLoading = loading || siteLoading;
 

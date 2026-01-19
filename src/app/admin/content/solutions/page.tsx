@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useSiteContext } from "@/lib/permissions/site-context";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import {
   DndContext,
   closestCenter,
@@ -193,6 +194,7 @@ function SortableSolutionRow({
 }
 
 export default function SolutionsPage() {
+  const { authorized, loading: permissionLoading } = useRequireFeature("solutions");
   const router = useRouter();
   const { currentSite, loading: siteLoading } = useSiteContext();
   const [solutions, setSolutions] = useState<Solution[]>([]);
@@ -356,6 +358,10 @@ export default function SolutionsPage() {
   useAdminHeaderActions(headerActions);
 
   const isLoading = loading || siteLoading;
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">

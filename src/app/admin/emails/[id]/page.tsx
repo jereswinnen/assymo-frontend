@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -49,6 +50,7 @@ import { t } from "@/config/strings";
 export default function EditNewsletterPage() {
   const params = useParams();
   const router = useRouter();
+  const { authorized, loading: permissionLoading } = useRequireFeature("emails");
 
   const [newsletter, setNewsletter] = useState<Newsletter | null>(null);
   const [savedNewsletter, setSavedNewsletter] = useState<Newsletter | null>(
@@ -413,6 +415,10 @@ export default function EditNewsletterPage() {
     ],
   );
   useAdminHeaderActions(headerActions);
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   if (loading) {
     return (

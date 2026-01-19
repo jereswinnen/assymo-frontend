@@ -50,6 +50,7 @@ import {
   useAdminUnsavedChanges,
 } from "@/components/admin/AdminHeaderContext";
 import { useSiteContext } from "@/lib/permissions/site-context";
+import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import { t } from "@/config/strings";
 
 interface PageData {
@@ -82,6 +83,7 @@ export default function PageEditorPage({
   const { id } = use(params);
   const router = useRouter();
   const { currentSite } = useSiteContext();
+  const { authorized, loading: permissionLoading } = useRequireFeature("pages");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -342,6 +344,10 @@ export default function PageEditorPage({
   useAdminHeaderActions(headerActions);
   useAdminBreadcrumbTitle(page ? title : null);
   useAdminUnsavedChanges(hasChanges, savePage);
+
+  if (permissionLoading || !authorized) {
+    return null;
+  }
 
   if (loading) {
     return (
