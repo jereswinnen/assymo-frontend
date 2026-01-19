@@ -808,6 +808,7 @@ export const ADMIN_STRINGS = {
       siteCouldNotDelete: "Kon site niet verwijderen",
       appointmentCouldNotUpdate: "Kon afspraak niet bijwerken",
       appointmentCouldNotCancel: "Kon afspraak niet annuleren",
+      cancelAppointment: "Afspraak annuleren",
       overrideCouldNotAdd: "Kon uitzondering niet toevoegen",
       overrideCouldNotDelete: "Kon uitzondering niet verwijderen",
       siteUpdated: "Site bijgewerkt",

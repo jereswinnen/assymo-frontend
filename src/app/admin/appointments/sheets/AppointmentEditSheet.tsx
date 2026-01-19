@@ -10,6 +10,7 @@ import {
   Field,
   FieldGroup,
   FieldLabel,
+  FieldSeparator,
   FieldSet,
 } from "@/components/ui/field";
 import {
@@ -297,15 +298,19 @@ export function AppointmentEditSheet({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="confirmed">Bevestigd</SelectItem>
-                      <SelectItem value="completed">Afgerond</SelectItem>
-                      <SelectItem value="cancelled">Geannuleerd</SelectItem>
+                      {(Object.entries(STATUS_LABELS) as [AppointmentStatus, string][]).map(
+                        ([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                 </Field>
               </FieldSet>
 
-              <Separator />
+              <FieldSeparator />
 
               {/* Customer info */}
               <FieldSet>
@@ -396,7 +401,7 @@ export function AppointmentEditSheet({
                 </div>
               </FieldSet>
 
-              <Separator />
+              <FieldSeparator />
 
               {/* Notes */}
               <FieldSet>
@@ -538,6 +543,10 @@ export function AppointmentEditSheet({
               </Button>
             ) : (
               <>
+                <Button variant="outline" onClick={startEditing}>
+                  <PencilIcon className="size-4" />
+                  {t("admin.buttons.edit")}
+                </Button>
                 {displayData.status !== "cancelled" && (
                   <Button
                     variant="destructive"
@@ -545,13 +554,9 @@ export function AppointmentEditSheet({
                     disabled={cancelling}
                   >
                     <TrashIcon className="size-4" />
-                    {t("admin.buttons.cancel")}
+                    {t("admin.misc.cancelAppointment")}
                   </Button>
                 )}
-                <Button variant="outline" onClick={startEditing}>
-                  <PencilIcon className="size-4" />
-                  {t("admin.buttons.edit")}
-                </Button>
               </>
             )}
           </SheetFooter>
