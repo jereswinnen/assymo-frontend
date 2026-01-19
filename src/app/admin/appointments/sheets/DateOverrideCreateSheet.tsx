@@ -17,6 +17,7 @@ import {
   FieldGroup,
   FieldLabel,
   FieldSeparator,
+  FieldSet,
 } from "@/components/ui/field";
 import {
   Sheet,
@@ -26,16 +27,13 @@ import {
   SheetDescription,
   SheetFooter,
 } from "@/components/ui/sheet";
-import {
-  CalendarDaysIcon,
-  CheckIcon,
-  GlobeIcon,
-  Loader2Icon,
-  RefreshCwIcon,
-} from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CheckIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { t } from "@/config/strings";
 import { DAYS_OF_WEEK } from "@/types/appointments";
+
+type ExceptionType = "one-time" | "weekly" | "yearly";
 
 interface DateOverrideCreateSheetProps {
   open: boolean;
@@ -49,6 +47,7 @@ export function DateOverrideCreateSheet({
   onCreated,
 }: DateOverrideCreateSheetProps) {
   const [saving, setSaving] = useState(false);
+  const [exceptionType, setExceptionType] = useState<ExceptionType>("one-time");
   const [formData, setFormData] = useState({
     date: "",
     end_date: "",
@@ -56,14 +55,13 @@ export function DateOverrideCreateSheet({
     open_time: "10:00",
     close_time: "17:00",
     reason: "",
-    is_recurring: false,
-    is_weekly_recurring: false,
-    recurrence_day_of_week: null as number | null,
+    recurrence_day_of_week: 0,
     show_on_website: false,
     hasDateRange: false,
   });
 
   const resetForm = () => {
+    setExceptionType("one-time");
     setFormData({
       date: "",
       end_date: "",
@@ -71,9 +69,7 @@ export function DateOverrideCreateSheet({
       open_time: "10:00",
       close_time: "17:00",
       reason: "",
-      is_recurring: false,
-      is_weekly_recurring: false,
-      recurrence_day_of_week: null,
+      recurrence_day_of_week: 0,
       show_on_website: false,
       hasDateRange: false,
     });
@@ -87,19 +83,17 @@ export function DateOverrideCreateSheet({
   }, [open]);
 
   const handleCreate = async () => {
-    // For weekly recurring, day of week is required instead of date
-    if (formData.is_weekly_recurring) {
-      if (formData.recurrence_day_of_week === null) {
-        toast.error(t("admin.messages.selectDate"));
-        return;
-      }
+    // Validation based on exception type
+    if (exceptionType === "weekly") {
+      // Weekly only needs day of week (always valid since default is 0)
     } else {
+      // One-time and yearly need a date
       if (!formData.date) {
         toast.error(t("admin.messages.selectDate"));
         return;
       }
 
-      if (formData.hasDateRange && !formData.end_date) {
+      if (exceptionType === "one-time" && formData.hasDateRange && !formData.end_date) {
         toast.error(t("admin.messages.selectEndDate"));
         return;
       }
@@ -112,16 +106,18 @@ export function DateOverrideCreateSheet({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           // For weekly recurring, use today's date as placeholder (not used in matching)
-          date: formData.is_weekly_recurring
+          date: exceptionType === "weekly"
             ? new Date().toISOString().split("T")[0]
             : formData.date,
-          end_date: formData.hasDateRange ? formData.end_date : null,
+          end_date: exceptionType === "one-time" && formData.hasDateRange
+            ? formData.end_date
+            : null,
           is_closed: formData.is_closed,
           open_time: formData.is_closed ? null : formData.open_time,
           close_time: formData.is_closed ? null : formData.close_time,
           reason: formData.reason || undefined,
-          is_recurring: formData.is_recurring,
-          recurrence_day_of_week: formData.is_weekly_recurring
+          is_recurring: exceptionType === "yearly",
+          recurrence_day_of_week: exceptionType === "weekly"
             ? formData.recurrence_day_of_week
             : null,
           show_on_website: formData.show_on_website,
@@ -148,6 +144,19 @@ export function DateOverrideCreateSheet({
     }
   };
 
+  const handleTypeChange = (type: ExceptionType) => {
+    setExceptionType(type);
+    // Reset date fields when switching types
+    setFormData((prev) => ({
+      ...prev,
+      date: "",
+      end_date: "",
+      hasDateRange: false,
+    }));
+  };
+
+  const isFormValid = exceptionType === "weekly" || !!formData.date;
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="flex flex-col overflow-hidden w-full md:max-w-xl">
@@ -160,155 +169,168 @@ export function DateOverrideCreateSheet({
 
         <div className="flex-1 overflow-y-auto px-4">
           <FieldGroup>
-            {/* Weekly recurring toggle */}
-            <Field orientation="horizontal">
-              <FieldLabel htmlFor="is_weekly_recurring">
-                <CalendarDaysIcon className="size-4" />
-                {t("admin.misc.repeatWeekly")}
-              </FieldLabel>
-              <Switch
-                id="is_weekly_recurring"
-                checked={formData.is_weekly_recurring}
-                onCheckedChange={(checked) =>
-                  setFormData({
-                    ...formData,
-                    is_weekly_recurring: checked,
-                    // Clear yearly recurring if enabling weekly
-                    is_recurring: checked ? false : formData.is_recurring,
-                    // Clear date fields if enabling weekly
-                    date: checked ? "" : formData.date,
-                    end_date: "",
-                    hasDateRange: false,
-                    recurrence_day_of_week: checked ? 0 : null,
-                  })
-                }
-              />
+            {/* Exception Type Selector */}
+            <Field>
+              <FieldLabel>{t("admin.misc.exceptionType")}</FieldLabel>
+              <Tabs
+                value={exceptionType}
+                onValueChange={(v) => handleTypeChange(v as ExceptionType)}
+              >
+                <TabsList className="w-full">
+                  <TabsTrigger value="one-time" className="flex-1">
+                    {t("admin.misc.oneTime")}
+                  </TabsTrigger>
+                  <TabsTrigger value="weekly" className="flex-1">
+                    {t("admin.misc.weekly")}
+                  </TabsTrigger>
+                  <TabsTrigger value="yearly" className="flex-1">
+                    {t("admin.misc.yearly")}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </Field>
 
-            {/* Day of week picker (for weekly recurring) */}
-            {formData.is_weekly_recurring && (
-              <Field>
-                <FieldLabel>{t("admin.misc.dayOfWeek")}</FieldLabel>
-                <Select
-                  value={String(formData.recurrence_day_of_week ?? 0)}
-                  onValueChange={(value) =>
-                    setFormData({
-                      ...formData,
-                      recurrence_day_of_week: parseInt(value, 10),
-                    })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DAYS_OF_WEEK.map((day) => (
-                      <SelectItem key={day.value} value={String(day.value)}>
-                        {day.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            )}
+            <FieldSeparator />
 
-            {/* Date selection (only if not weekly recurring) */}
-            {!formData.is_weekly_recurring && (
-              <>
+            {/* Date Selection - varies by type */}
+            <FieldSet>
+              {exceptionType === "weekly" ? (
+                // Weekly: Day of week picker
                 <Field>
-                  <FieldLabel>
-                    {formData.hasDateRange ? t("admin.labels.startDate") : t("admin.labels.date")}
-                  </FieldLabel>
-                  <Input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) =>
-                      setFormData({ ...formData, date: e.target.value })
-                    }
-                    min={
-                      formData.is_recurring
-                        ? undefined
-                        : new Date().toISOString().split("T")[0]
-                    }
-                    className="[&::-webkit-calendar-picker-indicator]:hidden"
-                  />
-                </Field>
-
-                {/* Date range toggle */}
-                <Field orientation="horizontal">
-                  <FieldLabel htmlFor="hasDateRange">{t("admin.misc.multipleDays")}</FieldLabel>
-                  <Switch
-                    id="hasDateRange"
-                    checked={formData.hasDateRange}
-                    onCheckedChange={(checked) =>
+                  <FieldLabel>{t("admin.misc.dayOfWeek")}</FieldLabel>
+                  <Select
+                    value={String(formData.recurrence_day_of_week)}
+                    onValueChange={(value) =>
                       setFormData({
                         ...formData,
-                        hasDateRange: checked,
-                        end_date: "",
+                        recurrence_day_of_week: parseInt(value, 10),
                       })
                     }
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DAYS_OF_WEEK.map((day) => (
+                        <SelectItem key={day.value} value={String(day.value)}>
+                          {day.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </Field>
-
-                {/* End date (conditional) */}
-                {formData.hasDateRange && (
+              ) : (
+                // One-time or Yearly: Date picker
+                <>
                   <Field>
-                    <FieldLabel>{t("admin.labels.endDate")}</FieldLabel>
+                    <FieldLabel>
+                      {formData.hasDateRange
+                        ? t("admin.labels.startDate")
+                        : t("admin.labels.date")}
+                    </FieldLabel>
                     <Input
                       type="date"
-                      value={formData.end_date}
+                      value={formData.date}
                       onChange={(e) =>
-                        setFormData({ ...formData, end_date: e.target.value })
+                        setFormData({ ...formData, date: e.target.value })
                       }
                       min={
-                        formData.date || new Date().toISOString().split("T")[0]
+                        exceptionType === "yearly"
+                          ? undefined
+                          : new Date().toISOString().split("T")[0]
                       }
                       className="[&::-webkit-calendar-picker-indicator]:hidden"
                     />
                   </Field>
-                )}
-              </>
-            )}
 
-            {/* Closed toggle */}
-            <Field orientation="horizontal">
-              <Checkbox
-                id="is_closed"
-                checked={formData.is_closed}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, is_closed: !!checked })
-                }
-              />
-              <FieldLabel htmlFor="is_closed">{t("admin.misc.fullyClosed")}</FieldLabel>
-            </Field>
+                  {/* Date range option - only for one-time */}
+                  {exceptionType === "one-time" && (
+                    <>
+                      <Field orientation="horizontal">
+                        <Checkbox
+                          id="hasDateRange"
+                          checked={formData.hasDateRange}
+                          onCheckedChange={(checked) =>
+                            setFormData({
+                              ...formData,
+                              hasDateRange: !!checked,
+                              end_date: "",
+                            })
+                          }
+                        />
+                        <FieldLabel htmlFor="hasDateRange">
+                          {t("admin.misc.multipleDays")}
+                        </FieldLabel>
+                      </Field>
 
-            {/* Custom hours (conditional) */}
-            {!formData.is_closed && (
-              <div className="flex gap-4">
-                <Field className="flex-1">
-                  <FieldLabel>{t("admin.misc.from")}</FieldLabel>
-                  <Input
-                    type="time"
-                    value={formData.open_time}
-                    onChange={(e) =>
-                      setFormData({ ...formData, open_time: e.target.value })
-                    }
-                    className="[&::-webkit-calendar-picker-indicator]:hidden"
-                  />
-                </Field>
-                <Field className="flex-1">
-                  <FieldLabel>{t("admin.misc.to")}</FieldLabel>
-                  <Input
-                    type="time"
-                    value={formData.close_time}
-                    onChange={(e) =>
-                      setFormData({ ...formData, close_time: e.target.value })
-                    }
-                    className="[&::-webkit-calendar-picker-indicator]:hidden"
-                  />
-                </Field>
-              </div>
-            )}
+                      {formData.hasDateRange && (
+                        <Field>
+                          <FieldLabel>{t("admin.labels.endDate")}</FieldLabel>
+                          <Input
+                            type="date"
+                            value={formData.end_date}
+                            onChange={(e) =>
+                              setFormData({ ...formData, end_date: e.target.value })
+                            }
+                            min={
+                              formData.date || new Date().toISOString().split("T")[0]
+                            }
+                            className="[&::-webkit-calendar-picker-indicator]:hidden"
+                          />
+                        </Field>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+            </FieldSet>
+
+            <FieldSeparator />
+
+            {/* Hours Section */}
+            <FieldSet>
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="is_closed"
+                  checked={formData.is_closed}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, is_closed: !!checked })
+                  }
+                />
+                <FieldLabel htmlFor="is_closed">
+                  {t("admin.misc.fullyClosed")}
+                </FieldLabel>
+              </Field>
+
+              {!formData.is_closed && (
+                <div className="grid grid-cols-2 gap-4">
+                  <Field>
+                    <FieldLabel>{t("admin.misc.from")}</FieldLabel>
+                    <Input
+                      type="time"
+                      value={formData.open_time}
+                      onChange={(e) =>
+                        setFormData({ ...formData, open_time: e.target.value })
+                      }
+                      className="[&::-webkit-calendar-picker-indicator]:hidden"
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel>{t("admin.misc.to")}</FieldLabel>
+                    <Input
+                      type="time"
+                      value={formData.close_time}
+                      onChange={(e) =>
+                        setFormData({ ...formData, close_time: e.target.value })
+                      }
+                      className="[&::-webkit-calendar-picker-indicator]:hidden"
+                    />
+                  </Field>
+                </div>
+              )}
+            </FieldSet>
+
+            <FieldSeparator />
 
             {/* Reason */}
             <Field>
@@ -324,27 +346,9 @@ export function DateOverrideCreateSheet({
 
             <FieldSeparator />
 
-            {/* Yearly recurring toggle (only if not weekly recurring) */}
-            {!formData.is_weekly_recurring && (
-              <Field orientation="horizontal">
-                <FieldLabel htmlFor="is_recurring">
-                  <RefreshCwIcon className="size-4" />
-                  {t("admin.misc.repeatYearly")}
-                </FieldLabel>
-                <Switch
-                  id="is_recurring"
-                  checked={formData.is_recurring}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, is_recurring: checked })
-                  }
-                />
-              </Field>
-            )}
-
-            {/* Show on website toggle */}
+            {/* Website visibility */}
             <Field orientation="horizontal">
               <FieldLabel htmlFor="show_on_website">
-                <GlobeIcon className="size-4" />
                 {t("admin.misc.showOnWebsite")}
               </FieldLabel>
               <Switch
@@ -359,15 +363,7 @@ export function DateOverrideCreateSheet({
         </div>
 
         <SheetFooter>
-          <Button
-            onClick={handleCreate}
-            disabled={
-              saving ||
-              (formData.is_weekly_recurring
-                ? formData.recurrence_day_of_week === null
-                : !formData.date)
-            }
-          >
+          <Button onClick={handleCreate} disabled={saving || !isFormValid}>
             {saving ? (
               <Loader2Icon className="size-4 animate-spin" />
             ) : (

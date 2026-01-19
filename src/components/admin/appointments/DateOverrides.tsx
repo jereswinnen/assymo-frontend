@@ -136,23 +136,20 @@ export function DateOverrides({
     return formatDate(override.date, !override.is_recurring);
   };
 
-  const isPast = (override: DateOverride) => {
-    // Recurring overrides are never "past"
-    if (override.is_recurring) return false;
-    // Weekly recurring overrides are never "past"
-    if (override.recurrence_day_of_week !== null) return false;
+  // Filter out expired overrides (only show upcoming/active ones)
+  const activeOverrides = overrides.filter((override) => {
+    // Recurring overrides are always active
+    if (override.is_recurring) return true;
+    // Weekly recurring overrides are always active
+    if (override.recurrence_day_of_week !== null) return true;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     // For ranges, check if end_date is past
     const checkDate = override.end_date || override.date;
-    return new Date(checkDate) < today;
-  };
-
-  // Separate into upcoming/recurring and past
-  const upcomingOverrides = overrides.filter((o) => !isPast(o));
-  const pastOverrides = overrides.filter((o) => isPast(o));
+    return new Date(checkDate) >= today;
+  });
 
   if (loading) {
     return (
@@ -163,133 +160,92 @@ export function DateOverrides({
   }
 
   return (
-    <div className="space-y-6">
-      {overrides.length === 0 ? (
+    <div className="space-y-4">
+      {activeOverrides.length === 0 ? (
         <div className="text-muted-foreground text-center text-sm py-8">
           {t("admin.misc.noExceptions")}
         </div>
       ) : (
-        <div className="space-y-6">
-          {/* Upcoming/recurring overrides */}
-          {upcomingOverrides.length > 0 && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-10"></TableHead>
-                  <TableHead>{t("admin.labels.date")}</TableHead>
-                  <TableHead>{t("admin.labels.status")}</TableHead>
-                  <TableHead>{t("admin.labels.reason")}</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {upcomingOverrides.map((override) => (
-                  <TableRow key={override.id} className="group">
-                    <TableCell>
-                      <div className="flex items-center justify-center">
-                        {override.show_on_website && (
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <GlobeIcon className="size-4 opacity-80" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {t("admin.misc.visibleOnWebsite")}
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <span>{formatDateRange(override)}</span>
-                        {override.recurrence_day_of_week !== null && (
-                          <Badge
-                            variant="outline"
-                            className="w-fit text-xs gap-1"
-                          >
-                            <CalendarDaysIcon className="size-3" />
-                            {t("admin.misc.weekly")}
-                          </Badge>
-                        )}
-                        {override.is_recurring && (
-                          <Badge
-                            variant="outline"
-                            className="w-fit text-xs gap-1"
-                          >
-                            <RefreshCwIcon className="size-3" />
-                            {t("admin.misc.yearly")}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t("admin.labels.date")}</TableHead>
+              <TableHead>{t("admin.labels.status")}</TableHead>
+              <TableHead>{t("admin.labels.reason")}</TableHead>
+              <TableHead className="w-[50px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {activeOverrides.map((override) => (
+              <TableRow key={override.id} className="group">
+                <TableCell>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <span>{formatDateRange(override)}</span>
+                      {override.show_on_website && (
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <GlobeIcon className="size-4 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {t("admin.misc.visibleOnWebsite")}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                    {override.recurrence_day_of_week !== null && (
                       <Badge
-                        variant={
-                          override.is_closed ? "destructive" : "secondary"
-                        }
+                        variant="outline"
+                        className="w-fit text-xs gap-1"
                       >
-                        {override.is_closed
-                          ? t("admin.empty.closed")
-                          : `${override.open_time?.substring(0, 5)} - ${override.close_time?.substring(0, 5)}`}
+                        <CalendarDaysIcon className="size-3" />
+                        {t("admin.misc.weekly")}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {override.reason || "-"}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-                        onClick={() => confirmDelete(override.id)}
-                        disabled={deleting === override.id}
+                    )}
+                    {override.is_recurring && (
+                      <Badge
+                        variant="outline"
+                        className="w-fit text-xs gap-1"
                       >
-                        {deleting === override.id ? (
-                          <Loader2Icon className="size-4 animate-spin" />
-                        ) : (
-                          <Trash2Icon className="size-4" />
-                        )}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-
-          {/* Past overrides */}
-          {pastOverrides.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                {t("admin.misc.expired")}
-              </h4>
-              <Table className="opacity-60">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("admin.labels.date")}</TableHead>
-                    <TableHead>{t("admin.labels.status")}</TableHead>
-                    <TableHead>{t("admin.labels.reason")}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pastOverrides.slice(0, 5).map((override) => (
-                    <TableRow key={override.id}>
-                      <TableCell>{formatDateRange(override)}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {override.is_closed ? t("admin.empty.closed") : t("admin.misc.customHours")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {override.reason || "-"}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </div>
+                        <RefreshCwIcon className="size-3" />
+                        {t("admin.misc.yearly")}
+                      </Badge>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      override.is_closed ? "destructive" : "secondary"
+                    }
+                  >
+                    {override.is_closed
+                      ? t("admin.empty.closed")
+                      : `${override.open_time?.substring(0, 5)} - ${override.close_time?.substring(0, 5)}`}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {override.reason || "-"}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                    onClick={() => confirmDelete(override.id)}
+                    disabled={deleting === override.id}
+                  >
+                    {deleting === override.id ? (
+                      <Loader2Icon className="size-4 animate-spin" />
+                    ) : (
+                      <Trash2Icon className="size-4" />
+                    )}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
 
       {/* Create Sheet */}
