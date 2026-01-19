@@ -133,6 +133,7 @@
 }
 
 @theme inline {
+  --breakpoint-xs: 24rem;
   --color-accent-lightest: var(--c-accent-lightest);
   --color-accent-light: var(--c-accent-light);
   --color-accent-dark: var(--c-accent-dark);
@@ -201,7 +202,7 @@
 body {
   font-size: 1.125rem;
   line-height: 1.5;
-  background: white;
+  /*background: white;*/
   color: var(--c-accent-dark);
   text-wrap: pretty;
 }

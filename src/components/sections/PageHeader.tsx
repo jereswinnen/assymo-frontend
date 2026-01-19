@@ -59,7 +59,7 @@ export default function PageHeader({ section, headerImage }: PageHeaderProps) {
           )}
         </div>
         {showButtons && buttons && buttons.length > 0 && (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex flex-col xs:flex-row xs:items-center gap-4">
             {buttons.map((button, index) => {
               const IconComponent = button.icon ? iconMap[button.icon] : null;
 
@@ -85,6 +85,7 @@ export default function PageHeader({ section, headerImage }: PageHeaderProps) {
                   icon={IconComponent ? <IconComponent /> : undefined}
                   label={button.label}
                   variant={button.variant}
+                  className="w-full justify-center xs:w-fit xs:justify-start"
                 />
               );
             })}
