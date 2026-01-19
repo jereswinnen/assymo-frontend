@@ -126,6 +126,54 @@ Tests run before every Vercel deploy (`pnpm build` runs tests first).
 - `src/lib/appointments/ics.ts` - Calendar file generation
 - `src/lib/format.ts` - Formatting utilities
 
+## Analytics (OpenPanel)
+
+This project uses OpenPanel for analytics. Use the `useTracking` hook from `src/lib/tracking.ts` in client components.
+
+### Usage
+```typescript
+import { useTracking } from "@/lib/tracking";
+
+function MyComponent() {
+  const { track } = useTracking();
+
+  const handleClick = () => {
+    track("event_name", { property: "value" });
+  };
+}
+```
+
+### Existing Events (Shared with VPG)
+| Event | Properties | Component |
+|-------|------------|-----------|
+| `contact_form_submitted` | `subject`, `has_attachment` | ContactForm |
+| `contact_form_error` | `error_type` | ContactForm |
+| `project_card_clicked` | `project_slug`, `project_name` | ProjectsGrid |
+| `filter_applied` | `category`, `value` | FilterBar |
+| `filter_cleared` | `category` | FilterBar |
+| `cta_clicked` | `location`, `label`, `href` | HeaderClient |
+| `outbound_clicked` | `type` (phone/email/instagram/facebook) | Footer, HeaderClient |
+| `carousel_navigated` | `direction`, `index` | Carousel |
+
+### Existing Events (Assymo-Only)
+| Event | Properties | Component |
+|-------|------------|-----------|
+| `newsletter_subscribed` | — | NewsletterForm |
+| `newsletter_error` | `error_type` | NewsletterForm |
+| `booking_started` | — | BookingForm |
+| `booking_date_selected` | `date`, `time` | BookingForm |
+| `booking_completed` | `date`, `time` | BookingForm |
+| `booking_error` | `error_type` | BookingForm |
+| `chatbot_opened` | — | ChatbotWrapper |
+| `chatbot_message_sent` | `message_length` | Chatbot |
+| `cookie_consent_given` | `level` (all/essential) | CookieBanner |
+
+### Adding New Events
+- Use lowercase with underscores: `feature_action` (e.g., `video_played`)
+- Include relevant properties for filtering/grouping in OpenPanel
+- Keep shared events consistent with vpg-frontend
+- Use `TrackedOutboundLink` component for external links needing tracking
+
 ### Environment Variables
 
 Required:
