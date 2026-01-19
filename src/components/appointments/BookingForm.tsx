@@ -99,15 +99,20 @@ export function BookingForm({ className }: BookingFormProps) {
     }
   }, []);
 
-  // Initial load
+  // Initial load - fetch availability
   useEffect(() => {
     const now = new Date();
     fetchAvailability(now.getFullYear(), now.getMonth());
+  }, [fetchAvailability]);
+
+  // Track booking started (once)
+  useEffect(() => {
     if (!hasTrackedStart.current) {
       track("booking_started");
       hasTrackedStart.current = true;
     }
-  }, [fetchAvailability, track]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDateTimeSelect = (date: string, time: string) => {
     setFormData((prev) => ({
