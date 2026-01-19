@@ -449,6 +449,9 @@ export const ADMIN_STRINGS = {
       folderEmpty: "Deze map is leeg",
       noLibraryImages: "Geen afbeeldingen in bibliotheek",
       closed: "Gesloten",
+      noImageYet: "Nog geen afbeelding",
+      noImageYetDesc:
+        "Upload een afbeelding of selecteer er één uit de bibliotheek om te beginnen.",
     },
 
     /**
