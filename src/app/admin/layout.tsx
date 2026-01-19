@@ -34,6 +34,7 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 import { Separator } from "@/components/ui/separator";
 import { BreadcrumbDropdown } from "@/components/admin/BreadcrumbDropdown";
+import { t } from "@/config/strings";
 
 interface BreadcrumbSegment {
   label: string;
@@ -47,31 +48,31 @@ function getBreadcrumbs(
   dynamicTitle: string | null
 ): BreadcrumbSegment[] {
   const routes: Record<string, string> = {
-    "/admin/appointments": "Afspraken",
-    "/admin/emails": "E-mails",
-    "/admin/conversations": "Conversaties",
-    "/admin/users": "Gebruikers",
-    "/admin/sites": "Sites",
-    "/admin/settings": "Instellingen",
-    "/admin/account": "Mijn Account",
-    "/admin/content/pages": "Pagina's",
-    "/admin/content/solutions": "Realisaties",
-    "/admin/content/media": "Media",
-    "/admin/content/image-studio": "Media Studio",
-    "/admin/content/filters": "Filters",
-    "/admin/content/navigation": "Navigatie",
-    "/admin/content/parameters": "Parameters",
+    "/admin/appointments": t("admin.nav.appointments"),
+    "/admin/emails": t("admin.nav.emails"),
+    "/admin/conversations": t("admin.nav.conversations"),
+    "/admin/users": t("admin.nav.users"),
+    "/admin/sites": t("admin.nav.sites"),
+    "/admin/settings": t("admin.nav.settings"),
+    "/admin/account": t("admin.nav.account"),
+    "/admin/content/pages": t("admin.nav.pages"),
+    "/admin/content/solutions": t("admin.nav.solutions"),
+    "/admin/content/media": t("admin.nav.media"),
+    "/admin/content/image-studio": t("admin.nav.imageStudio"),
+    "/admin/content/filters": t("admin.nav.filters"),
+    "/admin/content/navigation": t("admin.nav.navigation"),
+    "/admin/content/parameters": t("admin.nav.parameters"),
   };
 
   // Media with folder param - show folder name in breadcrumb
   if (pathname === "/admin/content/media") {
     if (folderName) {
       return [
-        { label: "Media", href: "/admin/content/media" },
+        { label: t("admin.nav.media"), href: "/admin/content/media" },
         { label: folderName },
       ];
     }
-    return [{ label: "Media" }];
+    return [{ label: t("admin.nav.media") }];
   }
 
   // Static routes - single breadcrumb
@@ -82,17 +83,17 @@ function getBreadcrumbs(
   // Dynamic routes - parent + current
   if (pathname.startsWith("/admin/emails/")) {
     return [
-      { label: "E-mails", href: "/admin/emails" },
-      { label: "Nieuwsbrief bewerken" },
+      { label: t("admin.nav.emails"), href: "/admin/emails" },
+      { label: t("admin.misc.editNewsletter") },
     ];
   }
   if (pathname.startsWith("/admin/content/pages/")) {
     const crumbs: BreadcrumbSegment[] = [
-      { label: "Pagina's", href: "/admin/content/pages" },
+      { label: t("admin.nav.pages"), href: "/admin/content/pages" },
     ];
     if (dynamicTitle !== null) {
       crumbs.push({
-        label: dynamicTitle || "Pagina bewerken",
+        label: dynamicTitle || t("admin.misc.editPage"),
         dropdown: "pages",
       });
     }
@@ -100,11 +101,11 @@ function getBreadcrumbs(
   }
   if (pathname.startsWith("/admin/content/solutions/")) {
     const crumbs: BreadcrumbSegment[] = [
-      { label: "Realisaties", href: "/admin/content/solutions" },
+      { label: t("admin.nav.solutions"), href: "/admin/content/solutions" },
     ];
     if (dynamicTitle !== null) {
       crumbs.push({
-        label: dynamicTitle || "Realisatie bewerken",
+        label: dynamicTitle || t("admin.misc.editSolution"),
         dropdown: "solutions",
       });
     }
@@ -112,8 +113,8 @@ function getBreadcrumbs(
   }
   if (pathname.startsWith("/admin/content/media/")) {
     return [
-      { label: "Media", href: "/admin/content/media" },
-      { label: "Afbeelding bekijken" },
+      { label: t("admin.nav.media"), href: "/admin/content/media" },
+      { label: t("admin.misc.viewImage") },
     ];
   }
 

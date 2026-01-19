@@ -549,12 +549,12 @@ export const ADMIN_STRINGS = {
       filters: "Filters",
       parameters: "Parameters",
       appointments: "Afspraken",
-      conversations: "Gesprekken",
+      conversations: "Conversaties",
       emails: "E-mails",
       settings: "Instellingen",
       users: "Gebruikers",
       sites: "Sites",
-      account: "Account",
+      account: "Mijn Account",
     },
 
     /**
@@ -648,6 +648,11 @@ export const ADMIN_STRINGS = {
       uploading: "Uploaden",
       searching: "Zoeken...",
       search: "Zoeken",
+      // Breadcrumb labels for dynamic routes
+      editPage: "Pagina bewerken",
+      editSolution: "Realisatie bewerken",
+      editNewsletter: "Nieuwsbrief bewerken",
+      viewImage: "Afbeelding bekijken",
       sections: "Secties",
       section: "Sectie",
       optional: "Optioneel",
