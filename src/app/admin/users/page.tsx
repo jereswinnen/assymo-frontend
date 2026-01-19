@@ -27,6 +27,7 @@ import { UserEditSheet } from "./sheets/UserEditSheet";
 import { UserCreateSheet } from "./sheets/UserCreateSheet";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import type { Role, FeatureOverrides, Feature } from "@/lib/permissions/types";
+import { getEffectiveFeatures } from "@/lib/permissions/check";
 import { t } from "@/config/strings";
 import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 
@@ -60,6 +61,21 @@ const ROLE_VARIANTS: Record<Role, "default" | "secondary" | "outline"> = {
   admin: "secondary",
   content_editor: "outline",
   user: "outline",
+};
+
+const FEATURE_LABELS: Record<Feature, string> = {
+  pages: "Pagina's",
+  solutions: "Realisaties",
+  navigation: "Navigatie",
+  filters: "Filters",
+  media: "Media",
+  parameters: "Parameters",
+  appointments: "Afspraken",
+  emails: "E-mails",
+  conversations: "Conversaties",
+  settings: "Instellingen",
+  users: "Gebruikers",
+  sites: "Sites",
 };
 
 export default function UsersPage() {
@@ -191,6 +207,7 @@ export default function UsersPage() {
               <TableHead>{t("admin.labels.email")}</TableHead>
               <TableHead>{t("admin.labels.role")}</TableHead>
               <TableHead>{t("admin.misc.sites")}</TableHead>
+              <TableHead>{t("admin.labels.features")}</TableHead>
               <TableHead>2FA</TableHead>
               <TableHead>{t("admin.misc.created")}</TableHead>
               <TableHead className="w-10"></TableHead>
@@ -224,6 +241,31 @@ export default function UsersPage() {
                   ) : (
                     <span className="text-muted-foreground text-sm">-</span>
                   )}
+                </TableCell>
+                <TableCell>
+                  {(() => {
+                    const features = getEffectiveFeatures(user.role, user.feature_overrides);
+                    if (user.role === "super_admin") {
+                      return <span className="text-muted-foreground text-sm italic">Alle</span>;
+                    }
+                    if (features.length === 0) {
+                      return <span className="text-muted-foreground text-sm">-</span>;
+                    }
+                    return (
+                      <div className="flex gap-1 flex-wrap max-w-xs">
+                        {features.slice(0, 3).map((feature) => (
+                          <Badge key={feature} variant="secondary" className="text-xs">
+                            {FEATURE_LABELS[feature]}
+                          </Badge>
+                        ))}
+                        {features.length > 3 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{features.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </TableCell>
                 <TableCell>
                   {user.two_factor_enabled ? (

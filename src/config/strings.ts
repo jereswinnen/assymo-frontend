@@ -98,6 +98,7 @@ export const ADMIN_STRINGS = {
       slotDuration: "Slot (min)",
       reason: "Reden",
       filters: "Filters",
+      features: "Functies",
       subitems: "Subitems",
       items: "Items",
       images: "Afbeeldingen",
