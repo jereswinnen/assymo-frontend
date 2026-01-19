@@ -57,6 +57,7 @@ function getBreadcrumbs(
     "/admin/content/pages": "Pagina's",
     "/admin/content/solutions": "Realisaties",
     "/admin/content/media": "Media",
+    "/admin/content/image-studio": "Media Studio",
     "/admin/content/filters": "Filters",
     "/admin/content/navigation": "Navigatie",
     "/admin/content/parameters": "Parameters",
