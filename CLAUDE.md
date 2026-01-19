@@ -166,6 +166,7 @@ function MyComponent() {
 | `booking_error` | `error_type` | BookingForm |
 | `chatbot_opened` | — | ChatbotWrapper |
 | `chatbot_message_sent` | `message_length` | Chatbot |
+| `cookie_banner_shown` | — | CookieBanner |
 | `cookie_consent_given` | `level` (all/essential) | CookieBanner |
 
 ### Adding New Events
