@@ -126,12 +126,12 @@ export default function ImageStudioPage() {
               <Loader2Icon className="size-8 animate-spin text-muted-foreground" />
             </div>
           ) : imageData ? (
-            <div className="h-full w-full rounded-lg bg-muted flex items-center justify-center p-4">
+            <div className="relative h-full w-full overflow-hidden rounded-lg bg-muted">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={imageData}
                 alt=""
-                className="max-h-full max-w-full object-contain"
+                className="h-full w-full object-contain"
               />
             </div>
           ) : (
