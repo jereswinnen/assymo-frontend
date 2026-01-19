@@ -110,6 +110,7 @@ export const ADMIN_STRINGS = {
       headingLevel: "Titel niveau",
       subject: "Onderwerp",
       preview: "Preview",
+      customer: "Klant",
       customerDetails: "Klantgegevens",
       remarks: "Opmerkingen",
       adminNotes: "Interne notities",

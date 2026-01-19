@@ -437,93 +437,101 @@ export function AppointmentEditSheet({
             </FieldGroup>
           ) : (
             // View mode
-            <div className="space-y-4 py-4">
+            <div className="space-y-5 py-4">
               {/* Date and Time */}
-              <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                <CalendarIcon className="size-5 text-muted-foreground mt-0.5" />
+              <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-center size-10 rounded-full bg-background">
+                  <CalendarIcon className="size-5 text-muted-foreground" />
+                </div>
                 <div>
                   <div className="font-medium">
                     {formatDate(displayData.appointment_date)}
                   </div>
-                  <div className="text-sm text-muted-foreground flex items-center gap-1">
-                    <ClockIcon className="size-3" />
+                  <div className="text-sm text-muted-foreground">
                     {formatTime(displayData.appointment_time)}
                   </div>
                 </div>
               </div>
 
-              <Separator />
-
-              {/* Customer info */}
+              {/* Customer */}
               <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <UserIcon className="size-4 text-muted-foreground" />
-                  <span className="font-medium">{displayData.customer_name}</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <MailIcon className="size-4 text-muted-foreground" />
-                  <a
-                    href={`mailto:${displayData.customer_email}`}
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    {displayData.customer_email}
-                  </a>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <PhoneIcon className="size-4 text-muted-foreground" />
-                  <a
-                    href={`tel:${displayData.customer_phone}`}
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    {displayData.customer_phone}
-                  </a>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <MapPinIcon className="size-4 text-muted-foreground mt-0.5" />
-                  <div className="text-sm">
-                    {displayData.customer_street}
-                    <br />
-                    {displayData.customer_postal_code} {displayData.customer_city}
+                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {t("admin.labels.customer")}
+                </h4>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <UserIcon className="size-4 text-muted-foreground" />
+                    <span className="font-medium">{displayData.customer_name}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <MailIcon className="size-4 text-muted-foreground" />
+                    <a
+                      href={`mailto:${displayData.customer_email}`}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      {displayData.customer_email}
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <PhoneIcon className="size-4 text-muted-foreground" />
+                    <a
+                      href={`tel:${displayData.customer_phone}`}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      {displayData.customer_phone}
+                    </a>
                   </div>
                 </div>
               </div>
 
+              {/* Address */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {t("admin.labels.address")}
+                </h4>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                    `${displayData.customer_street}, ${displayData.customer_postal_code} ${displayData.customer_city}`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-3 group"
+                >
+                  <MapPinIcon className="size-4 text-muted-foreground mt-0.5" />
+                  <div className="text-sm group-hover:text-primary">
+                    {displayData.customer_street}
+                    <br />
+                    {displayData.customer_postal_code} {displayData.customer_city}
+                  </div>
+                </a>
+              </div>
+
               {/* Remarks */}
               {displayData.remarks && (
-                <>
-                  <Separator />
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">
-                      {t("admin.misc.remarks")}
-                    </span>
-                    <p className="text-sm mt-1 whitespace-pre-wrap">
-                      {displayData.remarks}
-                    </p>
-                  </div>
-                </>
+                <div className="space-y-3">
+                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    {t("admin.misc.remarks")}
+                  </h4>
+                  <p className="text-sm whitespace-pre-wrap">
+                    {displayData.remarks}
+                  </p>
+                </div>
               )}
 
               {/* Admin notes */}
               {displayData.admin_notes && (
-                <>
-                  <Separator />
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">
-                      {t("admin.labels.internalNotes")}
-                    </span>
-                    <p className="text-sm mt-1 whitespace-pre-wrap bg-yellow-50 dark:bg-yellow-950 p-2 rounded">
-                      {displayData.admin_notes}
-                    </p>
-                  </div>
-                </>
+                <div className="space-y-3">
+                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    {t("admin.labels.internalNotes")}
+                  </h4>
+                  <p className="text-sm whitespace-pre-wrap bg-yellow-50 dark:bg-yellow-900/30 p-3 rounded-lg border border-yellow-200 dark:border-yellow-900">
+                    {displayData.admin_notes}
+                  </p>
+                </div>
               )}
 
-              <Separator />
-
               {/* Metadata */}
+              <Separator />
               <div className="text-xs text-muted-foreground">
                 {t("admin.misc.createdOn")}{" "}
                 {new Date(displayData.created_at).toLocaleString("nl-NL")}
