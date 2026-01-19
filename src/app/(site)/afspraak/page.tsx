@@ -9,9 +9,12 @@ import { buildMetadata } from "@/lib/getPageMetadata";
 import OpeningHoursDisplay from "@/components/shared/OpeningHoursDisplay";
 import { Separator } from "@/components/ui/separator";
 
-/**
- * Strip HTML tags and convert to plain text with line breaks
- */
+export const metadata = buildMetadata({
+  title: "Maak een afspraak",
+  description: "Breng een bezoekje aan onze toonzaal.",
+  path: "/afspraak",
+});
+
 function stripHtml(html: string): string {
   return html
     .replace(/<\/p>\s*<p>/gi, "\n") // Convert </p><p> to newline
@@ -19,12 +22,6 @@ function stripHtml(html: string): string {
     .replace(/<[^>]+>/g, "") // Remove remaining HTML tags
     .trim();
 }
-
-export const metadata = buildMetadata({
-  title: "Maak een afspraak",
-  description: "Breng een bezoekje aan onze toonzaal.",
-  path: "/afspraak",
-});
 
 export default async function AppointmentPage() {
   const [page, settings] = await Promise.all([

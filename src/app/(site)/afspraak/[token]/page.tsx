@@ -12,6 +12,14 @@ export const metadata = buildMetadata({
   path: "/afspraak",
 });
 
+function stripHtml(html: string): string {
+  return html
+    .replace(/<\/p>\s*<p>/gi, "\n") // Convert </p><p> to newline
+    .replace(/<br\s*\/?>/gi, "\n") // Convert <br> to newline
+    .replace(/<[^>]+>/g, "") // Remove remaining HTML tags
+    .trim();
+}
+
 interface AppointmentTokenPageProps {
   params: Promise<{ token: string }>;
   searchParams: Promise<{ status?: string }>;
@@ -45,7 +53,9 @@ export default async function AppointmentTokenPage({
 
           <ul className="flex flex-col gap-3 text-base font-medium">
             {settings?.address && (
-              <li className="whitespace-pre-line">{settings.address}</li>
+              <li className="whitespace-pre-line">
+                {stripHtml(settings.address)}
+              </li>
             )}
             {settings?.phone && (
               <li>
