@@ -1,10 +1,15 @@
 "use client";
 
 import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
+import { useAdminBreadcrumbTitle } from "@/components/admin/AdminHeaderContext";
+import { t } from "@/config/strings";
 import { Loader2Icon } from "lucide-react";
 
 export default function ImageStudioPage() {
   const { authorized, loading } = useRequireFeature("media");
+
+  // Set breadcrumb title
+  useAdminBreadcrumbTitle(t("admin.nav.imageStudio"));
 
   if (loading) {
     return (

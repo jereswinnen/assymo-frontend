@@ -8,6 +8,7 @@ import {
   CalendarDaysIcon,
   ChevronsLeftRightEllipsisIcon,
   ChevronsUpDownIcon,
+  CombineIcon,
   CompassIcon,
   FileTextIcon,
   FolderTreeIcon,
@@ -20,7 +21,6 @@ import {
   ToggleRightIcon,
   UserRoundIcon,
   UsersRoundIcon,
-  WandSparklesIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
@@ -120,8 +120,8 @@ const contentItems: {
   },
   {
     href: "/admin/content/image-studio",
-    label: "Image Studio",
-    icon: WandSparklesIcon,
+    label: "Media Studio",
+    icon: CombineIcon,
     feature: "media",
   },
   {

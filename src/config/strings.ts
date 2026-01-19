@@ -544,7 +544,7 @@ export const ADMIN_STRINGS = {
       pages: "Pagina's",
       solutions: "Realisaties",
       media: "Media",
-      imageStudio: "Image Studio",
+      imageStudio: "Media Studio",
       navigation: "Navigatie",
       filters: "Filters",
       parameters: "Parameters",
