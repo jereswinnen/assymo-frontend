@@ -20,6 +20,7 @@ import {
   ToggleRightIcon,
   UserRoundIcon,
   UsersRoundIcon,
+  WandSparklesIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
@@ -115,6 +116,12 @@ const contentItems: {
     href: "/admin/content/media",
     label: "Media",
     icon: ImageIcon,
+    feature: "media",
+  },
+  {
+    href: "/admin/content/image-studio",
+    label: "Image Studio",
+    icon: WandSparklesIcon,
     feature: "media",
   },
   {
