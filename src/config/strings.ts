@@ -92,6 +92,7 @@ export const ADMIN_STRINGS = {
       actions: "Acties",
       status: "Status",
       date: "Datum",
+      dateTime: "Datum & tijd",
       time: "Tijd",
       from: "Van",
       to: "Tot",
