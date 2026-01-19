@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { MessagesSquareIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTracking } from "@/lib/tracking";
 import Chatbot from "./Chatbot";
 
 export default function ChatbotWrapper() {
@@ -10,6 +11,7 @@ export default function ChatbotWrapper() {
   const [isClosing, setIsClosing] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const { track } = useTracking();
 
   // Handle Escape key to close
   useEffect(() => {
@@ -57,6 +59,7 @@ export default function ChatbotWrapper() {
     if (isOpen) {
       handleClose();
     } else {
+      track("chatbot_opened");
       setIsOpen(true);
       setIsClosing(false);
     }

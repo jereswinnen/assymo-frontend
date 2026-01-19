@@ -21,6 +21,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { CheckIcon, MailCheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTracking } from "@/lib/tracking";
 import {
   getVisibleFields,
   getInitialFormData,
@@ -40,6 +41,7 @@ export default function ContactForm({ className }: ContactFormProps) {
   const [formData, setFormData] = useState<FormDataState>(getInitialFormData);
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const { track } = useTracking();
 
   const isSubmitting = status === "submitting";
   const isSuccess = status === "success";
@@ -96,8 +98,15 @@ export default function ContactForm({ className }: ContactFormProps) {
         );
       }
 
+      track("contact_form_submitted", {
+        subject: formData.subject,
+        has_attachment: formData.grondplanFile instanceof File,
+      });
       setStatus("success");
     } catch (err) {
+      track("contact_form_error", {
+        error_type: err instanceof Error ? err.message : "unknown",
+      });
       setStatus("error");
       setErrorMessage(
         err instanceof Error

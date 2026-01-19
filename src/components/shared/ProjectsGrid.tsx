@@ -6,6 +6,7 @@ import Image from "next/image";
 import { FilterBar } from "@/components/forms/FilterBar";
 import { Action } from "./Action";
 import { InfoIcon } from "lucide-react";
+import { useTracking } from "@/lib/tracking";
 
 interface SolutionFilter {
   id: string;
@@ -48,6 +49,7 @@ export function ProjectsGrid({ solutions, categories }: ProjectsGridProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const { track } = useTracking();
 
   // Parse selected filters from URL
   const selectedFilters = useMemo(() => {
@@ -150,7 +152,13 @@ export function ProjectsGrid({ solutions, categories }: ProjectsGridProps) {
                 animationDelay: `${index * 60}ms`,
                 animationFillMode: "backwards",
               }}
-              onClick={() => router.push(`/realisaties/${solution.slug}`)}
+              onClick={() => {
+                track("project_card_clicked", {
+                  project_slug: solution.slug,
+                  project_name: solution.name,
+                });
+                router.push(`/realisaties/${solution.slug}`);
+              }}
             >
               {/* Image */}
               <div className="relative aspect-5/3 overflow-hidden bg-stone-100">

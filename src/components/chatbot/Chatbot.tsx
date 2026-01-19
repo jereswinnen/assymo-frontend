@@ -17,6 +17,7 @@ import { Spinner } from "../ui/spinner";
 import { CHATBOT_CONFIG } from "@/config/chatbot";
 import { usePersistedMessages } from "@/hooks/usePersistedMessages";
 import { useRateLimitCountdown } from "@/hooks/useRateLimitCountdown";
+import { useTracking } from "@/lib/tracking";
 import Logo from "../layout/Logo";
 import { ToolResultCard, BookingForm } from "../chatbot/ToolResultCards";
 
@@ -38,6 +39,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
   } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { track } = useTracking();
 
   const sessionId = getSessionId();
 
@@ -161,6 +163,7 @@ export default function Chatbot({ onClose }: ChatbotProps = {}) {
     // Enforce character limit
     if (input.length > CHATBOT_CONFIG.maxInputLength) return;
 
+    track("chatbot_message_sent", { message_length: input.length });
     sendMessage({ text: input });
     setInput("");
   };

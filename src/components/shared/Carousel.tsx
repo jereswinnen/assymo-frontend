@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence, type PanInfo } from "motion/react";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
+import { useTracking } from "@/lib/tracking";
 
 const CAROUSEL_INTERVAL = 4000;
 const TRANSITION_DURATION = 0.4;
@@ -33,6 +34,7 @@ export default function Slideshow({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+  const { track } = useTracking();
 
   const isLoading = !loadedImages.has(currentIndex);
 
@@ -48,10 +50,22 @@ export default function Slideshow({
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   }, [images.length]);
 
+  const handlePrevClick = () => {
+    track("carousel_navigated", { direction: "prev", index: currentIndex });
+    goToPrevious();
+  };
+
+  const handleNextClick = () => {
+    track("carousel_navigated", { direction: "next", index: currentIndex });
+    goToNext();
+  };
+
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.x > SWIPE_THRESHOLD) {
+      track("carousel_navigated", { direction: "prev", index: currentIndex });
       goToPrevious();
     } else if (info.offset.x < -SWIPE_THRESHOLD) {
+      track("carousel_navigated", { direction: "next", index: currentIndex });
       goToNext();
     }
   };
@@ -133,14 +147,14 @@ export default function Slideshow({
             </span>
             <div className="flex items-center gap-2">
               <button
-                onClick={goToPrevious}
+                onClick={handlePrevClick}
                 className="cursor-pointer text-stone-600 transition-all duration-400 ease-circ hover:-translate-x-0.5 hover:text-stone-800"
                 aria-label="Previous image"
               >
                 <ArrowLeftIcon className="size-4" />
               </button>
               <button
-                onClick={goToNext}
+                onClick={handleNextClick}
                 className="cursor-pointer text-stone-600 transition-all duration-400 ease-circ hover:translate-x-0.5 hover:text-stone-800"
                 aria-label="Next image"
               >

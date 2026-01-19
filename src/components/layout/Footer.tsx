@@ -5,6 +5,7 @@ import { getNavigation, getSiteParameters } from "@/lib/content";
 import { PhoneIcon, InstagramIcon, FacebookIcon, MailIcon } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { NewsletterForm } from "../forms/NewsletterForm";
+import { TrackedOutboundLink } from "../shared/TrackedOutboundLink";
 
 type SubItem = {
   name: string;
@@ -63,24 +64,26 @@ export default async function Footer({ className }: FooterProps) {
               )}
               {settings?.phone && (
                 <li>
-                  <a
+                  <TrackedOutboundLink
                     href={`tel:${settings.phone}`}
+                    type="phone"
                     className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
                   >
                     <PhoneIcon className="size-4" />
                     <span>{settings.phone}</span>
-                  </a>
+                  </TrackedOutboundLink>
                 </li>
               )}
               {settings?.email && (
                 <li>
-                  <a
+                  <TrackedOutboundLink
                     href={`mailto:${settings.email}`}
+                    type="email"
                     className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
                   >
                     <MailIcon className="size-4" />
                     <span>{settings.email}</span>
-                  </a>
+                  </TrackedOutboundLink>
                 </li>
               )}
             </ul>
@@ -91,24 +94,26 @@ export default async function Footer({ className }: FooterProps) {
                 <ul className="flex gap-3 *:text-stone-500 *:transition-colors *:duration-300 *:hover:text-stone-700">
                   {settings?.instagram && (
                     <li>
-                      <Link
+                      <TrackedOutboundLink
                         href={settings.instagram}
+                        type="instagram"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <InstagramIcon className="size-5" />
-                      </Link>
+                      </TrackedOutboundLink>
                     </li>
                   )}
                   {settings?.facebook && (
                     <li>
-                      <Link
+                      <TrackedOutboundLink
                         href={settings.facebook}
+                        type="facebook"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <FacebookIcon className="size-5" />
-                      </Link>
+                      </TrackedOutboundLink>
                     </li>
                   )}
                 </ul>

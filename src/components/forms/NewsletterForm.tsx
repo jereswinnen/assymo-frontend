@@ -8,6 +8,7 @@ import {
   InputGroupInput,
 } from "../ui/input-group";
 import { cn } from "@/lib/utils";
+import { useTracking } from "@/lib/tracking";
 import { Spinner } from "../ui/spinner";
 import { CheckIcon, MailCheckIcon, SendIcon } from "lucide-react";
 
@@ -21,6 +22,7 @@ export function NewsletterForm({ className }: NewsletterFormProps) {
     "idle" | "submitting" | "success" | "already-subscribed" | "error"
   >("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const { track } = useTracking();
 
   const isSuccess = status === "success" || status === "already-subscribed";
   const isSubmitting = status === "submitting";
@@ -49,11 +51,16 @@ export function NewsletterForm({ className }: NewsletterFormProps) {
 
       if (data.alreadySubscribed) {
         setStatus("already-subscribed");
+        track("newsletter_subscribed");
       } else {
         setStatus("success");
+        track("newsletter_subscribed");
       }
       setEmail("");
     } catch (err) {
+      track("newsletter_error", {
+        error_type: err instanceof Error ? err.message : "unknown",
+      });
       setStatus("error");
       setErrorMessage(
         err instanceof Error ? err.message : "Er is iets misgegaan",

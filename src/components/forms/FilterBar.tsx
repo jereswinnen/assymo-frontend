@@ -10,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useTracking } from "@/lib/tracking";
 
 interface FilterOption {
   id: string;
@@ -39,6 +40,8 @@ interface CategoryFilterProps {
   options: FilterOption[];
   selectedOptions: string[];
   onSelectionChange: (categorySlug: string, optionSlugs: string[]) => void;
+  onFilterApplied: (category: string, value: string) => void;
+  onFilterCleared: (category: string) => void;
 }
 
 function CategoryFilter({
@@ -46,18 +49,25 @@ function CategoryFilter({
   options,
   selectedOptions,
   onSelectionChange,
+  onFilterApplied,
+  onFilterCleared,
 }: CategoryFilterProps) {
   const [open, setOpen] = useState(false);
 
   const handleToggle = (optionSlug: string) => {
-    const newSelection = selectedOptions.includes(optionSlug)
-      ? selectedOptions.filter((s) => s !== optionSlug)
-      : [...selectedOptions, optionSlug];
+    const isAdding = !selectedOptions.includes(optionSlug);
+    const newSelection = isAdding
+      ? [...selectedOptions, optionSlug]
+      : selectedOptions.filter((s) => s !== optionSlug);
     onSelectionChange(category.slug, newSelection);
+    if (isAdding) {
+      onFilterApplied(category.slug, optionSlug);
+    }
     setOpen(false);
   };
 
   const handleClear = () => {
+    onFilterCleared(category.slug);
     onSelectionChange(category.slug, []);
   };
 
@@ -130,6 +140,8 @@ export function FilterBar({
   selectedFilters,
   onFiltersChange,
 }: FilterBarProps) {
+  const { track } = useTracking();
+
   const handleCategoryChange = (
     categorySlug: string,
     optionSlugs: string[],
@@ -140,7 +152,16 @@ export function FilterBar({
     });
   };
 
+  const handleFilterApplied = (category: string, value: string) => {
+    track("filter_applied", { category, value });
+  };
+
+  const handleFilterCleared = (category: string) => {
+    track("filter_cleared", { category });
+  };
+
   const handleClearAll = () => {
+    track("filter_cleared", { category: "all" });
     onFiltersChange({});
   };
 
@@ -166,6 +187,8 @@ export function FilterBar({
             options={category.filters}
             selectedOptions={selectedFilters[category.slug] || []}
             onSelectionChange={handleCategoryChange}
+            onFilterApplied={handleFilterApplied}
+            onFilterCleared={handleFilterCleared}
           />
         ))}
       </div>

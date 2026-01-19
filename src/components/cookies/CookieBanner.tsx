@@ -4,14 +4,17 @@ import { useState } from "react";
 import { useCookieConsent, type ConsentLevel } from "@/hooks/useCookieConsent";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTracking } from "@/lib/tracking";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function CookieBanner() {
   const { showBanner, updateConsent } = useCookieConsent();
   const [isExiting, setIsExiting] = useState(false);
+  const { track } = useTracking();
 
   const handleConsent = (level: ConsentLevel) => {
+    track("cookie_consent_given", { level });
     setIsExiting(true);
     // Wait for exit animation to complete before updating consent
     setTimeout(() => {

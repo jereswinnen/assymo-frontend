@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "./Logo";
 import { cn } from "@/lib/utils";
+import { useTracking } from "@/lib/tracking";
 import { Action } from "../shared/Action";
 import {
   Calendar1Icon,
@@ -67,6 +68,7 @@ export default function HeaderClient({
   className,
 }: HeaderClientProps) {
   const pathname = usePathname();
+  const { track } = useTracking();
   const [activeLink, setActiveLink] = useState<NavLink | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [direction, setDirection] = useState(1);
@@ -235,6 +237,13 @@ export default function HeaderClient({
               href="/afspraak"
               icon={<Calendar1Icon />}
               label="Afspraak maken"
+              onClick={() =>
+                track("cta_clicked", {
+                  location: "header",
+                  label: "Afspraak maken",
+                  href: "/afspraak",
+                })
+              }
             />
 
             {/* Mobile hamburger */}
@@ -387,6 +396,9 @@ export default function HeaderClient({
                               <a
                                 href={`tel:${settings.phone}`}
                                 className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                onClick={() =>
+                                  track("outbound_clicked", { type: "phone" })
+                                }
                               >
                                 <PhoneIcon className="size-4" />
                                 <span>{settings.phone}</span>
@@ -398,6 +410,9 @@ export default function HeaderClient({
                               <a
                                 href={`mailto:${settings.email}`}
                                 className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors duration-300"
+                                onClick={() =>
+                                  track("outbound_clicked", { type: "email" })
+                                }
                               >
                                 <MailIcon className="size-4" />
                                 <span>{settings.email}</span>
@@ -416,6 +431,11 @@ export default function HeaderClient({
                                     href={settings.instagram}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    onClick={() =>
+                                      track("outbound_clicked", {
+                                        type: "instagram",
+                                      })
+                                    }
                                   >
                                     <InstagramIcon className="size-4" />
                                     Instagram
@@ -429,6 +449,11 @@ export default function HeaderClient({
                                     href={settings.facebook}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    onClick={() =>
+                                      track("outbound_clicked", {
+                                        type: "facebook",
+                                      })
+                                    }
                                   >
                                     <FacebookIcon className="size-4" />
                                     Facebook

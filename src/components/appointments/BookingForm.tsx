@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar } from "./Calendar";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ import {
   CheckIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTracking } from "@/lib/tracking";
 import { toast } from "sonner";
 import type { DateAvailability } from "@/types/appointments";
 import { formatDateNL } from "@/lib/appointments/utils";
@@ -65,6 +66,8 @@ export function BookingForm({ className }: BookingFormProps) {
   const [loadingAvailability, setLoadingAvailability] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { track } = useTracking();
+  const hasTrackedStart = useRef(false);
 
   // Fetch availability for a month range
   const fetchAvailability = useCallback(async (year: number, month: number) => {
@@ -100,7 +103,11 @@ export function BookingForm({ className }: BookingFormProps) {
   useEffect(() => {
     const now = new Date();
     fetchAvailability(now.getFullYear(), now.getMonth());
-  }, [fetchAvailability]);
+    if (!hasTrackedStart.current) {
+      track("booking_started");
+      hasTrackedStart.current = true;
+    }
+  }, [fetchAvailability, track]);
 
   const handleDateTimeSelect = (date: string, time: string) => {
     setFormData((prev) => ({
@@ -108,6 +115,7 @@ export function BookingForm({ className }: BookingFormProps) {
       appointment_date: date,
       appointment_time: time,
     }));
+    track("booking_date_selected", { date, time });
     setCurrentStep("details");
   };
 
@@ -150,10 +158,17 @@ export function BookingForm({ className }: BookingFormProps) {
         throw new Error(data.error || "Kon afspraak niet aanmaken");
       }
 
+      track("booking_completed", {
+        date: formData.appointment_date,
+        time: formData.appointment_time,
+      });
       // Redirect to appointment page with success status (relative URL for correct domain)
       router.push(`/afspraak/${data.appointment.edit_token}?status=booked`);
     } catch (err) {
       console.error("Failed to create appointment:", err);
+      track("booking_error", {
+        error_type: err instanceof Error ? err.message : "unknown",
+      });
       setError(
         err instanceof Error
           ? err.message
