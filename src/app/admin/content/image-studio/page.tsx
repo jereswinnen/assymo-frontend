@@ -74,11 +74,12 @@ const getExtension = (mimeType: string): string => {
 
 // Load image and get dimensions
 const getImageDimensions = (
-  base64: string
+  base64: string,
 ): Promise<{ width: number; height: number }> => {
   return new Promise((resolve) => {
     const img = new Image();
-    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onload = () =>
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
     img.onerror = () => resolve({ width: 0, height: 0 });
     img.src = base64;
   });
@@ -299,8 +300,8 @@ export default function ImageStudioPage() {
                 sourceBase64: undefined,
                 ...dimensions,
               }
-            : v
-        )
+            : v,
+        ),
       );
 
       // Add assistant message
@@ -348,7 +349,9 @@ export default function ImageStudioPage() {
       // Create file with timestamp name
       const extension = currentVersion.mimeType.split("/")[1] || "png";
       const filename = `ai-studio-${Date.now()}.${extension}`;
-      const file = new File([blob], filename, { type: currentVersion.mimeType });
+      const file = new File([blob], filename, {
+        type: currentVersion.mimeType,
+      });
 
       // Upload to Vercel Blob
       const result = await upload(filename, file, {
@@ -388,7 +391,7 @@ export default function ImageStudioPage() {
       </Button>
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [versions.length, saving]
+    [versions.length, saving],
   );
 
   useAdminHeaderActions(headerActions);
@@ -444,24 +447,16 @@ export default function ImageStudioPage() {
                       alt=""
                       className="h-full w-full object-contain animate-in fade-in duration-1000"
                     />
-                    {/* Metadata overlay */}
-                    <div className="absolute top-2 left-2 flex gap-2 text-[10px] text-white/80">
+                    {/* Metadata header */}
+                    <div className="absolute top-0 inset-x-0 bg-white/60 backdrop-blur-sm px-3 py-1.5 flex items-center gap-3 text-sm text-foreground/80">
                       {currentVersion.model && (
-                        <span className="bg-black/50 rounded px-1.5 py-0.5">
-                          {currentVersion.model}
-                        </span>
+                        <span className="font-medium">{currentVersion.model}</span>
                       )}
                       {currentVersion.width && currentVersion.height && (
-                        <span className="bg-black/50 rounded px-1.5 py-0.5">
-                          {currentVersion.width}×{currentVersion.height}
-                        </span>
+                        <span>{currentVersion.width}×{currentVersion.height}</span>
                       )}
-                      <span className="bg-black/50 rounded px-1.5 py-0.5">
-                        {formatBytes(getBase64Size(currentVersion.base64))}
-                      </span>
-                      <span className="bg-black/50 rounded px-1.5 py-0.5">
-                        {getExtension(currentVersion.mimeType)}
-                      </span>
+                      <span>{formatBytes(getBase64Size(currentVersion.base64))}</span>
+                      <span>{getExtension(currentVersion.mimeType)}</span>
                     </div>
                   </>
                 )}
@@ -616,7 +611,10 @@ export default function ImageStudioPage() {
               <InputGroupAddon align="block-end">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild disabled={isGenerating}>
-                    <InputGroupButton variant="secondary" disabled={isGenerating}>
+                    <InputGroupButton
+                      variant="secondary"
+                      disabled={isGenerating}
+                    >
                       {selectedModel === "gpt-image-1-mini" &&
                         t("admin.misc.modelFast")}
                       {selectedModel === "gpt-image-1" &&
@@ -637,9 +635,7 @@ export default function ImageStudioPage() {
                       {t("admin.misc.modelStandard")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() =>
-                        setSelectedModel("gpt-image-1.5")
-                      }
+                      onClick={() => setSelectedModel("gpt-image-1.5")}
                     >
                       {t("admin.misc.modelBest")}
                     </DropdownMenuItem>
