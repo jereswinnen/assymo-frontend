@@ -46,7 +46,43 @@ interface ImageVersion {
   isOriginal: boolean;
   isPending?: boolean;
   sourceBase64?: string; // The source image shown blurred while pending
+  model?: string; // Model used for generation
+  width?: number;
+  height?: number;
 }
+
+// Calculate file size from base64 string
+const getBase64Size = (base64: string): number => {
+  // Remove data URL prefix if present
+  const base64Data = base64.split(",")[1] || base64;
+  // Base64 encodes 3 bytes as 4 characters, with padding
+  const padding = (base64Data.match(/=+$/) || [""])[0].length;
+  return Math.floor((base64Data.length * 3) / 4) - padding;
+};
+
+// Format bytes to human readable
+const formatBytes = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+// Get file extension from mimeType
+const getExtension = (mimeType: string): string => {
+  return mimeType.split("/")[1]?.toUpperCase() || "PNG";
+};
+
+// Load image and get dimensions
+const getImageDimensions = (
+  base64: string
+): Promise<{ width: number; height: number }> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onerror = () => resolve({ width: 0, height: 0 });
+    img.src = base64;
+  });
+};
 
 interface ChatMessage {
   id: string;
@@ -131,7 +167,11 @@ export default function ImageStudioPage() {
     setIsLoading(true);
     try {
       const base64 = await fileToBase64(file);
-      const version = createOriginalVersion(base64, file.type);
+      const dimensions = await getImageDimensions(base64);
+      const version: ImageVersion = {
+        ...createOriginalVersion(base64, file.type),
+        ...dimensions,
+      };
       setVersions([version]);
       setCurrentVersionIndex(0);
     } catch {
@@ -174,7 +214,11 @@ export default function ImageStudioPage() {
     setIsLoading(true);
     try {
       const { base64, mimeType } = await urlToBase64(url);
-      const version = createOriginalVersion(base64, mimeType);
+      const dimensions = await getImageDimensions(base64);
+      const version: ImageVersion = {
+        ...createOriginalVersion(base64, mimeType),
+        ...dimensions,
+      };
       setVersions([version]);
       setCurrentVersionIndex(0);
     } catch {
@@ -212,6 +256,7 @@ export default function ImageStudioPage() {
       isOriginal: false,
       isPending: true,
       sourceBase64: currentVersion.base64, // Source image to show blurred
+      model: selectedModel, // Store which model is being used
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -239,6 +284,9 @@ export default function ImageStudioPage() {
 
       const data = await response.json();
 
+      // Get dimensions of the generated image
+      const dimensions = await getImageDimensions(data.base64);
+
       // Update the pending version with actual data
       setVersions((prev) =>
         prev.map((v) =>
@@ -249,6 +297,7 @@ export default function ImageStudioPage() {
                 mimeType: data.mimeType,
                 isPending: false,
                 sourceBase64: undefined,
+                ...dimensions,
               }
             : v
         )
@@ -386,14 +435,35 @@ export default function ImageStudioPage() {
                     </div>
                   </>
                 ) : (
-                  /* Completed image with fade-in animation */
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    key={currentVersion.id}
-                    src={currentVersion.base64}
-                    alt=""
-                    className="h-full w-full object-contain animate-in fade-in duration-1000"
-                  />
+                  <>
+                    {/* Completed image with fade-in animation */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      key={currentVersion.id}
+                      src={currentVersion.base64}
+                      alt=""
+                      className="h-full w-full object-contain animate-in fade-in duration-1000"
+                    />
+                    {/* Metadata overlay */}
+                    <div className="absolute top-2 left-2 flex gap-2 text-[10px] text-white/80">
+                      {currentVersion.model && (
+                        <span className="bg-black/50 rounded px-1.5 py-0.5">
+                          {currentVersion.model}
+                        </span>
+                      )}
+                      {currentVersion.width && currentVersion.height && (
+                        <span className="bg-black/50 rounded px-1.5 py-0.5">
+                          {currentVersion.width}×{currentVersion.height}
+                        </span>
+                      )}
+                      <span className="bg-black/50 rounded px-1.5 py-0.5">
+                        {formatBytes(getBase64Size(currentVersion.base64))}
+                      </span>
+                      <span className="bg-black/50 rounded px-1.5 py-0.5">
+                        {getExtension(currentVersion.mimeType)}
+                      </span>
+                    </div>
+                  </>
                 )}
               </div>
             ) : (
