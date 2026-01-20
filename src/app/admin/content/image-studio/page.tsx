@@ -12,18 +12,17 @@ import {
   EmptyDescription,
 } from "@/components/ui/empty";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   InputGroup,
   InputGroupTextarea,
   InputGroupAddon,
   InputGroupButton,
 } from "@/components/ui/input-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { MediaLibraryDialog } from "@/components/admin/media/MediaLibraryDialog";
 import { t } from "@/config/strings";
 import { toast } from "sonner";
@@ -286,29 +285,6 @@ export default function ImageStudioPage() {
 
         {/* Right: Chat sidebar */}
         <div className="bg-muted rounded-lg p-4 flex flex-col h-full">
-          {/* Model selector */}
-          <div className="mb-4">
-            <label className="text-sm font-medium mb-2 block">
-              {t("admin.labels.model")}
-            </label>
-            <Select value={selectedModel} onValueChange={setSelectedModel}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="gpt-image-1-mini">
-                  GPT Image Mini ({t("admin.misc.modelFast")})
-                </SelectItem>
-                <SelectItem value="gpt-image-1">
-                  GPT Image ({t("admin.misc.modelStandard")})
-                </SelectItem>
-                <SelectItem value="gpt-image-1.5-2025-12-16">
-                  GPT Image 1.5 ({t("admin.misc.modelBest")})
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Messages list */}
           <div className="flex-1 overflow-y-auto space-y-3 mb-4">
             {messages.length === 0 && (
@@ -355,11 +331,31 @@ export default function ImageStudioPage() {
                 rows={2}
                 disabled={!hasImage}
               />
-              <InputGroupAddon align="block-end" className="justify-end">
+              <InputGroupAddon align="block-end">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <InputGroupButton variant="ghost">
+                      {selectedModel === "gpt-image-1-mini" && t("admin.misc.modelFast")}
+                      {selectedModel === "gpt-image-1" && t("admin.misc.modelStandard")}
+                      {selectedModel === "gpt-image-1.5-2025-12-16" && t("admin.misc.modelBest")}
+                    </InputGroupButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="top" align="start">
+                    <DropdownMenuItem onClick={() => setSelectedModel("gpt-image-1-mini")}>
+                      {t("admin.misc.modelFast")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedModel("gpt-image-1")}>
+                      {t("admin.misc.modelStandard")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedModel("gpt-image-1.5-2025-12-16")}>
+                      {t("admin.misc.modelBest")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <InputGroupButton
                   type="submit"
                   variant="default"
-                  className="cursor-pointer rounded-full"
+                  className="cursor-pointer rounded-full ml-auto"
                   size="icon-xs"
                   disabled={!input.trim() || !hasImage}
                 >
