@@ -146,6 +146,8 @@ export const ADMIN_STRINGS = {
       profilePhoto: "Profielfoto",
       metaTitle: "SEO titel",
       metaDescription: "Meta beschrijving",
+      version: "Versie",
+      versions: "Versies",
     },
 
     /**
@@ -866,6 +868,7 @@ export const ADMIN_STRINGS = {
       modified: "aangepast",
       assignedSites: "Toegewezen sites",
       assignedSitesDesc: "Content features zijn beperkt tot de toegewezen sites",
+      originalImage: "Origineel",
     },
 
     /**
