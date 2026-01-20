@@ -151,10 +151,10 @@ export default function ImageStudioPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-theme(spacing.16)-theme(spacing.8))] flex flex-col gap-6">
+    <div className="h-[calc(100vh-(--spacing(16))-(--spacing(8)))] flex flex-col gap-6">
       <div className="grid gap-6 md:grid-cols-3 flex-1 min-h-0">
         {/* Left: Image viewer */}
-        <div className="md:col-span-2 min-h-0 flex flex-col">
+        <div className="md:col-span-2 min-h-0 flex flex-col gap-4">
           {/* Main image area */}
           <div className="flex-1 min-h-0">
             {isLoading ? (
@@ -215,13 +215,13 @@ export default function ImageStudioPage() {
 
           {/* Version thumbnails strip */}
           {versions.length > 0 && (
-            <div className="flex gap-2 overflow-x-visible py-1 mt-2">
+            <div className="flex gap-2 overflow-x-visible">
               {versions.map((version, index) => (
                 <button
                   key={version.id}
                   type="button"
                   onClick={() => setCurrentVersionIndex(index)}
-                  className={`relative flex-shrink-0 size-16 rounded-md overflow-hidden transition-all ${
+                  className={`relative shrink-0 size-16 rounded-md overflow-hidden transition-all ${
                     index === currentVersionIndex
                       ? "outline-2 outline-offset-2 outline-primary"
                       : "hover:outline-2 hover:outline-offset-2 hover:outline-muted-foreground/50"
