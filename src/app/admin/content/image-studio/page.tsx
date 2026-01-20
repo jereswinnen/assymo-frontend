@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
+import { useSiteContext } from "@/lib/permissions/site-context";
 import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import {
@@ -138,6 +139,7 @@ const urlToBase64 = async (
 };
 
 export default function ImageStudioPage() {
+  const { currentSite } = useSiteContext();
   const { authorized, loading } = useRequireFeature("media");
   const router = useRouter();
 
@@ -359,7 +361,7 @@ export default function ImageStudioPage() {
 
   // Save current version to media library
   const saveToLibrary = async () => {
-    if (!currentVersion || saving) return;
+    if (!currentVersion || saving || !currentSite) return;
 
     setSaving(true);
     try {
@@ -378,6 +380,17 @@ export default function ImageStudioPage() {
       const result = await upload(filename, file, {
         access: "public",
         handleUploadUrl: "/api/admin/content/images/upload",
+      });
+
+      // Create metadata record so image appears in media library
+      await fetch("/api/admin/content/media/generate-alt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: result.url,
+          fileName: filename,
+          siteId: currentSite.id,
+        }),
       });
 
       toast.success(t("admin.messages.imageSaved"));
