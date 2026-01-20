@@ -221,10 +221,10 @@ export default function ImageStudioPage() {
                   key={version.id}
                   type="button"
                   onClick={() => setCurrentVersionIndex(index)}
-                  className={`relative flex-shrink-0 size-16 rounded-md overflow-hidden border-2 transition-colors ${
+                  className={`relative flex-shrink-0 size-16 rounded-md overflow-hidden transition-all ${
                     index === currentVersionIndex
-                      ? "border-primary"
-                      : "border-transparent hover:border-muted-foreground/50"
+                      ? "outline-2 outline-offset-2 outline-primary"
+                      : "hover:outline-2 hover:outline-offset-2 hover:outline-muted-foreground/50"
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
