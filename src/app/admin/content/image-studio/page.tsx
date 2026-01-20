@@ -328,7 +328,7 @@ export default function ImageStudioPage() {
                     key={currentVersion.id}
                     src={currentVersion.base64}
                     alt=""
-                    className="h-full w-full object-contain animate-in fade-in duration-500"
+                    className="h-full w-full object-contain animate-in fade-in duration-1000"
                   />
                 )}
               </div>
