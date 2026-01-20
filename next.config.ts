@@ -21,6 +21,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/producten/eiken-bijgebouwen",
+        destination: "/realisaties/bijgebouwen",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
