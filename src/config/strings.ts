@@ -254,6 +254,8 @@ export const ADMIN_STRINGS = {
       sectionPasted: "Sectie geplakt",
       metaDescriptionGenerated: "Meta beschrijving gegenereerd",
       metaDescriptionGenerateFailed: "Kon meta beschrijving niet genereren",
+      imageGenerated: "Afbeelding gegenereerd",
+      imageGenerateFailed: "Kon afbeelding niet genereren",
 
       // Validation errors
       fillAllFields: "Vul alle velden in",

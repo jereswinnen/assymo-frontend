@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import {
   ArrowUpIcon,
@@ -89,11 +89,18 @@ export default function ImageStudioPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState("gpt-image-1");
+  const [isGenerating, setIsGenerating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentVersion = versions[currentVersionIndex] ?? null;
   const hasImage = versions.length > 0;
+
+  // Auto-scroll to bottom when new messages are added
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const createOriginalVersion = (
     base64: string,
@@ -176,11 +183,76 @@ export default function ImageStudioPage() {
     }
   };
 
-  const handleSubmit = () => {
-    if (!input.trim() || !hasImage) return;
-    // Will be implemented in Phase 6
-    console.log("Submit:", input, selectedModel);
+  const handleSubmit = async () => {
+    if (!input.trim() || !hasImage || isGenerating || !currentVersion) return;
+
+    const userMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: input.trim(),
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setIsGenerating(true);
+
+    try {
+      const response = await fetch("/api/admin/content/image-studio/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: userMessage.content,
+          imageBase64: currentVersion.base64,
+          model: selectedModel,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Generation failed");
+      }
+
+      const data = await response.json();
+
+      // Create new version
+      const newVersion: ImageVersion = {
+        id: crypto.randomUUID(),
+        base64: data.base64,
+        mimeType: data.mimeType,
+        prompt: userMessage.content,
+        timestamp: new Date(),
+        isOriginal: false,
+      };
+
+      setVersions((prev) => [...prev, newVersion]);
+      setCurrentVersionIndex(versions.length); // Select new version
+
+      // Add assistant message
+      const assistantMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: t("admin.messages.imageGenerated"),
+        timestamp: new Date(),
+        versionId: newVersion.id,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+      toast.success(t("admin.messages.imageGenerated"));
+    } catch (error) {
+      console.error("Generation failed:", error);
+
+      const errorMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: t("admin.messages.imageGenerateFailed"),
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, errorMessage]);
+      toast.error(t("admin.messages.imageGenerateFailed"));
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   if (loading) {
@@ -325,6 +397,8 @@ export default function ImageStudioPage() {
                 </div>
               </div>
             ))}
+            {/* Scroll anchor */}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
@@ -342,12 +416,12 @@ export default function ImageStudioPage() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={2}
-                disabled={!hasImage}
+                disabled={!hasImage || isGenerating}
               />
               <InputGroupAddon align="block-end">
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <InputGroupButton variant="secondary">
+                  <DropdownMenuTrigger asChild disabled={isGenerating}>
+                    <InputGroupButton variant="secondary" disabled={isGenerating}>
                       {selectedModel === "gpt-image-1-mini" &&
                         t("admin.misc.modelFast")}
                       {selectedModel === "gpt-image-1" &&
@@ -381,9 +455,13 @@ export default function ImageStudioPage() {
                   variant="default"
                   className="cursor-pointer rounded-full ml-auto"
                   size="icon-xs"
-                  disabled={!input.trim() || !hasImage}
+                  disabled={!input.trim() || !hasImage || isGenerating}
                 >
-                  <ArrowUpIcon />
+                  {isGenerating ? (
+                    <Loader2Icon className="animate-spin" />
+                  ) : (
+                    <ArrowUpIcon />
+                  )}
                   <span className="sr-only">{t("admin.buttons.send")}</span>
                 </InputGroupButton>
               </InputGroupAddon>
