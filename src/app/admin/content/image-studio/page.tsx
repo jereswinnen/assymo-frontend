@@ -34,14 +34,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { MediaLibraryDialog } from "@/components/admin/media/MediaLibraryDialog";
 import { t } from "@/config/strings";
 import { toast } from "sonner";
@@ -664,80 +656,79 @@ export default function ImageStudioPage() {
                       {t("admin.misc.options")}
                     </InputGroupButton>
                   </PopoverTrigger>
-                  <PopoverContent side="top" align="start" className="w-56">
-                    <div className="grid gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="model">{t("admin.labels.model")}</Label>
-                        <Select
-                          value={selectedModel}
-                          onValueChange={setSelectedModel}
+                  <PopoverContent side="top" align="start" className="w-48 p-0">
+                    <div className="p-2">
+                      <p className="text-xs font-medium text-muted-foreground px-2 py-1">
+                        {t("admin.labels.model")}
+                      </p>
+                      {[
+                        { value: "gpt-image-1-mini", label: t("admin.misc.modelFast") },
+                        { value: "gpt-image-1", label: t("admin.misc.modelStandard") },
+                        { value: "gpt-image-1.5", label: t("admin.misc.modelBest") },
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setSelectedModel(option.value)}
                           disabled={isGenerating}
+                          className={`w-full text-left px-2 py-1.5 text-sm rounded-sm transition-colors ${
+                            selectedModel === option.value
+                              ? "bg-accent text-accent-foreground"
+                              : "hover:bg-accent/50"
+                          }`}
                         >
-                          <SelectTrigger id="model">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="gpt-image-1-mini">
-                              {t("admin.misc.modelFast")}
-                            </SelectItem>
-                            <SelectItem value="gpt-image-1">
-                              {t("admin.misc.modelStandard")}
-                            </SelectItem>
-                            <SelectItem value="gpt-image-1.5">
-                              {t("admin.misc.modelBest")}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="size">{t("admin.labels.size")}</Label>
-                        <Select
-                          value={selectedSize}
-                          onValueChange={setSelectedSize}
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="border-t p-2">
+                      <p className="text-xs font-medium text-muted-foreground px-2 py-1">
+                        {t("admin.labels.size")}
+                      </p>
+                      {[
+                        { value: "1024x1024", label: t("admin.misc.sizeSquare") },
+                        { value: "1024x1536", label: t("admin.misc.sizePortrait") },
+                        { value: "1536x1024", label: t("admin.misc.sizeLandscape") },
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setSelectedSize(option.value)}
                           disabled={isGenerating}
+                          className={`w-full text-left px-2 py-1.5 text-sm rounded-sm transition-colors ${
+                            selectedSize === option.value
+                              ? "bg-accent text-accent-foreground"
+                              : "hover:bg-accent/50"
+                          }`}
                         >
-                          <SelectTrigger id="size">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1024x1024">
-                              {t("admin.misc.sizeSquare")} (1024×1024)
-                            </SelectItem>
-                            <SelectItem value="1024x1536">
-                              {t("admin.misc.sizePortrait")} (1024×1536)
-                            </SelectItem>
-                            <SelectItem value="1536x1024">
-                              {t("admin.misc.sizeLandscape")} (1536×1024)
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="quality">{t("admin.labels.quality")}</Label>
-                        <Select
-                          value={selectedQuality}
-                          onValueChange={setSelectedQuality}
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="border-t p-2">
+                      <p className="text-xs font-medium text-muted-foreground px-2 py-1">
+                        {t("admin.labels.quality")}
+                      </p>
+                      {[
+                        { value: "auto", label: t("admin.misc.qualityAuto") },
+                        { value: "high", label: t("admin.misc.qualityHigh") },
+                        { value: "medium", label: t("admin.misc.qualityMedium") },
+                        { value: "low", label: t("admin.misc.qualityLow") },
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setSelectedQuality(option.value)}
                           disabled={isGenerating}
+                          className={`w-full text-left px-2 py-1.5 text-sm rounded-sm transition-colors ${
+                            selectedQuality === option.value
+                              ? "bg-accent text-accent-foreground"
+                              : "hover:bg-accent/50"
+                          }`}
                         >
-                          <SelectTrigger id="quality">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="auto">
-                              {t("admin.misc.qualityAuto")}
-                            </SelectItem>
-                            <SelectItem value="high">
-                              {t("admin.misc.qualityHigh")}
-                            </SelectItem>
-                            <SelectItem value="medium">
-                              {t("admin.misc.qualityMedium")}
-                            </SelectItem>
-                            <SelectItem value="low">
-                              {t("admin.misc.qualityLow")}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                          {option.label}
+                        </button>
+                      ))}
                     </div>
                   </PopoverContent>
                 </Popover>
