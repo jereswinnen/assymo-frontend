@@ -14,6 +14,7 @@ import {
   Loader2Icon,
   MaximizeIcon,
   MessagesSquareIcon,
+  PlusIcon,
   SaveIcon,
   SlidersHorizontalIcon,
   SparklesIcon,
@@ -38,6 +39,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { MediaLibraryDialog } from "@/components/admin/media/MediaLibraryDialog";
 import { t } from "@/config/strings";
 import { toast } from "sonner";
@@ -142,6 +153,7 @@ export default function ImageStudioPage() {
   const [selectedQuality, setSelectedQuality] = useState("auto");
   const [isGenerating, setIsGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -393,10 +405,39 @@ export default function ImageStudioPage() {
     document.body.removeChild(link);
   };
 
+  // Has unsaved changes (more than just original)
+  const hasUnsavedChanges = versions.length > 1;
+
+  // Reset function
+  const handleReset = () => {
+    if (hasUnsavedChanges) {
+      setShowResetDialog(true);
+    } else {
+      doReset();
+    }
+  };
+
+  const doReset = () => {
+    setVersions([]);
+    setCurrentVersionIndex(0);
+    setMessages([]);
+    setInput("");
+    setShowResetDialog(false);
+  };
+
   // Header actions
   const headerActions = useMemo(
     () => (
       <div className="flex items-center gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleReset}
+          disabled={versions.length === 0}
+        >
+          <PlusIcon className="size-4" />
+          {t("admin.buttons.new")}
+        </Button>
         <Button
           size="sm"
           variant="outline"
@@ -426,7 +467,7 @@ export default function ImageStudioPage() {
       </div>
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentVersion, saving]
+    [currentVersion, saving, versions.length, hasUnsavedChanges]
   );
 
   useAdminHeaderActions(headerActions);
@@ -777,6 +818,26 @@ export default function ImageStudioPage() {
         onOpenChange={setShowMediaLibrary}
         onSelect={handleLibrarySelect}
       />
+
+      {/* Reset Confirmation Dialog */}
+      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("admin.headings.unsavedChanges")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("admin.dialogs.unsavedVersionsDesc")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("admin.buttons.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={doReset}>
+              {t("admin.buttons.confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

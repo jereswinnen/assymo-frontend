@@ -65,6 +65,7 @@ export const ADMIN_STRINGS = {
       addPasskey: "Passkey toevoegen",
       saveToLibrary: "Bewaren in bibliotheek",
       download: "Downloaden",
+      new: "Nieuw",
     },
 
     /**
@@ -197,6 +198,7 @@ export const ADMIN_STRINGS = {
       deletePasskey: "Passkey verwijderen",
       seo: "SEO",
       general: "Algemeen",
+      unsavedChanges: "Niet-opgeslagen wijzigingen",
     },
 
     /**
@@ -544,6 +546,8 @@ export const ADMIN_STRINGS = {
       couldAppointmentNotCreate: "Kon afspraak niet aanmaken",
       formBlockDesc:
         "Dit blok toont het contactformulier met een optionele titel en subtitel.",
+      unsavedVersionsDesc:
+        "Je hebt onopgeslagen versies. Weet je zeker dat je opnieuw wilt beginnen?",
       submenuHeadingHint:
         "Enkel invullen indien er subitems aanwezig zijn voor deze link.",
     },
