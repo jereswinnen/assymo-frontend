@@ -7,12 +7,16 @@ import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import {
   ArrowUpIcon,
+  CheckIcon,
+  CpuIcon,
   DownloadIcon,
   ImageIcon,
   Loader2Icon,
+  MaximizeIcon,
   MessagesSquareIcon,
   SaveIcon,
   SlidersHorizontalIcon,
+  SparklesIcon,
   UploadIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -658,7 +662,8 @@ export default function ImageStudioPage() {
                   </PopoverTrigger>
                   <PopoverContent side="top" align="start" className="w-48 p-0">
                     <div className="p-2">
-                      <p className="text-xs font-medium text-muted-foreground px-2 py-1">
+                      <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground px-2 mb-0">
+                        <CpuIcon className="size-3" />
                         {t("admin.labels.model")}
                       </p>
                       {[
@@ -671,18 +676,20 @@ export default function ImageStudioPage() {
                           type="button"
                           onClick={() => setSelectedModel(option.value)}
                           disabled={isGenerating}
-                          className={`w-full text-left px-2 py-1.5 text-sm rounded-sm transition-colors ${
+                          className={`w-full flex items-center gap-2 text-left px-2 py-1.5 text-sm rounded-sm transition-colors ${
                             selectedModel === option.value
                               ? "bg-accent text-accent-foreground"
                               : "hover:bg-accent/50"
                           }`}
                         >
+                          <CheckIcon className={`size-3 ${selectedModel === option.value ? "opacity-100" : "opacity-0"}`} />
                           {option.label}
                         </button>
                       ))}
                     </div>
                     <div className="border-t p-2">
-                      <p className="text-xs font-medium text-muted-foreground px-2 py-1">
+                      <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground px-2 mb-0">
+                        <MaximizeIcon className="size-3" />
                         {t("admin.labels.size")}
                       </p>
                       {[
@@ -695,18 +702,20 @@ export default function ImageStudioPage() {
                           type="button"
                           onClick={() => setSelectedSize(option.value)}
                           disabled={isGenerating}
-                          className={`w-full text-left px-2 py-1.5 text-sm rounded-sm transition-colors ${
+                          className={`w-full flex items-center gap-2 text-left px-2 py-1.5 text-sm rounded-sm transition-colors ${
                             selectedSize === option.value
                               ? "bg-accent text-accent-foreground"
                               : "hover:bg-accent/50"
                           }`}
                         >
+                          <CheckIcon className={`size-3 ${selectedSize === option.value ? "opacity-100" : "opacity-0"}`} />
                           {option.label}
                         </button>
                       ))}
                     </div>
                     <div className="border-t p-2">
-                      <p className="text-xs font-medium text-muted-foreground px-2 py-1">
+                      <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground px-2 mb-0">
+                        <SparklesIcon className="size-3" />
                         {t("admin.labels.quality")}
                       </p>
                       {[
@@ -720,12 +729,13 @@ export default function ImageStudioPage() {
                           type="button"
                           onClick={() => setSelectedQuality(option.value)}
                           disabled={isGenerating}
-                          className={`w-full text-left px-2 py-1.5 text-sm rounded-sm transition-colors ${
+                          className={`w-full flex items-center gap-2 text-left px-2 py-1.5 text-sm rounded-sm transition-colors ${
                             selectedQuality === option.value
                               ? "bg-accent text-accent-foreground"
                               : "hover:bg-accent/50"
                           }`}
                         >
+                          <CheckIcon className={`size-3 ${selectedQuality === option.value ? "opacity-100" : "opacity-0"}`} />
                           {option.label}
                         </button>
                       ))}
