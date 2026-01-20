@@ -63,6 +63,7 @@ export const ADMIN_STRINGS = {
       changePassword: "Wachtwoord wijzigen",
       changePhoto: "Foto wijzigen",
       addPasskey: "Passkey toevoegen",
+      saveToLibrary: "Bewaren in bibliotheek",
     },
 
     /**

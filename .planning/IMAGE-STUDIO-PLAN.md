@@ -8,7 +8,7 @@
 - [x] **Phase 4**: Chat UI Shell
 - [x] **Phase 5**: API Endpoint
 - [x] **Phase 6**: Connect Chat to API
-- [ ] **Phase 7**: Save to Library
+- [x] **Phase 7**: Save to Library
 - [ ] **Phase 8**: Polish & Reset
 
 ---

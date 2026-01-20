@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { upload } from "@vercel/blob/client";
 import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
+import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import {
   ArrowUpIcon,
   ImageIcon,
   Loader2Icon,
   MessagesSquareIcon,
+  SaveIcon,
   UploadIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -82,6 +86,7 @@ const urlToBase64 = async (
 
 export default function ImageStudioPage() {
   const { authorized, loading } = useRequireFeature("media");
+  const router = useRouter();
 
   const [versions, setVersions] = useState<ImageVersion[]>([]);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
@@ -92,6 +97,7 @@ export default function ImageStudioPage() {
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState("gpt-image-1");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -279,6 +285,64 @@ export default function ImageStudioPage() {
       setIsGenerating(false);
     }
   };
+
+  // Save current version to media library
+  const saveToLibrary = async () => {
+    if (!currentVersion || saving) return;
+
+    setSaving(true);
+    try {
+      // Convert base64 to blob
+      const response = await fetch(currentVersion.base64);
+      const blob = await response.blob();
+
+      // Create file with timestamp name
+      const extension = currentVersion.mimeType.split("/")[1] || "png";
+      const filename = `ai-studio-${Date.now()}.${extension}`;
+      const file = new File([blob], filename, { type: currentVersion.mimeType });
+
+      // Upload to Vercel Blob
+      const result = await upload(filename, file, {
+        access: "public",
+        handleUploadUrl: "/api/admin/content/images/upload",
+      });
+
+      toast.success(t("admin.messages.imageSaved"));
+      router.push(`/admin/content/media/${encodeURIComponent(result.url)}`);
+    } catch (error) {
+      console.error("Save failed:", error);
+      toast.error(t("admin.messages.imageSaveFailed"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Header actions
+  const headerActions = useMemo(
+    () => (
+      <Button
+        size="sm"
+        onClick={saveToLibrary}
+        disabled={versions.length === 0 || saving}
+      >
+        {saving ? (
+          <>
+            <Loader2Icon className="size-4 animate-spin" />
+            {t("admin.loading.saving")}
+          </>
+        ) : (
+          <>
+            <SaveIcon className="size-4" />
+            {t("admin.buttons.saveToLibrary")}
+          </>
+        )}
+      </Button>
+    ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [versions.length, saving]
+  );
+
+  useAdminHeaderActions(headerActions);
 
   if (loading) {
     return (
