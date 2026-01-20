@@ -13,7 +13,7 @@ const sql = neon(process.env.DATABASE_URL!);
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
     const { embedding } = await embed({
-      model: openai.textEmbeddingModel('text-embedding-3-small'),
+      model: openai.embeddingModel('text-embedding-3-small'),
       value: text,
     });
 
@@ -41,7 +41,7 @@ export async function storeChunksWithEmbeddings(
 
     // Generate embeddings for all chunks at once using AI SDK's embedMany
     const { embeddings } = await embedMany({
-      model: openai.textEmbeddingModel('text-embedding-3-small'),
+      model: openai.embeddingModel('text-embedding-3-small'),
       values: chunks,
       maxParallelCalls: 2, // Limit concurrent API calls to avoid rate limits
     });

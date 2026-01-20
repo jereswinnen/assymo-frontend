@@ -1,3 +1,5 @@
+import { generateImage } from "ai";
+import { openai } from "@ai-sdk/openai";
 import { protectRoute } from "@/lib/permissions";
 
 const ALLOWED_MODELS = [
@@ -7,15 +9,6 @@ const ALLOWED_MODELS = [
 ] as const;
 
 type AllowedModel = (typeof ALLOWED_MODELS)[number];
-
-interface OpenAIResponseOutput {
-  type: string;
-  result?: string;
-}
-
-interface OpenAIResponseAPIResponse {
-  output: OpenAIResponseOutput[];
-}
 
 export async function POST(request: Request) {
   // Check authentication and media permission
@@ -44,73 +37,37 @@ export async function POST(request: Request) {
       return Response.json({ error: "Invalid image format" }, { status: 400 });
     }
 
-    // Call OpenAI Responses API with image_generation tool
-    // This allows editing images based on a prompt without requiring a mask
-    const openaiResponse = await fetch(
-      "https://api.openai.com/v1/responses",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-4.1",
-          input: [
-            {
-              role: "user",
-              content: [
-                { type: "input_text", text: prompt },
-                {
-                  type: "input_image",
-                  image_url: imageBase64,
-                },
-              ],
-            },
-          ],
-          tools: [
-            {
-              type: "image_generation",
-              image_generation: {
-                model: model,
-                size: "1024x1024",
-              },
-            },
-          ],
-        }),
-      }
-    );
-
-    if (!openaiResponse.ok) {
-      const errorData = await openaiResponse.json().catch(() => ({}));
-      console.error("OpenAI API error:", errorData);
-      return Response.json(
-        { error: "Failed to generate image" },
-        { status: openaiResponse.status }
-      );
+    // Extract the base64 data from the data URL
+    const base64Data = imageBase64.split(",")[1];
+    if (!base64Data) {
+      return Response.json({ error: "Invalid image format" }, { status: 400 });
     }
 
-    const result = (await openaiResponse.json()) as OpenAIResponseAPIResponse;
+    // Convert base64 to Buffer for the AI SDK
+    const imageBuffer = Buffer.from(base64Data, "base64");
 
-    // Find the image generation result in the output
-    const imageGenerationCall = result.output?.find(
-      (output) => output.type === "image_generation_call"
-    );
+    // Call OpenAI image generation with input image for editing
+    const { images } = await generateImage({
+      model: openai.image(model),
+      prompt: {
+        text: prompt,
+        images: [imageBuffer],
+      },
+      size: "1024x1024",
+    });
 
-    if (!imageGenerationCall?.result) {
-      console.error("No image generated in response:", result);
-      return Response.json(
-        { error: "No image generated" },
-        { status: 500 }
-      );
+    // Get the first generated image
+    const generatedImage = images[0];
+    if (!generatedImage) {
+      return Response.json({ error: "No image generated" }, { status: 500 });
     }
 
-    // The result is base64 encoded image data (without the data URL prefix)
-    const outputMimeType = "image/png";
+    // Return the image as a data URL
+    const mediaType = generatedImage.mediaType || "image/png";
 
     return Response.json({
-      base64: `data:${outputMimeType};base64,${imageGenerationCall.result}`,
-      mimeType: outputMimeType,
+      base64: `data:${mediaType};base64,${generatedImage.base64}`,
+      mimeType: mediaType,
     });
   } catch (error) {
     console.error("Image generation failed:", error);

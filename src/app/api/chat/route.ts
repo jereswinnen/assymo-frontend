@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Convert UIMessages to ModelMessages
-    const modelMessages = convertToModelMessages(messages);
+    const modelMessages = await convertToModelMessages(messages);
 
     // Get last user message text
     const lastUserMessage = messages[messages.length - 1];
