@@ -40,6 +40,8 @@ interface ImageVersion {
   prompt: string;
   timestamp: Date;
   isOriginal: boolean;
+  isPending?: boolean;
+  sourceBase64?: string; // The source image shown blurred while pending
 }
 
 interface ChatMessage {
@@ -193,9 +195,26 @@ export default function ImageStudioPage() {
       timestamp: new Date(),
     };
 
+    // Create pending version immediately (shows blurred source while generating)
+    const pendingVersionId = crypto.randomUUID();
+    const pendingVersion: ImageVersion = {
+      id: pendingVersionId,
+      base64: "", // Will be filled when generation completes
+      mimeType: currentVersion.mimeType,
+      prompt: userMessage.content,
+      timestamp: new Date(),
+      isOriginal: false,
+      isPending: true,
+      sourceBase64: currentVersion.base64, // Source image to show blurred
+    };
+
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsGenerating(true);
+
+    // Add pending version and select it
+    setVersions((prev) => [...prev, pendingVersion]);
+    setCurrentVersionIndex(versions.length); // Select the new pending version
 
     try {
       const response = await fetch("/api/admin/content/image-studio/generate", {
@@ -214,18 +233,20 @@ export default function ImageStudioPage() {
 
       const data = await response.json();
 
-      // Create new version
-      const newVersion: ImageVersion = {
-        id: crypto.randomUUID(),
-        base64: data.base64,
-        mimeType: data.mimeType,
-        prompt: userMessage.content,
-        timestamp: new Date(),
-        isOriginal: false,
-      };
-
-      setVersions((prev) => [...prev, newVersion]);
-      setCurrentVersionIndex(versions.length); // Select new version
+      // Update the pending version with actual data
+      setVersions((prev) =>
+        prev.map((v) =>
+          v.id === pendingVersionId
+            ? {
+                ...v,
+                base64: data.base64,
+                mimeType: data.mimeType,
+                isPending: false,
+                sourceBase64: undefined,
+              }
+            : v
+        )
+      );
 
       // Add assistant message
       const assistantMessage: ChatMessage = {
@@ -233,13 +254,17 @@ export default function ImageStudioPage() {
         role: "assistant",
         content: t("admin.messages.imageGenerated"),
         timestamp: new Date(),
-        versionId: newVersion.id,
+        versionId: pendingVersionId,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
       toast.success(t("admin.messages.imageGenerated"));
     } catch (error) {
       console.error("Generation failed:", error);
+
+      // Remove the failed pending version
+      setVersions((prev) => prev.filter((v) => v.id !== pendingVersionId));
+      setCurrentVersionIndex((prev) => Math.max(0, prev - 1));
 
       const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -280,12 +305,32 @@ export default function ImageStudioPage() {
               </div>
             ) : currentVersion ? (
               <div className="relative h-full w-full overflow-hidden rounded-lg bg-muted">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={currentVersion.base64}
-                  alt=""
-                  className="h-full w-full object-contain"
-                />
+                {currentVersion.isPending ? (
+                  <>
+                    {/* Blurred source image while generating */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={currentVersion.sourceBase64}
+                      alt=""
+                      className="h-full w-full object-contain blur-md scale-105 opacity-60"
+                    />
+                    {/* Spinner overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-background/80 rounded-full p-4">
+                        <Loader2Icon className="size-8 animate-spin text-primary" />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  /* Completed image with fade-in animation */
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    key={currentVersion.id}
+                    src={currentVersion.base64}
+                    alt=""
+                    className="h-full w-full object-contain animate-in fade-in duration-500"
+                  />
+                )}
               </div>
             ) : (
               <div
@@ -344,12 +389,28 @@ export default function ImageStudioPage() {
                       : "hover:outline-2 hover:outline-offset-2 hover:outline-muted-foreground/50"
                   }`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={version.base64}
-                    alt={version.prompt}
-                    className="size-full object-cover"
-                  />
+                  {version.isPending ? (
+                    <>
+                      {/* Blurred source image for pending thumbnail */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={version.sourceBase64}
+                        alt={version.prompt}
+                        className="size-full object-cover blur-sm opacity-60"
+                      />
+                      {/* Spinner overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Loader2Icon className="size-4 animate-spin text-primary" />
+                      </div>
+                    </>
+                  ) : (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={version.base64}
+                      alt={version.prompt}
+                      className="size-full object-cover"
+                    />
+                  )}
                   {version.isOriginal && (
                     <span className="absolute bottom-0 left-0 right-0 text-[10px] bg-black/60 text-white px-1 truncate">
                       {t("admin.misc.originalImage")}
