@@ -148,6 +148,7 @@ export const ADMIN_STRINGS = {
       metaDescription: "Meta beschrijving",
       version: "Versie",
       versions: "Versies",
+      model: "Model",
     },
 
     /**
@@ -434,6 +435,7 @@ export const ADMIN_STRINGS = {
       metaTitlePlaceholder: "Aangepaste titel voor zoekmachines",
       metaDescriptionPlaceholder:
         "Korte beschrijving voor zoekmachines (max 160 tekens)",
+      describeEdit: "Beschrijf je wijziging...",
     },
 
     /**
@@ -869,6 +871,10 @@ export const ADMIN_STRINGS = {
       assignedSites: "Toegewezen sites",
       assignedSitesDesc: "Content features zijn beperkt tot de toegewezen sites",
       originalImage: "Origineel",
+      startWithImage: "Upload eerst een afbeelding om te beginnen",
+      modelFast: "Snel",
+      modelStandard: "Standaard",
+      modelBest: "Beste kwaliteit",
     },
 
     /**

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
-import { ImageIcon, Loader2Icon, UploadIcon } from "lucide-react";
+import { ArrowUpIcon, ImageIcon, Loader2Icon, UploadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -11,6 +11,19 @@ import {
   EmptyTitle,
   EmptyDescription,
 } from "@/components/ui/empty";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  InputGroup,
+  InputGroupTextarea,
+  InputGroupAddon,
+  InputGroupButton,
+} from "@/components/ui/input-group";
 import { MediaLibraryDialog } from "@/components/admin/media/MediaLibraryDialog";
 import { t } from "@/config/strings";
 import { toast } from "sonner";
@@ -22,6 +35,14 @@ interface ImageVersion {
   prompt: string;
   timestamp: Date;
   isOriginal: boolean;
+}
+
+interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+  versionId?: string;
 }
 
 // Convert File to base64 data URL
@@ -60,9 +81,14 @@ export default function ImageStudioPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [selectedModel, setSelectedModel] = useState("gpt-image-1");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const currentVersion = versions[currentVersionIndex] ?? null;
+  const hasImage = versions.length > 0;
 
   const createOriginalVersion = (
     base64: string,
@@ -136,6 +162,20 @@ export default function ImageStudioPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!input.trim() || !hasImage) return;
+    // Will be implemented in Phase 6
+    console.log("Submit:", input, selectedModel);
+    setInput("");
   };
 
   if (loading) {
@@ -244,9 +284,91 @@ export default function ImageStudioPage() {
           )}
         </div>
 
-        {/* Right: Chat sidebar placeholder */}
-        <div className="bg-muted rounded-lg p-4">
-          <p className="text-muted-foreground">Chat sidebar (Fase 4)</p>
+        {/* Right: Chat sidebar */}
+        <div className="bg-muted rounded-lg p-4 flex flex-col h-full">
+          {/* Model selector */}
+          <div className="mb-4">
+            <label className="text-sm font-medium mb-2 block">
+              {t("admin.labels.model")}
+            </label>
+            <Select value={selectedModel} onValueChange={setSelectedModel}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="gpt-image-1-mini">
+                  GPT Image Mini ({t("admin.misc.modelFast")})
+                </SelectItem>
+                <SelectItem value="gpt-image-1">
+                  GPT Image ({t("admin.misc.modelStandard")})
+                </SelectItem>
+                <SelectItem value="gpt-image-1.5-2025-12-16">
+                  GPT Image 1.5 ({t("admin.misc.modelBest")})
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Messages list */}
+          <div className="flex-1 overflow-y-auto space-y-3 mb-4">
+            {messages.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                {hasImage
+                  ? t("admin.placeholders.describeEdit")
+                  : t("admin.misc.startWithImage")}
+              </p>
+            )}
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
+                    message.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-background border"
+                  }`}
+                >
+                  {message.content}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Input */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+          >
+            <InputGroup>
+              <InputGroupTextarea
+                ref={textareaRef}
+                placeholder={t("admin.placeholders.describeEdit")}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                rows={2}
+                disabled={!hasImage}
+              />
+              <InputGroupAddon align="block-end" className="justify-end">
+                <InputGroupButton
+                  type="submit"
+                  variant="default"
+                  className="cursor-pointer rounded-full"
+                  size="icon-xs"
+                  disabled={!input.trim() || !hasImage}
+                >
+                  <ArrowUpIcon />
+                  <span className="sr-only">{t("admin.buttons.send")}</span>
+                </InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+          </form>
         </div>
       </div>
 
