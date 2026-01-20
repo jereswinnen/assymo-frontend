@@ -2,7 +2,13 @@
 
 import { useRef, useState } from "react";
 import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
-import { ArrowUpIcon, ImageIcon, Loader2Icon, UploadIcon } from "lucide-react";
+import {
+  ArrowUpIcon,
+  ImageIcon,
+  Loader2Icon,
+  MessagesSquareIcon,
+  UploadIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -288,11 +294,18 @@ export default function ImageStudioPage() {
           {/* Messages list */}
           <div className="flex-1 overflow-y-auto space-y-3 mb-4">
             {messages.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                {hasImage
-                  ? t("admin.placeholders.describeEdit")
-                  : t("admin.misc.startWithImage")}
-              </p>
+              <Empty className="h-full border-0">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <MessagesSquareIcon />
+                  </EmptyMedia>
+                  <EmptyDescription>
+                    {hasImage
+                      ? t("admin.placeholders.describeEdit")
+                      : t("admin.misc.startWithImage")}
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             )}
             {messages.map((message) => (
               <div
@@ -321,7 +334,7 @@ export default function ImageStudioPage() {
               handleSubmit();
             }}
           >
-            <InputGroup>
+            <InputGroup className="bg-white">
               <InputGroupTextarea
                 ref={textareaRef}
                 placeholder={t("admin.placeholders.describeEdit")}
@@ -334,20 +347,31 @@ export default function ImageStudioPage() {
               <InputGroupAddon align="block-end">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <InputGroupButton variant="ghost">
-                      {selectedModel === "gpt-image-1-mini" && t("admin.misc.modelFast")}
-                      {selectedModel === "gpt-image-1" && t("admin.misc.modelStandard")}
-                      {selectedModel === "gpt-image-1.5-2025-12-16" && t("admin.misc.modelBest")}
+                    <InputGroupButton variant="secondary">
+                      {selectedModel === "gpt-image-1-mini" &&
+                        t("admin.misc.modelFast")}
+                      {selectedModel === "gpt-image-1" &&
+                        t("admin.misc.modelStandard")}
+                      {selectedModel === "gpt-image-1.5-2025-12-16" &&
+                        t("admin.misc.modelBest")}
                     </InputGroupButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="top" align="start">
-                    <DropdownMenuItem onClick={() => setSelectedModel("gpt-image-1-mini")}>
+                    <DropdownMenuItem
+                      onClick={() => setSelectedModel("gpt-image-1-mini")}
+                    >
                       {t("admin.misc.modelFast")}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setSelectedModel("gpt-image-1")}>
+                    <DropdownMenuItem
+                      onClick={() => setSelectedModel("gpt-image-1")}
+                    >
                       {t("admin.misc.modelStandard")}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setSelectedModel("gpt-image-1.5-2025-12-16")}>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setSelectedModel("gpt-image-1.5-2025-12-16")
+                      }
+                    >
                       {t("admin.misc.modelBest")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
