@@ -7,10 +7,12 @@ import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
 import {
   ArrowUpIcon,
+  DownloadIcon,
   ImageIcon,
   Loader2Icon,
   MessagesSquareIcon,
   SaveIcon,
+  SlidersHorizontalIcon,
   UploadIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,11 +30,18 @@ import {
   InputGroupButton,
 } from "@/components/ui/input-group";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { MediaLibraryDialog } from "@/components/admin/media/MediaLibraryDialog";
 import { t } from "@/config/strings";
 import { toast } from "sonner";
@@ -133,6 +142,8 @@ export default function ImageStudioPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState("gpt-image-1");
+  const [selectedSize, setSelectedSize] = useState("1024x1024");
+  const [selectedQuality, setSelectedQuality] = useState("auto");
   const [isGenerating, setIsGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -276,6 +287,8 @@ export default function ImageStudioPage() {
           prompt: userMessage.content,
           imageBase64: currentVersion.base64,
           model: selectedModel,
+          size: selectedSize,
+          quality: selectedQuality,
         }),
       });
 
@@ -369,29 +382,55 @@ export default function ImageStudioPage() {
     }
   };
 
+  // Download current version to device
+  const downloadImage = () => {
+    if (!currentVersion) return;
+
+    const extension = currentVersion.mimeType.split("/")[1] || "png";
+    const filename = `ai-studio-${Date.now()}.${extension}`;
+
+    const link = document.createElement("a");
+    link.href = currentVersion.base64;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Header actions
   const headerActions = useMemo(
     () => (
-      <Button
-        size="sm"
-        onClick={saveToLibrary}
-        disabled={versions.length === 0 || saving}
-      >
-        {saving ? (
-          <>
-            <Loader2Icon className="size-4 animate-spin" />
-            {t("admin.loading.saving")}
-          </>
-        ) : (
-          <>
-            <SaveIcon className="size-4" />
-            {t("admin.buttons.saveToLibrary")}
-          </>
-        )}
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={downloadImage}
+          disabled={!currentVersion || currentVersion.isPending}
+        >
+          <DownloadIcon className="size-4" />
+          {t("admin.buttons.download")}
+        </Button>
+        <Button
+          size="sm"
+          onClick={saveToLibrary}
+          disabled={!currentVersion || currentVersion.isPending || saving}
+        >
+          {saving ? (
+            <>
+              <Loader2Icon className="size-4 animate-spin" />
+              {t("admin.loading.saving")}
+            </>
+          ) : (
+            <>
+              <SaveIcon className="size-4" />
+              {t("admin.buttons.save")}
+            </>
+          )}
+        </Button>
+      </div>
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [versions.length, saving],
+    [currentVersion, saving]
   );
 
   useAdminHeaderActions(headerActions);
@@ -448,14 +487,20 @@ export default function ImageStudioPage() {
                       className="h-full w-full object-contain animate-in fade-in duration-1000"
                     />
                     {/* Metadata header */}
-                    <div className="absolute top-0 inset-x-0 bg-white/60 backdrop-blur-sm px-3 py-1.5 flex items-center gap-3 text-sm text-foreground/80">
+                    <div className="absolute top-0 inset-x-0 bg-white/90 backdrop-blur-md border-b border-border p-2 flex items-center gap-3 text-xs text-foreground">
                       {currentVersion.model && (
-                        <span className="font-medium">{currentVersion.model}</span>
+                        <span className="font-medium">
+                          {currentVersion.model}
+                        </span>
                       )}
                       {currentVersion.width && currentVersion.height && (
-                        <span>{currentVersion.width}×{currentVersion.height}</span>
+                        <span>
+                          {currentVersion.width}×{currentVersion.height}
+                        </span>
                       )}
-                      <span>{formatBytes(getBase64Size(currentVersion.base64))}</span>
+                      <span>
+                        {formatBytes(getBase64Size(currentVersion.base64))}
+                      </span>
                       <span>{getExtension(currentVersion.mimeType)}</span>
                     </div>
                   </>
@@ -609,38 +654,93 @@ export default function ImageStudioPage() {
                 disabled={!hasImage || isGenerating}
               />
               <InputGroupAddon align="block-end">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild disabled={isGenerating}>
+                <Popover>
+                  <PopoverTrigger asChild>
                     <InputGroupButton
                       variant="secondary"
                       disabled={isGenerating}
                     >
-                      {selectedModel === "gpt-image-1-mini" &&
-                        t("admin.misc.modelFast")}
-                      {selectedModel === "gpt-image-1" &&
-                        t("admin.misc.modelStandard")}
-                      {selectedModel === "gpt-image-1.5" &&
-                        t("admin.misc.modelBest")}
+                      <SlidersHorizontalIcon className="size-4" />
+                      {t("admin.misc.options")}
                     </InputGroupButton>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side="top" align="start">
-                    <DropdownMenuItem
-                      onClick={() => setSelectedModel("gpt-image-1-mini")}
-                    >
-                      {t("admin.misc.modelFast")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setSelectedModel("gpt-image-1")}
-                    >
-                      {t("admin.misc.modelStandard")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setSelectedModel("gpt-image-1.5")}
-                    >
-                      {t("admin.misc.modelBest")}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  </PopoverTrigger>
+                  <PopoverContent side="top" align="start" className="w-56">
+                    <div className="grid gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="model">{t("admin.labels.model")}</Label>
+                        <Select
+                          value={selectedModel}
+                          onValueChange={setSelectedModel}
+                          disabled={isGenerating}
+                        >
+                          <SelectTrigger id="model">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="gpt-image-1-mini">
+                              {t("admin.misc.modelFast")}
+                            </SelectItem>
+                            <SelectItem value="gpt-image-1">
+                              {t("admin.misc.modelStandard")}
+                            </SelectItem>
+                            <SelectItem value="gpt-image-1.5">
+                              {t("admin.misc.modelBest")}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="size">{t("admin.labels.size")}</Label>
+                        <Select
+                          value={selectedSize}
+                          onValueChange={setSelectedSize}
+                          disabled={isGenerating}
+                        >
+                          <SelectTrigger id="size">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1024x1024">
+                              {t("admin.misc.sizeSquare")} (1024×1024)
+                            </SelectItem>
+                            <SelectItem value="1024x1536">
+                              {t("admin.misc.sizePortrait")} (1024×1536)
+                            </SelectItem>
+                            <SelectItem value="1536x1024">
+                              {t("admin.misc.sizeLandscape")} (1536×1024)
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="quality">{t("admin.labels.quality")}</Label>
+                        <Select
+                          value={selectedQuality}
+                          onValueChange={setSelectedQuality}
+                          disabled={isGenerating}
+                        >
+                          <SelectTrigger id="quality">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="auto">
+                              {t("admin.misc.qualityAuto")}
+                            </SelectItem>
+                            <SelectItem value="high">
+                              {t("admin.misc.qualityHigh")}
+                            </SelectItem>
+                            <SelectItem value="medium">
+                              {t("admin.misc.qualityMedium")}
+                            </SelectItem>
+                            <SelectItem value="low">
+                              {t("admin.misc.qualityLow")}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
                 <InputGroupButton
                   type="submit"
                   variant="default"

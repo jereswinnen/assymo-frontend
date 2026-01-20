@@ -8,7 +8,17 @@ const ALLOWED_MODELS = [
   "gpt-image-1.5",
 ] as const;
 
+const ALLOWED_SIZES = [
+  "1024x1024", // Square
+  "1024x1536", // Portrait
+  "1536x1024", // Landscape
+] as const;
+
+const ALLOWED_QUALITIES = ["auto", "high", "medium", "low"] as const;
+
 type AllowedModel = (typeof ALLOWED_MODELS)[number];
+type AllowedSize = (typeof ALLOWED_SIZES)[number];
+type AllowedQuality = (typeof ALLOWED_QUALITIES)[number];
 
 export async function POST(request: Request) {
   // Check authentication and media permission
@@ -16,7 +26,7 @@ export async function POST(request: Request) {
   if (!authorized) return response;
 
   try {
-    const { prompt, imageBase64, model } = await request.json();
+    const { prompt, imageBase64, model, size, quality } = await request.json();
 
     // Validate inputs
     if (!prompt || typeof prompt !== "string") {
@@ -30,6 +40,18 @@ export async function POST(request: Request) {
     if (!ALLOWED_MODELS.includes(model as AllowedModel)) {
       return Response.json({ error: "Invalid model" }, { status: 400 });
     }
+
+    // Validate size (default to 1024x1024 if not provided)
+    const imageSize: AllowedSize = ALLOWED_SIZES.includes(size as AllowedSize)
+      ? (size as AllowedSize)
+      : "1024x1024";
+
+    // Validate quality (default to auto if not provided)
+    const imageQuality: AllowedQuality = ALLOWED_QUALITIES.includes(
+      quality as AllowedQuality
+    )
+      ? (quality as AllowedQuality)
+      : "auto";
 
     // Validate the data URL format
     // Format: "data:image/png;base64,iVBORw0KGgo..."
@@ -53,7 +75,12 @@ export async function POST(request: Request) {
         text: prompt,
         images: [imageBuffer],
       },
-      size: "1024x1024",
+      size: imageSize,
+      providerOptions: {
+        openai: {
+          quality: imageQuality,
+        },
+      },
     });
 
     // Get the first generated image

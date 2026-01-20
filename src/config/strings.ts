@@ -64,6 +64,7 @@ export const ADMIN_STRINGS = {
       changePhoto: "Foto wijzigen",
       addPasskey: "Passkey toevoegen",
       saveToLibrary: "Bewaren in bibliotheek",
+      download: "Downloaden",
     },
 
     /**
@@ -150,6 +151,8 @@ export const ADMIN_STRINGS = {
       version: "Versie",
       versions: "Versies",
       model: "Model",
+      size: "Formaat",
+      quality: "Kwaliteit",
     },
 
     /**
@@ -878,6 +881,16 @@ export const ADMIN_STRINGS = {
       modelFast: "Snel",
       modelStandard: "Standaard",
       modelBest: "Beste kwaliteit",
+      // Image generation size options
+      sizeSquare: "Vierkant",
+      sizePortrait: "Portret",
+      sizeLandscape: "Landschap",
+      // Image generation quality options
+      qualityAuto: "Auto",
+      qualityHigh: "Hoog",
+      qualityMedium: "Gemiddeld",
+      qualityLow: "Laag",
+      options: "Opties",
     },
 
     /**
