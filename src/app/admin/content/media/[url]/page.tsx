@@ -300,7 +300,7 @@ export default function ImageDetailPage({
   }
 
   return (
-    <div className="h-[calc(100vh-theme(spacing.16)-theme(spacing.8))] flex flex-col gap-6">
+    <div className="h-[calc(100vh-(--spacing(16))-(--spacing(8)))] flex flex-col gap-6">
       <div className="grid gap-6 md:grid-cols-3 flex-1 min-h-0">
         {/* Image preview */}
         <div className="md:col-span-2 min-h-0">
