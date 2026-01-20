@@ -215,7 +215,7 @@ export default function ImageStudioPage() {
 
           {/* Version thumbnails strip */}
           {versions.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto py-2 mt-2">
+            <div className="flex gap-2 overflow-x-visible py-1 mt-2">
               {versions.map((version, index) => (
                 <button
                   key={version.id}
