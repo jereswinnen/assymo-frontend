@@ -551,7 +551,7 @@ export default function ImageStudioPage() {
                         t("admin.misc.modelFast")}
                       {selectedModel === "gpt-image-1" &&
                         t("admin.misc.modelStandard")}
-                      {selectedModel === "gpt-image-1.5-2025-12-16" &&
+                      {selectedModel === "gpt-image-1.5" &&
                         t("admin.misc.modelBest")}
                     </InputGroupButton>
                   </DropdownMenuTrigger>
@@ -568,7 +568,7 @@ export default function ImageStudioPage() {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() =>
-                        setSelectedModel("gpt-image-1.5-2025-12-16")
+                        setSelectedModel("gpt-image-1.5")
                       }
                     >
                       {t("admin.misc.modelBest")}

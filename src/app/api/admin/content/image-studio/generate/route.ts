@@ -5,7 +5,7 @@ import { protectRoute } from "@/lib/permissions";
 const ALLOWED_MODELS = [
   "gpt-image-1-mini",
   "gpt-image-1",
-  "gpt-image-1.5-2025-12-16",
+  "gpt-image-1.5",
 ] as const;
 
 type AllowedModel = (typeof ALLOWED_MODELS)[number];
