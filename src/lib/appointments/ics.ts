@@ -147,3 +147,73 @@ export function generateICSFilename(appointment: Appointment): string {
   const date = appointment.appointment_date.replace(/-/g, "");
   return `assymo-afspraak-${date}.ics`;
 }
+
+/**
+ * Generate an ICS calendar feed with multiple appointments
+ *
+ * Unlike generateICS which creates a single event for email attachments,
+ * this creates a subscribable calendar feed with all appointments.
+ *
+ * @param appointments - Array of appointments to include in the feed
+ * @param calendarName - Name for the calendar (shown in calendar apps)
+ * @returns ICS file content as string
+ */
+export function generateCalendarFeed(
+  appointments: Appointment[],
+  calendarName = "Assymo Afspraken"
+): string {
+  const now = new Date();
+  const timestamp = now.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+  const events = appointments.map((appointment) => {
+    const startDateTime = formatICSDateTime(
+      appointment.appointment_date,
+      appointment.appointment_time
+    );
+
+    const endTime = calculateEndTime(
+      appointment.appointment_time,
+      appointment.duration_minutes
+    );
+    const endDateTime = formatICSDateTime(appointment.appointment_date, endTime);
+
+    const summary = `Afspraak: ${escapeICS(appointment.customer_name)}`;
+
+    const description = [
+      `Klant: ${appointment.customer_name}`,
+      `E-mail: ${appointment.customer_email}`,
+      `Telefoon: ${appointment.customer_phone}`,
+      `Adres: ${appointment.customer_street}, ${appointment.customer_postal_code} ${appointment.customer_city}`,
+      appointment.remarks ? `Opmerkingen: ${appointment.remarks}` : "",
+    ]
+      .filter(Boolean)
+      .join("\\n");
+
+    return [
+      "BEGIN:VEVENT",
+      `UID:${generateUID(appointment)}`,
+      `DTSTAMP:${timestamp}`,
+      `DTSTART:${startDateTime}`,
+      `DTEND:${endDateTime}`,
+      `SUMMARY:${summary}`,
+      `DESCRIPTION:${escapeICS(description)}`,
+      `LOCATION:${escapeICS(APPOINTMENTS_CONFIG.storeLocation)}`,
+      "STATUS:CONFIRMED",
+      "END:VEVENT",
+    ].join("\r\n");
+  });
+
+  const icsLines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Assymo//Appointment System//NL",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    `X-WR-CALNAME:${escapeICS(calendarName)}`,
+    `X-WR-TIMEZONE:Europe/Brussels`,
+    ...events,
+    "END:VCALENDAR",
+  ];
+
+  return icsLines.join("\r\n");
+}
