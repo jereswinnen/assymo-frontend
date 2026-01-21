@@ -118,6 +118,8 @@ export default function ContactForm({ className, products = [], defaultProduct }
       track("contact_form_submitted", {
         subject: formData.subject,
         has_attachment: formData.bestand instanceof File,
+        source: defaultProduct ? "product_page" : "general",
+        product: defaultProduct || undefined,
       });
       setStatus("success");
     } catch (err) {
