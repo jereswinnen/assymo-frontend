@@ -5,9 +5,11 @@ import type { FlexibleSectionData, FlexibleBlock } from "./types";
 
 interface FlexibleSectionProps {
   section: FlexibleSectionData;
+  /** Solution name to pass to form blocks (for pre-selecting product) */
+  solutionName?: string;
 }
 
-function BlockRenderer({ blocks }: { blocks?: FlexibleBlock[] }) {
+function BlockRenderer({ blocks, solutionName }: { blocks?: FlexibleBlock[]; solutionName?: string }) {
   if (!blocks || blocks.length === 0) return null;
 
   return (
@@ -19,13 +21,13 @@ function BlockRenderer({ blocks }: { blocks?: FlexibleBlock[] }) {
         }
 
         const BlockComponent = blockComponents[block._type];
-        return <BlockComponent key={block._key} block={block} />;
+        return <BlockComponent key={block._key} block={block} solutionName={solutionName} />;
       })}
     </>
   );
 }
 
-export default function FlexibleSection({ section }: FlexibleSectionProps) {
+export default function FlexibleSection({ section, solutionName }: FlexibleSectionProps) {
   const {
     layout,
     background = false,
@@ -49,15 +51,15 @@ export default function FlexibleSection({ section }: FlexibleSectionProps) {
     >
       {isSingleColumn ? (
         <div className={gridClasses.main}>
-          <BlockRenderer blocks={blockMain} />
+          <BlockRenderer blocks={blockMain} solutionName={solutionName} />
         </div>
       ) : (
         <>
           <div className={cn(gridClasses.left, alignClass)}>
-            <BlockRenderer blocks={blockLeft} />
+            <BlockRenderer blocks={blockLeft} solutionName={solutionName} />
           </div>
           <div className={cn(gridClasses.right, alignClass)}>
-            <BlockRenderer blocks={blockRight} />
+            <BlockRenderer blocks={blockRight} solutionName={solutionName} />
           </div>
         </>
       )}

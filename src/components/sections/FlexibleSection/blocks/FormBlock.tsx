@@ -4,9 +4,11 @@ import type { FlexFormBlock } from "../types";
 
 interface FormBlockProps {
   block: FlexFormBlock;
+  /** Solution name to pre-select in the form (when on a solution page) */
+  solutionName?: string;
 }
 
-export default async function FormBlock({ block }: FormBlockProps) {
+export default async function FormBlock({ block, solutionName }: FormBlockProps) {
   const { title, subtitle } = block;
 
   // Fetch solutions for the product dropdown
@@ -25,7 +27,7 @@ export default async function FormBlock({ block }: FormBlockProps) {
           )}
         </div>
       )}
-      <ContactForm products={products} />
+      <ContactForm products={products} defaultProduct={solutionName} />
     </div>
   );
 }

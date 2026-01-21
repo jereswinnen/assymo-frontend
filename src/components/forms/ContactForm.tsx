@@ -43,10 +43,20 @@ interface ContactFormProps {
   className?: string;
   /** Product options for the "Offerte aanvragen" subject (from solutions) */
   products?: ProductOption[];
+  /** Pre-select "Offerte aanvragen" subject with this product (e.g., on solution pages) */
+  defaultProduct?: string;
 }
 
-export default function ContactForm({ className, products = [] }: ContactFormProps) {
-  const [formData, setFormData] = useState<FormDataState>(getInitialFormData);
+export default function ContactForm({ className, products = [], defaultProduct }: ContactFormProps) {
+  const [formData, setFormData] = useState<FormDataState>(() => {
+    const initial = getInitialFormData();
+    // If a default product is provided, pre-select "Offerte aanvragen" and the product
+    if (defaultProduct) {
+      initial.subject = "Offerte aanvragen";
+      initial.product = defaultProduct;
+    }
+    return initial;
+  });
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const { track } = useTracking();

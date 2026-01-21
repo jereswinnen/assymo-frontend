@@ -95,11 +95,14 @@ type Section =
 interface SectionRendererProps {
   sections: Section[];
   headerImage?: ImageWithUrl;
+  /** Solution name to pass to form blocks for pre-selecting product */
+  solutionName?: string;
 }
 
 export default function SectionRenderer({
   sections,
   headerImage,
+  solutionName,
 }: SectionRendererProps) {
   return (
     <>
@@ -129,7 +132,7 @@ export default function SectionRenderer({
             return <SolutionsScroller key={key} section={section} />;
 
           case "flexibleSection":
-            return <FlexibleSection key={key} section={section} />;
+            return <FlexibleSection key={key} section={section} solutionName={solutionName} />;
 
           default:
             console.warn(`Unknown section type: ${(section as { _type: string })._type}`);
