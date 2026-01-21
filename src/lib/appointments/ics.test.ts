@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, test, expect } from 'vitest'
-import { generateICS, generateCancellationICS, generateICSFilename } from './ics'
+import { generateICS, generateCancellationICS, generateICSFilename, generateCalendarFeed } from './ics'
 import type { Appointment } from '@/types/appointments'
 
 const mockAppointment: Appointment = {
@@ -166,5 +166,69 @@ describe('generateICSFilename', () => {
     const filename = generateICSFilename(appointmentDifferentDate)
 
     expect(filename).toBe('assymo-afspraak-20251231.ics')
+  })
+})
+
+describe('generateCalendarFeed', () => {
+  const mockAppointment2: Appointment = {
+    ...mockAppointment,
+    id: 456,
+    appointment_date: '2025-01-20',
+    appointment_time: '10:00',
+    customer_name: 'Piet Jansen',
+    customer_email: 'piet@example.com',
+  }
+
+  test('generates valid ICS feed with multiple events', () => {
+    const feed = generateCalendarFeed([mockAppointment, mockAppointment2])
+
+    // Check overall structure
+    expect(feed).toContain('BEGIN:VCALENDAR')
+    expect(feed).toContain('END:VCALENDAR')
+    expect(feed).toContain('METHOD:PUBLISH')
+
+    // Should have two events
+    const eventCount = (feed.match(/BEGIN:VEVENT/g) || []).length
+    expect(eventCount).toBe(2)
+  })
+
+  test('includes calendar name header', () => {
+    const feed = generateCalendarFeed([mockAppointment])
+
+    expect(feed).toContain('X-WR-CALNAME:Assymo Afspraken')
+  })
+
+  test('allows custom calendar name', () => {
+    const feed = generateCalendarFeed([mockAppointment], 'Custom Calendar')
+
+    expect(feed).toContain('X-WR-CALNAME:Custom Calendar')
+  })
+
+  test('includes timezone header', () => {
+    const feed = generateCalendarFeed([mockAppointment])
+
+    expect(feed).toContain('X-WR-TIMEZONE:Europe/Brussels')
+  })
+
+  test('generates empty calendar when no appointments', () => {
+    const feed = generateCalendarFeed([])
+
+    expect(feed).toContain('BEGIN:VCALENDAR')
+    expect(feed).toContain('END:VCALENDAR')
+    expect(feed).not.toContain('BEGIN:VEVENT')
+  })
+
+  test('includes unique UIDs for each appointment', () => {
+    const feed = generateCalendarFeed([mockAppointment, mockAppointment2])
+
+    expect(feed).toContain('UID:appointment-123@assymo.be')
+    expect(feed).toContain('UID:appointment-456@assymo.be')
+  })
+
+  test('includes customer details in each event', () => {
+    const feed = generateCalendarFeed([mockAppointment, mockAppointment2])
+
+    expect(feed).toContain('SUMMARY:Afspraak: Jan de Vries')
+    expect(feed).toContain('SUMMARY:Afspraak: Piet Jansen')
   })
 })
