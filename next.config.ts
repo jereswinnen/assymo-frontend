@@ -34,6 +34,16 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/tuinconstructies/tuinhuizen.html",
+        destination: "/realisaties/tuinhuizen-op-maat",
+        permanent: true,
+      },
+      {
+        source: "/buitenschrijnwerk/terrassen.html",
+        destination: "/realisaties",
+        permanent: true,
+      },
+      {
         source: "/afspraak.html",
         destination: "/afspraak",
         permanent: true,
