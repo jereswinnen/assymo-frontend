@@ -28,6 +28,11 @@ const nextConfig: NextConfig = {
         destination: "/realisaties/bijgebouwen",
         permanent: true,
       },
+      {
+        source: "/buitenschrijnwerk/terrassen.html",
+        destination: "/realisaties/bijgebouwen",
+        permanent: true,
+      },
     ];
   },
 };
