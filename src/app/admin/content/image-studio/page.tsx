@@ -140,7 +140,7 @@ const urlToBase64 = async (
 
 export default function ImageStudioPage() {
   const { currentSite } = useSiteContext();
-  const { authorized, loading } = useRequireFeature("media");
+  const { authorized, loading } = useRequireFeature("imageStudio");
   const router = useRouter();
 
   const [versions, setVersions] = useState<ImageVersion[]>([]);

@@ -33,6 +33,11 @@ const nextConfig: NextConfig = {
         destination: "/realisaties/bijgebouwen",
         permanent: true,
       },
+      {
+        source: "/afspraak.html",
+        destination: "/afspraak",
+        permanent: true,
+      },
     ];
   },
 };

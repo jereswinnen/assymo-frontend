@@ -31,6 +31,7 @@ export const FEATURES = {
   navigation: "navigation",
   filters: "filters",
   media: "media",
+  imageStudio: "imageStudio",
   parameters: "parameters",
 
   // Business features (global)
@@ -53,6 +54,7 @@ export const SITE_SCOPED_FEATURES: Feature[] = [
   "navigation",
   "filters",
   "media",
+  "imageStudio",
   "parameters",
 ];
 
@@ -77,6 +79,7 @@ export const ROLE_FEATURES: Record<Role, Feature[]> = {
     "navigation",
     "filters",
     "media",
+    "imageStudio",
     "parameters",
     // Business features
     "appointments",
@@ -92,6 +95,7 @@ export const ROLE_FEATURES: Record<Role, Feature[]> = {
     "navigation",
     "filters",
     "media",
+    "imageStudio",
     "parameters",
   ],
 

@@ -16,6 +16,7 @@ const FEATURE_ROUTES: Record<Feature, string> = {
   pages: "/admin/content/pages",
   solutions: "/admin/content/solutions",
   media: "/admin/content/media",
+  imageStudio: "/admin/content/image-studio",
   filters: "/admin/content/filters",
   navigation: "/admin/content/navigation",
   parameters: "/admin/content/parameters",

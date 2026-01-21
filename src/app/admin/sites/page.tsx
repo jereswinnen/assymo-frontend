@@ -68,6 +68,7 @@ const FEATURE_LABELS: Record<Feature, string> = {
   navigation: "Navigatie",
   filters: "Filters",
   media: "Media",
+  imageStudio: "Media Studio",
   parameters: "Parameters",
   appointments: "Afspraken",
   emails: "E-mails",
@@ -84,6 +85,7 @@ const CONTENT_CAPABILITIES: Feature[] = [
   "navigation",
   "filters",
   "media",
+  "imageStudio",
   "parameters",
 ];
 

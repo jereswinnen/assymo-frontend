@@ -122,7 +122,7 @@ const contentItems: {
     href: "/admin/content/image-studio",
     label: "Media Studio",
     icon: CombineIcon,
-    feature: "media",
+    feature: "imageStudio",
   },
   {
     href: "/admin/content/filters",
