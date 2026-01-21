@@ -6,7 +6,7 @@ export const layoutGridClasses: Record<
   { left: string; right: string; main: string }
 > = {
   "1-col": {
-    main: "col-span-full md:col-span-7",
+    main: "col-span-full md:col-start-3 md:col-span-5",
     left: "",
     right: "",
   },

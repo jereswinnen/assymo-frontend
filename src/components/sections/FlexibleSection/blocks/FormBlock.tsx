@@ -21,9 +21,10 @@ export default async function FormBlock({ block, solutionName }: FormBlockProps)
         <div className="flex flex-col gap-2">
           {title && <h2 className="mb-0!">{title}</h2>}
           {subtitle && (
-            <p className="font-[420] text-stone-600 text-base md:text-lg">
-              {subtitle}
-            </p>
+            <div
+              className="font-[420] text-stone-600 text-base md:text-lg"
+              dangerouslySetInnerHTML={{ __html: subtitle }}
+            />
           )}
         </div>
       )}
