@@ -80,12 +80,15 @@ interface SolutionsScrollerClientProps {
   heading?: string;
   subtitle?: string;
   solutions: SolutionCard[];
+  /** Enable infinite looping when reaching the end. Defaults to false. */
+  loop?: boolean;
 }
 
 export default function SolutionsScrollerClient({
   heading,
   subtitle,
   solutions,
+  loop = false,
 }: SolutionsScrollerClientProps) {
   const router = useRouter();
 
@@ -99,8 +102,8 @@ export default function SolutionsScrollerClient({
   });
 
   const maxIndex = Math.max(0, solutions.length - VISIBLE_CARDS);
-  const canGoPrevious = currentIndex > 0;
-  const canGoNext = currentIndex < maxIndex;
+  const canGoPrevious = loop || currentIndex > 0;
+  const canGoNext = loop || currentIndex < maxIndex;
 
   // Scroll the container to show a specific card index at the left edge
   const scrollToCard = useCallback((index: number) => {
@@ -143,30 +146,41 @@ export default function SolutionsScrollerClient({
 
   const goToPrevious = useCallback(() => {
     if (!canGoPrevious) return;
-    const newIndex = currentIndex - 1;
+    let newIndex = currentIndex - 1;
+    if (loop && newIndex < 0) {
+      newIndex = maxIndex;
+    }
     setCurrentIndex(newIndex);
     scrollToCard(newIndex);
-  }, [canGoPrevious, currentIndex, scrollToCard]);
+  }, [canGoPrevious, currentIndex, loop, maxIndex, scrollToCard]);
 
   const goToNext = useCallback(() => {
     if (!canGoNext) return;
-    const newIndex = currentIndex + 1;
+    let newIndex = currentIndex + 1;
+    if (loop && newIndex > maxIndex) {
+      newIndex = 0;
+    }
     setCurrentIndex(newIndex);
     scrollToCard(newIndex);
-  }, [canGoNext, currentIndex, scrollToCard]);
+  }, [canGoNext, currentIndex, loop, maxIndex, scrollToCard]);
 
-  // Auto-advance one card at a time (only when in view, stops at end)
+  // Auto-advance one card at a time (only when in view, stops at end unless loop is enabled)
   useEffect(() => {
-    if (!isInView || isPaused || !canGoNext) return;
+    if (!isInView || isPaused) return;
+    // Stop auto-advance at end unless looping is enabled
+    if (!loop && currentIndex >= maxIndex) return;
 
     const interval = setInterval(() => {
-      const newIndex = currentIndex + 1;
+      let newIndex = currentIndex + 1;
+      if (loop && newIndex > maxIndex) {
+        newIndex = 0;
+      }
       setCurrentIndex(newIndex);
       scrollToCard(newIndex);
     }, SCROLL_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [isInView, isPaused, currentIndex, canGoNext, scrollToCard]);
+  }, [isInView, isPaused, currentIndex, loop, maxIndex, scrollToCard]);
 
   if (solutions.length === 0) {
     return null;

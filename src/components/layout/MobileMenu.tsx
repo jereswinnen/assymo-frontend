@@ -234,6 +234,7 @@ export default function MobileMenu({
                               ) : (
                                 <Link
                                   href={`/${link.slug}`}
+                                  onClick={onToggle}
                                   className={cn(
                                     "cursor-pointer block text-2xl font-[560] text-stone-600 transition-colors hover:text-stone-900",
                                     isActive && "text-stone-900",
@@ -357,6 +358,7 @@ export default function MobileMenu({
                           <li key={index}>
                             <Link
                               href={`/realisaties/${item.slug}`}
+                              onClick={onToggle}
                               className="cursor-pointer block text-xl font-medium text-stone-600 transition-colors hover:text-stone-900"
                             >
                               {item.name}
