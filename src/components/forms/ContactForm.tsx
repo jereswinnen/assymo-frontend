@@ -23,21 +23,29 @@ import { CheckIcon, MailCheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTracking } from "@/lib/tracking";
 import {
-  getVisibleFields,
+  getVisibleFieldsForProduct,
   getInitialFormData,
   isValidEmail,
   type FieldConfig,
   type Subject,
   type FormDataState,
+  type FieldOption,
 } from "@/config/contactForm";
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
-interface ContactFormProps {
-  className?: string;
+export interface ProductOption {
+  id: string;
+  name: string;
 }
 
-export default function ContactForm({ className }: ContactFormProps) {
+interface ContactFormProps {
+  className?: string;
+  /** Product options for the "Offerte aanvragen" subject (from solutions) */
+  products?: ProductOption[];
+}
+
+export default function ContactForm({ className, products = [] }: ContactFormProps) {
   const [formData, setFormData] = useState<FormDataState>(getInitialFormData);
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -46,8 +54,10 @@ export default function ContactForm({ className }: ContactFormProps) {
   const isSubmitting = status === "submitting";
   const isSuccess = status === "success";
   const currentSubject = formData.subject as Subject;
+  const currentProduct = formData.product as string | null;
 
-  const visibleFields = getVisibleFields(currentSubject);
+  // Get visible fields based on subject and product
+  const visibleFields = getVisibleFieldsForProduct(currentSubject, currentProduct);
 
   const isFormValid = visibleFields
     .filter((field) => field.required)
@@ -75,10 +85,7 @@ export default function ContactForm({ className }: ContactFormProps) {
       visibleFields.forEach((field) => {
         const value = formData[field.name];
         if (field.type === "file" && value instanceof File) {
-          data.set(
-            field.name === "grondplanFile" ? "grondplan" : field.name,
-            value,
-          );
+          data.set(field.name, value);
         } else if (field.type === "checkbox") {
           data.set(field.name, String(value));
         } else if (typeof value === "string") {
@@ -100,7 +107,7 @@ export default function ContactForm({ className }: ContactFormProps) {
 
       track("contact_form_submitted", {
         subject: formData.subject,
-        has_attachment: formData.grondplanFile instanceof File,
+        has_attachment: formData.bestand instanceof File,
       });
       setStatus("success");
     } catch (err) {
@@ -114,6 +121,14 @@ export default function ContactForm({ className }: ContactFormProps) {
           : "Er is iets misgegaan. Probeer later opnieuw.",
       );
     }
+  }
+
+  function getFieldOptions(field: FieldConfig): FieldOption[] {
+    // For dynamic options (product field), use the products prop
+    if (field.dynamicOptions && field.name === "product") {
+      return products.map((p) => ({ value: p.name, label: p.name }));
+    }
+    return field.options || [];
   }
 
   function renderField(field: FieldConfig) {
@@ -136,6 +151,7 @@ export default function ContactForm({ className }: ContactFormProps) {
               value={String(value || "")}
               onChange={(e) => updateField(field.name, e.target.value)}
               autoComplete={field.autoComplete}
+              placeholder={field.placeholder}
               disabled={isDisabled}
             />
           </Field>
@@ -153,12 +169,18 @@ export default function ContactForm({ className }: ContactFormProps) {
               value={String(value || "")}
               onChange={(e) => updateField(field.name, e.target.value)}
               className="min-h-40"
+              placeholder={field.placeholder}
               disabled={isDisabled}
             />
           </Field>
         );
 
-      case "select":
+      case "select": {
+        const options = getFieldOptions(field);
+        // Don't render if dynamic options but no options available
+        if (field.dynamicOptions && options.length === 0) {
+          return null;
+        }
         return (
           <Field key={field.name}>
             <FieldLabel htmlFor={field.name}>
@@ -170,10 +192,10 @@ export default function ContactForm({ className }: ContactFormProps) {
               disabled={isDisabled}
             >
               <SelectTrigger id={field.name} className="w-full">
-                <SelectValue />
+                <SelectValue placeholder="Selecteer..." />
               </SelectTrigger>
               <SelectContent>
-                {field.options?.map((option) => (
+                {options.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
@@ -182,6 +204,7 @@ export default function ContactForm({ className }: ContactFormProps) {
             </Select>
           </Field>
         );
+      }
 
       case "file":
         return (

@@ -1,5 +1,5 @@
 export { ContactFormEmail } from "./ContactFormEmail";
-export { ContactFormTuinhuizenEmail } from "./ContactFormTuinhuizenEmail";
+export { ContactFormOfferteEmail } from "./ContactFormOfferteEmail";
 export { NewsletterWelcome } from "./NewsletterWelcome";
 export { NewsletterBroadcast } from "./NewsletterBroadcast";
 export { EmailLayout } from "./components/EmailLayout";

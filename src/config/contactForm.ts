@@ -12,7 +12,7 @@ export type FieldType =
   | "file"
   | "checkbox";
 
-export type Subject = "Algemeen" | "Tuinhuizen";
+export type Subject = "Algemeen" | "Offerte aanvragen";
 
 export interface FieldOption {
   value: string;
@@ -28,7 +28,20 @@ export interface FieldConfig {
   accept?: string; // for file inputs
   options?: FieldOption[]; // for select inputs
   subject?: Subject; // if set, only show for this subject
+  placeholder?: string;
+  /** If true, options will be provided dynamically (e.g., from database) */
+  dynamicOptions?: boolean;
+  /** Products that should show this field (matched by name) */
+  showForProducts?: string[];
 }
+
+// Products that should show the Budget field
+export const PRODUCTS_WITH_BUDGET = [
+  "Tuinhuizen op maat",
+  "Poorten",
+  "Overdekkingen",
+  "Carports",
+];
 
 export const FORM_FIELDS: FieldConfig[] = [
   // Common fields (shown for all subjects)
@@ -48,7 +61,7 @@ export const FORM_FIELDS: FieldConfig[] = [
   },
   {
     name: "phone",
-    label: "Telefoon",
+    label: "Telefoonnummer",
     type: "tel",
     required: true,
     autoComplete: "tel",
@@ -66,7 +79,7 @@ export const FORM_FIELDS: FieldConfig[] = [
     type: "select",
     options: [
       { value: "Algemeen", label: "Algemeen" },
-      { value: "Tuinhuizen", label: "Tuinhuizen" },
+      { value: "Offerte aanvragen", label: "Offerte aanvragen" },
     ],
   },
 
@@ -79,43 +92,40 @@ export const FORM_FIELDS: FieldConfig[] = [
     subject: "Algemeen",
   },
 
-  // Tuinhuizen fields
+  // Offerte aanvragen fields
+  {
+    name: "product",
+    label: "Product",
+    type: "select",
+    required: true,
+    subject: "Offerte aanvragen",
+    dynamicOptions: true, // Options provided from solutions
+  },
+  {
+    name: "budget",
+    label: "Budget",
+    type: "text",
+    required: false,
+    subject: "Offerte aanvragen",
+    showForProducts: PRODUCTS_WITH_BUDGET,
+  },
+  {
+    name: "bestand",
+    label: "Bestand uploaden",
+    type: "file",
+    accept: "image/*,application/pdf,.doc,.docx",
+    subject: "Offerte aanvragen",
+  },
   {
     name: "extraInfo",
     label: "Extra informatie",
     type: "textarea",
-    required: true,
-    subject: "Tuinhuizen",
+    required: false,
+    subject: "Offerte aanvragen",
+    placeholder: "Eventuele extra informatie over je project...",
   },
-  {
-    name: "grondplanFile",
-    label: "Grondplan uploaden",
-    type: "file",
-    accept: "image/*,application/pdf",
-    subject: "Tuinhuizen",
-  },
-  {
-    name: "bouwType",
-    label: "Bouwpakket of geplaatst",
-    type: "select",
-    options: [
-      { value: "Bouwpakket", label: "Bouwpakket" },
-      { value: "Geplaatst", label: "Geplaatst" },
-    ],
-    subject: "Tuinhuizen",
-  },
-  {
-    name: "bekledingHoutsoort",
-    label: "Bekledingen: houtsoort",
-    type: "text",
-    subject: "Tuinhuizen",
-  },
-  {
-    name: "bekledingProfiel",
-    label: "Bekledingen: profiel",
-    type: "text",
-    subject: "Tuinhuizen",
-  },
+
+  // Newsletter opt-in (all subjects)
   {
     name: "newsletterOptIn",
     label: "Ja, ik ontvang graag nieuws over aanbiedingen",
@@ -134,6 +144,26 @@ export function getVisibleFields(subject: Subject): FieldConfig[] {
   return FORM_FIELDS.filter(
     (field) => !field.subject || field.subject === subject
   );
+}
+
+/**
+ * Get fields visible for a given subject and product
+ * Filters out fields that have showForProducts but the current product isn't in the list
+ */
+export function getVisibleFieldsForProduct(
+  subject: Subject,
+  product: string | null
+): FieldConfig[] {
+  return getVisibleFields(subject).filter((field) => {
+    // If field has showForProducts, check if current product matches
+    if (field.showForProducts && field.showForProducts.length > 0) {
+      if (!product) return false;
+      return field.showForProducts.some(
+        (p) => p.toLowerCase() === product.toLowerCase()
+      );
+    }
+    return true;
+  });
 }
 
 /**

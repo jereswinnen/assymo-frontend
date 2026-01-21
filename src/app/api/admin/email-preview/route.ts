@@ -9,7 +9,7 @@ import {
   NewsletterWelcome,
   NewsletterBroadcast,
   ContactFormEmail,
-  ContactFormTuinhuizenEmail,
+  ContactFormOfferteEmail,
 } from "@/emails";
 
 // Sample data for each email template
@@ -77,17 +77,17 @@ const sampleData = {
     message:
       "Beste,\n\nIk ben geïnteresseerd in een offerte voor een tuinhuis.\n\nMet vriendelijke groeten,\nJan",
   },
-  "contact-form-tuinhuizen": {
+  "contact-form-offerte": {
     name: "Jan Janssen",
     email: "jan.janssen@email.be",
     phone: "+32 123 45 67 89",
     address: "Voorbeeldstraat 42, 2000 Antwerpen",
+    product: "Tuinhuizen op maat",
+    budget: "€5.000 - €10.000",
     extraInfo: "Ik wil graag een tuinhuis van 3x4 meter met een luifel.",
-    bouwType: "Geplaatst",
-    bekledingHoutsoort: "Thermowood",
-    bekledingProfiel: "Horizontaal",
     newsletterOptIn: true,
-    hasGrondplan: false,
+    hasBestand: true,
+    bestandNaam: "grondplan.pdf",
   },
 };
 
@@ -113,9 +113,9 @@ const templates: Record<string, (props: unknown) => React.ReactElement> = {
     NewsletterBroadcast(props as Parameters<typeof NewsletterBroadcast>[0]),
   "contact-form": (props) =>
     ContactFormEmail(props as Parameters<typeof ContactFormEmail>[0]),
-  "contact-form-tuinhuizen": (props) =>
-    ContactFormTuinhuizenEmail(
-      props as Parameters<typeof ContactFormTuinhuizenEmail>[0]
+  "contact-form-offerte": (props) =>
+    ContactFormOfferteEmail(
+      props as Parameters<typeof ContactFormOfferteEmail>[0]
     ),
 };
 
@@ -127,7 +127,7 @@ const templateList = [
   { id: "newsletter-welcome", name: "Nieuwsbrief welkom" },
   { id: "newsletter-broadcast", name: "Nieuwsbrief broadcast" },
   { id: "contact-form", name: "Contactformulier algemeen" },
-  { id: "contact-form-tuinhuizen", name: "Contactformulier tuinhuizen" },
+  { id: "contact-form-offerte", name: "Contactformulier offerte" },
 ];
 
 // GET: Get list of available templates or render a specific one

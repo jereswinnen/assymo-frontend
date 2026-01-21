@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { resend } from "@/lib/resend";
 import { RESEND_CONFIG } from "@/config/resend";
 import { validateFormData, type Subject } from "@/config/contactForm";
-import { ContactFormEmail, ContactFormTuinhuizenEmail } from "@/emails";
+import { ContactFormEmail, ContactFormOfferteEmail } from "@/emails";
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,20 +32,18 @@ export async function POST(req: NextRequest) {
     const newsletterOptIn = form.get("newsletterOptIn") === "true";
 
     // Send email based on subject
-    if (subject === "Tuinhuizen") {
+    if (subject === "Offerte aanvragen") {
+      const product = (form.get("product") as string) || "";
+      const budget = (form.get("budget") as string) || "";
       const extraInfo = (form.get("extraInfo") as string) || "";
-      const bouwType = (form.get("bouwType") as string) || "Bouwpakket";
-      const bekledingHoutsoort =
-        (form.get("bekledingHoutsoort") as string) || "";
-      const bekledingProfiel = (form.get("bekledingProfiel") as string) || "";
-      const grondplan = form.get("grondplan") as File | null;
+      const bestand = form.get("bestand") as File | null;
 
-      // Prepare attachments if grondplan is provided
+      // Prepare attachments if file is provided
       const attachments: { filename: string; content: Buffer }[] = [];
-      if (grondplan && grondplan.size > 0) {
-        const buffer = Buffer.from(await grondplan.arrayBuffer());
+      if (bestand && bestand.size > 0) {
+        const buffer = Buffer.from(await bestand.arrayBuffer());
         attachments.push({
-          filename: grondplan.name,
+          filename: bestand.name,
           content: buffer,
         });
       }
@@ -54,24 +52,24 @@ export async function POST(req: NextRequest) {
         from: RESEND_CONFIG.fromAddressContact,
         to: [RESEND_CONFIG.contactRecipient],
         replyTo: email,
-        subject: RESEND_CONFIG.subjects.contactTuinhuizen,
-        react: ContactFormTuinhuizenEmail({
+        subject: RESEND_CONFIG.subjects.contactOfferte,
+        react: ContactFormOfferteEmail({
           name,
           email,
           phone,
           address,
-          extraInfo,
-          bouwType,
-          bekledingHoutsoort,
-          bekledingProfiel,
+          product,
+          budget: budget || undefined,
+          extraInfo: extraInfo || undefined,
           newsletterOptIn,
-          hasGrondplan: attachments.length > 0,
+          hasBestand: attachments.length > 0,
+          bestandNaam: bestand?.name,
         }),
         attachments: attachments.length > 0 ? attachments : undefined,
       });
 
       if (emailError) {
-        console.error("Failed to send Tuinhuizen email:", emailError);
+        console.error("Failed to send Offerte email:", emailError);
         return NextResponse.json(
           { error: "Kon e-mail niet verzenden. Probeer later opnieuw." },
           { status: 500 }

@@ -55,7 +55,7 @@ export const RESEND_CONFIG = {
   // Email subjects
   subjects: {
     contactAlgemeen: "Nieuw contactformulier: Algemeen",
-    contactTuinhuizen: "Nieuw contactformulier: Tuinhuizen",
+    contactOfferte: "Nieuw contactformulier: Offerte aanvragen",
     newsletterWelcome: "Welkom bij de Assymo nieuwsbrief!",
     appointmentConfirmation: "Bevestiging afspraak bij Assymo",
     appointmentCancellation: "Uw afspraak bij Assymo is geannuleerd",

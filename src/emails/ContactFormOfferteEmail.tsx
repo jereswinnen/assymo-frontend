@@ -3,36 +3,36 @@ import * as React from "react";
 import { EmailLayout } from "./components/EmailLayout";
 import { MessageBox, typography, layout, colors, components } from "@/components/email";
 
-interface ContactFormTuinhuizenEmailProps {
+interface ContactFormOfferteEmailProps {
   name: string;
   email: string;
   phone: string;
   address: string;
-  extraInfo: string;
-  bouwType: string;
-  bekledingHoutsoort: string;
-  bekledingProfiel: string;
+  product: string;
+  budget?: string;
+  extraInfo?: string;
   newsletterOptIn: boolean;
-  hasGrondplan: boolean;
+  hasBestand: boolean;
+  bestandNaam?: string;
 }
 
-export function ContactFormTuinhuizenEmail({
+export function ContactFormOfferteEmail({
   name,
   email,
   phone,
   address,
+  product,
+  budget,
   extraInfo,
-  bouwType,
-  bekledingHoutsoort,
-  bekledingProfiel,
   newsletterOptIn,
-  hasGrondplan,
-}: ContactFormTuinhuizenEmailProps) {
+  hasBestand,
+  bestandNaam,
+}: ContactFormOfferteEmailProps) {
   return (
-    <EmailLayout preview={`Tuinhuizen aanvraag van ${name}`}>
+    <EmailLayout preview={`Offerteaanvraag van ${name} voor ${product}`}>
       <Section style={layout.content}>
         <Text style={typography.heading}>Nieuw contactformulier</Text>
-        <Text style={typography.subheading}>Tuinhuizen</Text>
+        <Text style={typography.subheading}>Offerte aanvragen</Text>
 
         <Hr style={layout.divider} />
 
@@ -67,37 +67,39 @@ export function ContactFormTuinhuizenEmail({
 
         <Hr style={layout.divider} />
 
-        <Text style={sectionTitle}>Tuinhuis specificaties</Text>
+        <Text style={sectionTitle}>Offertegegevens</Text>
 
-        <Text style={typography.label}>Bouwpakket of geplaatst</Text>
-        <Text style={typography.value}>{bouwType}</Text>
+        <Text style={typography.label}>Product</Text>
+        <Text style={typography.value}>{product}</Text>
 
-        {bekledingHoutsoort && (
+        {budget && (
           <>
-            <Text style={typography.label}>Bekledingen: houtsoort</Text>
-            <Text style={typography.value}>{bekledingHoutsoort}</Text>
+            <Text style={typography.label}>Budget</Text>
+            <Text style={typography.value}>{budget}</Text>
           </>
         )}
 
-        {bekledingProfiel && (
+        {hasBestand && (
           <>
-            <Text style={typography.label}>Bekledingen: profiel</Text>
-            <Text style={typography.value}>{bekledingProfiel}</Text>
+            <Text style={typography.label}>Bijlage</Text>
+            <Text style={typography.value}>
+              {bestandNaam || "Bestand bijgevoegd"}
+            </Text>
           </>
         )}
 
-        <Hr style={layout.divider} />
-
-        <Text style={typography.label}>Extra informatie</Text>
-        <MessageBox>{extraInfo}</MessageBox>
+        {extraInfo && (
+          <>
+            <Hr style={layout.divider} />
+            <Text style={typography.label}>Extra informatie</Text>
+            <MessageBox>{extraInfo}</MessageBox>
+          </>
+        )}
 
         <Hr style={layout.divider} />
 
         <Text style={sectionTitle}>Extra opties</Text>
 
-        <Text style={typography.value}>
-          Grondplan bijgevoegd: {hasGrondplan ? "Ja" : "Nee"}
-        </Text>
         <Text style={typography.value}>
           Nieuwsbrief: {newsletterOptIn ? "Ja, graag" : "Nee"}
         </Text>
@@ -106,7 +108,7 @@ export function ContactFormTuinhuizenEmail({
   );
 }
 
-export default ContactFormTuinhuizenEmail;
+export default ContactFormOfferteEmail;
 
 const sectionTitle = {
   fontSize: "14px",

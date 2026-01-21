@@ -1,12 +1,17 @@
 import ContactForm from "@/components/forms/ContactForm";
+import { getAllSolutions } from "@/lib/content";
 import type { FlexFormBlock } from "../types";
 
 interface FormBlockProps {
   block: FlexFormBlock;
 }
 
-export default function FormBlock({ block }: FormBlockProps) {
+export default async function FormBlock({ block }: FormBlockProps) {
   const { title, subtitle } = block;
+
+  // Fetch solutions for the product dropdown
+  const solutions = await getAllSolutions();
+  const products = solutions.map((s) => ({ id: s.id, name: s.name }));
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
@@ -20,7 +25,7 @@ export default function FormBlock({ block }: FormBlockProps) {
           )}
         </div>
       )}
-      <ContactForm />
+      <ContactForm products={products} />
     </div>
   );
 }
