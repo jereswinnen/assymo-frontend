@@ -187,7 +187,7 @@ export function generateCalendarFeed(
       appointment.remarks ? `Opmerkingen: ${appointment.remarks}` : "",
     ]
       .filter(Boolean)
-      .join("\\n");
+      .join("\n");
 
     return [
       "BEGIN:VEVENT",
