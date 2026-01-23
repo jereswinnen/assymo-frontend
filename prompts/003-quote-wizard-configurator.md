@@ -324,24 +324,21 @@ Existing availability API can be reused:
 - Check `quote_submissions` table has the submission
 </phase3>
 
-<phase4 name="Admin Interface">
-**Commit message:** `feat(configurator): add admin pages for questions, pricing and submissions`
+<phase4 name="Admin Interface" status="COMPLETE">
+**Commit:** `37e623f` - `feat(configurator): add admin pages for questions and pricing`
 
-1. Build admin page for managing product questions per product
-   - Follow existing admin page patterns (DataTable, forms, modals)
-   - Use existing shadcn/ui components throughout
-2. Build admin page for managing pricing per product
-3. Build admin page for viewing quote submissions (admin+ only, read-only)
-4. Add navigation links to admin sidebar under "Content"
-5. Ensure all pages use `useSiteContext()` and `usePermissions()` patterns
+1. ✅ Built admin page for managing product questions per product
+   - Drag-drop reorder, add/edit/delete questions via sheet
+2. ✅ Built admin page for managing pricing per product
+3. ❌ Submissions view removed (admin gets email notification instead)
+4. ✅ Added "Configurator" link to admin sidebar under "Content"
+5. ✅ Added "configurator" as site-scoped feature in permissions system
 
-**How to test:**
-- Navigate to admin → Content → Configurator
-- Add/edit/delete questions for a product
-- Set pricing for a product
-- View submissions list
-- Verify permission checks (content_editor can edit, admin can view submissions)
-- Complete wizard again - verify new questions/pricing are used
+**Tested:**
+- ✅ Navigate to admin → Content → Configurator
+- ✅ Add/edit/delete questions for a product
+- ✅ Set pricing for a product
+- ✅ Complete wizard - verify new questions/pricing are used
 </phase4>
 </implementation_phases>
 
