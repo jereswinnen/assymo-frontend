@@ -311,6 +311,7 @@ export default function SolutionEditorPage({
     headerImage,
     sections,
     selectedFilterIds,
+    configuratorCategoryId,
     metaTitle,
     metaDescription,
   ]);
