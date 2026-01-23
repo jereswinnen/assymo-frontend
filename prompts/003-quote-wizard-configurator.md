@@ -306,19 +306,20 @@ Existing availability API can be reused:
 - ✅ URL param `?product=poolhouses` pre-selects product
 </phase2>
 
-<phase3 name="Submission, Email and Appointments">
-**Commit message:** `feat(configurator): add quote submission, email and appointment booking`
+<phase3 name="Submission, Email and Appointments" status="COMPLETE">
+**Commit:** `ad046b9` - `feat(configurator): add quote submission, email and appointment booking`
 
-1. Implement quote submission API (`POST /api/configurator/submit`)
-2. Create `QuoteEmail.tsx` template (user version + admin notification)
-3. Complete SummaryStep: price display, email confirmation, appointment booking
-4. Integrate appointment availability (reuse existing APIs)
-5. Store submissions in database with site_id
-6. Add analytics tracking for all steps
+1. ✅ Implemented quote submission API (`POST /api/configurator/submit`)
+2. ✅ Created `QuoteEmail.tsx` template (user version + admin notification)
+3. ✅ Completed SummaryStep: price display, email confirmation, appointment booking
+4. ✅ Integrated appointment availability (reuse existing APIs)
+5. ✅ Stored submissions in database with site_id
+6. ✅ Added analytics tracking for all steps
 
-**How to test:**
-- Complete wizard end-to-end
-- Check email received with correct quote details
+**Tested:**
+- ✅ Complete wizard end-to-end
+- ✅ Email sent with correct quote details (test mode routes to test email)
+- ✅ Appointment booking works from summary step
 - Book appointment from summary - verify it appears in admin appointments
 - Check `quote_submissions` table has the submission
 </phase3>
