@@ -18,6 +18,7 @@ export const ADMIN_STRINGS = {
      */
     buttons: {
       save: "Bewaren",
+      savePricing: "Prijzen bewaren",
       saving: "Bewaren...",
       cancel: "Annuleren",
       delete: "Verwijderen",

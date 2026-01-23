@@ -31,8 +31,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import {
   Empty,
   EmptyHeader,
@@ -43,16 +41,14 @@ import {
 import { toast } from "sonner";
 import {
   ChevronRightIcon,
-  CoinsIcon,
   GripVerticalIcon,
-  ListIcon,
   Loader2Icon,
   PlusIcon,
   SettingsIcon,
 } from "lucide-react";
 import { t } from "@/config/strings";
 import { CategoryEditSheet } from "./sheets/CategoryEditSheet";
-import type { ConfiguratorQuestion, ConfiguratorPricing } from "@/lib/configurator/types";
+import type { ConfiguratorQuestion } from "@/lib/configurator/types";
 import type { ConfiguratorCategory } from "@/lib/configurator/categories";
 
 interface CategorySummary {
@@ -60,17 +56,14 @@ interface CategorySummary {
   name: string;
   slug: string;
   questionCount: number;
-  hasPricing: boolean;
 }
 
 export default function ConfiguratorPage() {
   const router = useRouter();
   const { currentSite, loading: siteLoading } = useSiteContext();
   const { authorized, loading: permissionLoading } = useRequireFeature("configurator");
-  const [activeTab, setActiveTab] = useState("categories");
   const [categories, setCategories] = useState<ConfiguratorCategory[]>([]);
   const [questions, setQuestions] = useState<ConfiguratorQuestion[]>([]);
-  const [pricing, setPricing] = useState<ConfiguratorPricing[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Sheet state
@@ -95,25 +88,21 @@ export default function ConfiguratorPage() {
     if (!currentSite) return;
     setLoading(true);
     try {
-      const [categoriesRes, questionsRes, pricingRes] = await Promise.all([
+      const [categoriesRes, questionsRes] = await Promise.all([
         fetch(`/api/admin/configurator/categories?siteId=${currentSite.id}`),
         fetch(`/api/admin/configurator/questions?siteId=${currentSite.id}`),
-        fetch(`/api/admin/configurator/pricing?siteId=${currentSite.id}`),
       ]);
 
       if (!categoriesRes.ok) throw new Error("Failed to fetch categories");
       if (!questionsRes.ok) throw new Error("Failed to fetch questions");
-      if (!pricingRes.ok) throw new Error("Failed to fetch pricing");
 
-      const [categoriesData, questionsData, pricingData] = await Promise.all([
+      const [categoriesData, questionsData] = await Promise.all([
         categoriesRes.json(),
         questionsRes.json(),
-        pricingRes.json(),
       ]);
 
       setCategories(categoriesData);
       setQuestions(questionsData);
-      setPricing(pricingData);
     } catch (error) {
       console.error("Failed to load configurator data:", error);
       toast.error(t("admin.messages.dataLoadFailed"));
@@ -124,7 +113,6 @@ export default function ConfiguratorPage() {
 
   // Build category summaries
   const categorySummaries: CategorySummary[] = useMemo(() => {
-    // Count questions per category
     const questionCounts = new Map<string, number>();
     for (const q of questions) {
       if (q.category_id) {
@@ -135,21 +123,13 @@ export default function ConfiguratorPage() {
       }
     }
 
-    // Check pricing per category
-    const pricingMap = new Map(
-      pricing
-        .filter((p) => p.category_id)
-        .map((p) => [p.category_id, p])
-    );
-
     return categories.map((cat) => ({
       id: cat.id,
       name: cat.name,
       slug: cat.slug,
       questionCount: questionCounts.get(cat.id) || 0,
-      hasPricing: pricingMap.has(cat.id),
     }));
-  }, [categories, questions, pricing]);
+  }, [categories, questions]);
 
   // Sheet handlers
   const openNewCategorySheet = useCallback(() => {
@@ -224,80 +204,61 @@ export default function ConfiguratorPage() {
 
   return (
     <>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="categories">
-            <ListIcon className="size-4" />
-            {t("admin.headings.configuratorItems")}
-          </TabsTrigger>
-          <TabsTrigger value="pricing">
-            <CoinsIcon className="size-4" />
-            {t("admin.headings.pricing")}
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="categories">
-          {categories.length === 0 ? (
-            <Empty className="border py-12">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <SettingsIcon className="size-5" />
-                </EmptyMedia>
-                <EmptyTitle>{t("admin.empty.noCategories")}</EmptyTitle>
-                <EmptyDescription>{t("admin.empty.noCategoriesDesc")}</EmptyDescription>
-              </EmptyHeader>
-              <Button size="sm" onClick={openNewCategorySheet}>
-                <PlusIcon className="size-4" />
-                {t("admin.buttons.addItem")}
-              </Button>
-            </Empty>
-          ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={categories.map((c) => c.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-10"></TableHead>
-                      <TableHead>{t("admin.labels.name")}</TableHead>
-                      <TableHead className="text-right">{t("admin.headings.questions")}</TableHead>
-                      <TableHead className="w-10"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {categorySummaries.map((category) => (
-                      <SortableCategoryRow
-                        key={category.id}
-                        id={category.id}
-                        onClick={() => router.push(`/admin/content/configurator/${category.id}`)}
-                        onEdit={() => {
-                          const cat = categories.find((c) => c.id === category.id);
-                          if (cat) openEditCategorySheet(cat);
-                        }}
-                      >
-                        <TableCell className="font-medium">{category.name}</TableCell>
-                        <TableCell className="text-right text-muted-foreground">
-                          {category.questionCount} {category.questionCount === 1 ? "vraag" : "vragen"}
-                        </TableCell>
-                      </SortableCategoryRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </SortableContext>
-            </DndContext>
-          )}
-        </TabsContent>
-
-        <TabsContent value="pricing">
-          <PricingTable categories={categorySummaries} pricing={pricing} />
-        </TabsContent>
-      </Tabs>
+      {categories.length === 0 ? (
+        <Empty className="border py-12">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <SettingsIcon className="size-5" />
+            </EmptyMedia>
+            <EmptyTitle>{t("admin.empty.noCategories")}</EmptyTitle>
+            <EmptyDescription>{t("admin.empty.noCategoriesDesc")}</EmptyDescription>
+          </EmptyHeader>
+          <Button size="sm" onClick={openNewCategorySheet}>
+            <PlusIcon className="size-4" />
+            {t("admin.buttons.addItem")}
+          </Button>
+        </Empty>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={categories.map((c) => c.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10"></TableHead>
+                  <TableHead>{t("admin.labels.name")}</TableHead>
+                  <TableHead className="text-right">{t("admin.headings.questions")}</TableHead>
+                  <TableHead className="w-10"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {categorySummaries.map((category) => (
+                  <SortableCategoryRow
+                    key={category.id}
+                    id={category.id}
+                    onClick={() => router.push(`/admin/content/configurator/${category.id}`)}
+                    onEdit={() => {
+                      const cat = categories.find((c) => c.id === category.id);
+                      if (cat) openEditCategorySheet(cat);
+                    }}
+                  >
+                    <TableCell className="font-medium">{category.name}</TableCell>
+                    <TableCell className="text-right text-muted-foreground">
+                      {category.questionCount} {category.questionCount === 1 ? "vraag" : "vragen"}
+                    </TableCell>
+                  </SortableCategoryRow>
+                ))}
+              </TableBody>
+            </Table>
+          </SortableContext>
+        </DndContext>
+      )}
 
       {/* Edit/Create Sheet */}
       <CategoryEditSheet
@@ -362,89 +323,4 @@ function SortableCategoryRow({
       </TableCell>
     </TableRow>
   );
-}
-
-function PricingTable({
-  categories,
-  pricing,
-}: {
-  categories: CategorySummary[];
-  pricing: ConfiguratorPricing[];
-}) {
-  const router = useRouter();
-  const pricingMap = new Map(
-    pricing
-      .filter((p) => p.category_id)
-      .map((p) => [p.category_id, p])
-  );
-
-  if (categories.length === 0) {
-    return (
-      <Empty className="border py-12">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <CoinsIcon className="size-5" />
-          </EmptyMedia>
-          <EmptyTitle>{t("admin.empty.noPricing")}</EmptyTitle>
-          <EmptyDescription>
-            Maak eerst een configurator item aan om prijzen te configureren.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    );
-  }
-
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t("admin.labels.name")}</TableHead>
-          <TableHead>{t("admin.labels.basePriceMin")}</TableHead>
-          <TableHead>{t("admin.labels.basePriceMax")}</TableHead>
-          <TableHead>{t("admin.labels.status")}</TableHead>
-          <TableHead className="w-10"></TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {categories.map((category) => {
-          const p = pricingMap.get(category.id);
-          return (
-            <TableRow
-              key={category.id}
-              className="cursor-pointer"
-              onClick={() => router.push(`/admin/content/configurator/pricing?categoryId=${category.id}`)}
-            >
-              <TableCell className="font-medium">{category.name}</TableCell>
-              <TableCell>
-                {p ? formatPrice(p.base_price_min) : "-"}
-              </TableCell>
-              <TableCell>
-                {p ? formatPrice(p.base_price_max) : "-"}
-              </TableCell>
-              <TableCell>
-                {p ? (
-                  <Badge variant="default">{t("admin.misc.active")}</Badge>
-                ) : (
-                  <Badge variant="secondary">{t("admin.misc.inactive")}</Badge>
-                )}
-              </TableCell>
-              <TableCell>
-                <ChevronRightIcon className="size-4 text-muted-foreground" />
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
-  );
-}
-
-// Helper functions
-function formatPrice(cents: number): string {
-  return new Intl.NumberFormat("nl-BE", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
 }

@@ -63,7 +63,6 @@ function getBreadcrumbs(
     "/admin/content/navigation": t("admin.nav.navigation"),
     "/admin/content/parameters": t("admin.nav.parameters"),
     "/admin/content/configurator": t("admin.nav.configurator"),
-    "/admin/content/configurator/pricing": t("admin.headings.pricing"),
   };
 
   // Media with folder param - show folder name in breadcrumb
