@@ -3,6 +3,7 @@
 import { Action, actionVariants } from "@/components/shared/Action";
 import { iconMap } from "@/lib/icons";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { RichText } from "@/components/RichText";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +14,7 @@ interface ImageWithUrl {
 
 interface PageHeaderButton {
   label: string;
-  action?: "link" | "openChatbot";
+  action?: "link" | "openChatbot" | "openConfigurator";
   url?: string;
   icon?: string;
   variant?: "primary" | "secondary";
@@ -32,6 +33,7 @@ interface PageHeaderProps {
 }
 
 export default function PageHeader({ section, headerImage }: PageHeaderProps) {
+  const router = useRouter();
   const { title, subtitle, background, showImage, showButtons, buttons } =
     section;
 
@@ -70,6 +72,19 @@ export default function PageHeader({ section, headerImage }: PageHeaderProps) {
                     onClick={() =>
                       window.dispatchEvent(new CustomEvent("openChatbot"))
                     }
+                    className={cn(actionVariants({ variant: button.variant }))}
+                  >
+                    {IconComponent && <IconComponent />}
+                    {button.label}
+                  </button>
+                );
+              }
+
+              if (button.action === "openConfigurator") {
+                return (
+                  <button
+                    key={index}
+                    onClick={() => router.push("/configurator")}
                     className={cn(actionVariants({ variant: button.variant }))}
                   >
                     {IconComponent && <IconComponent />}

@@ -23,7 +23,7 @@ export interface PageHeaderSection extends BaseSection {
   buttons?: {
     _key: string;
     label: string;
-    action?: "link" | "openChatbot";
+    action?: "link" | "openChatbot" | "openConfigurator";
     url?: string;
     icon?: string;
     variant?: "primary" | "secondary";
@@ -51,7 +51,7 @@ export interface SplitSectionItem {
   image?: { url: string; alt?: string };
   title?: string;
   subtitle?: string;
-  actionType?: "link" | "openChatbot";
+  actionType?: "link" | "openChatbot" | "openConfigurator";
   href?: string;
   action?: {
     label?: string;
@@ -102,7 +102,7 @@ export interface FlexTextBlock {
   text?: string; // HTML from Tiptap
   button?: {
     label?: string;
-    action?: "link" | "openChatbot";
+    action?: "link" | "openChatbot" | "openConfigurator";
     url?: string;
     icon?: string;
     variant?: "primary" | "secondary";

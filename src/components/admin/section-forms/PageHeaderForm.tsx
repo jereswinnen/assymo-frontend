@@ -28,7 +28,7 @@ import { t } from "@/config/strings";
 interface ButtonItem {
   _key: string;
   label: string;
-  action?: "link" | "openChatbot";
+  action?: "link" | "openChatbot" | "openConfigurator";
   url?: string;
   icon?: string;
   variant?: "primary" | "secondary";
@@ -149,17 +149,26 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                   key={button._key}
                   className="p-4 space-y-4 border rounded-lg"
                 >
-                  <Field orientation="horizontal">
-                    <FieldLabel>{t("admin.labels.openChatbot")}</FieldLabel>
-                    <Switch
-                      checked={button.action === "openChatbot"}
-                      onCheckedChange={(checked) =>
+                  <Field>
+                    <FieldLabel>{t("admin.labels.action")}</FieldLabel>
+                    <Select
+                      value={button.action || "link"}
+                      onValueChange={(value) =>
                         updateButton(index, {
-                          action: checked ? "openChatbot" : "link",
-                          url: checked ? undefined : button.url,
+                          action: value as "link" | "openChatbot" | "openConfigurator",
+                          url: value !== "link" ? undefined : button.url,
                         })
                       }
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="link">Link</SelectItem>
+                        <SelectItem value="openChatbot">{t("admin.labels.openChatbot")}</SelectItem>
+                        <SelectItem value="openConfigurator">{t("admin.labels.openConfigurator")}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </Field>
 
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -173,11 +182,13 @@ export function PageHeaderForm({ section, onChange }: PageHeaderFormProps) {
                         placeholder={
                           button.action === "openChatbot"
                             ? t("admin.placeholders.askQuestion")
-                            : t("admin.placeholders.buttonText")
+                            : button.action === "openConfigurator"
+                              ? "Start configurator"
+                              : t("admin.placeholders.buttonText")
                         }
                       />
                     </Field>
-                    {button.action !== "openChatbot" && (
+                    {button.action === "link" && (
                       <Field>
                         <FieldLabel>{t("admin.labels.url")}</FieldLabel>
                         <Input

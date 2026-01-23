@@ -4,6 +4,7 @@ import { RichText } from "@/components/RichText";
 import { Action, actionVariants } from "@/components/shared/Action";
 import { iconMap } from "@/lib/icons";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 import type { FlexTextBlock } from "../types";
 
 interface TextBlockProps {
@@ -11,6 +12,7 @@ interface TextBlockProps {
 }
 
 export default function TextBlock({ block }: TextBlockProps) {
+  const router = useRouter();
   const { heading, headingLevel = "h2", text, button } = block;
 
   const IconComponent =
@@ -18,6 +20,10 @@ export default function TextBlock({ block }: TextBlockProps) {
 
   const handleOpenChatbot = () => {
     window.dispatchEvent(new CustomEvent("openChatbot"));
+  };
+
+  const handleOpenConfigurator = () => {
+    router.push("/configurator");
   };
 
   const renderHeading = () => {
@@ -46,6 +52,14 @@ export default function TextBlock({ block }: TextBlockProps) {
         (button.action === "openChatbot" ? (
           <button
             onClick={handleOpenChatbot}
+            className={cn(actionVariants({ variant: button.variant }))}
+          >
+            {IconComponent && <IconComponent />}
+            {button.label}
+          </button>
+        ) : button.action === "openConfigurator" ? (
+          <button
+            onClick={handleOpenConfigurator}
             className={cn(actionVariants({ variant: button.variant }))}
           >
             {IconComponent && <IconComponent />}

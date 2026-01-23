@@ -18,7 +18,7 @@ export interface FlexTextBlock extends BaseBlock {
   text?: string; // HTML string from Tiptap
   button?: {
     label: string;
-    action?: "link" | "openChatbot";
+    action?: "link" | "openChatbot" | "openConfigurator";
     url?: string;
     icon?: string;
     variant?: "primary" | "secondary";

@@ -142,6 +142,7 @@ export const ADMIN_STRINGS = {
       showImage: "Toon afbeelding",
       showButtons: "Toon acties",
       openChatbot: "Open chatbot",
+      openConfigurator: "Open configurator",
       isClosed: "Is gesloten",
       showOnWebsite: "Toon op website",
       isRecurring: "Jaarlijks terugkerend",
