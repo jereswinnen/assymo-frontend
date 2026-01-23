@@ -273,19 +273,19 @@ Existing availability API can be reused:
 <implementation_phases>
 <!-- Each phase is independently testable and committable -->
 
-<phase1 name="Database and Core Logic">
-**Commit message:** `feat(configurator): add database schema and core logic`
+<phase1 name="Database and Core Logic" status="COMPLETE">
+**Commit:** `664f466` - `feat(configurator): add database schema and core logic`
 
-1. Create database migrations for new tables (all with site_id)
-2. Implement `src/lib/configurator/` with site-scoped queries, pricing logic, types
-3. Create default question configuration in `src/config/configurator.ts`
-4. Add public API routes for questions and pricing (with site param support)
+1. ✅ Created database migrations for new tables (all with site_id)
+2. ✅ Implemented `src/lib/configurator/` with site-scoped queries, pricing logic, types
+3. ✅ Created default question configuration in `src/config/configurator.ts`
+4. ✅ Added public API routes for questions and pricing (with site param support)
 
-**How to test:**
-- Run migrations successfully
-- `GET /api/configurator/questions?product=poolhouses` returns default questions
-- `GET /api/configurator/pricing?product=poolhouses` returns pricing config
-- `POST /api/configurator/calculate` returns price range for given answers
+**Tested:**
+- ✅ Migrations applied to Neon database
+- ✅ `GET /api/configurator/questions?product=poolhouses` returns default questions
+- ✅ `GET /api/configurator/pricing?product=poolhouses` returns pricing config
+- ✅ `POST /api/configurator/calculate` returns price range for given answers
 </phase1>
 
 <phase2 name="Wizard Frontend (UI Only)">
