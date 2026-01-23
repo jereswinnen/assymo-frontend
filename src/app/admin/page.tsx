@@ -20,6 +20,7 @@ const FEATURE_ROUTES: Record<Feature, string> = {
   filters: "/admin/content/filters",
   navigation: "/admin/content/navigation",
   parameters: "/admin/content/parameters",
+  configurator: "/admin/content/configurator",
 };
 
 // Priority order for redirects

@@ -71,6 +71,7 @@ const FEATURE_LABELS: Record<Feature, string> = {
   media: "Media",
   imageStudio: "Media Studio",
   parameters: "Parameters",
+  configurator: "Configurator",
   appointments: "Afspraken",
   emails: "E-mails",
   conversations: "Conversaties",

@@ -70,6 +70,7 @@ const FEATURE_LABELS: Record<Feature, string> = {
   media: "Media",
   imageStudio: "Media Studio",
   parameters: "Parameters",
+  configurator: "Configurator",
   appointments: "Afspraken",
   emails: "E-mails",
   conversations: "Conversaties",
@@ -87,6 +88,7 @@ const CONTENT_CAPABILITIES: Feature[] = [
   "media",
   "imageStudio",
   "parameters",
+  "configurator",
 ];
 
 // Business features that can be enabled per site

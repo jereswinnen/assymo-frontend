@@ -154,6 +154,18 @@ export const ADMIN_STRINGS = {
       model: "Model",
       size: "Formaat",
       quality: "Kwaliteit",
+      questionKey: "Vraag sleutel",
+      questionType: "Type vraag",
+      required: "Verplicht",
+      product: "Product",
+      allProducts: "Alle producten",
+      basePriceMin: "Minimumprijs",
+      basePriceMax: "Maximumprijs",
+      priceModifiers: "Prijsmodifiers",
+      priceEstimate: "Prijsindicatie",
+      hasAppointment: "Afspraak",
+      customer: "Klant",
+      configuration: "Configuratie",
     },
 
     /**
@@ -199,6 +211,11 @@ export const ADMIN_STRINGS = {
       seo: "SEO",
       general: "Algemeen",
       unsavedChanges: "Niet-opgeslagen wijzigingen",
+      questions: "Vragen",
+      pricing: "Prijzen",
+      submissions: "Aanvragen",
+      newQuestion: "Nieuwe vraag",
+      editQuestion: "Vraag bewerken",
     },
 
     /**
@@ -262,6 +279,16 @@ export const ADMIN_STRINGS = {
       metaDescriptionGenerateFailed: "Kon meta beschrijving niet genereren",
       imageGenerated: "Afbeelding gegenereerd",
       imageGenerateFailed: "Kon afbeelding niet genereren",
+      questionCreated: "Vraag aangemaakt",
+      questionUpdated: "Vraag bijgewerkt",
+      questionDeleted: "Vraag verwijderd",
+      pricingSaved: "Prijzen opgeslagen",
+      questionSaveFailed: "Kon vraag niet opslaan",
+      questionDeleteFailed: "Kon vraag niet verwijderen",
+      questionsLoadFailed: "Kon vragen niet laden",
+      pricingLoadFailed: "Kon prijzen niet laden",
+      pricingSaveFailed: "Kon prijzen niet opslaan",
+      submissionsLoadFailed: "Kon aanvragen niet laden",
 
       // Validation errors
       fillAllFields: "Vul alle velden in",
@@ -444,6 +471,11 @@ export const ADMIN_STRINGS = {
       metaDescriptionPlaceholder:
         "Korte beschrijving voor zoekmachines (max 160 tekens)",
       describeEdit: "Beschrijf je wijziging...",
+      questionLabel: "Wat wilt u weten?",
+      questionKey: "vraag-sleutel",
+      optionLabel: "Optie label",
+      optionValue: "optie-waarde",
+      priceModifier: "0",
     },
 
     /**
@@ -464,6 +496,13 @@ export const ADMIN_STRINGS = {
       noImageYet: "Nog geen afbeelding",
       noImageYetDesc:
         "Upload een afbeelding of selecteer er één uit de bibliotheek om te beginnen.",
+      noQuestions: "Nog geen vragen",
+      noQuestionsDesc: "Voeg vragen toe om de configurator te bouwen.",
+      noOptions: "Nog geen opties",
+      noSubmissions: "Nog geen aanvragen",
+      noSubmissionsDesc: "Aanvragen verschijnen hier zodra klanten de configurator invullen.",
+      noPricing: "Nog geen prijzen",
+      noPricingDesc: "Configureer de prijzen voor dit product.",
     },
 
     /**
@@ -565,6 +604,7 @@ export const ADMIN_STRINGS = {
       navigation: "Navigatie",
       filters: "Filters",
       parameters: "Parameters",
+      configurator: "Configurator",
       appointments: "Afspraken",
       conversations: "Conversaties",
       emails: "E-mails",
@@ -895,6 +935,19 @@ export const ADMIN_STRINGS = {
       qualityMedium: "Gemiddeld",
       qualityLow: "Laag",
       options: "Opties",
+      questionTypes: {
+        singleSelect: "Enkele keuze",
+        multiSelect: "Meerdere keuzes",
+        number: "Getal",
+        dimensions: "Afmetingen",
+      },
+      deleteQuestionQuestion: "Vraag verwijderen?",
+      deleteQuestionDesc: "Weet je zeker dat je deze vraag wilt verwijderen?",
+      editQuestionDesc: "Bewerk de vraag en opties.",
+      newQuestionDesc: "Maak een nieuwe vraag aan voor de configurator.",
+      submissionDetails: "Aanvraag details",
+      yes: "Ja",
+      no: "Nee",
     },
 
     /**
@@ -927,6 +980,7 @@ export const ADMIN_STRINGS = {
       filters: "Filters",
       media: "Media",
       parameters: "Parameters",
+      configurator: "Configurator",
       appointments: "Afspraken",
       emails: "E-mails",
       conversations: "Conversaties",

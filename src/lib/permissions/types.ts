@@ -33,6 +33,7 @@ export const FEATURES = {
   media: "media",
   imageStudio: "imageStudio",
   parameters: "parameters",
+  configurator: "configurator",
 
   // Business features (global)
   appointments: "appointments",
@@ -56,6 +57,7 @@ export const SITE_SCOPED_FEATURES: Feature[] = [
   "media",
   "imageStudio",
   "parameters",
+  "configurator",
 ];
 
 // Features that are global (not site-specific)
@@ -81,6 +83,7 @@ export const ROLE_FEATURES: Record<Role, Feature[]> = {
     "media",
     "imageStudio",
     "parameters",
+    "configurator",
     // Business features
     "appointments",
     "emails",
@@ -97,6 +100,7 @@ export const ROLE_FEATURES: Record<Role, Feature[]> = {
     "media",
     "imageStudio",
     "parameters",
+    "configurator",
   ],
 
   // User role has no default features - all access must be explicitly granted

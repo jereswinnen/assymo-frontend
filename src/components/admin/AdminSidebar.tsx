@@ -18,6 +18,7 @@ import {
   MenuIcon,
   MessagesSquareIcon,
   SettingsIcon,
+  SlidersHorizontalIcon,
   ToggleRightIcon,
   UserRoundIcon,
   UsersRoundIcon,
@@ -141,6 +142,12 @@ const contentItems: {
     label: "Parameters",
     icon: ChevronsLeftRightEllipsisIcon,
     feature: "parameters",
+  },
+  {
+    href: "/admin/content/configurator",
+    label: "Configurator",
+    icon: SlidersHorizontalIcon,
+    feature: "configurator",
   },
 ];
 
