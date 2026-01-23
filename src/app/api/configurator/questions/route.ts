@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getQuestionsForProduct, getQuestionsForCategory } from "@/lib/configurator";
+import { getQuestionsForProduct, getQuestionsForCategory, type ConfiguratorQuestion } from "@/lib/configurator";
 import { getDefaultQuestions } from "@/config/configurator";
+
+/**
+ * Maps database question to frontend format
+ * - Maps `subtitle` to `description` for frontend compatibility
+ */
+function mapQuestionForFrontend(question: ConfiguratorQuestion) {
+  return {
+    question_key: question.question_key,
+    label: question.label,
+    type: question.type,
+    options: question.options,
+    required: question.required,
+    description: question.subtitle, // Map subtitle -> description for frontend
+  };
+}
 
 /**
  * GET /api/configurator/questions
@@ -39,8 +54,11 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Map database questions to frontend format
+    const questions = dbQuestions.map(mapQuestionForFrontend);
+
     return NextResponse.json({
-      questions: dbQuestions,
+      questions,
       source: "database",
     });
   } catch (error) {
