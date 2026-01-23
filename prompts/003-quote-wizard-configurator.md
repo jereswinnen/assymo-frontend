@@ -288,21 +288,22 @@ Existing availability API can be reused:
 - ✅ `POST /api/configurator/calculate` returns price range for given answers
 </phase1>
 
-<phase2 name="Wizard Frontend (UI Only)">
-**Commit message:** `feat(configurator): add wizard UI with steps 1-2`
+<phase2 name="Wizard Frontend (UI Only)" status="COMPLETE">
+**Commit:** `9196912` - `feat(configurator): add wizard UI with steps 1-2`
 
-1. Build `/configurator` page with 3-step wizard container
-2. Implement ProductStep: product selection + dynamic questions from API
-3. Implement ContactStep: fixed user details (follow contact form pattern)
-4. Add progress bar and step navigation (back/next)
-5. SummaryStep placeholder (shows "Loading..." for now)
+1. ✅ Built `/configurator` page with 3-step wizard container
+2. ✅ Implemented ProductStep: product selection + dynamic questions from API
+3. ✅ Implemented ContactStep: fixed user details (follow contact form pattern)
+4. ✅ Added progress bar and step navigation (back/next)
+5. ✅ SummaryStep placeholder for phase 3
 
-**How to test:**
-- Visit `/configurator` - see step 1 with product dropdown
-- Select product - questions load dynamically
-- Fill questions, click next - see contact form (step 2)
-- Fill contact, click next - see placeholder summary (step 3)
-- Back button works between steps
+**Tested:**
+- ✅ Visit `/configurator` - see step 1 with product dropdown
+- ✅ Select product - questions load dynamically
+- ✅ Fill questions, click next - see contact form (step 2)
+- ✅ Fill contact, click next - see placeholder summary (step 3)
+- ✅ Back button works between steps
+- ✅ URL param `?product=poolhouses` pre-selects product
 </phase2>
 
 <phase3 name="Submission, Email and Appointments">
