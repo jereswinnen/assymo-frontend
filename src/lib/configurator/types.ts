@@ -72,7 +72,8 @@ export interface ConfiguratorPricing {
 }
 
 export interface CreatePricingInput {
-  product_slug: string;
+  product_slug?: string | null; // @deprecated - use category_id
+  category_id?: string | null;
   base_price_min: number;
   base_price_max: number;
   price_modifiers?: PriceModifier[];

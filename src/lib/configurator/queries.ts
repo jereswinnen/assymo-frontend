@@ -392,12 +392,59 @@ export async function getPricingById(
 }
 
 /**
- * Create or update pricing for a product (upsert)
+ * Create or update pricing for a product or category (upsert)
+ * Supports both product_slug (deprecated) and category_id
  */
 export async function upsertPricing(
   siteId: string,
   input: CreatePricingInput
 ): Promise<ConfiguratorPricing> {
+  // Use category_id if provided, otherwise fall back to product_slug
+  if (input.category_id) {
+    // Check if pricing exists for this category
+    const existing = await sql`
+      SELECT id FROM configurator_pricing
+      WHERE site_id = ${siteId} AND category_id = ${input.category_id}
+    `;
+
+    if (existing.length > 0) {
+      // Update existing pricing
+      const rows = await sql`
+        UPDATE configurator_pricing
+        SET
+          base_price_min = ${input.base_price_min},
+          base_price_max = ${input.base_price_max},
+          price_modifiers = ${input.price_modifiers ? JSON.stringify(input.price_modifiers) : null},
+          updated_at = now()
+        WHERE site_id = ${siteId} AND category_id = ${input.category_id}
+        RETURNING *
+      `;
+      return rows[0] as ConfiguratorPricing;
+    }
+
+    // Insert new pricing
+    const rows = await sql`
+      INSERT INTO configurator_pricing (
+        product_slug,
+        category_id,
+        base_price_min,
+        base_price_max,
+        price_modifiers,
+        site_id
+      ) VALUES (
+        ${input.product_slug ?? null},
+        ${input.category_id},
+        ${input.base_price_min},
+        ${input.base_price_max},
+        ${input.price_modifiers ? JSON.stringify(input.price_modifiers) : null},
+        ${siteId}
+      )
+      RETURNING *
+    `;
+    return rows[0] as ConfiguratorPricing;
+  }
+
+  // Legacy: product_slug based pricing (uses existing unique constraint)
   const rows = await sql`
     INSERT INTO configurator_pricing (
       product_slug,

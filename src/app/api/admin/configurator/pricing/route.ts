@@ -72,13 +72,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Require either category_id or product_slug (category_id preferred)
     if (
-      !pricingData.product_slug ||
+      (!pricingData.category_id && !pricingData.product_slug) ||
       pricingData.base_price_min === undefined ||
       pricingData.base_price_max === undefined
     ) {
       return NextResponse.json(
-        { error: "product_slug, base_price_min and base_price_max are required" },
+        { error: "category_id (or product_slug), base_price_min and base_price_max are required" },
         { status: 400 }
       );
     }
