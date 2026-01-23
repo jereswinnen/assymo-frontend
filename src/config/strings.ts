@@ -304,6 +304,7 @@ export const ADMIN_STRINGS = {
       fillAllFields: "Vul alle velden in",
       fillAllFieldsAuth: "Vul alle velden in.",
       fillBothFields: "Vul beide velden in.",
+      addAtLeastOneOption: "Voeg minstens één optie toe",
       passwordMismatch: "Wachtwoorden komen niet overeen",
       passwordMinLength: "Wachtwoord moet minimaal 8 tekens zijn",
       passwordMinLengthWithPeriod: "Wachtwoord moet minimaal 8 tekens zijn.",
@@ -953,6 +954,7 @@ export const ADMIN_STRINGS = {
       questionTypes: {
         singleSelect: "Enkele keuze",
         multiSelect: "Meerdere keuzes",
+        text: "Invulveld",
         number: "Getal",
         dimensions: "Afmetingen",
       },

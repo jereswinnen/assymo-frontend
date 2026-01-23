@@ -27,6 +27,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { toast } from "sonner";
 import {
   CheckIcon,
@@ -39,6 +40,7 @@ import type {
   ConfiguratorQuestion,
   QuestionType,
   QuestionOption,
+  HeadingLevel,
 } from "@/lib/configurator/types";
 
 interface QuestionEditSheetProps {
@@ -53,6 +55,7 @@ interface QuestionEditSheetProps {
 const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
   { value: "single-select", label: t("admin.misc.questionTypes.singleSelect") },
   { value: "multi-select", label: t("admin.misc.questionTypes.multiSelect") },
+  { value: "text", label: t("admin.misc.questionTypes.text") },
   { value: "number", label: t("admin.misc.questionTypes.number") },
   { value: "dimensions", label: t("admin.misc.questionTypes.dimensions") },
 ];
@@ -78,6 +81,8 @@ export function QuestionEditSheet({
 
   // Form state
   const [label, setLabel] = useState("");
+  const [headingLevel, setHeadingLevel] = useState<HeadingLevel>("h2");
+  const [subtitle, setSubtitle] = useState("");
   const [questionKey, setQuestionKey] = useState("");
   const [type, setType] = useState<QuestionType>("single-select");
   const [required, setRequired] = useState(true);
@@ -87,6 +92,8 @@ export function QuestionEditSheet({
   // Original values for change detection
   const [originalValues, setOriginalValues] = useState({
     label: "",
+    headingLevel: "h2" as HeadingLevel,
+    subtitle: "",
     questionKey: "",
     type: "single-select" as QuestionType,
     required: true,
@@ -97,12 +104,16 @@ export function QuestionEditSheet({
   useEffect(() => {
     if (open && question) {
       setLabel(question.label);
+      setHeadingLevel(question.heading_level || "h2");
+      setSubtitle(question.subtitle || "");
       setQuestionKey(question.question_key);
       setType(question.type);
       setRequired(question.required);
       setOptions(question.options || []);
       setOriginalValues({
         label: question.label,
+        headingLevel: question.heading_level || "h2",
+        subtitle: question.subtitle || "",
         questionKey: question.question_key,
         type: question.type,
         required: question.required,
@@ -110,12 +121,16 @@ export function QuestionEditSheet({
       });
     } else if (open && !question) {
       setLabel("");
+      setHeadingLevel("h2");
+      setSubtitle("");
       setQuestionKey("");
       setType("single-select");
       setRequired(true);
       setOptions([]);
       setOriginalValues({
         label: "",
+        headingLevel: "h2",
+        subtitle: "",
         questionKey: "",
         type: "single-select",
         required: true,
@@ -130,16 +145,17 @@ export function QuestionEditSheet({
   // Check for changes
   const hasChanges = useMemo(() => {
     if (isNew) {
-      // For new questions, only need label (key is auto-generated)
       return label.trim().length > 0;
     }
     return (
       label !== originalValues.label ||
+      headingLevel !== originalValues.headingLevel ||
+      subtitle !== originalValues.subtitle ||
       type !== originalValues.type ||
       required !== originalValues.required ||
       JSON.stringify(options) !== JSON.stringify(originalValues.options)
     );
-  }, [isNew, label, type, required, options, originalValues]);
+  }, [isNew, label, headingLevel, subtitle, type, required, options, originalValues]);
 
   const handleSave = async () => {
     if (!label.trim() || !questionKey.trim()) {
@@ -148,7 +164,7 @@ export function QuestionEditSheet({
     }
 
     if (needsOptions && options.length === 0) {
-      toast.error("Voeg minstens één optie toe");
+      toast.error(t("admin.messages.addAtLeastOneOption"));
       return;
     }
 
@@ -157,6 +173,8 @@ export function QuestionEditSheet({
       const body = {
         siteId,
         label,
+        heading_level: headingLevel,
+        subtitle: subtitle || null,
         question_key: questionKey,
         type,
         required,
@@ -196,15 +214,13 @@ export function QuestionEditSheet({
     setOptions([...options, { value: "", label: "" }]);
   };
 
-  const updateOption = (index: number, field: keyof QuestionOption, value: string | number) => {
+  const updateOptionLabel = (index: number, newLabel: string) => {
     const newOptions = [...options];
-    if (field === "priceModifier") {
-      // Convert euro input to cents
-      const euros = parseFloat(value as string) || 0;
-      newOptions[index] = { ...newOptions[index], priceModifier: Math.round(euros * 100) };
-    } else {
-      newOptions[index] = { ...newOptions[index], [field]: value };
-    }
+    newOptions[index] = {
+      ...newOptions[index],
+      label: newLabel,
+      value: slugify(newLabel),
+    };
     setOptions(newOptions);
   };
 
@@ -228,22 +244,45 @@ export function QuestionEditSheet({
 
         <FieldGroup>
           <FieldSet>
-            <Field>
-              <FieldLabel htmlFor="question-label">{t("admin.labels.label")}</FieldLabel>
-              <Input
-                id="question-label"
-                value={label}
-                onChange={(e) => {
-                  setLabel(e.target.value);
-                  // Auto-generate question key from label for new questions
-                  if (!question) {
-                    setQuestionKey(slugify(e.target.value));
-                  }
-                }}
-                placeholder={t("admin.placeholders.questionLabel")}
-              />
-            </Field>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field>
+                <FieldLabel htmlFor="question-label">{t("admin.labels.title")}</FieldLabel>
+                <Input
+                  id="question-label"
+                  value={label}
+                  onChange={(e) => {
+                    setLabel(e.target.value);
+                    if (!question) {
+                      setQuestionKey(slugify(e.target.value));
+                    }
+                  }}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="question-heading-level">{t("admin.labels.headingLevel")}</FieldLabel>
+                <Select value={headingLevel} onValueChange={(v) => setHeadingLevel(v as HeadingLevel)}>
+                  <SelectTrigger id="question-heading-level">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="h2">H2</SelectItem>
+                    <SelectItem value="h3">H3</SelectItem>
+                    <SelectItem value="h4">H4</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+            </div>
 
+            <RichTextEditor
+              label={t("admin.labels.subtitle")}
+              value={subtitle}
+              onChange={setSubtitle}
+            />
+          </FieldSet>
+
+          <Separator />
+
+          <FieldSet>
             <Field>
               <FieldLabel htmlFor="question-type">{t("admin.labels.questionType")}</FieldLabel>
               <Select value={type} onValueChange={(v) => setType(v as QuestionType)}>
@@ -283,45 +322,22 @@ export function QuestionEditSheet({
                     {t("admin.empty.noOptions")}
                   </p>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {options.map((option, index) => (
                       <div
                         key={index}
-                        className="group flex gap-2 p-3 bg-muted/50 rounded-md"
+                        className="flex items-center gap-2"
                       >
-                        <div className="flex-1 space-y-2">
-                          <Input
-                            value={option.label}
-                            onChange={(e) => {
-                              updateOption(index, "label", e.target.value);
-                              // Auto-generate value from label if empty
-                              if (!option.value) {
-                                updateOption(index, "value", slugify(e.target.value));
-                              }
-                            }}
-                            placeholder={t("admin.placeholders.optionLabel")}
-                            className="h-8"
-                          />
-                          <div className="flex gap-2">
-                            <Input
-                              value={option.value}
-                              onChange={(e) => updateOption(index, "value", e.target.value)}
-                              placeholder={t("admin.placeholders.optionValue")}
-                              className="h-8 flex-1"
-                            />
-                            <Input
-                              type="number"
-                              value={option.priceModifier ? option.priceModifier / 100 : ""}
-                              onChange={(e) => updateOption(index, "priceModifier", e.target.value)}
-                              placeholder={t("admin.placeholders.priceModifier")}
-                              className="h-8 w-24"
-                            />
-                          </div>
-                        </div>
+                        <Input
+                          value={option.label}
+                          onChange={(e) => updateOptionLabel(index, e.target.value)}
+                          placeholder={t("admin.labels.label")}
+                          className="h-9 flex-1"
+                        />
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="size-8 text-muted-foreground hover:text-destructive"
+                          className="size-9 text-muted-foreground hover:text-destructive"
                           onClick={() => removeOption(index)}
                         >
                           <Trash2Icon className="size-4" />

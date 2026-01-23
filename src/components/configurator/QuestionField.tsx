@@ -75,6 +75,17 @@ export function QuestionField({
         />
       );
 
+    case "text":
+      return (
+        <TextField
+          question={question}
+          value={value as string | undefined}
+          onChange={handleChange}
+          disabled={disabled}
+          className={className}
+        />
+      );
+
     case "number":
       return (
         <NumberField
@@ -210,6 +221,48 @@ function MultiSelectField({
           </label>
         ))}
       </div>
+    </Field>
+  );
+}
+
+// =============================================================================
+// Text Field
+// =============================================================================
+
+interface TextFieldProps {
+  question: QuestionConfig;
+  value: string | undefined;
+  onChange: (value: string | undefined) => void;
+  disabled?: boolean;
+  className?: string;
+}
+
+function TextField({
+  question,
+  value,
+  onChange,
+  disabled,
+  className,
+}: TextFieldProps) {
+  return (
+    <Field className={className}>
+      <FieldLabel htmlFor={question.question_key}>
+        {question.label}
+        {question.required && " *"}
+      </FieldLabel>
+      {question.description && (
+        <FieldDescription>{question.description}</FieldDescription>
+      )}
+      <Input
+        id={question.question_key}
+        type="text"
+        value={value ?? ""}
+        onChange={(e) => {
+          const val = e.target.value;
+          onChange(val === "" ? undefined : val);
+        }}
+        disabled={disabled}
+      />
     </Field>
   );
 }

@@ -45,6 +45,8 @@ export async function calculatePrice(
       category_id: null,
       question_key: q.question_key,
       label: q.label,
+      heading_level: "h2" as const,
+      subtitle: null,
       type: q.type,
       options: q.options || null,
       required: q.required,

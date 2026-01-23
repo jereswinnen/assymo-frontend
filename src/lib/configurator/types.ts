@@ -1,6 +1,8 @@
 // Configurator types
 
-export type QuestionType = "single-select" | "multi-select" | "number" | "dimensions";
+export type QuestionType = "single-select" | "multi-select" | "text" | "number" | "dimensions";
+
+export type HeadingLevel = "h2" | "h3" | "h4";
 
 export interface QuestionOption {
   value: string;
@@ -14,6 +16,8 @@ export interface ConfiguratorQuestion {
   category_id: string | null; // Links to configurator_categories
   question_key: string;
   label: string;
+  heading_level: HeadingLevel;
+  subtitle: string | null;
   type: QuestionType;
   options: QuestionOption[] | null; // For select types
   required: boolean;
@@ -28,6 +32,8 @@ export interface CreateQuestionInput {
   category_id?: string | null;
   question_key: string;
   label: string;
+  heading_level?: HeadingLevel;
+  subtitle?: string | null;
   type: QuestionType;
   options?: QuestionOption[];
   required?: boolean;
@@ -39,6 +45,8 @@ export interface UpdateQuestionInput {
   category_id?: string | null;
   question_key?: string;
   label?: string;
+  heading_level?: HeadingLevel;
+  subtitle?: string | null;
   type?: QuestionType;
   options?: QuestionOption[] | null;
   required?: boolean;

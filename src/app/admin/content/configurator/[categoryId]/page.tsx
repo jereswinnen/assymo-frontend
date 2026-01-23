@@ -88,6 +88,7 @@ interface PageProps {
 const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   "single-select": t("admin.misc.questionTypes.singleSelect"),
   "multi-select": t("admin.misc.questionTypes.multiSelect"),
+  text: t("admin.misc.questionTypes.text"),
   number: t("admin.misc.questionTypes.number"),
   dimensions: t("admin.misc.questionTypes.dimensions"),
 };
