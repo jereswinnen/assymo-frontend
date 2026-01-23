@@ -515,6 +515,7 @@ export const ADMIN_STRINGS = {
       noPricingDesc: "Configureer de prijzen voor dit product.",
       noCategories: "Nog geen configurator items",
       noCategoriesDesc: "Maak een nieuw item aan om te beginnen.",
+      addSelectQuestionsForModifiers: "Voeg keuzevragen toe om prijsmodifiers in te stellen.",
     },
 
     /**
@@ -635,6 +636,8 @@ export const ADMIN_STRINGS = {
       lastActivity: "Laatste activiteit",
       avgResponseTime: "Gem. responstijd",
       messagesUnit: "berichten",
+      questionSingular: "vraag",
+      questionPlural: "vragen",
     },
 
     /**
@@ -962,7 +965,9 @@ export const ADMIN_STRINGS = {
       no: "Nee",
       deleteConfiguratorItemQuestion: "Configurator item verwijderen?",
       deleteConfiguratorItemDesc:
-        "Weet je zeker dat je dit item wilt verwijderen? Alle gekoppelde vragen en prijzen worden ook verwijderd.",
+        "Weet je zeker dat je dit item wilt verwijderen?",
+      deleteConfiguratorItemCascadeWarning:
+        "Alle gekoppelde vragen en prijzen worden ook verwijderd. Dit kan niet ongedaan worden gemaakt.",
       editConfiguratorItemDesc: "Bewerk het configurator item.",
       addConfiguratorItemDesc: "Maak een nieuw configurator item aan.",
       configuratorCategory: "Configurator",

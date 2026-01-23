@@ -500,7 +500,7 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
 
                 {selectQuestions.length === 0 ? (
                   <p className="text-xs text-muted-foreground">
-                    Voeg keuzevragen toe om prijsmodifiers in te stellen.
+                    {t("admin.empty.addSelectQuestionsForModifiers")}
                   </p>
                 ) : (
                   <>

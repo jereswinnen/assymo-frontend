@@ -250,7 +250,7 @@ export default function ConfiguratorPage() {
                   >
                     <TableCell className="font-medium">{category.name}</TableCell>
                     <TableCell className="text-right text-muted-foreground">
-                      {category.questionCount} {category.questionCount === 1 ? "vraag" : "vragen"}
+                      {category.questionCount} {category.questionCount === 1 ? t("admin.table.questionSingular") : t("admin.table.questionPlural")}
                     </TableCell>
                   </SortableCategoryRow>
                 ))}

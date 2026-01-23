@@ -255,8 +255,11 @@ export function CategoryEditSheet({
             <AlertDialogTitle>
               {t("admin.misc.deleteConfiguratorItemQuestion")}
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("admin.misc.deleteConfiguratorItemDesc")}
+            <AlertDialogDescription className="space-y-2">
+              <span className="block">{t("admin.misc.deleteConfiguratorItemDesc")}</span>
+              <span className="block font-medium text-destructive">
+                {t("admin.misc.deleteConfiguratorItemCascadeWarning")}
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
