@@ -7,9 +7,11 @@ interface FlexibleSectionProps {
   section: FlexibleSectionData;
   /** Solution name to pass to form blocks (for pre-selecting product) */
   solutionName?: string;
+  /** Configurator category slug for pre-selecting product in configurator */
+  configuratorCategorySlug?: string | null;
 }
 
-function BlockRenderer({ blocks, solutionName }: { blocks?: FlexibleBlock[]; solutionName?: string }) {
+function BlockRenderer({ blocks, solutionName, configuratorCategorySlug }: { blocks?: FlexibleBlock[]; solutionName?: string; configuratorCategorySlug?: string | null }) {
   if (!blocks || blocks.length === 0) return null;
 
   return (
@@ -21,13 +23,13 @@ function BlockRenderer({ blocks, solutionName }: { blocks?: FlexibleBlock[]; sol
         }
 
         const BlockComponent = blockComponents[block._type];
-        return <BlockComponent key={block._key} block={block} solutionName={solutionName} />;
+        return <BlockComponent key={block._key} block={block} solutionName={solutionName} configuratorCategorySlug={configuratorCategorySlug} />;
       })}
     </>
   );
 }
 
-export default function FlexibleSection({ section, solutionName }: FlexibleSectionProps) {
+export default function FlexibleSection({ section, solutionName, configuratorCategorySlug }: FlexibleSectionProps) {
   const {
     layout,
     background = false,
@@ -51,15 +53,15 @@ export default function FlexibleSection({ section, solutionName }: FlexibleSecti
     >
       {isSingleColumn ? (
         <div className={gridClasses.main}>
-          <BlockRenderer blocks={blockMain} solutionName={solutionName} />
+          <BlockRenderer blocks={blockMain} solutionName={solutionName} configuratorCategorySlug={configuratorCategorySlug} />
         </div>
       ) : (
         <>
           <div className={cn(gridClasses.left, alignClass)}>
-            <BlockRenderer blocks={blockLeft} solutionName={solutionName} />
+            <BlockRenderer blocks={blockLeft} solutionName={solutionName} configuratorCategorySlug={configuratorCategorySlug} />
           </div>
           <div className={cn(gridClasses.right, alignClass)}>
-            <BlockRenderer blocks={blockRight} solutionName={solutionName} />
+            <BlockRenderer blocks={blockRight} solutionName={solutionName} configuratorCategorySlug={configuratorCategorySlug} />
           </div>
         </>
       )}

@@ -30,9 +30,11 @@ interface PageHeaderProps {
     buttons?: PageHeaderButton[];
   };
   headerImage?: ImageWithUrl;
+  /** Configurator category slug for pre-selecting product in configurator */
+  configuratorCategorySlug?: string | null;
 }
 
-export default function PageHeader({ section, headerImage }: PageHeaderProps) {
+export default function PageHeader({ section, headerImage, configuratorCategorySlug }: PageHeaderProps) {
   const router = useRouter();
   const { title, subtitle, background, showImage, showButtons, buttons } =
     section;
@@ -81,10 +83,13 @@ export default function PageHeader({ section, headerImage }: PageHeaderProps) {
               }
 
               if (button.action === "openConfigurator") {
+                const configuratorUrl = configuratorCategorySlug
+                  ? `/configurator?product=${configuratorCategorySlug}`
+                  : "/configurator";
                 return (
                   <button
                     key={index}
-                    onClick={() => router.push("/configurator")}
+                    onClick={() => router.push(configuratorUrl)}
                     className={cn(actionVariants({ variant: button.variant }))}
                   >
                     {IconComponent && <IconComponent />}

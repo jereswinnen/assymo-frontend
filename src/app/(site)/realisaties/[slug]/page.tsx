@@ -39,7 +39,12 @@ export default async function SolutionPage({ params }: any) {
   return (
     <section className="col-span-full grid grid-cols-subgrid gap-y-14! md:gap-y-24!">
       {sections.length > 0 && (
-        <SectionRenderer sections={sections} headerImage={headerImage} solutionName={solution.name} />
+        <SectionRenderer
+          sections={sections}
+          headerImage={headerImage}
+          solutionName={solution.name}
+          configuratorCategorySlug={solution.configurator_category_slug}
+        />
       )}
     </section>
   );

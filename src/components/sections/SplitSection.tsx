@@ -29,9 +29,11 @@ interface SplitSectionProps {
     items: [SplitItem, SplitItem, SplitItem?];
   };
   className?: string;
+  /** Configurator category slug for pre-selecting product in configurator */
+  configuratorCategorySlug?: string | null;
 }
 
-export function SplitSection({ section, className }: SplitSectionProps) {
+export function SplitSection({ section, className, configuratorCategorySlug }: SplitSectionProps) {
   const router = useRouter();
   const rawItems = section.items;
   const items = rawItems.filter((item): item is SplitItem => item !== undefined);
@@ -41,7 +43,10 @@ export function SplitSection({ section, className }: SplitSectionProps) {
     if (item.actionType === "openChatbot") {
       window.dispatchEvent(new CustomEvent("openChatbot"));
     } else if (item.actionType === "openConfigurator") {
-      router.push("/configurator");
+      const configuratorUrl = configuratorCategorySlug
+        ? `/configurator?product=${configuratorCategorySlug}`
+        : "/configurator";
+      router.push(configuratorUrl);
     } else if (item.href) {
       router.push(item.href);
     }
@@ -106,7 +111,10 @@ export function SplitSection({ section, className }: SplitSectionProps) {
                         : item.actionType === "openConfigurator"
                           ? (e) => {
                               e.preventDefault();
-                              router.push("/configurator");
+                              const url = configuratorCategorySlug
+                                ? `/configurator?product=${configuratorCategorySlug}`
+                                : "/configurator";
+                              router.push(url);
                             }
                           : undefined
                     }

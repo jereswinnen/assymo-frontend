@@ -5,7 +5,7 @@ import MapBlock from "./MapBlock";
 import FormBlock from "./FormBlock";
 
 // Block component registry - add new blocks here
-export const blockComponents: Record<string, ComponentType<{ block: any; solutionName?: string }>> = {
+export const blockComponents: Record<string, ComponentType<{ block: any; solutionName?: string; configuratorCategorySlug?: string | null }>> = {
   flexTextBlock: TextBlock,
   flexImageBlock: ImageBlock,
   flexMapBlock: MapBlock,

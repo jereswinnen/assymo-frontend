@@ -9,9 +9,11 @@ import type { FlexTextBlock } from "../types";
 
 interface TextBlockProps {
   block: FlexTextBlock;
+  /** Configurator category slug for pre-selecting product in configurator */
+  configuratorCategorySlug?: string | null;
 }
 
-export default function TextBlock({ block }: TextBlockProps) {
+export default function TextBlock({ block, configuratorCategorySlug }: TextBlockProps) {
   const router = useRouter();
   const { heading, headingLevel = "h2", text, button } = block;
 
@@ -23,7 +25,10 @@ export default function TextBlock({ block }: TextBlockProps) {
   };
 
   const handleOpenConfigurator = () => {
-    router.push("/configurator");
+    const url = configuratorCategorySlug
+      ? `/configurator?product=${configuratorCategorySlug}`
+      : "/configurator";
+    router.push(url);
   };
 
   const renderHeading = () => {

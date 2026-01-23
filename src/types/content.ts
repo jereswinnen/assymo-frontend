@@ -61,6 +61,7 @@ export interface Solution {
   filters: Filter[];
   meta_title: string | null;
   meta_description: string | null;
+  configurator_category_slug: string | null;
   created_at: Date;
   updated_at: Date;
 }
