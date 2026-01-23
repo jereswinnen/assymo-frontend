@@ -10,7 +10,8 @@ export interface QuestionOption {
 
 export interface ConfiguratorQuestion {
   id: string;
-  product_slug: string | null; // NULL = applies to all products
+  product_slug: string | null; // @deprecated - use category_id
+  category_id: string | null; // Links to configurator_categories
   question_key: string;
   label: string;
   type: QuestionType;
@@ -23,7 +24,8 @@ export interface ConfiguratorQuestion {
 }
 
 export interface CreateQuestionInput {
-  product_slug: string | null;
+  product_slug?: string | null; // @deprecated - use category_id
+  category_id?: string | null;
   question_key: string;
   label: string;
   type: QuestionType;
@@ -33,7 +35,8 @@ export interface CreateQuestionInput {
 }
 
 export interface UpdateQuestionInput {
-  product_slug?: string | null;
+  product_slug?: string | null; // @deprecated - use category_id
+  category_id?: string | null;
   question_key?: string;
   label?: string;
   type?: QuestionType;
@@ -50,7 +53,8 @@ export interface PriceModifier {
 
 export interface ConfiguratorPricing {
   id: string;
-  product_slug: string;
+  product_slug: string | null; // @deprecated - use category_id
+  category_id: string | null; // Links to configurator_categories
   base_price_min: number; // in cents
   base_price_max: number; // in cents
   price_modifiers: PriceModifier[] | null;

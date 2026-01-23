@@ -2,13 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { protectRoute } from "@/lib/permissions";
 import {
-  getAllQuestions,
-  getQuestionsByProduct,
-  getQuestionsByCategory,
-  createQuestion,
-  CONFIGURATOR_CACHE_TAGS,
-} from "@/lib/configurator/queries";
-import type { CreateQuestionInput } from "@/lib/configurator/types";
+  getCategories,
+  createCategory,
+  CATEGORIES_CACHE_TAG,
+} from "@/lib/configurator/categories";
+import type { CreateCategoryInput } from "@/lib/configurator/categories";
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,8 +17,6 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const siteId = searchParams.get("siteId");
-    const productSlug = searchParams.get("productSlug");
-    const categoryId = searchParams.get("categoryId");
 
     if (!siteId) {
       return NextResponse.json(
@@ -37,25 +33,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let questions;
-    if (categoryId) {
-      // Get questions for a specific category
-      questions = await getQuestionsByCategory(siteId, categoryId);
-    } else if (productSlug !== null && productSlug !== undefined) {
-      // Get questions for a specific product (or global questions if productSlug is "global")
-      // @deprecated - use categoryId instead
-      const slug = productSlug === "global" ? null : productSlug;
-      questions = await getQuestionsByProduct(siteId, slug);
-    } else {
-      // Get all questions for the site
-      questions = await getAllQuestions(siteId);
-    }
-
-    return NextResponse.json(questions);
+    const categories = await getCategories(siteId);
+    return NextResponse.json(categories);
   } catch (error) {
-    console.error("Failed to fetch questions:", error);
+    console.error("Failed to fetch categories:", error);
     return NextResponse.json(
-      { error: "Failed to fetch questions" },
+      { error: "Failed to fetch categories" },
       { status: 500 }
     );
   }
@@ -69,7 +52,7 @@ export async function POST(request: NextRequest) {
     if (!authorized) return response;
 
     const body = await request.json();
-    const { siteId, ...questionData } = body as CreateQuestionInput & {
+    const { siteId, ...categoryData } = body as CreateCategoryInput & {
       siteId: string;
     };
 
@@ -88,23 +71,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!questionData.label || !questionData.question_key || !questionData.type) {
+    if (!categoryData.name || !categoryData.slug) {
       return NextResponse.json(
-        { error: "label, question_key and type are required" },
+        { error: "name and slug are required" },
         { status: 400 }
       );
     }
 
-    const question = await createQuestion(siteId, questionData);
+    const category = await createCategory(siteId, categoryData);
 
     // Invalidate cache
-    revalidateTag(CONFIGURATOR_CACHE_TAGS.questions, "max");
+    revalidateTag(CATEGORIES_CACHE_TAG, "max");
 
-    return NextResponse.json(question);
+    return NextResponse.json(category);
   } catch (error) {
-    console.error("Failed to create question:", error);
+    console.error("Failed to create category:", error);
     return NextResponse.json(
-      { error: "Failed to create question" },
+      { error: "Failed to create category" },
       { status: 500 }
     );
   }

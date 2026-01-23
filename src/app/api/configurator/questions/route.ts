@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getQuestionsForProduct } from "@/lib/configurator";
+import { getQuestionsForProduct, getQuestionsForCategory } from "@/lib/configurator";
 import { getDefaultQuestions } from "@/config/configurator";
 
 /**
  * GET /api/configurator/questions
- * Public API to get configurator questions for a product
+ * Public API to get configurator questions for a product/category
  * Query params:
- * - product: Product slug (required)
+ * - product: Product/category slug (required)
  * - site: Site slug (defaults to "assymo")
  */
 export async function GET(request: NextRequest) {
@@ -22,8 +22,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get questions from database
-    const dbQuestions = await getQuestionsForProduct(productSlug, siteSlug);
+    // Try category-based lookup first (new system)
+    let dbQuestions = await getQuestionsForCategory(productSlug, siteSlug);
+
+    // Fall back to product_slug-based lookup for backward compatibility
+    if (dbQuestions.length === 0) {
+      dbQuestions = await getQuestionsForProduct(productSlug, siteSlug);
+    }
 
     // If no questions in database, use defaults
     if (dbQuestions.length === 0) {

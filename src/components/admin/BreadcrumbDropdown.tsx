@@ -26,7 +26,13 @@ interface SolutionItem {
   slug: string;
 }
 
-type ContentType = "pages" | "solutions";
+interface ConfiguratorCategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+type ContentType = "pages" | "solutions" | "configurator";
 
 interface BreadcrumbDropdownProps {
   type: ContentType;
@@ -40,11 +46,13 @@ export function BreadcrumbDropdown({
   const router = useRouter();
   const params = useParams();
   const currentId = params.id as string;
+  const currentCategoryId = params.categoryId as string;
   const { currentSite } = useSiteContext();
   const { hasUnsavedChanges, saveBeforeNavigate } = useAdminNavigationGuard();
 
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<(PageItem | SolutionItem)[]>([]);
+  const [configuratorCategories, setConfiguratorCategories] = useState<ConfiguratorCategoryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [navigating, setNavigating] = useState(false);
@@ -56,17 +64,28 @@ export function BreadcrumbDropdown({
     const fetchItems = async () => {
       setLoading(true);
       try {
-        const endpoint =
-          type === "pages"
-            ? "/api/admin/content/pages"
-            : "/api/admin/content/solutions";
-        const url = currentSite?.id
-          ? `${endpoint}?siteId=${currentSite.id}`
-          : endpoint;
-        const response = await fetch(url);
-        if (response.ok) {
-          const data = await response.json();
-          setItems(data);
+        if (type === "configurator") {
+          // Fetch configurator categories
+          if (currentSite?.id) {
+            const response = await fetch(`/api/admin/configurator/categories?siteId=${currentSite.id}`);
+            if (response.ok) {
+              const data = await response.json();
+              setConfiguratorCategories(data);
+            }
+          }
+        } else {
+          const endpoint =
+            type === "pages"
+              ? "/api/admin/content/pages"
+              : "/api/admin/content/solutions";
+          const url = currentSite?.id
+            ? `${endpoint}?siteId=${currentSite.id}`
+            : endpoint;
+          const response = await fetch(url);
+          if (response.ok) {
+            const data = await response.json();
+            setItems(data);
+          }
         }
       } catch (error) {
         console.error(`Failed to fetch ${type}:`, error);
@@ -80,18 +99,38 @@ export function BreadcrumbDropdown({
 
   // Filter items based on search
   const filteredItems = useMemo(() => {
+    if (type === "configurator") {
+      if (!search.trim()) return configuratorCategories;
+      const query = search.toLowerCase();
+      return configuratorCategories.filter((c) =>
+        c.name.toLowerCase().includes(query)
+      );
+    }
+
     if (!search.trim()) return items;
     const query = search.toLowerCase();
     return items.filter((item) => {
       const name = "title" in item ? item.title : item.name;
       return name.toLowerCase().includes(query);
     });
-  }, [items, search]);
+  }, [items, search, type, configuratorCategories]);
 
-  const handleSelect = async (item: PageItem | SolutionItem) => {
-    if (item.id === currentId) {
-      setOpen(false);
-      return;
+  const handleSelect = async (
+    item: PageItem | SolutionItem | ConfiguratorCategoryItem
+  ) => {
+    // Check if already on this item
+    if (type === "configurator") {
+      const category = item as ConfiguratorCategoryItem;
+      if (category.id === currentCategoryId) {
+        setOpen(false);
+        return;
+      }
+    } else {
+      const contentItem = item as PageItem | SolutionItem;
+      if (contentItem.id === currentId) {
+        setOpen(false);
+        return;
+      }
     }
 
     setNavigating(true);
@@ -105,13 +144,51 @@ export function BreadcrumbDropdown({
       }
     }
 
-    const path =
-      type === "pages"
-        ? `/admin/content/pages/${item.id}`
-        : `/admin/content/solutions/${item.id}`;
+    let path: string;
+    if (type === "configurator") {
+      const category = item as ConfiguratorCategoryItem;
+      path = `/admin/content/configurator/${category.id}`;
+    } else if (type === "pages") {
+      const pageItem = item as PageItem;
+      path = `/admin/content/pages/${pageItem.id}`;
+    } else {
+      const solutionItem = item as SolutionItem;
+      path = `/admin/content/solutions/${solutionItem.id}`;
+    }
+
     router.push(path);
     setOpen(false);
     setNavigating(false);
+  };
+
+  const getItemName = (
+    item: PageItem | SolutionItem | ConfiguratorCategoryItem
+  ): string => {
+    if (type === "configurator") {
+      return (item as ConfiguratorCategoryItem).name;
+    }
+    if ("title" in item) {
+      return item.title;
+    }
+    return (item as SolutionItem).name;
+  };
+
+  const getItemKey = (
+    item: PageItem | SolutionItem | ConfiguratorCategoryItem
+  ): string => {
+    if (type === "configurator") {
+      return (item as ConfiguratorCategoryItem).id;
+    }
+    return (item as PageItem | SolutionItem).id;
+  };
+
+  const isItemActive = (
+    item: PageItem | SolutionItem | ConfiguratorCategoryItem
+  ): boolean => {
+    if (type === "configurator") {
+      return (item as ConfiguratorCategoryItem).id === currentCategoryId;
+    }
+    return (item as PageItem | SolutionItem).id === currentId;
   };
 
   return (
@@ -150,11 +227,12 @@ export function BreadcrumbDropdown({
           ) : (
             <div className="p-1">
               {filteredItems.map((item) => {
-                const name = "title" in item ? item.title : item.name;
-                const isActive = item.id === currentId;
+                const name = getItemName(item);
+                const key = getItemKey(item);
+                const isActive = isItemActive(item);
                 return (
                   <button
-                    key={item.id}
+                    key={key}
                     onClick={() => handleSelect(item)}
                     disabled={navigating}
                     className={cn(

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPricingForProduct, formatPrice, formatPriceRange } from "@/lib/configurator";
+import { getPricingForProduct, getPricingForCategory, formatPrice, formatPriceRange } from "@/lib/configurator";
 import { getDefaultPricing } from "@/config/configurator";
 
 /**
  * GET /api/configurator/pricing
- * Public API to get configurator pricing for a product
+ * Public API to get configurator pricing for a product/category
  * Query params:
- * - product: Product slug (required)
+ * - product: Product/category slug (required)
  * - site: Site slug (defaults to "assymo")
  */
 export async function GET(request: NextRequest) {
@@ -22,8 +22,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get pricing from database
-    const dbPricing = await getPricingForProduct(productSlug, siteSlug);
+    // Try category-based lookup first (new system)
+    let dbPricing = await getPricingForCategory(productSlug, siteSlug);
+
+    // Fall back to product_slug-based lookup for backward compatibility
+    if (!dbPricing) {
+      dbPricing = await getPricingForProduct(productSlug, siteSlug);
+    }
 
     // If no pricing in database, use defaults
     if (!dbPricing) {

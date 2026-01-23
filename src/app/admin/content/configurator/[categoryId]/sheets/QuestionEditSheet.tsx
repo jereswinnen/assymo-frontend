@@ -43,7 +43,7 @@ import type {
 
 interface QuestionEditSheetProps {
   question: ConfiguratorQuestion | null;
-  productSlug: string | null; // null for global questions
+  categoryId: string;
   siteId: string | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -68,7 +68,7 @@ function slugify(text: string): string {
 
 export function QuestionEditSheet({
   question,
-  productSlug,
+  categoryId,
   siteId,
   open,
   onOpenChange,
@@ -130,16 +130,16 @@ export function QuestionEditSheet({
   // Check for changes
   const hasChanges = useMemo(() => {
     if (isNew) {
-      return label.trim().length > 0 && questionKey.trim().length > 0;
+      // For new questions, only need label (key is auto-generated)
+      return label.trim().length > 0;
     }
     return (
       label !== originalValues.label ||
-      questionKey !== originalValues.questionKey ||
       type !== originalValues.type ||
       required !== originalValues.required ||
       JSON.stringify(options) !== JSON.stringify(originalValues.options)
     );
-  }, [isNew, label, questionKey, type, required, options, originalValues]);
+  }, [isNew, label, type, required, options, originalValues]);
 
   const handleSave = async () => {
     if (!label.trim() || !questionKey.trim()) {
@@ -161,7 +161,7 @@ export function QuestionEditSheet({
         type,
         required,
         options: needsOptions ? options : null,
-        product_slug: productSlug,
+        category_id: categoryId,
       };
 
       const url = question
@@ -235,21 +235,12 @@ export function QuestionEditSheet({
                 value={label}
                 onChange={(e) => {
                   setLabel(e.target.value);
+                  // Auto-generate question key from label for new questions
                   if (!question) {
                     setQuestionKey(slugify(e.target.value));
                   }
                 }}
                 placeholder={t("admin.placeholders.questionLabel")}
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="question-key">{t("admin.labels.questionKey")}</FieldLabel>
-              <Input
-                id="question-key"
-                value={questionKey}
-                onChange={(e) => setQuestionKey(e.target.value)}
-                placeholder={t("admin.placeholders.questionKey")}
               />
             </Field>
 
@@ -269,15 +260,15 @@ export function QuestionEditSheet({
               </Select>
             </Field>
 
-            <Field className="flex items-center gap-2">
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="question-required">
+                {t("admin.labels.required")}
+              </FieldLabel>
               <Checkbox
                 id="question-required"
                 checked={required}
                 onCheckedChange={(checked) => setRequired(checked === true)}
               />
-              <FieldLabel htmlFor="question-required" className="!mt-0">
-                {t("admin.labels.required")}
-              </FieldLabel>
             </Field>
           </FieldSet>
 

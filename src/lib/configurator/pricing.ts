@@ -25,6 +25,7 @@ export async function calculatePrice(
       pricing = {
         id: "default",
         product_slug: defaultPricing.product_slug,
+        category_id: null,
         base_price_min: defaultPricing.base_price_min,
         base_price_max: defaultPricing.base_price_max,
         price_modifiers: defaultPricing.price_modifiers,
@@ -41,6 +42,7 @@ export async function calculatePrice(
     questions = defaultQuestions.map((q, i) => ({
       id: `default-${i}`,
       product_slug: q.product_slug,
+      category_id: null,
       question_key: q.question_key,
       label: q.label,
       type: q.type,

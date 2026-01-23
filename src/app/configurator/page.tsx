@@ -1,6 +1,5 @@
 import { Metadata } from "next";
-import { getAllSolutions } from "@/lib/content";
-import { CONFIGURATOR_PRODUCTS } from "@/config/configurator";
+import { getCategoriesForSite } from "@/lib/configurator/categories";
 import { Wizard } from "@/components/configurator/Wizard";
 
 export const metadata: Metadata = {
@@ -19,31 +18,14 @@ export default async function ConfiguratorPage({
   // Get search params
   const { product: initialProduct } = await searchParams;
 
-  // Get solutions from database to use as product options
-  const solutions = await getAllSolutions();
+  // Get configurator categories from database
+  const categories = await getCategoriesForSite("assymo");
 
-  // Filter solutions to only include configurator-enabled products
-  // and map to the format needed by the wizard
-  const products = solutions
-    .filter((s) => CONFIGURATOR_PRODUCTS.includes(s.slug as any))
-    .map((s) => ({
-      slug: s.slug,
-      name: s.name,
-    }));
-
-  // Add any configurator products that aren't in solutions yet
-  // (in case solutions don't cover all configurator products)
-  const existingSlugs = new Set(products.map((p) => p.slug));
-  for (const slug of CONFIGURATOR_PRODUCTS) {
-    if (!existingSlugs.has(slug)) {
-      // Convert slug to display name (e.g., "tuinhuizen-op-maat" -> "Tuinhuizen op maat")
-      const name = slug
-        .split("-")
-        .map((word, i) => (i === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word))
-        .join(" ");
-      products.push({ slug, name });
-    }
-  }
+  // Map categories to the format needed by the wizard
+  const products = categories.map((cat) => ({
+    slug: cat.slug,
+    name: cat.name,
+  }));
 
   // Validate initial product if provided
   const validInitialProduct =

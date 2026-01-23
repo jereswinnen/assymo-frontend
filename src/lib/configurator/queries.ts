@@ -88,6 +88,41 @@ export const getQuestionsForProduct = (
     }
   )(productSlug, siteSlug);
 
+/**
+ * Get questions for a category by slug (public, cached)
+ */
+async function _getQuestionsForCategory(
+  categorySlug: string,
+  siteSlug: string = DEFAULT_SITE_SLUG
+): Promise<ConfiguratorQuestion[]> {
+  const siteId = await getSiteIdBySlug(siteSlug);
+  if (!siteId) return [];
+
+  const rows = await sql`
+    SELECT q.*
+    FROM configurator_questions q
+    JOIN configurator_categories c ON q.category_id = c.id
+    WHERE q.site_id = ${siteId}
+      AND c.slug = ${categorySlug}
+    ORDER BY q.order_rank, q.created_at
+  `;
+
+  return rows as ConfiguratorQuestion[];
+}
+
+export const getQuestionsForCategory = (
+  categorySlug: string,
+  siteSlug: string = DEFAULT_SITE_SLUG
+) =>
+  unstable_cache(
+    _getQuestionsForCategory,
+    [`configurator-questions-category-${siteSlug}-${categorySlug}`],
+    {
+      tags: [CONFIGURATOR_CACHE_TAGS.questions],
+      revalidate: 60,
+    }
+  )(categorySlug, siteSlug);
+
 // =============================================================================
 // Pricing - Public Queries
 // =============================================================================
@@ -125,6 +160,40 @@ export const getPricingForProduct = (
     }
   )(productSlug, siteSlug);
 
+/**
+ * Get pricing for a category by slug (public, cached)
+ */
+async function _getPricingForCategory(
+  categorySlug: string,
+  siteSlug: string = DEFAULT_SITE_SLUG
+): Promise<ConfiguratorPricing | null> {
+  const siteId = await getSiteIdBySlug(siteSlug);
+  if (!siteId) return null;
+
+  const rows = await sql`
+    SELECT p.*
+    FROM configurator_pricing p
+    JOIN configurator_categories c ON p.category_id = c.id
+    WHERE p.site_id = ${siteId}
+      AND c.slug = ${categorySlug}
+  `;
+
+  return (rows[0] as ConfiguratorPricing) || null;
+}
+
+export const getPricingForCategory = (
+  categorySlug: string,
+  siteSlug: string = DEFAULT_SITE_SLUG
+) =>
+  unstable_cache(
+    _getPricingForCategory,
+    [`configurator-pricing-category-${siteSlug}-${categorySlug}`],
+    {
+      tags: [CONFIGURATOR_CACHE_TAGS.pricing],
+      revalidate: 60,
+    }
+  )(categorySlug, siteSlug);
+
 // =============================================================================
 // Questions - Admin Queries (no caching)
 // =============================================================================
@@ -144,6 +213,7 @@ export async function getAllQuestions(siteId: string): Promise<ConfiguratorQuest
 
 /**
  * Get questions for a specific product (admin)
+ * @deprecated Use getQuestionsByCategory instead
  */
 export async function getQuestionsByProduct(
   siteId: string,
@@ -165,6 +235,23 @@ export async function getQuestionsByProduct(
     FROM configurator_questions
     WHERE site_id = ${siteId}
       AND product_slug = ${productSlug}
+    ORDER BY order_rank, created_at
+  `;
+  return rows as ConfiguratorQuestion[];
+}
+
+/**
+ * Get questions for a specific category (admin)
+ */
+export async function getQuestionsByCategory(
+  siteId: string,
+  categoryId: string
+): Promise<ConfiguratorQuestion[]> {
+  const rows = await sql`
+    SELECT *
+    FROM configurator_questions
+    WHERE site_id = ${siteId}
+      AND category_id = ${categoryId}
     ORDER BY order_rank, created_at
   `;
   return rows as ConfiguratorQuestion[];
@@ -196,6 +283,7 @@ export async function createQuestion(
   const rows = await sql`
     INSERT INTO configurator_questions (
       product_slug,
+      category_id,
       question_key,
       label,
       type,
@@ -205,6 +293,7 @@ export async function createQuestion(
       site_id
     ) VALUES (
       ${input.product_slug},
+      ${input.category_id ?? null},
       ${input.question_key},
       ${input.label},
       ${input.type},
@@ -233,6 +322,7 @@ export async function updateQuestion(
     UPDATE configurator_questions
     SET
       product_slug = ${input.product_slug !== undefined ? input.product_slug : existing.product_slug},
+      category_id = ${input.category_id !== undefined ? input.category_id : existing.category_id},
       question_key = ${input.question_key ?? existing.question_key},
       label = ${input.label ?? existing.label},
       type = ${input.type ?? existing.type},

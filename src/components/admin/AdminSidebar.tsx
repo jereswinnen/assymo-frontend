@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  BoltIcon,
   CalendarDaysIcon,
   ChevronsLeftRightEllipsisIcon,
   ChevronsUpDownIcon,
@@ -17,8 +18,7 @@ import {
   MailboxIcon,
   MenuIcon,
   MessagesSquareIcon,
-  SettingsIcon,
-  SlidersHorizontalIcon,
+  MousePointerClickIcon,
   ToggleRightIcon,
   UserRoundIcon,
   UsersRoundIcon,
@@ -90,7 +90,7 @@ const navItems: {
   {
     href: "/admin/settings",
     label: "Instellingen",
-    icon: SettingsIcon,
+    icon: BoltIcon,
     feature: "settings",
   },
 ];
@@ -112,6 +112,12 @@ const contentItems: {
     label: "Realisaties",
     icon: FolderTreeIcon,
     feature: "solutions",
+  },
+  {
+    href: "/admin/content/configurator",
+    label: "Configurator",
+    icon: MousePointerClickIcon,
+    feature: "configurator",
   },
   {
     href: "/admin/content/media",
@@ -142,12 +148,6 @@ const contentItems: {
     label: "Parameters",
     icon: ChevronsLeftRightEllipsisIcon,
     feature: "parameters",
-  },
-  {
-    href: "/admin/content/configurator",
-    label: "Configurator",
-    icon: SlidersHorizontalIcon,
-    feature: "configurator",
   },
 ];
 
@@ -200,12 +200,12 @@ export function AdminSidebar({
   // Filter nav items based on visible features from context
   const visibleNavItems = useMemo(
     () => navItems.filter((item) => visibleFeatures.includes(item.feature)),
-    [visibleFeatures]
+    [visibleFeatures],
   );
 
   const visibleContentItems = useMemo(
     () => contentItems.filter((item) => visibleFeatures.includes(item.feature)),
-    [visibleFeatures]
+    [visibleFeatures],
   );
 
   const handleLogout = async () => {

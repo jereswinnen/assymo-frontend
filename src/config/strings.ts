@@ -216,6 +216,8 @@ export const ADMIN_STRINGS = {
       submissions: "Aanvragen",
       newQuestion: "Nieuwe vraag",
       editQuestion: "Vraag bewerken",
+      editConfiguratorItem: "Item bewerken",
+      configuratorItems: "Configurator items",
     },
 
     /**
@@ -289,6 +291,12 @@ export const ADMIN_STRINGS = {
       pricingLoadFailed: "Kon prijzen niet laden",
       pricingSaveFailed: "Kon prijzen niet opslaan",
       submissionsLoadFailed: "Kon aanvragen niet laden",
+      configuratorItemCreated: "Configurator item aangemaakt",
+      configuratorItemUpdated: "Configurator item bijgewerkt",
+      configuratorItemDeleted: "Configurator item verwijderd",
+      configuratorItemSaveFailed: "Kon configurator item niet opslaan",
+      configuratorItemDeleteFailed: "Kon configurator item niet verwijderen",
+      configuratorItemsLoadFailed: "Kon configurator items niet laden",
 
       // Validation errors
       fillAllFields: "Vul alle velden in",
@@ -503,6 +511,8 @@ export const ADMIN_STRINGS = {
       noSubmissionsDesc: "Aanvragen verschijnen hier zodra klanten de configurator invullen.",
       noPricing: "Nog geen prijzen",
       noPricingDesc: "Configureer de prijzen voor dit product.",
+      noCategories: "Nog geen configurator items",
+      noCategoriesDesc: "Maak een nieuw item aan om te beginnen.",
     },
 
     /**
@@ -948,6 +958,14 @@ export const ADMIN_STRINGS = {
       submissionDetails: "Aanvraag details",
       yes: "Ja",
       no: "Nee",
+      deleteConfiguratorItemQuestion: "Configurator item verwijderen?",
+      deleteConfiguratorItemDesc:
+        "Weet je zeker dat je dit item wilt verwijderen? Alle gekoppelde vragen en prijzen worden ook verwijderd.",
+      editConfiguratorItemDesc: "Bewerk het configurator item.",
+      addConfiguratorItemDesc: "Maak een nieuw configurator item aan.",
+      configuratorCategory: "Configurator",
+      configuratorCategoryDesc: "Koppel deze realisatie aan een configurator item",
+      configuratorCategoryNone: "Geen",
     },
 
     /**

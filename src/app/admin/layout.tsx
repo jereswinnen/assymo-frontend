@@ -39,7 +39,7 @@ import { t } from "@/config/strings";
 interface BreadcrumbSegment {
   label: string;
   href?: string;
-  dropdown?: "pages" | "solutions";
+  dropdown?: "pages" | "solutions" | "configurator";
 }
 
 function getBreadcrumbs(
@@ -62,6 +62,8 @@ function getBreadcrumbs(
     "/admin/content/filters": t("admin.nav.filters"),
     "/admin/content/navigation": t("admin.nav.navigation"),
     "/admin/content/parameters": t("admin.nav.parameters"),
+    "/admin/content/configurator": t("admin.nav.configurator"),
+    "/admin/content/configurator/pricing": t("admin.headings.pricing"),
   };
 
   // Media with folder param - show folder name in breadcrumb
@@ -116,6 +118,19 @@ function getBreadcrumbs(
       { label: t("admin.nav.media"), href: "/admin/content/media" },
       { label: t("admin.misc.viewImage") },
     ];
+  }
+  // Configurator product questions page
+  if (pathname.match(/^\/admin\/content\/configurator\/(?!pricing)[^/]+$/)) {
+    const crumbs: BreadcrumbSegment[] = [
+      { label: t("admin.nav.configurator"), href: "/admin/content/configurator" },
+    ];
+    if (dynamicTitle !== null) {
+      crumbs.push({
+        label: dynamicTitle || t("admin.headings.questions"),
+        dropdown: "configurator",
+      });
+    }
+    return crumbs;
   }
 
   return [{ label: "Admin" }];

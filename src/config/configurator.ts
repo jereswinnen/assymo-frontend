@@ -260,8 +260,13 @@ export function getDefaultPricing(productSlug: string): DefaultPricing | null {
 
 // =============================================================================
 // Product slugs that support the configurator
+// @deprecated - Use configurator_categories table instead
+// Kept for backward compatibility with existing product_slug references
 // =============================================================================
 
+/**
+ * @deprecated Use configurator_categories from database instead
+ */
 export const CONFIGURATOR_PRODUCTS = [
   "poolhouses",
   "carports",
@@ -278,6 +283,7 @@ export type ConfiguratorProduct = (typeof CONFIGURATOR_PRODUCTS)[number];
 
 /**
  * Check if a product slug supports the configurator
+ * @deprecated Use configurator_categories from database instead
  */
 export function isConfiguratorProduct(slug: string): slug is ConfiguratorProduct {
   return CONFIGURATOR_PRODUCTS.includes(slug as ConfiguratorProduct);

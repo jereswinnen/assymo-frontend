@@ -45,6 +45,13 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   useAdminHeaderActions,
   useAdminBreadcrumbTitle,
   useAdminUnsavedChanges,
@@ -52,6 +59,12 @@ import {
 import { useSiteContext } from "@/lib/permissions/site-context";
 import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import { t } from "@/config/strings";
+
+interface ConfiguratorCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 interface Filter {
   id: string;
@@ -77,6 +90,7 @@ interface SolutionData {
   filters: Filter[];
   meta_title: string | null;
   meta_description: string | null;
+  configurator_category_id: string | null;
   site_id: string;
   created_at: string;
   updated_at: string;
@@ -107,6 +121,7 @@ export default function SolutionEditorPage({
   const [filterCategories, setFilterCategories] = useState<FilterCategory[]>(
     [],
   );
+  const [configuratorCategories, setConfiguratorCategories] = useState<ConfiguratorCategory[]>([]);
 
   // Form state
   const [name, setName] = useState("");
@@ -118,6 +133,7 @@ export default function SolutionEditorPage({
   const [selectedFilterIds, setSelectedFilterIds] = useState<Set<string>>(
     new Set(),
   );
+  const [configuratorCategoryId, setConfiguratorCategoryId] = useState<string | null>(null);
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
   const [generatingMeta, setGeneratingMeta] = useState(false);
@@ -150,7 +166,8 @@ export default function SolutionEditorPage({
       JSON.stringify(sections) !== JSON.stringify(solution.sections) ||
       filtersChanged ||
       metaTitle !== (solution.meta_title || "") ||
-      metaDescription !== (solution.meta_description || "");
+      metaDescription !== (solution.meta_description || "") ||
+      (configuratorCategoryId || null) !== (solution.configurator_category_id || null);
 
     setHasChanges(changed);
   }, [
@@ -160,6 +177,7 @@ export default function SolutionEditorPage({
     headerImage,
     sections,
     selectedFilterIds,
+    configuratorCategoryId,
     metaTitle,
     metaDescription,
     solution,
@@ -182,14 +200,19 @@ export default function SolutionEditorPage({
 
       const solutionData: SolutionData = await solutionRes.json();
 
-      // Fetch filter categories for the solution's site
-      const categoriesRes = await fetch(
-        `/api/admin/content/filter-categories?siteId=${solutionData.site_id}`,
-      );
+      // Fetch filter categories and configurator categories for the solution's site
+      const [categoriesRes, configCategoriesRes] = await Promise.all([
+        fetch(`/api/admin/content/filter-categories?siteId=${solutionData.site_id}`),
+        fetch(`/api/admin/configurator/categories?siteId=${solutionData.site_id}`),
+      ]);
       const categoriesData: FilterCategory[] = await categoriesRes.json();
+      const configCategoriesData: ConfiguratorCategory[] = configCategoriesRes.ok
+        ? await configCategoriesRes.json()
+        : [];
 
       setSolution(solutionData);
       setFilterCategories(categoriesData);
+      setConfiguratorCategories(configCategoriesData);
 
       // Set form values
       setName(solutionData.name);
@@ -198,6 +221,7 @@ export default function SolutionEditorPage({
       setHeaderImage(solutionData.header_image);
       setSections(solutionData.sections || []);
       setSelectedFilterIds(new Set(solutionData.filters.map((f) => f.id)));
+      setConfiguratorCategoryId(solutionData.configurator_category_id);
       setMetaTitle(solutionData.meta_title || "");
       setMetaDescription(solutionData.meta_description || "");
     } catch {
@@ -249,6 +273,7 @@ export default function SolutionEditorPage({
           header_image: headerImage,
           sections,
           filter_ids: [...selectedFilterIds],
+          configurator_category_id: configuratorCategoryId || null,
           meta_title: metaTitle.trim() || null,
           meta_description: metaDescription.trim() || null,
         }),
@@ -262,6 +287,7 @@ export default function SolutionEditorPage({
       const updatedSolution = await response.json();
       setSolution(updatedSolution);
       setSections(updatedSolution.sections || []);
+      setConfiguratorCategoryId(updatedSolution.configurator_category_id);
       setMetaTitle(updatedSolution.meta_title || "");
       setMetaDescription(updatedSolution.meta_description || "");
       setHasChanges(false);
@@ -530,6 +556,37 @@ export default function SolutionEditorPage({
                         </div>
                       ))}
                     </div>
+                  </>
+                )}
+
+                {/* Configurator */}
+                {configuratorCategories.length > 0 && (
+                  <>
+                    <FieldSeparator />
+                    <Field>
+                      <FieldLabel htmlFor="configurator-category">
+                        {t("admin.misc.configuratorCategory")}
+                      </FieldLabel>
+                      <Select
+                        value={configuratorCategoryId || ""}
+                        onValueChange={(value) => setConfiguratorCategoryId(value || null)}
+                      >
+                        <SelectTrigger id="configurator-category">
+                          <SelectValue placeholder={t("admin.misc.configuratorCategoryNone")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">{t("admin.misc.configuratorCategoryNone")}</SelectItem>
+                          {configuratorCategories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FieldDescription>
+                        {t("admin.misc.configuratorCategoryDesc")}
+                      </FieldDescription>
+                    </Field>
                   </>
                 )}
 

@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, use } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSiteContext } from "@/lib/permissions/site-context";
 import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
-import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
+import {
+  useAdminHeaderActions,
+  useAdminBreadcrumbTitle,
+} from "@/components/admin/AdminHeaderContext";
 import {
   DndContext,
   closestCenter,
@@ -48,14 +51,6 @@ import {
   EmptyTitle,
   EmptyDescription,
 } from "@/components/ui/empty";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
@@ -68,9 +63,10 @@ import {
 import { t } from "@/config/strings";
 import { QuestionEditSheet } from "./sheets/QuestionEditSheet";
 import type { ConfiguratorQuestion, QuestionType } from "@/lib/configurator/types";
+import type { ConfiguratorCategory } from "@/lib/configurator/categories";
 
 interface PageProps {
-  params: Promise<{ productSlug: string }>;
+  params: Promise<{ categoryId: string }>;
 }
 
 const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
@@ -80,23 +76,12 @@ const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   dimensions: t("admin.misc.questionTypes.dimensions"),
 };
 
-const PRODUCT_LABELS: Record<string, string> = {
-  poolhouses: "Poolhouses",
-  carports: "Carports",
-  poorten: "Poorten",
-  guesthouse: "Guesthouse",
-  tuinkamers: "Tuinkamers",
-  "tuinhuizen-op-maat": "Tuinhuizen op maat",
-  bijgebouwen: "Bijgebouwen",
-  overdekkingen: "Overdekkingen",
-  woninguitbreiding: "Woninguitbreiding",
-  global: t("admin.labels.allProducts"),
-};
-
-export default function ProductQuestionsPage({ params }: PageProps) {
-  const { productSlug } = use(params);
+export default function CategoryQuestionsPage({ params }: PageProps) {
+  const { categoryId } = use(params);
+  const router = useRouter();
   const { currentSite, loading: siteLoading } = useSiteContext();
   const { authorized, loading: permissionLoading } = useRequireFeature("configurator");
+  const [category, setCategory] = useState<ConfiguratorCategory | null>(null);
   const [questions, setQuestions] = useState<ConfiguratorQuestion[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -118,29 +103,41 @@ export default function ProductQuestionsPage({ params }: PageProps) {
     })
   );
 
-  const isGlobal = productSlug === "global";
-  const productLabel = PRODUCT_LABELS[productSlug] || productSlug;
-
   useEffect(() => {
     if (!siteLoading && currentSite) {
-      loadQuestions();
+      loadData();
     }
-  }, [currentSite, siteLoading, productSlug]);
+  }, [currentSite, siteLoading, categoryId]);
 
-  const loadQuestions = async () => {
+  const loadData = async () => {
     if (!currentSite) return;
     setLoading(true);
     try {
-      const slug = isGlobal ? "global" : productSlug;
-      const response = await fetch(
-        `/api/admin/configurator/questions?siteId=${currentSite.id}&productSlug=${slug}`
+      // Fetch category details
+      const categoryRes = await fetch(
+        `/api/admin/configurator/categories/${categoryId}?siteId=${currentSite.id}`
       );
-      if (!response.ok) throw new Error("Failed to fetch");
-      const data = await response.json();
-      setQuestions(data);
+      if (!categoryRes.ok) {
+        if (categoryRes.status === 404) {
+          toast.error("Configurator item niet gevonden");
+          router.push("/admin/content/configurator");
+          return;
+        }
+        throw new Error("Failed to fetch category");
+      }
+      const categoryData = await categoryRes.json();
+      setCategory(categoryData);
+
+      // Fetch questions for this category
+      const questionsRes = await fetch(
+        `/api/admin/configurator/questions?siteId=${currentSite.id}&categoryId=${categoryId}`
+      );
+      if (!questionsRes.ok) throw new Error("Failed to fetch questions");
+      const questionsData = await questionsRes.json();
+      setQuestions(questionsData);
     } catch (error) {
-      console.error("Failed to fetch questions:", error);
-      toast.error(t("admin.messages.questionsLoadFailed"));
+      console.error("Failed to load data:", error);
+      toast.error(t("admin.messages.dataLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -176,7 +173,7 @@ export default function ProductQuestionsPage({ params }: PageProps) {
       if (!response.ok) throw new Error("Failed to delete");
 
       toast.success(t("admin.messages.questionDeleted"));
-      loadQuestions();
+      loadData();
     } catch (error) {
       console.error("Failed to delete question:", error);
       toast.error(t("admin.messages.questionDeleteFailed"));
@@ -208,7 +205,7 @@ export default function ProductQuestionsPage({ params }: PageProps) {
       } catch (error) {
         console.error("Failed to reorder questions:", error);
         toast.error(t("admin.messages.orderSaveFailed"));
-        loadQuestions();
+        loadData();
       }
     }
   };
@@ -224,6 +221,7 @@ export default function ProductQuestionsPage({ params }: PageProps) {
     [openNewQuestionSheet]
   );
   useAdminHeaderActions(headerActions);
+  useAdminBreadcrumbTitle(category?.name || null);
 
   if (permissionLoading || !authorized) {
     return null;
@@ -233,20 +231,6 @@ export default function ProductQuestionsPage({ params }: PageProps) {
 
   return (
     <div className="space-y-4">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/admin/content/configurator">Configurator</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{productLabel}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
@@ -326,11 +310,11 @@ export default function ProductQuestionsPage({ params }: PageProps) {
       {/* Edit/Create Sheet */}
       <QuestionEditSheet
         question={editingQuestion}
-        productSlug={isGlobal ? null : productSlug}
+        categoryId={categoryId}
         siteId={currentSite?.id}
         open={sheetOpen}
         onOpenChange={handleSheetOpenChange}
-        onSaved={loadQuestions}
+        onSaved={loadData}
       />
 
       {/* Delete Confirmation */}
