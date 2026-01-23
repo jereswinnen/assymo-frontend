@@ -11,6 +11,8 @@
  * │ Contact form                    │ DEFAULT_TEST_EMAIL (automatic)  │ info@assymo.be                  │
  * │ Appointment - admin notification│ DEFAULT_TEST_EMAIL (automatic)  │ info@assymo.be                  │
  * │ Appointment - customer email    │ DEFAULT_TEST_EMAIL (automatic)  │ Actual customer email           │
+ * │ Quote - admin notification      │ DEFAULT_TEST_EMAIL (automatic)  │ info@assymo.be                  │
+ * │ Quote - customer email          │ DEFAULT_TEST_EMAIL (automatic)  │ Actual customer email           │
  * └─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┘
  *
  * Admin Settings (localStorage) only affects newsletter "Test versturen".
@@ -52,6 +54,9 @@ export const RESEND_CONFIG = {
   // Resend Audience ID for newsletter subscribers
   audienceId: process.env.RESEND_AUDIENCE_ID || "",
 
+  // Recipient address for quote/configurator notifications
+  quoteRecipient: TEST_MODE ? DEFAULT_TEST_EMAIL : "info@assymo.be",
+
   // Email subjects
   subjects: {
     contactAlgemeen: "Nieuw contactformulier: Algemeen",
@@ -63,5 +68,7 @@ export const RESEND_CONFIG = {
     appointmentReminder: "Herinnering: uw afspraak bij Assymo morgen",
     appointmentAdmin: "Nieuwe afspraak ingepland",
     passwordReset: "Reset je wachtwoord - Assymo Admin",
+    quoteCustomer: "Uw offerte aanvraag bij Assymo",
+    quoteAdmin: "Nieuwe offerte aanvraag",
   },
 } as const;

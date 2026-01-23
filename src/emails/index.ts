@@ -13,3 +13,6 @@ export { AppointmentReminder } from "./AppointmentReminder";
 
 // Auth emails
 export { PasswordReset } from "./PasswordReset";
+
+// Quote emails
+export { QuoteEmail, QuoteAdminNotification } from "./QuoteEmail";

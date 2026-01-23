@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { useTracking } from "@/lib/tracking";
 import { ProgressBar } from "./ProgressBar";
 import { ProductStep } from "./steps/ProductStep";
 import { ContactStep, validateContactDetails } from "./steps/ContactStep";
@@ -42,8 +43,11 @@ interface WizardProps {
 // =============================================================================
 
 export function Wizard({ products, initialProduct = null, className }: WizardProps) {
+  const { track } = useTracking();
+
   // Step management
   const [currentStep, setCurrentStep] = useState(1);
+  const hasTrackedStartRef = useRef(false);
 
   // Step 1: Product configuration
   const [selectedProduct, setSelectedProduct] = useState<string | null>(initialProduct);
@@ -60,6 +64,22 @@ export function Wizard({ products, initialProduct = null, className }: WizardPro
 
   // Validation state
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Submission complete state (to hide navigation on step 3)
+  const [submissionComplete, setSubmissionComplete] = useState(false);
+
+  // ==========================================================================
+  // Analytics: Track wizard started on mount
+  // ==========================================================================
+
+  useEffect(() => {
+    if (!hasTrackedStartRef.current) {
+      hasTrackedStartRef.current = true;
+      track("configurator_started", {
+        product: initialProduct || undefined,
+      });
+    }
+  }, [track, initialProduct]);
 
   // ==========================================================================
   // Handlers
@@ -85,6 +105,33 @@ export function Wizard({ products, initialProduct = null, className }: WizardPro
     setValidationError(null);
   }, []);
 
+  const handleSubmissionComplete = useCallback(
+    (data: {
+      submissionId: string;
+      appointmentId?: number;
+      appointmentDate?: string;
+      appointmentTime?: string;
+    }) => {
+      setSubmissionComplete(true);
+
+      // Track quote sent
+      track("configurator_quote_sent", {
+        product: selectedProduct,
+        submission_id: data.submissionId,
+      });
+
+      // Track appointment booked if applicable
+      if (data.appointmentDate && data.appointmentTime) {
+        track("configurator_appointment_booked", {
+          product: selectedProduct,
+          date: data.appointmentDate,
+          time: data.appointmentTime,
+        });
+      }
+    },
+    [track, selectedProduct]
+  );
+
   // ==========================================================================
   // Navigation
   // ==========================================================================
@@ -107,6 +154,13 @@ export function Wizard({ products, initialProduct = null, className }: WizardPro
         setValidationError("Selecteer eerst een product");
         return;
       }
+
+      // Track step 1 completed
+      track("configurator_step_completed", {
+        step: 1,
+        product: selectedProduct,
+      });
+
       setCurrentStep(2);
       return;
     }
@@ -117,6 +171,13 @@ export function Wizard({ products, initialProduct = null, className }: WizardPro
         setValidationError(error);
         return;
       }
+
+      // Track step 2 completed
+      track("configurator_step_completed", {
+        step: 2,
+        product: selectedProduct,
+      });
+
       setCurrentStep(3);
       return;
     }
@@ -163,6 +224,7 @@ export function Wizard({ products, initialProduct = null, className }: WizardPro
             products={products}
             answers={answers}
             contactDetails={contactDetails}
+            onSubmissionComplete={handleSubmissionComplete}
           />
         )}
       </div>
@@ -174,41 +236,33 @@ export function Wizard({ products, initialProduct = null, className }: WizardPro
         </div>
       )}
 
-      {/* Navigation Buttons */}
-      <div className="flex items-center justify-between border-t pt-6">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleBack}
-          disabled={currentStep === 1}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeftIcon className="size-4" />
-          Terug
-        </Button>
+      {/* Navigation Buttons - Hide on step 3 when submission is complete */}
+      {!(currentStep === 3 && submissionComplete) && (
+        <div className="flex items-center justify-between border-t pt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleBack}
+            disabled={currentStep === 1}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeftIcon className="size-4" />
+            Terug
+          </Button>
 
-        {currentStep < 3 ? (
-          <Button
-            type="button"
-            onClick={handleNext}
-            disabled={!canGoNext()}
-            className="flex items-center gap-2 bg-accent-dark text-accent-light hover:bg-accent-dark/90"
-          >
-            Volgende
-            <ArrowRightIcon className="size-4" />
-          </Button>
-        ) : (
-          // Placeholder for Phase 3 - submit button
-          <Button
-            type="button"
-            disabled
-            className="flex items-center gap-2 bg-accent-dark text-accent-light hover:bg-accent-dark/90"
-          >
-            Offerte aanvragen
-            <ArrowRightIcon className="size-4" />
-          </Button>
-        )}
-      </div>
+          {currentStep < 3 && (
+            <Button
+              type="button"
+              onClick={handleNext}
+              disabled={!canGoNext()}
+              className="flex items-center gap-2 bg-accent-dark text-accent-light hover:bg-accent-dark/90"
+            >
+              Volgende
+              <ArrowRightIcon className="size-4" />
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
