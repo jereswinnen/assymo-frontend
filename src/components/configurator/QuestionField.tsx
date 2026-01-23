@@ -13,8 +13,8 @@ import {
 import {
   Field,
   FieldLabel,
-  FieldDescription,
 } from "@/components/ui/field";
+import { RichText } from "@/components/RichText";
 import type { QuestionOption, QuestionType } from "@/lib/configurator/types";
 
 export interface QuestionConfig {
@@ -141,7 +141,7 @@ function SingleSelectField({
         {question.required && " *"}
       </FieldLabel>
       {question.description && (
-        <FieldDescription>{question.description}</FieldDescription>
+        <RichText html={question.description} className="text-sm text-muted-foreground [&_p]:m-0" />
       )}
       <Select
         value={value || ""}
@@ -199,7 +199,7 @@ function MultiSelectField({
         {question.required && " *"}
       </FieldLabel>
       {question.description && (
-        <FieldDescription>{question.description}</FieldDescription>
+        <RichText html={question.description} className="text-sm text-muted-foreground [&_p]:m-0" />
       )}
       <div className="flex flex-col gap-3 mt-2">
         {options.map((option) => (
@@ -251,7 +251,7 @@ function TextField({
         {question.required && " *"}
       </FieldLabel>
       {question.description && (
-        <FieldDescription>{question.description}</FieldDescription>
+        <RichText html={question.description} className="text-sm text-muted-foreground [&_p]:m-0" />
       )}
       <Input
         id={question.question_key}
@@ -293,7 +293,7 @@ function NumberField({
         {question.required && " *"}
       </FieldLabel>
       {question.description && (
-        <FieldDescription>{question.description}</FieldDescription>
+        <RichText html={question.description} className="text-sm text-muted-foreground [&_p]:m-0" />
       )}
       <Input
         id={question.question_key}
@@ -356,7 +356,7 @@ function DimensionsField({
         {question.required && " *"}
       </FieldLabel>
       {question.description && (
-        <FieldDescription>{question.description}</FieldDescription>
+        <RichText html={question.description} className="text-sm text-muted-foreground [&_p]:m-0" />
       )}
       <div className="grid grid-cols-2 gap-4 mt-2">
         <div className="flex flex-col gap-1.5">
