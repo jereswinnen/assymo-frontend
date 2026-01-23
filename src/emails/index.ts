@@ -16,3 +16,4 @@ export { PasswordReset } from "./PasswordReset";
 
 // Quote emails
 export { QuoteEmail, QuoteAdminNotification } from "./QuoteEmail";
+export { QuoteReminderEmail } from "./QuoteReminderEmail";

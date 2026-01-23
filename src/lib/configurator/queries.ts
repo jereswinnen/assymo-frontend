@@ -445,3 +445,40 @@ export async function countQuoteSubmissions(siteId: string): Promise<number> {
   `;
   return Number(rows[0]?.count || 0);
 }
+
+// =============================================================================
+// Quote Reminder Queries
+// =============================================================================
+
+/**
+ * Get quote submissions that need a reminder email
+ * Returns submissions where:
+ * - No appointment was booked (appointment_id IS NULL)
+ * - Reminder hasn't been sent yet (reminder_sent_at IS NULL)
+ * - Created exactly `daysAfterSubmission` days ago (targets that specific day)
+ */
+export async function getQuoteSubmissionsNeedingReminder(
+  daysAfterSubmission: number
+): Promise<QuoteSubmission[]> {
+  const rows = await sql`
+    SELECT *
+    FROM quote_submissions
+    WHERE appointment_id IS NULL
+      AND reminder_sent_at IS NULL
+      AND created_at >= (CURRENT_DATE - ${daysAfterSubmission})::timestamptz
+      AND created_at < (CURRENT_DATE - ${daysAfterSubmission - 1})::timestamptz
+    ORDER BY created_at ASC
+  `;
+  return rows as QuoteSubmission[];
+}
+
+/**
+ * Mark a quote submission as having had its reminder sent
+ */
+export async function markQuoteReminderSent(submissionId: string): Promise<void> {
+  await sql`
+    UPDATE quote_submissions
+    SET reminder_sent_at = now()
+    WHERE id = ${submissionId}
+  `;
+}

@@ -4,6 +4,15 @@
 import type { QuestionOption, PriceModifier } from "@/lib/configurator/types";
 
 // =============================================================================
+// Quote Reminder Configuration
+// =============================================================================
+
+export const QUOTE_REMINDER_CONFIG = {
+  /** Number of days after quote submission to send the reminder */
+  daysAfterSubmission: 3,
+} as const;
+
+// =============================================================================
 // Default Questions (used when database is empty)
 // =============================================================================
 

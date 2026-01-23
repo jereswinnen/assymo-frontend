@@ -84,6 +84,7 @@ export interface QuoteSubmission {
   appointment_id: number | null;
   site_id: string;
   created_at: Date;
+  reminder_sent_at: Date | null;
 }
 
 export interface CreateQuoteSubmissionInput {

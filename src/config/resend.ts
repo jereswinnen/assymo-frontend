@@ -70,5 +70,6 @@ export const RESEND_CONFIG = {
     passwordReset: "Reset je wachtwoord - Assymo Admin",
     quoteCustomer: "Uw offerte aanvraag bij Assymo",
     quoteAdmin: "Nieuwe offerte aanvraag",
+    quoteReminder: "Herinnering: plan uw vrijblijvend plaatsbezoek",
   },
 } as const;
