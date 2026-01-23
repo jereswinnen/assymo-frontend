@@ -133,14 +133,14 @@ export function CategoryEditSheet({
 
       toast.success(
         category
-          ? t("admin.messages.configuratorItemUpdated")
-          : t("admin.messages.configuratorItemCreated")
+          ? t("admin.messages.itemUpdated")
+          : t("admin.messages.itemCreated")
       );
       onOpenChange(false);
       onSaved();
     } catch (error) {
       console.error("Failed to save category:", error);
-      toast.error(t("admin.messages.configuratorItemSaveFailed"));
+      toast.error(t("admin.messages.itemSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -158,13 +158,13 @@ export function CategoryEditSheet({
 
       if (!response.ok) throw new Error("Failed to delete");
 
-      toast.success(t("admin.messages.configuratorItemDeleted"));
+      toast.success(t("admin.messages.itemDeleted"));
       setShowDeleteDialog(false);
       onOpenChange(false);
       onSaved();
     } catch (error) {
       console.error("Failed to delete category:", error);
-      toast.error(t("admin.messages.configuratorItemDeleteFailed"));
+      toast.error(t("admin.messages.itemDeleteFailed"));
     } finally {
       setDeleting(false);
     }
@@ -177,13 +177,13 @@ export function CategoryEditSheet({
           <SheetHeader className="px-0">
             <SheetTitle>
               {category
-                ? t("admin.headings.editConfiguratorItem")
+                ? t("admin.headings.editItem")
                 : t("admin.buttons.addItem")}
             </SheetTitle>
             <SheetDescription>
               {category
-                ? t("admin.misc.editConfiguratorItemDesc")
-                : t("admin.misc.addConfiguratorItemDesc")}
+                ? t("admin.misc.editItemDesc")
+                : t("admin.misc.addItemDesc")}
             </SheetDescription>
           </SheetHeader>
 
@@ -253,13 +253,10 @@ export function CategoryEditSheet({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t("admin.misc.deleteConfiguratorItemQuestion")}
+              {t("admin.misc.deleteItemQuestion")}
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <span className="block">{t("admin.misc.deleteConfiguratorItemDesc")}</span>
-              <span className="block font-medium text-destructive">
-                {t("admin.misc.deleteConfiguratorItemCascadeWarning")}
-              </span>
+            <AlertDialogDescription>
+              {t("admin.misc.deleteItemDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

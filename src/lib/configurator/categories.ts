@@ -219,13 +219,17 @@ export async function deleteCategory(
   siteId: string,
   categoryId: string
 ): Promise<boolean> {
-  const result = await sql`
+  // Check if exists first
+  const existing = await getCategoryById(siteId, categoryId);
+  if (!existing) return false;
+
+  await sql`
     DELETE FROM configurator_categories
     WHERE id = ${categoryId}
       AND site_id = ${siteId}
   `;
 
-  return (result as { rowCount?: number }).rowCount === 1;
+  return true;
 }
 
 /**

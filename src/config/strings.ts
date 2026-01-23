@@ -218,8 +218,7 @@ export const ADMIN_STRINGS = {
       submissions: "Aanvragen",
       newQuestion: "Nieuwe vraag",
       editQuestion: "Vraag bewerken",
-      editConfiguratorItem: "Item bewerken",
-      configuratorItems: "Configurator items",
+      editItem: "Item bewerken",
     },
 
     /**
@@ -293,12 +292,13 @@ export const ADMIN_STRINGS = {
       pricingLoadFailed: "Kon prijzen niet laden",
       pricingSaveFailed: "Kon prijzen niet opslaan",
       submissionsLoadFailed: "Kon aanvragen niet laden",
-      configuratorItemCreated: "Configurator item aangemaakt",
-      configuratorItemUpdated: "Configurator item bijgewerkt",
-      configuratorItemDeleted: "Configurator item verwijderd",
-      configuratorItemSaveFailed: "Kon configurator item niet opslaan",
-      configuratorItemDeleteFailed: "Kon configurator item niet verwijderen",
-      configuratorItemsLoadFailed: "Kon configurator items niet laden",
+      itemCreated: "Item aangemaakt",
+      itemUpdated: "Item bijgewerkt",
+      itemDeleted: "Item verwijderd",
+      itemDuplicated: "Item gedupliceerd",
+      itemSaveFailed: "Kon item niet opslaan",
+      itemDeleteFailed: "Kon item niet verwijderen",
+      itemDuplicateFailed: "Kon item niet dupliceren",
 
       // Validation errors
       fillAllFields: "Vul alle velden in",
@@ -963,13 +963,10 @@ export const ADMIN_STRINGS = {
       submissionDetails: "Aanvraag details",
       yes: "Ja",
       no: "Nee",
-      deleteConfiguratorItemQuestion: "Configurator item verwijderen?",
-      deleteConfiguratorItemDesc:
-        "Weet je zeker dat je dit item wilt verwijderen?",
-      deleteConfiguratorItemCascadeWarning:
-        "Alle gekoppelde vragen en prijzen worden ook verwijderd. Dit kan niet ongedaan worden gemaakt.",
-      editConfiguratorItemDesc: "Bewerk het configurator item.",
-      addConfiguratorItemDesc: "Maak een nieuw configurator item aan.",
+      deleteItemQuestion: "Item verwijderen?",
+      deleteItemDesc: "Weet je zeker dat je dit item wilt verwijderen?",
+      editItemDesc: "Bewerk het item.",
+      addItemDesc: "Maak een nieuw item aan.",
       configuratorCategory: "Configurator",
       configuratorCategoryDesc: "Koppel deze realisatie aan een configurator item",
       configuratorCategoryNone: "Geen",

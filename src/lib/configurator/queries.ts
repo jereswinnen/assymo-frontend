@@ -341,12 +341,15 @@ export async function updateQuestion(
  * Delete a question
  */
 export async function deleteQuestion(siteId: string, questionId: string): Promise<boolean> {
-  const result = await sql`
+  const existing = await getQuestionById(siteId, questionId);
+  if (!existing) return false;
+
+  await sql`
     DELETE FROM configurator_questions
     WHERE id = ${questionId}
       AND site_id = ${siteId}
   `;
-  return (result as { rowCount?: number }).rowCount === 1;
+  return true;
 }
 
 // =============================================================================
@@ -443,12 +446,15 @@ export async function updatePricing(
  * Delete pricing
  */
 export async function deletePricing(siteId: string, pricingId: string): Promise<boolean> {
-  const result = await sql`
+  const existing = await getPricingById(siteId, pricingId);
+  if (!existing) return false;
+
+  await sql`
     DELETE FROM configurator_pricing
     WHERE id = ${pricingId}
       AND site_id = ${siteId}
   `;
-  return (result as { rowCount?: number }).rowCount === 1;
+  return true;
 }
 
 // =============================================================================
