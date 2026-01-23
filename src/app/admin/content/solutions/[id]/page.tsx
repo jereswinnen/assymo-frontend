@@ -568,14 +568,14 @@ export default function SolutionEditorPage({
                         {t("admin.misc.configuratorCategory")}
                       </FieldLabel>
                       <Select
-                        value={configuratorCategoryId || ""}
-                        onValueChange={(value) => setConfiguratorCategoryId(value || null)}
+                        value={configuratorCategoryId || "_none"}
+                        onValueChange={(value) => setConfiguratorCategoryId(value === "_none" ? null : value)}
                       >
                         <SelectTrigger id="configurator-category">
                           <SelectValue placeholder={t("admin.misc.configuratorCategoryNone")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">{t("admin.misc.configuratorCategoryNone")}</SelectItem>
+                          <SelectItem value="_none">{t("admin.misc.configuratorCategoryNone")}</SelectItem>
                           {configuratorCategories.map((cat) => (
                             <SelectItem key={cat.id} value={cat.id}>
                               {cat.name}
