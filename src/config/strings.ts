@@ -168,6 +168,15 @@ export const ADMIN_STRINGS = {
       hasAppointment: "Afspraak",
       customer: "Klant",
       configuration: "Configuratie",
+      catalogueCategory: "Categorie",
+      priceMin: "Minimumprijs",
+      priceMax: "Maximumprijs",
+      unit: "Eenheid",
+      pricePerM2: "Prijs per m\u00B2",
+      pricePerUnit: "Prijs per eenheid",
+      optionPrice: "Optieprijs",
+      fromCatalogue: "Uit catalogus",
+      manualPrice: "Handmatig",
     },
 
     /**
@@ -219,6 +228,9 @@ export const ADMIN_STRINGS = {
       newQuestion: "Nieuwe vraag",
       editQuestion: "Vraag bewerken",
       editItem: "Item bewerken",
+      catalogue: "Prijscatalogus",
+      newCatalogueItem: "Nieuw catalogusitem",
+      editCatalogueItem: "Catalogusitem bewerken",
     },
 
     /**
@@ -297,6 +309,12 @@ export const ADMIN_STRINGS = {
       itemDeleted: "Item verwijderd",
       itemDuplicated: "Item gedupliceerd",
       itemSaveFailed: "Kon item niet opslaan",
+      catalogueItemCreated: "Catalogusitem aangemaakt",
+      catalogueItemUpdated: "Catalogusitem bijgewerkt",
+      catalogueItemDeleted: "Catalogusitem verwijderd",
+      catalogueItemSaveFailed: "Kon catalogusitem niet opslaan",
+      catalogueItemDeleteFailed: "Kon catalogusitem niet verwijderen",
+      catalogueLoadFailed: "Kon catalogus niet laden",
       itemDeleteFailed: "Kon item niet verwijderen",
       itemDuplicateFailed: "Kon item niet dupliceren",
 
@@ -487,6 +505,11 @@ export const ADMIN_STRINGS = {
       optionLabel: "Optie label",
       optionValue: "optie-waarde",
       priceModifier: "0",
+      catalogueItemName: "Bijv. Vast raam",
+      catalogueCategory: "Bijv. Ramen",
+      unitExample: "Bijv. per stuk, per m\u00B2",
+      selectCatalogueItem: "Selecteer catalogusitem",
+      noCatalogueItem: "Geen (handmatig)",
     },
 
     /**
@@ -517,6 +540,8 @@ export const ADMIN_STRINGS = {
       noCategories: "Nog geen configurator items",
       noCategoriesDesc: "Maak een nieuw item aan om te beginnen.",
       addSelectQuestionsForModifiers: "Voeg keuzevragen toe om prijsmodifiers in te stellen.",
+      noCatalogueItems: "Nog geen catalogusitems",
+      noCatalogueItemsDesc: "Voeg items toe aan de prijscatalogus.",
     },
 
     /**
@@ -972,6 +997,12 @@ export const ADMIN_STRINGS = {
       configuratorCategory: "Configurator",
       configuratorCategoryDesc: "Koppel deze realisatie aan een configurator item",
       configuratorCategoryNone: "Geen",
+      deleteCatalogueItemQuestion: "Catalogusitem verwijderen?",
+      deleteCatalogueItemDesc: "Weet je zeker dat je dit catalogusitem wilt verwijderen? Opties die dit item gebruiken worden niet automatisch bijgewerkt.",
+      editCatalogueItemDesc: "Bewerk het catalogusitem.",
+      newCatalogueItemDesc: "Maak een nieuw item aan voor de prijscatalogus.",
+      indicativePrice: "Indicatieve prijs",
+      indicativePriceDisclaimer: "Exacte prijs na inmeting ter plaatse",
     },
 
     /**
