@@ -4,10 +4,50 @@ export type QuestionType = "single-select" | "multi-select" | "text" | "number" 
 
 export type HeadingLevel = "h2" | "h3" | "h4";
 
+// =============================================================================
+// Price Catalogue
+// =============================================================================
+
+export interface PriceCatalogueItem {
+  id: string;
+  site_id: string;
+  name: string;
+  category: string;
+  price_min: number; // in cents
+  price_max: number; // in cents
+  unit: string | null; // e.g., "per stuk", "per m²", null for flat price
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface CreatePriceCatalogueInput {
+  name: string;
+  category: string;
+  price_min: number;
+  price_max: number;
+  unit?: string | null;
+}
+
+export interface UpdatePriceCatalogueInput {
+  name?: string;
+  category?: string;
+  price_min?: number;
+  price_max?: number;
+  unit?: string | null;
+}
+
+// =============================================================================
+// Question Options
+// =============================================================================
+
 export interface QuestionOption {
   value: string;
   label: string;
-  priceModifier?: number; // in cents, can be positive or negative
+  catalogueItemId?: string; // Reference to price catalogue (linked pricing)
+  priceModifierMin?: number; // Manual price override (in cents)
+  priceModifierMax?: number; // Manual price override (in cents)
+  /** @deprecated Use catalogueItemId or priceModifierMin/Max instead */
+  priceModifier?: number; // Legacy: in cents, can be positive or negative
 }
 
 export interface ConfiguratorQuestion {
@@ -23,6 +63,11 @@ export interface ConfiguratorQuestion {
   required: boolean;
   order_rank: number;
   site_id: string;
+  // Pricing fields for specific question types
+  price_per_m2_min: number | null; // For dimensions type (in cents)
+  price_per_m2_max: number | null; // For dimensions type (in cents)
+  price_per_unit_min: number | null; // For number type (in cents)
+  price_per_unit_max: number | null; // For number type (in cents)
   created_at: Date;
   updated_at: Date;
 }
@@ -38,6 +83,10 @@ export interface CreateQuestionInput {
   options?: QuestionOption[];
   required?: boolean;
   order_rank?: number;
+  price_per_m2_min?: number | null;
+  price_per_m2_max?: number | null;
+  price_per_unit_min?: number | null;
+  price_per_unit_max?: number | null;
 }
 
 export interface UpdateQuestionInput {
@@ -51,6 +100,10 @@ export interface UpdateQuestionInput {
   options?: QuestionOption[] | null;
   required?: boolean;
   order_rank?: number;
+  price_per_m2_min?: number | null;
+  price_per_m2_max?: number | null;
+  price_per_unit_min?: number | null;
+  price_per_unit_max?: number | null;
 }
 
 export interface PriceModifier {
