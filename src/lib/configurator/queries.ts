@@ -292,6 +292,10 @@ export async function createQuestion(
       options,
       required,
       order_rank,
+      price_per_m2_min,
+      price_per_m2_max,
+      price_per_unit_min,
+      price_per_unit_max,
       site_id
     ) VALUES (
       ${input.product_slug},
@@ -304,6 +308,10 @@ export async function createQuestion(
       ${input.options ? JSON.stringify(input.options) : null},
       ${input.required ?? true},
       ${input.order_rank ?? 0},
+      ${input.price_per_m2_min ?? null},
+      ${input.price_per_m2_max ?? null},
+      ${input.price_per_unit_min ?? null},
+      ${input.price_per_unit_max ?? null},
       ${siteId}
     )
     RETURNING *
@@ -335,6 +343,10 @@ export async function updateQuestion(
       options = ${input.options !== undefined ? (input.options ? JSON.stringify(input.options) : null) : (existing.options ? JSON.stringify(existing.options) : null)},
       required = ${input.required ?? existing.required},
       order_rank = ${input.order_rank ?? existing.order_rank},
+      price_per_m2_min = ${input.price_per_m2_min !== undefined ? input.price_per_m2_min : existing.price_per_m2_min},
+      price_per_m2_max = ${input.price_per_m2_max !== undefined ? input.price_per_m2_max : existing.price_per_m2_max},
+      price_per_unit_min = ${input.price_per_unit_min !== undefined ? input.price_per_unit_min : existing.price_per_unit_min},
+      price_per_unit_max = ${input.price_per_unit_max !== undefined ? input.price_per_unit_max : existing.price_per_unit_max},
       updated_at = now()
     WHERE id = ${questionId}
       AND site_id = ${siteId}
