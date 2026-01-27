@@ -100,9 +100,7 @@ export function QuestionEditSheet({
   const [options, setOptions] = useState<QuestionOption[]>([]);
   const [saving, setSaving] = useState(false);
 
-  // Pricing fields for dimensions/number types
-  const [pricePerM2Min, setPricePerM2Min] = useState("");
-  const [pricePerM2Max, setPricePerM2Max] = useState("");
+  // Pricing fields for number types (per-unit pricing)
   const [pricePerUnitMin, setPricePerUnitMin] = useState("");
   const [pricePerUnitMax, setPricePerUnitMax] = useState("");
 
@@ -119,8 +117,6 @@ export function QuestionEditSheet({
     type: "single-select" as QuestionType,
     required: true,
     options: [] as QuestionOption[],
-    pricePerM2Min: "",
-    pricePerM2Max: "",
     pricePerUnitMin: "",
     pricePerUnitMax: "",
   });
@@ -158,8 +154,6 @@ export function QuestionEditSheet({
       setType(question.type);
       setRequired(question.required);
       setOptions(question.options || []);
-      setPricePerM2Min(question.price_per_m2_min ? (question.price_per_m2_min / 100).toString() : "");
-      setPricePerM2Max(question.price_per_m2_max ? (question.price_per_m2_max / 100).toString() : "");
       setPricePerUnitMin(question.price_per_unit_min ? (question.price_per_unit_min / 100).toString() : "");
       setPricePerUnitMax(question.price_per_unit_max ? (question.price_per_unit_max / 100).toString() : "");
       setOriginalValues({
@@ -170,8 +164,6 @@ export function QuestionEditSheet({
         type: question.type,
         required: question.required,
         options: question.options || [],
-        pricePerM2Min: question.price_per_m2_min ? (question.price_per_m2_min / 100).toString() : "",
-        pricePerM2Max: question.price_per_m2_max ? (question.price_per_m2_max / 100).toString() : "",
         pricePerUnitMin: question.price_per_unit_min ? (question.price_per_unit_min / 100).toString() : "",
         pricePerUnitMax: question.price_per_unit_max ? (question.price_per_unit_max / 100).toString() : "",
       });
@@ -183,8 +175,6 @@ export function QuestionEditSheet({
       setType("single-select");
       setRequired(true);
       setOptions([]);
-      setPricePerM2Min("");
-      setPricePerM2Max("");
       setPricePerUnitMin("");
       setPricePerUnitMax("");
       setOriginalValues({
@@ -195,8 +185,6 @@ export function QuestionEditSheet({
         type: "single-select",
         required: true,
         options: [],
-        pricePerM2Min: "",
-        pricePerM2Max: "",
         pricePerUnitMin: "",
         pricePerUnitMax: "",
       });
@@ -218,12 +206,10 @@ export function QuestionEditSheet({
       type !== originalValues.type ||
       required !== originalValues.required ||
       JSON.stringify(options) !== JSON.stringify(originalValues.options) ||
-      pricePerM2Min !== originalValues.pricePerM2Min ||
-      pricePerM2Max !== originalValues.pricePerM2Max ||
       pricePerUnitMin !== originalValues.pricePerUnitMin ||
       pricePerUnitMax !== originalValues.pricePerUnitMax
     );
-  }, [isNew, label, headingLevel, subtitle, type, required, options, pricePerM2Min, pricePerM2Max, pricePerUnitMin, pricePerUnitMax, originalValues]);
+  }, [isNew, label, headingLevel, subtitle, type, required, options, pricePerUnitMin, pricePerUnitMax, originalValues]);
 
   // Group catalogue items by category
   const catalogueByCategory = useMemo(() => {
@@ -260,8 +246,6 @@ export function QuestionEditSheet({
         required,
         options: needsOptions ? options : null,
         category_id: categoryId,
-        price_per_m2_min: type === "dimensions" && pricePerM2Min ? Math.round(parseFloat(pricePerM2Min) * 100) : null,
-        price_per_m2_max: type === "dimensions" && pricePerM2Max ? Math.round(parseFloat(pricePerM2Max) * 100) : null,
         price_per_unit_min: type === "number" && pricePerUnitMin ? Math.round(parseFloat(pricePerUnitMin) * 100) : null,
         price_per_unit_max: type === "number" && pricePerUnitMax ? Math.round(parseFloat(pricePerUnitMax) * 100) : null,
       };
@@ -563,42 +547,6 @@ export function QuestionEditSheet({
                   <PlusIcon className="size-4" />
                   {t("admin.buttons.addItem")}
                 </Button>
-              </FieldSet>
-            </>
-          )}
-
-          {/* Price per m² for dimensions type */}
-          {type === "dimensions" && (
-            <>
-              <Separator />
-              <FieldSet>
-                <FieldLegend variant="label">{t("admin.labels.pricePerM2")}</FieldLegend>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field>
-                    <FieldLabel htmlFor="price-m2-min">{t("admin.labels.priceMin")} (EUR)</FieldLabel>
-                    <Input
-                      id="price-m2-min"
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={pricePerM2Min}
-                      onChange={(e) => setPricePerM2Min(e.target.value)}
-                      placeholder="100"
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="price-m2-max">{t("admin.labels.priceMax")} (EUR)</FieldLabel>
-                    <Input
-                      id="price-m2-max"
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={pricePerM2Max}
-                      onChange={(e) => setPricePerM2Max(e.target.value)}
-                      placeholder="200"
-                    />
-                  </Field>
-                </div>
               </FieldSet>
             </>
           )}

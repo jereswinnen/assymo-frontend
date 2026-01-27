@@ -34,6 +34,8 @@ export async function calculatePrice(
         category_id: null,
         base_price_min: defaultPricing.base_price_min,
         base_price_max: defaultPricing.base_price_max,
+        price_per_m2_min: null,
+        price_per_m2_max: null,
         price_modifiers: defaultPricing.price_modifiers,
         site_id: "default",
         created_at: new Date(),
@@ -57,8 +59,7 @@ export async function calculatePrice(
       options: q.options || null,
       required: q.required,
       order_rank: q.order_rank,
-      price_per_m2_min: null,
-      price_per_m2_max: null,
+      catalogue_item_id: null,
       price_per_unit_min: null,
       price_per_unit_max: null,
       site_id: "default",
@@ -209,12 +210,12 @@ export function calculatePriceFromConfig(
       "length" in answer &&
       "width" in answer
     ) {
-      // Dimensions: calculate area × pricePerM2
+      // Dimensions: calculate area × pricePerM2 (from category pricing)
       // Note: dimensions are stored in meters
       const area = answer.length * answer.width;
-      if (area > 0 && (question.price_per_m2_min || question.price_per_m2_max)) {
-        const perM2Min = question.price_per_m2_min || 0;
-        const perM2Max = question.price_per_m2_max || perM2Min;
+      if (area > 0 && (pricing.price_per_m2_min || pricing.price_per_m2_max)) {
+        const perM2Min = pricing.price_per_m2_min || 0;
+        const perM2Max = pricing.price_per_m2_max || perM2Min;
         totalModifierMin += perM2Min * area;
         totalModifierMax += perM2Max * area;
         modifierBreakdown.push({

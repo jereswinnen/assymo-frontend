@@ -63,11 +63,10 @@ export interface ConfiguratorQuestion {
   required: boolean;
   order_rank: number;
   site_id: string;
-  // Pricing fields for specific question types
-  price_per_m2_min: number | null; // For dimensions type (in cents)
-  price_per_m2_max: number | null; // For dimensions type (in cents)
-  price_per_unit_min: number | null; // For number type (in cents)
-  price_per_unit_max: number | null; // For number type (in cents)
+  // Pricing for number type questions (multiplied by user input)
+  catalogue_item_id: string | null; // Reference to price catalogue for per-unit pricing
+  price_per_unit_min: number | null; // Manual per-unit price (in cents)
+  price_per_unit_max: number | null; // Manual per-unit price (in cents)
   created_at: Date;
   updated_at: Date;
 }
@@ -83,8 +82,7 @@ export interface CreateQuestionInput {
   options?: QuestionOption[];
   required?: boolean;
   order_rank?: number;
-  price_per_m2_min?: number | null;
-  price_per_m2_max?: number | null;
+  catalogue_item_id?: string | null;
   price_per_unit_min?: number | null;
   price_per_unit_max?: number | null;
 }
@@ -100,8 +98,7 @@ export interface UpdateQuestionInput {
   options?: QuestionOption[] | null;
   required?: boolean;
   order_rank?: number;
-  price_per_m2_min?: number | null;
-  price_per_m2_max?: number | null;
+  catalogue_item_id?: string | null;
   price_per_unit_min?: number | null;
   price_per_unit_max?: number | null;
 }
@@ -118,6 +115,9 @@ export interface ConfiguratorPricing {
   category_id: string | null; // Links to configurator_categories
   base_price_min: number; // in cents
   base_price_max: number; // in cents
+  price_per_m2_min: number | null; // For dimensions questions (in cents)
+  price_per_m2_max: number | null; // For dimensions questions (in cents)
+  /** @deprecated Use option-level pricing instead */
   price_modifiers: PriceModifier[] | null;
   site_id: string;
   created_at: Date;
@@ -129,6 +129,9 @@ export interface CreatePricingInput {
   category_id?: string | null;
   base_price_min: number;
   base_price_max: number;
+  price_per_m2_min?: number | null;
+  price_per_m2_max?: number | null;
+  /** @deprecated */
   price_modifiers?: PriceModifier[];
 }
 

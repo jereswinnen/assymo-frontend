@@ -4,6 +4,13 @@ import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Field,
   FieldGroup,
   FieldLabel,
@@ -32,6 +39,14 @@ import { toast } from "sonner";
 import { CheckIcon, Loader2Icon, Trash2Icon } from "lucide-react";
 import { t } from "@/config/strings";
 import type { PriceCatalogueItem } from "@/lib/configurator/types";
+
+const UNIT_OPTIONS = [
+  { value: "_none", label: "Geen (vaste prijs)" },
+  { value: "per stuk", label: "Per stuk" },
+  { value: "per m²", label: "Per m²" },
+  { value: "per m", label: "Per strekkende meter" },
+  { value: "per uur", label: "Per uur" },
+] as const;
 
 interface CatalogueItemEditSheetProps {
   item: PriceCatalogueItem | null;
@@ -282,14 +297,23 @@ export function CatalogueItemEditSheet({
 
               <Field>
                 <FieldLabel htmlFor="item-unit">{t("admin.labels.unit")}</FieldLabel>
-                <Input
-                  id="item-unit"
-                  value={unit}
-                  onChange={(e) => setUnit(e.target.value)}
-                  placeholder={t("admin.placeholders.unitExample")}
-                />
+                <Select
+                  value={unit || "_none"}
+                  onValueChange={(v) => setUnit(v === "_none" ? "" : v)}
+                >
+                  <SelectTrigger id="item-unit">
+                    <SelectValue placeholder="Selecteer eenheid" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {UNIT_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FieldDescription>
-                  {t("admin.misc.optional")}
+                  Bepaalt hoe de prijs wordt berekend bij gebruik
                 </FieldDescription>
               </Field>
             </FieldSet>

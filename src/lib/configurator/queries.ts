@@ -292,8 +292,7 @@ export async function createQuestion(
       options,
       required,
       order_rank,
-      price_per_m2_min,
-      price_per_m2_max,
+      catalogue_item_id,
       price_per_unit_min,
       price_per_unit_max,
       site_id
@@ -308,8 +307,7 @@ export async function createQuestion(
       ${input.options ? JSON.stringify(input.options) : null},
       ${input.required ?? true},
       ${input.order_rank ?? 0},
-      ${input.price_per_m2_min ?? null},
-      ${input.price_per_m2_max ?? null},
+      ${input.catalogue_item_id ?? null},
       ${input.price_per_unit_min ?? null},
       ${input.price_per_unit_max ?? null},
       ${siteId}
@@ -343,8 +341,7 @@ export async function updateQuestion(
       options = ${input.options !== undefined ? (input.options ? JSON.stringify(input.options) : null) : (existing.options ? JSON.stringify(existing.options) : null)},
       required = ${input.required ?? existing.required},
       order_rank = ${input.order_rank ?? existing.order_rank},
-      price_per_m2_min = ${input.price_per_m2_min !== undefined ? input.price_per_m2_min : existing.price_per_m2_min},
-      price_per_m2_max = ${input.price_per_m2_max !== undefined ? input.price_per_m2_max : existing.price_per_m2_max},
+      catalogue_item_id = ${input.catalogue_item_id !== undefined ? input.catalogue_item_id : existing.catalogue_item_id},
       price_per_unit_min = ${input.price_per_unit_min !== undefined ? input.price_per_unit_min : existing.price_per_unit_min},
       price_per_unit_max = ${input.price_per_unit_max !== undefined ? input.price_per_unit_max : existing.price_per_unit_max},
       updated_at = now()
@@ -426,6 +423,8 @@ export async function upsertPricing(
         SET
           base_price_min = ${input.base_price_min},
           base_price_max = ${input.base_price_max},
+          price_per_m2_min = ${input.price_per_m2_min ?? null},
+          price_per_m2_max = ${input.price_per_m2_max ?? null},
           price_modifiers = ${input.price_modifiers ? JSON.stringify(input.price_modifiers) : null},
           updated_at = now()
         WHERE site_id = ${siteId} AND category_id = ${input.category_id}
@@ -441,6 +440,8 @@ export async function upsertPricing(
         category_id,
         base_price_min,
         base_price_max,
+        price_per_m2_min,
+        price_per_m2_max,
         price_modifiers,
         site_id
       ) VALUES (
@@ -448,6 +449,8 @@ export async function upsertPricing(
         ${input.category_id},
         ${input.base_price_min},
         ${input.base_price_max},
+        ${input.price_per_m2_min ?? null},
+        ${input.price_per_m2_max ?? null},
         ${input.price_modifiers ? JSON.stringify(input.price_modifiers) : null},
         ${siteId}
       )

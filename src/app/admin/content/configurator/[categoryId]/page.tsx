@@ -31,6 +31,7 @@ import {
   Field,
   FieldGroup,
   FieldLabel,
+  FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
 import {
@@ -61,13 +62,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
-  CoinsIcon,
+  EuroIcon,
   GripVerticalIcon,
   Loader2Icon,
   PlusIcon,
+  RulerIcon,
   SlidersHorizontalIcon,
   Trash2Icon,
 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import { t } from "@/config/strings";
 import { QuestionEditSheet } from "./sheets/QuestionEditSheet";
 import type { ConfiguratorQuestion, ConfiguratorPricing, QuestionType } from "@/lib/configurator/types";
@@ -109,10 +112,14 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
   const [pricing, setPricing] = useState<ConfiguratorPricing | null>(null);
   const [basePriceMin, setBasePriceMin] = useState("");
   const [basePriceMax, setBasePriceMax] = useState("");
+  const [pricePerM2Min, setPricePerM2Min] = useState("");
+  const [pricePerM2Max, setPricePerM2Max] = useState("");
   const [savingPricing, setSavingPricing] = useState(false);
   const [originalPricing, setOriginalPricing] = useState({
     basePriceMin: "",
     basePriceMax: "",
+    pricePerM2Min: "",
+    pricePerM2Max: "",
   });
 
   const sensors = useSensors(
@@ -166,17 +173,34 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
           setPricing(categoryPricing);
           const minStr = (categoryPricing.base_price_min / 100).toString();
           const maxStr = (categoryPricing.base_price_max / 100).toString();
+          const perM2MinStr = categoryPricing.price_per_m2_min
+            ? (categoryPricing.price_per_m2_min / 100).toString()
+            : "";
+          const perM2MaxStr = categoryPricing.price_per_m2_max
+            ? (categoryPricing.price_per_m2_max / 100).toString()
+            : "";
           setBasePriceMin(minStr);
           setBasePriceMax(maxStr);
+          setPricePerM2Min(perM2MinStr);
+          setPricePerM2Max(perM2MaxStr);
           setOriginalPricing({
             basePriceMin: minStr,
             basePriceMax: maxStr,
+            pricePerM2Min: perM2MinStr,
+            pricePerM2Max: perM2MaxStr,
           });
         } else {
           setPricing(null);
           setBasePriceMin("");
           setBasePriceMax("");
-          setOriginalPricing({ basePriceMin: "", basePriceMax: "" });
+          setPricePerM2Min("");
+          setPricePerM2Max("");
+          setOriginalPricing({
+            basePriceMin: "",
+            basePriceMax: "",
+            pricePerM2Min: "",
+            pricePerM2Max: "",
+          });
         }
       }
     } catch (error) {
@@ -258,15 +282,23 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
   const hasPricingChanges = useMemo(() => {
     return (
       basePriceMin !== originalPricing.basePriceMin ||
-      basePriceMax !== originalPricing.basePriceMax
+      basePriceMax !== originalPricing.basePriceMax ||
+      pricePerM2Min !== originalPricing.pricePerM2Min ||
+      pricePerM2Max !== originalPricing.pricePerM2Max
     );
-  }, [basePriceMin, basePriceMax, originalPricing]);
+  }, [basePriceMin, basePriceMax, pricePerM2Min, pricePerM2Max, originalPricing]);
 
   const savePricing = useCallback(async () => {
     if (!currentSite) return;
 
     const minCents = Math.round(parseFloat(basePriceMin || "0") * 100);
     const maxCents = Math.round(parseFloat(basePriceMax || "0") * 100);
+    const perM2MinCents = pricePerM2Min
+      ? Math.round(parseFloat(pricePerM2Min) * 100)
+      : null;
+    const perM2MaxCents = pricePerM2Max
+      ? Math.round(parseFloat(pricePerM2Max) * 100)
+      : null;
 
     if (minCents <= 0 || maxCents <= 0) {
       toast.error("Vul geldige prijzen in");
@@ -275,6 +307,12 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
 
     if (minCents > maxCents) {
       toast.error("Minimumprijs moet lager zijn dan maximumprijs");
+      return;
+    }
+
+    // Validate per-m² if both are provided
+    if (perM2MinCents !== null && perM2MaxCents !== null && perM2MinCents > perM2MaxCents) {
+      toast.error("Minimumprijs per m² moet lager zijn dan maximumprijs");
       return;
     }
 
@@ -288,6 +326,8 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
           category_id: categoryId,
           base_price_min: minCents,
           base_price_max: maxCents,
+          price_per_m2_min: perM2MinCents,
+          price_per_m2_max: perM2MaxCents,
         }),
       });
 
@@ -298,6 +338,8 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
       setOriginalPricing({
         basePriceMin,
         basePriceMax,
+        pricePerM2Min,
+        pricePerM2Max,
       });
     } catch (error) {
       console.error("Failed to save pricing:", error);
@@ -305,7 +347,7 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
     } finally {
       setSavingPricing(false);
     }
-  }, [currentSite, categoryId, basePriceMin, basePriceMax]);
+  }, [currentSite, categoryId, basePriceMin, basePriceMax, pricePerM2Min, pricePerM2Max]);
 
   // Header actions
   const headerActions = useMemo(
@@ -412,18 +454,17 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
           )}
         </div>
 
-        {/* Sidebar - Base Pricing */}
+        {/* Sidebar - Pricing */}
         <div className="bg-muted sticky top-4 flex h-fit flex-col rounded-lg p-4">
-          <h3 className="mb-4 flex items-center gap-2 text-sm font-medium">
-            <CoinsIcon className="size-4" />
-            {t("admin.headings.pricing")}
-          </h3>
-
           <FieldGroup>
             <FieldSet>
+              <FieldLegend className="flex items-center gap-1.5 font-semibold">
+                <EuroIcon className="size-4 opacity-80" />
+                {t("admin.headings.basePrices")}
+              </FieldLegend>
               <Field>
                 <FieldLabel htmlFor="base-price-min">
-                  {t("admin.labels.basePriceMin")} (EUR)
+                  {t("admin.labels.minimum")}
                 </FieldLabel>
                 <Input
                   id="base-price-min"
@@ -435,7 +476,7 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
               </Field>
               <Field>
                 <FieldLabel htmlFor="base-price-max">
-                  {t("admin.labels.basePriceMax")} (EUR)
+                  {t("admin.labels.maximum")}
                 </FieldLabel>
                 <Input
                   id="base-price-max"
@@ -443,6 +484,44 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
                   value={basePriceMax}
                   onChange={(e) => setBasePriceMax(e.target.value)}
                   placeholder="75000"
+                />
+              </Field>
+            </FieldSet>
+
+            <Separator />
+
+            <FieldSet>
+              <FieldLegend className="flex items-center gap-1.5 font-semibold">
+                <RulerIcon className="size-4 opacity-80" />
+                <span>
+                  {t("admin.labels.pricePerM2")}{" "}
+                  <span className="font-normal text-muted-foreground">
+                    ({t("admin.misc.optional")})
+                  </span>
+                </span>
+              </FieldLegend>
+              <Field>
+                <FieldLabel htmlFor="price-per-m2-min">
+                  {t("admin.labels.minimum")}
+                </FieldLabel>
+                <Input
+                  id="price-per-m2-min"
+                  type="number"
+                  value={pricePerM2Min}
+                  onChange={(e) => setPricePerM2Min(e.target.value)}
+                  placeholder="150"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="price-per-m2-max">
+                  {t("admin.labels.maximum")}
+                </FieldLabel>
+                <Input
+                  id="price-per-m2-max"
+                  type="number"
+                  value={pricePerM2Max}
+                  onChange={(e) => setPricePerM2Max(e.target.value)}
+                  placeholder="250"
                 />
               </Field>
             </FieldSet>
