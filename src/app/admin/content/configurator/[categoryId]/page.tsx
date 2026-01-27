@@ -28,18 +28,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Field,
   FieldGroup,
   FieldLabel,
   FieldSet,
-  FieldSeparator,
 } from "@/components/ui/field";
 import {
   Table,
@@ -78,7 +70,7 @@ import {
 } from "lucide-react";
 import { t } from "@/config/strings";
 import { QuestionEditSheet } from "./sheets/QuestionEditSheet";
-import type { ConfiguratorQuestion, ConfiguratorPricing, PriceModifier, QuestionType } from "@/lib/configurator/types";
+import type { ConfiguratorQuestion, ConfiguratorPricing, QuestionType } from "@/lib/configurator/types";
 import type { ConfiguratorCategory } from "@/lib/configurator/categories";
 
 interface PageProps {
@@ -117,12 +109,10 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
   const [pricing, setPricing] = useState<ConfiguratorPricing | null>(null);
   const [basePriceMin, setBasePriceMin] = useState("");
   const [basePriceMax, setBasePriceMax] = useState("");
-  const [priceModifiers, setPriceModifiers] = useState<PriceModifier[]>([]);
   const [savingPricing, setSavingPricing] = useState(false);
   const [originalPricing, setOriginalPricing] = useState({
     basePriceMin: "",
     basePriceMax: "",
-    priceModifiers: [] as PriceModifier[],
   });
 
   const sensors = useSensors(
@@ -178,18 +168,15 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
           const maxStr = (categoryPricing.base_price_max / 100).toString();
           setBasePriceMin(minStr);
           setBasePriceMax(maxStr);
-          setPriceModifiers(categoryPricing.price_modifiers || []);
           setOriginalPricing({
             basePriceMin: minStr,
             basePriceMax: maxStr,
-            priceModifiers: categoryPricing.price_modifiers || [],
           });
         } else {
           setPricing(null);
           setBasePriceMin("");
           setBasePriceMax("");
-          setPriceModifiers([]);
-          setOriginalPricing({ basePriceMin: "", basePriceMax: "", priceModifiers: [] });
+          setOriginalPricing({ basePriceMin: "", basePriceMax: "" });
         }
       }
     } catch (error) {
@@ -268,18 +255,12 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
   };
 
   // Pricing functions
-  const selectQuestions = useMemo(
-    () => questions.filter((q) => q.type === "single-select" || q.type === "multi-select"),
-    [questions]
-  );
-
   const hasPricingChanges = useMemo(() => {
     return (
       basePriceMin !== originalPricing.basePriceMin ||
-      basePriceMax !== originalPricing.basePriceMax ||
-      JSON.stringify(priceModifiers) !== JSON.stringify(originalPricing.priceModifiers)
+      basePriceMax !== originalPricing.basePriceMax
     );
-  }, [basePriceMin, basePriceMax, priceModifiers, originalPricing]);
+  }, [basePriceMin, basePriceMax, originalPricing]);
 
   const savePricing = useCallback(async () => {
     if (!currentSite) return;
@@ -307,7 +288,6 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
           category_id: categoryId,
           base_price_min: minCents,
           base_price_max: maxCents,
-          price_modifiers: priceModifiers.filter((m) => m.questionKey && m.optionValue),
         }),
       });
 
@@ -318,7 +298,6 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
       setOriginalPricing({
         basePriceMin,
         basePriceMax,
-        priceModifiers: [...priceModifiers],
       });
     } catch (error) {
       console.error("Failed to save pricing:", error);
@@ -326,31 +305,7 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
     } finally {
       setSavingPricing(false);
     }
-  }, [currentSite, categoryId, basePriceMin, basePriceMax, priceModifiers]);
-
-  const addModifier = () => {
-    setPriceModifiers([...priceModifiers, { questionKey: "", optionValue: "", modifier: 0 }]);
-  };
-
-  const updateModifier = (index: number, field: keyof PriceModifier, value: string | number) => {
-    const newModifiers = [...priceModifiers];
-    if (field === "modifier") {
-      const euros = parseFloat(value as string) || 0;
-      newModifiers[index] = { ...newModifiers[index], modifier: Math.round(euros * 100) };
-    } else {
-      newModifiers[index] = { ...newModifiers[index], [field]: value };
-    }
-    setPriceModifiers(newModifiers);
-  };
-
-  const removeModifier = (index: number) => {
-    setPriceModifiers(priceModifiers.filter((_, i) => i !== index));
-  };
-
-  const getQuestionOptions = (questionKey: string) => {
-    const question = questions.find((q) => q.question_key === questionKey);
-    return question?.options || [];
-  };
+  }, [currentSite, categoryId, basePriceMin, basePriceMax]);
 
   // Header actions
   const headerActions = useMemo(
@@ -457,122 +412,41 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
           )}
         </div>
 
-        {/* Sidebar - Pricing */}
-        <div className="bg-muted sticky top-4 flex h-fit max-h-[calc(100vh-6rem)] flex-col rounded-lg p-4">
+        {/* Sidebar - Base Pricing */}
+        <div className="bg-muted sticky top-4 flex h-fit flex-col rounded-lg p-4">
           <h3 className="mb-4 flex items-center gap-2 text-sm font-medium">
             <CoinsIcon className="size-4" />
             {t("admin.headings.pricing")}
           </h3>
 
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <FieldGroup>
-              <FieldSet>
-                <Field>
-                  <FieldLabel htmlFor="base-price-min">
-                    {t("admin.labels.basePriceMin")} (EUR)
-                  </FieldLabel>
-                  <Input
-                    id="base-price-min"
-                    type="number"
-                    value={basePriceMin}
-                    onChange={(e) => setBasePriceMin(e.target.value)}
-                    placeholder="35000"
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="base-price-max">
-                    {t("admin.labels.basePriceMax")} (EUR)
-                  </FieldLabel>
-                  <Input
-                    id="base-price-max"
-                    type="number"
-                    value={basePriceMax}
-                    onChange={(e) => setBasePriceMax(e.target.value)}
-                    placeholder="75000"
-                  />
-                </Field>
-              </FieldSet>
-
-              <FieldSeparator />
-
-              {/* Price Modifiers */}
-              <div className="space-y-3">
-                <FieldLabel>{t("admin.labels.priceModifiers")}</FieldLabel>
-
-                {selectQuestions.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">
-                    {t("admin.empty.addSelectQuestionsForModifiers")}
-                  </p>
-                ) : (
-                  <>
-                    {priceModifiers.map((modifier, index) => (
-                      <div key={index} className="space-y-2 rounded-md bg-background p-2">
-                        <Select
-                          value={modifier.questionKey}
-                          onValueChange={(v) => updateModifier(index, "questionKey", v)}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Selecteer vraag" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {selectQuestions.map((q) => (
-                              <SelectItem key={q.question_key} value={q.question_key}>
-                                {q.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <div className="flex gap-2">
-                          <Select
-                            value={modifier.optionValue}
-                            onValueChange={(v) => updateModifier(index, "optionValue", v)}
-                            disabled={!modifier.questionKey}
-                          >
-                            <SelectTrigger className="h-8 flex-1 text-xs">
-                              <SelectValue placeholder="Optie" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {getQuestionOptions(modifier.questionKey).map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>
-                                  {opt.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Input
-                            type="number"
-                            value={modifier.modifier ? modifier.modifier / 100 : ""}
-                            onChange={(e) => updateModifier(index, "modifier", e.target.value)}
-                            placeholder="EUR"
-                            className="h-8 w-20 text-xs"
-                          />
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
-                            onClick={() => removeModifier(index)}
-                          >
-                            <Trash2Icon className="size-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={addModifier}
-                    >
-                      <PlusIcon className="size-3" />
-                      Modifier toevoegen
-                    </Button>
-                  </>
-                )}
-              </div>
-            </FieldGroup>
-          </div>
+          <FieldGroup>
+            <FieldSet>
+              <Field>
+                <FieldLabel htmlFor="base-price-min">
+                  {t("admin.labels.basePriceMin")} (EUR)
+                </FieldLabel>
+                <Input
+                  id="base-price-min"
+                  type="number"
+                  value={basePriceMin}
+                  onChange={(e) => setBasePriceMin(e.target.value)}
+                  placeholder="35000"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="base-price-max">
+                  {t("admin.labels.basePriceMax")} (EUR)
+                </FieldLabel>
+                <Input
+                  id="base-price-max"
+                  type="number"
+                  value={basePriceMax}
+                  onChange={(e) => setBasePriceMax(e.target.value)}
+                  placeholder="75000"
+                />
+              </Field>
+            </FieldSet>
+          </FieldGroup>
 
           {/* Save button */}
           <div className="mt-4 border-t pt-4">
