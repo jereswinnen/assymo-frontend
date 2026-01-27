@@ -16,7 +16,7 @@ import { SummaryStep } from "./steps/SummaryStep";
 
 export type WizardAnswers = Record<
   string,
-  string | string[] | number | { length: number; width: number; height?: number } | undefined
+  string | string[] | number | undefined
 >;
 
 export interface ContactDetails {

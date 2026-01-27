@@ -19,9 +19,7 @@ interface ProductOption {
 
 interface PriceData {
   min: number;
-  max: number;
   min_formatted: string;
-  max_formatted: string;
   range_formatted: string;
 }
 
@@ -400,7 +398,7 @@ export function SummaryStep({
       {/* Price Card */}
       <Card className="bg-accent-dark text-accent-light">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg opacity-80">Geschatte prijs</CardTitle>
+          <CardTitle className="text-lg opacity-80">Indicatie vanafprijs</CardTitle>
         </CardHeader>
         <CardContent>
           {priceLoading ? (
@@ -414,7 +412,7 @@ export function SummaryStep({
             <>
               <p className="text-3xl font-bold">{price.range_formatted}</p>
               <p className="text-sm opacity-70 mt-2">
-                Dit is een indicatieve prijsschatting. De uiteindelijke prijs is
+                Dit is een indicatieve vanafprijs. De uiteindelijke prijs is
                 afhankelijk van een plaatsbezoek.
               </p>
             </>

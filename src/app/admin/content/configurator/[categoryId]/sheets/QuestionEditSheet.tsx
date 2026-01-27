@@ -68,7 +68,6 @@ const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
   { value: "multi-select", label: t("admin.misc.questionTypes.multiSelect") },
   { value: "text", label: t("admin.misc.questionTypes.text") },
   { value: "number", label: t("admin.misc.questionTypes.number") },
-  { value: "dimensions", label: t("admin.misc.questionTypes.dimensions") },
 ];
 
 function slugify(text: string): string {
@@ -101,8 +100,7 @@ export function QuestionEditSheet({
   const [saving, setSaving] = useState(false);
 
   // Pricing fields for number types (per-unit pricing)
-  const [pricePerUnitMin, setPricePerUnitMin] = useState("");
-  const [pricePerUnitMax, setPricePerUnitMax] = useState("");
+  const [pricePerUnit, setPricePerUnit] = useState("");
 
   // Catalogue items for option pricing
   const [catalogueItems, setCatalogueItems] = useState<PriceCatalogueItem[]>([]);
@@ -117,8 +115,7 @@ export function QuestionEditSheet({
     type: "single-select" as QuestionType,
     required: true,
     options: [] as QuestionOption[],
-    pricePerUnitMin: "",
-    pricePerUnitMax: "",
+    pricePerUnit: "",
   });
 
   // Load catalogue items when sheet opens
@@ -154,8 +151,7 @@ export function QuestionEditSheet({
       setType(question.type);
       setRequired(question.required);
       setOptions(question.options || []);
-      setPricePerUnitMin(question.price_per_unit_min ? (question.price_per_unit_min / 100).toString() : "");
-      setPricePerUnitMax(question.price_per_unit_max ? (question.price_per_unit_max / 100).toString() : "");
+      setPricePerUnit(question.price_per_unit_min ? (question.price_per_unit_min / 100).toString() : "");
       setOriginalValues({
         label: question.label,
         headingLevel: question.heading_level || "h2",
@@ -164,8 +160,7 @@ export function QuestionEditSheet({
         type: question.type,
         required: question.required,
         options: question.options || [],
-        pricePerUnitMin: question.price_per_unit_min ? (question.price_per_unit_min / 100).toString() : "",
-        pricePerUnitMax: question.price_per_unit_max ? (question.price_per_unit_max / 100).toString() : "",
+        pricePerUnit: question.price_per_unit_min ? (question.price_per_unit_min / 100).toString() : "",
       });
     } else if (open && !question) {
       setLabel("");
@@ -175,8 +170,7 @@ export function QuestionEditSheet({
       setType("single-select");
       setRequired(true);
       setOptions([]);
-      setPricePerUnitMin("");
-      setPricePerUnitMax("");
+      setPricePerUnit("");
       setOriginalValues({
         label: "",
         headingLevel: "h2",
@@ -185,8 +179,7 @@ export function QuestionEditSheet({
         type: "single-select",
         required: true,
         options: [],
-        pricePerUnitMin: "",
-        pricePerUnitMax: "",
+        pricePerUnit: "",
       });
     }
   }, [open, question]);
@@ -206,10 +199,9 @@ export function QuestionEditSheet({
       type !== originalValues.type ||
       required !== originalValues.required ||
       JSON.stringify(options) !== JSON.stringify(originalValues.options) ||
-      pricePerUnitMin !== originalValues.pricePerUnitMin ||
-      pricePerUnitMax !== originalValues.pricePerUnitMax
+      pricePerUnit !== originalValues.pricePerUnit
     );
-  }, [isNew, label, headingLevel, subtitle, type, required, options, pricePerUnitMin, pricePerUnitMax, originalValues]);
+  }, [isNew, label, headingLevel, subtitle, type, required, options, pricePerUnit, originalValues]);
 
   // Group catalogue items by category
   const catalogueByCategory = useMemo(() => {
@@ -236,6 +228,7 @@ export function QuestionEditSheet({
 
     setSaving(true);
     try {
+      const pricePerUnitCents = type === "number" && pricePerUnit ? Math.round(parseFloat(pricePerUnit) * 100) : null;
       const body = {
         siteId,
         label,
@@ -246,8 +239,8 @@ export function QuestionEditSheet({
         required,
         options: needsOptions ? options : null,
         category_id: categoryId,
-        price_per_unit_min: type === "number" && pricePerUnitMin ? Math.round(parseFloat(pricePerUnitMin) * 100) : null,
-        price_per_unit_max: type === "number" && pricePerUnitMax ? Math.round(parseFloat(pricePerUnitMax) * 100) : null,
+        price_per_unit_min: pricePerUnitCents,
+        price_per_unit_max: pricePerUnitCents, // Same as min - single price
       };
 
       const url = question
@@ -312,22 +305,15 @@ export function QuestionEditSheet({
     setOptions(newOptions);
   };
 
-  const updateOptionManualPrice = (index: number, field: "min" | "max", value: string) => {
+  const updateOptionManualPrice = (index: number, value: string) => {
     const newOptions = [...options];
     const cents = value ? Math.round(parseFloat(value) * 100) : undefined;
-    if (field === "min") {
-      newOptions[index] = {
-        ...newOptions[index],
-        priceModifierMin: cents,
-        catalogueItemId: undefined, // Clear catalogue when using manual
-      };
-    } else {
-      newOptions[index] = {
-        ...newOptions[index],
-        priceModifierMax: cents,
-        catalogueItemId: undefined, // Clear catalogue when using manual
-      };
-    }
+    newOptions[index] = {
+      ...newOptions[index],
+      priceModifierMin: cents,
+      priceModifierMax: cents, // Same as min - single price
+      catalogueItemId: undefined, // Clear catalogue when using manual
+    };
     setOptions(newOptions);
   };
 
@@ -466,7 +452,7 @@ export function QuestionEditSheet({
 
                           {/* Pricing row */}
                           <div className="flex items-center gap-2 text-sm">
-                            <span className="text-muted-foreground shrink-0">Prijs:</span>
+                            <span className="text-muted-foreground shrink-0">{t("admin.labels.startingPrice")}:</span>
                             <Select
                               value={option.catalogueItemId || "_manual"}
                               onValueChange={(value) => {
@@ -491,7 +477,7 @@ export function QuestionEditSheet({
                                     </div>
                                     {items.map((item) => (
                                       <SelectItem key={item.id} value={item.id}>
-                                        {item.name} ({formatPrice(item.price_min)} - {formatPrice(item.price_max)})
+                                        {item.name} ({formatPrice(item.price_min)})
                                       </SelectItem>
                                     ))}
                                   </div>
@@ -500,10 +486,10 @@ export function QuestionEditSheet({
                             </Select>
                           </div>
 
-                          {/* Show catalogue item info or manual price inputs */}
+                          {/* Show catalogue item info or manual price input */}
                           {hasCatalogue && catalogueItem ? (
                             <div className="text-xs text-muted-foreground pl-1">
-                              {formatPrice(catalogueItem.price_min)} - {formatPrice(catalogueItem.price_max)}
+                              {formatPrice(catalogueItem.price_min)}
                               {catalogueItem.unit && <span className="ml-1">({catalogueItem.unit})</span>}
                             </div>
                           ) : (
@@ -515,20 +501,9 @@ export function QuestionEditSheet({
                                 min="0"
                                 step="1"
                                 value={option.priceModifierMin ? option.priceModifierMin / 100 : ""}
-                                onChange={(e) => updateOptionManualPrice(index, "min", e.target.value)}
-                                placeholder="min"
-                                className="h-7 w-20 text-xs"
-                              />
-                              <span className="text-xs">-</span>
-                              <span className="text-xs">€</span>
-                              <Input
-                                type="number"
-                                min="0"
-                                step="1"
-                                value={option.priceModifierMax ? option.priceModifierMax / 100 : ""}
-                                onChange={(e) => updateOptionManualPrice(index, "max", e.target.value)}
-                                placeholder="max"
-                                className="h-7 w-20 text-xs"
+                                onChange={(e) => updateOptionManualPrice(index, e.target.value)}
+                                placeholder="0"
+                                className="h-7 w-24 text-xs"
                               />
                             </div>
                           )}
@@ -556,33 +531,18 @@ export function QuestionEditSheet({
             <>
               <Separator />
               <FieldSet>
-                <FieldLegend variant="label">{t("admin.labels.pricePerUnit")}</FieldLegend>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field>
-                    <FieldLabel htmlFor="price-unit-min">{t("admin.labels.priceMin")} (EUR)</FieldLabel>
-                    <Input
-                      id="price-unit-min"
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={pricePerUnitMin}
-                      onChange={(e) => setPricePerUnitMin(e.target.value)}
-                      placeholder="50"
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="price-unit-max">{t("admin.labels.priceMax")} (EUR)</FieldLabel>
-                    <Input
-                      id="price-unit-max"
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={pricePerUnitMax}
-                      onChange={(e) => setPricePerUnitMax(e.target.value)}
-                      placeholder="100"
-                    />
-                  </Field>
-                </div>
+                <Field>
+                  <FieldLabel htmlFor="price-unit">{t("admin.labels.pricePerUnit")} (EUR)</FieldLabel>
+                  <Input
+                    id="price-unit"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={pricePerUnit}
+                    onChange={(e) => setPricePerUnit(e.target.value)}
+                    placeholder="50"
+                  />
+                </Field>
               </FieldSet>
             </>
           )}

@@ -71,8 +71,7 @@ export function CatalogueItemEditSheet({
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [isNewCategory, setIsNewCategory] = useState(false);
-  const [priceMin, setPriceMin] = useState("");
-  const [priceMax, setPriceMax] = useState("");
+  const [price, setPrice] = useState("");
   const [unit, setUnit] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -84,8 +83,7 @@ export function CatalogueItemEditSheet({
   const [originalValues, setOriginalValues] = useState({
     name: "",
     category: "",
-    priceMin: "",
-    priceMax: "",
+    price: "",
     unit: "",
   });
 
@@ -96,28 +94,24 @@ export function CatalogueItemEditSheet({
       setCategory(item.category);
       // Check if category is in existing categories
       setIsNewCategory(!existingCategories.includes(item.category));
-      setPriceMin((item.price_min / 100).toString());
-      setPriceMax((item.price_max / 100).toString());
+      setPrice((item.price_min / 100).toString());
       setUnit(item.unit || "");
       setOriginalValues({
         name: item.name,
         category: item.category,
-        priceMin: (item.price_min / 100).toString(),
-        priceMax: (item.price_max / 100).toString(),
+        price: (item.price_min / 100).toString(),
         unit: item.unit || "",
       });
     } else if (open && !item) {
       setName("");
       setCategory("");
       setIsNewCategory(false);
-      setPriceMin("");
-      setPriceMax("");
+      setPrice("");
       setUnit("");
       setOriginalValues({
         name: "",
         category: "",
-        priceMin: "",
-        priceMax: "",
+        price: "",
         unit: "",
       });
     }
@@ -131,11 +125,10 @@ export function CatalogueItemEditSheet({
     return (
       name !== originalValues.name ||
       category !== originalValues.category ||
-      priceMin !== originalValues.priceMin ||
-      priceMax !== originalValues.priceMax ||
+      price !== originalValues.price ||
       unit !== originalValues.unit
     );
-  }, [isNew, name, category, priceMin, priceMax, unit, originalValues]);
+  }, [isNew, name, category, price, unit, originalValues]);
 
   const handleSave = async () => {
     if (!name.trim() || !category.trim()) {
@@ -143,16 +136,10 @@ export function CatalogueItemEditSheet({
       return;
     }
 
-    const minCents = Math.round(parseFloat(priceMin || "0") * 100);
-    const maxCents = Math.round(parseFloat(priceMax || "0") * 100);
+    const priceCents = Math.round(parseFloat(price || "0") * 100);
 
-    if (minCents <= 0 || maxCents <= 0) {
-      toast.error("Vul geldige prijzen in");
-      return;
-    }
-
-    if (minCents > maxCents) {
-      toast.error("Minimumprijs moet lager zijn dan maximumprijs");
+    if (priceCents <= 0) {
+      toast.error("Vul een geldige prijs in");
       return;
     }
 
@@ -162,8 +149,8 @@ export function CatalogueItemEditSheet({
         siteId,
         name: name.trim(),
         category: category.trim(),
-        price_min: minCents,
-        price_max: maxCents,
+        price_min: priceCents,
+        price_max: priceCents, // Same as min - we use single price now
         unit: unit.trim() || null,
       };
 
@@ -308,32 +295,18 @@ export function CatalogueItemEditSheet({
             </FieldSet>
 
             <FieldSet>
-              <div className="grid grid-cols-2 gap-3">
-                <Field>
-                  <FieldLabel htmlFor="item-price-min">{t("admin.labels.priceMin")} (EUR)</FieldLabel>
-                  <Input
-                    id="item-price-min"
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={priceMin}
-                    onChange={(e) => setPriceMin(e.target.value)}
-                    placeholder="1000"
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="item-price-max">{t("admin.labels.priceMax")} (EUR)</FieldLabel>
-                  <Input
-                    id="item-price-max"
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={priceMax}
-                    onChange={(e) => setPriceMax(e.target.value)}
-                    placeholder="2000"
-                  />
-                </Field>
-              </div>
+              <Field>
+                <FieldLabel htmlFor="item-price">{t("admin.labels.startingPrice")} (EUR)</FieldLabel>
+                <Input
+                  id="item-price"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="1000"
+                />
+              </Field>
 
               <Field>
                 <FieldLabel htmlFor="item-unit">{t("admin.labels.unit")}</FieldLabel>

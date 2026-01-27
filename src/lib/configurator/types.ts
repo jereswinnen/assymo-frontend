@@ -1,6 +1,6 @@
 // Configurator types
 
-export type QuestionType = "single-select" | "multi-select" | "text" | "number" | "dimensions";
+export type QuestionType = "single-select" | "multi-select" | "text" | "number";
 
 export type HeadingLevel = "h2" | "h3" | "h4";
 
@@ -115,8 +115,6 @@ export interface ConfiguratorPricing {
   category_id: string | null; // Links to configurator_categories
   base_price_min: number; // in cents
   base_price_max: number; // in cents
-  price_per_m2_min: number | null; // For dimensions questions (in cents)
-  price_per_m2_max: number | null; // For dimensions questions (in cents)
   /** @deprecated Use option-level pricing instead */
   price_modifiers: PriceModifier[] | null;
   site_id: string;
@@ -129,8 +127,6 @@ export interface CreatePricingInput {
   category_id?: string | null;
   base_price_min: number;
   base_price_max: number;
-  price_per_m2_min?: number | null;
-  price_per_m2_max?: number | null;
   /** @deprecated */
   price_modifiers?: PriceModifier[];
 }
@@ -170,7 +166,7 @@ export interface CreateQuoteSubmissionInput {
 // For price calculation
 export interface PriceCalculationInput {
   product_slug: string;
-  answers: Record<string, string | string[] | number | { length: number; width: number; height?: number }>;
+  answers: Record<string, string | string[] | number>;
 }
 
 export interface PriceCalculationResult {

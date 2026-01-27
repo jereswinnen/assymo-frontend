@@ -32,7 +32,7 @@ async function getSiteIdBySlug(slug: string): Promise<string | null> {
  * Format answer value for display in email
  */
 function formatAnswerValue(
-  value: string | string[] | number | { length: number; width: number; height?: number } | undefined
+  value: string | string[] | number | undefined
 ): string {
   if (value === undefined || value === null) {
     return "-";
@@ -40,15 +40,6 @@ function formatAnswerValue(
 
   if (Array.isArray(value)) {
     return value.length > 0 ? value.join(", ") : "-";
-  }
-
-  if (typeof value === "object" && "length" in value && "width" in value) {
-    const dims = value as { length: number; width: number; height?: number };
-    const parts = [`${dims.length}m x ${dims.width}m`];
-    if (dims.height) {
-      parts.push(`x ${dims.height}m`);
-    }
-    return parts.join(" ");
   }
 
   if (typeof value === "number") {
@@ -60,7 +51,7 @@ function formatAnswerValue(
 
 interface SubmitRequestBody {
   product_slug: string;
-  answers: Record<string, string | string[] | number | { length: number; width: number; height?: number }>;
+  answers: Record<string, string | string[] | number>;
   contact: {
     name: string;
     email: string;

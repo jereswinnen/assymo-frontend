@@ -423,8 +423,6 @@ export async function upsertPricing(
         SET
           base_price_min = ${input.base_price_min},
           base_price_max = ${input.base_price_max},
-          price_per_m2_min = ${input.price_per_m2_min ?? null},
-          price_per_m2_max = ${input.price_per_m2_max ?? null},
           price_modifiers = ${input.price_modifiers ? JSON.stringify(input.price_modifiers) : null},
           updated_at = now()
         WHERE site_id = ${siteId} AND category_id = ${input.category_id}
@@ -440,8 +438,6 @@ export async function upsertPricing(
         category_id,
         base_price_min,
         base_price_max,
-        price_per_m2_min,
-        price_per_m2_max,
         price_modifiers,
         site_id
       ) VALUES (
@@ -449,8 +445,6 @@ export async function upsertPricing(
         ${input.category_id},
         ${input.base_price_min},
         ${input.base_price_max},
-        ${input.price_per_m2_min ?? null},
-        ${input.price_per_m2_max ?? null},
         ${input.price_modifiers ? JSON.stringify(input.price_modifiers) : null},
         ${siteId}
       )

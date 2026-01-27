@@ -433,14 +433,13 @@ export default function ConfiguratorPage() {
                   <h3 className="text-sm font-medium text-muted-foreground px-1">
                     {category}
                   </h3>
-                  <Table>
+                  <Table className="table-fixed">
                     <TableHeader>
                       <TableRow>
                         <TableHead>{t("admin.labels.name")}</TableHead>
-                        <TableHead className="hidden sm:table-cell">{t("admin.labels.priceMin")}</TableHead>
-                        <TableHead className="hidden sm:table-cell">{t("admin.labels.priceMax")}</TableHead>
-                        <TableHead className="hidden md:table-cell">{t("admin.labels.unit")}</TableHead>
-                        <TableHead className="w-10"></TableHead>
+                        <TableHead className="hidden sm:table-cell w-32">{t("admin.labels.startingPrice")}</TableHead>
+                        <TableHead className="hidden md:table-cell w-40">{t("admin.labels.unit")}</TableHead>
+                        <TableHead className="w-12"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -451,20 +450,17 @@ export default function ConfiguratorPage() {
                           onClick={() => openEditCatalogueSheet(item)}
                         >
                           <TableCell className="font-medium">{item.name}</TableCell>
-                          <TableCell className="hidden sm:table-cell">
+                          <TableCell className="hidden sm:table-cell w-32">
                             {formatPrice(item.price_min)}
                           </TableCell>
-                          <TableCell className="hidden sm:table-cell">
-                            {formatPrice(item.price_max)}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
+                          <TableCell className="hidden md:table-cell w-40">
                             {item.unit ? (
                               <Badge variant="outline">{item.unit}</Badge>
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}
                           </TableCell>
-                          <TableCell className="w-10">
+                          <TableCell className="w-12">
                             <Button
                               size="icon"
                               variant="ghost"

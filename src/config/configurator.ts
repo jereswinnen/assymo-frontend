@@ -19,7 +19,7 @@ export const QUOTE_REMINDER_CONFIG = {
 export interface DefaultQuestion {
   question_key: string;
   label: string;
-  type: "single-select" | "multi-select" | "number" | "dimensions";
+  type: "single-select" | "multi-select" | "number" | "text";
   options?: QuestionOption[];
   required: boolean;
   order_rank: number;
@@ -66,11 +66,19 @@ export const DEFAULT_COMMON_QUESTIONS: DefaultQuestion[] = [
 export const DEFAULT_PRODUCT_QUESTIONS: Record<string, DefaultQuestion[]> = {
   poolhouses: [
     {
-      question_key: "size",
-      label: "Afmetingen (L x B)",
-      type: "dimensions",
+      question_key: "length",
+      label: "Lengte (m)",
+      type: "number",
       required: true,
       order_rank: 5,
+      product_slug: "poolhouses",
+    },
+    {
+      question_key: "width",
+      label: "Breedte (m)",
+      type: "number",
+      required: true,
+      order_rank: 6,
       product_slug: "poolhouses",
     },
     {
@@ -144,11 +152,19 @@ export const DEFAULT_PRODUCT_QUESTIONS: Record<string, DefaultQuestion[]> = {
   ],
   guesthouse: [
     {
-      question_key: "size",
-      label: "Afmetingen (L x B)",
-      type: "dimensions",
+      question_key: "length",
+      label: "Lengte (m)",
+      type: "number",
       required: true,
       order_rank: 5,
+      product_slug: "guesthouse",
+    },
+    {
+      question_key: "width",
+      label: "Breedte (m)",
+      type: "number",
+      required: true,
+      order_rank: 6,
       product_slug: "guesthouse",
     },
     {

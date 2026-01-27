@@ -26,12 +26,7 @@ export interface QuestionConfig {
   description?: string;
 }
 
-type AnswerValue =
-  | string
-  | string[]
-  | number
-  | { length: number; width: number; height?: number }
-  | undefined;
+type AnswerValue = string | string[] | number | undefined;
 
 interface QuestionFieldProps {
   question: QuestionConfig;
@@ -91,17 +86,6 @@ export function QuestionField({
         <NumberField
           question={question}
           value={value as number | undefined}
-          onChange={handleChange}
-          disabled={disabled}
-          className={className}
-        />
-      );
-
-    case "dimensions":
-      return (
-        <DimensionsField
-          question={question}
-          value={value as { length: number; width: number; height?: number } | undefined}
           onChange={handleChange}
           disabled={disabled}
           className={className}
@@ -311,91 +295,3 @@ function NumberField({
   );
 }
 
-// =============================================================================
-// Dimensions Field (Length x Width, optional Height)
-// =============================================================================
-
-interface DimensionsFieldProps {
-  question: QuestionConfig;
-  value: { length: number; width: number; height?: number } | undefined;
-  onChange: (value: { length: number; width: number; height?: number } | undefined) => void;
-  disabled?: boolean;
-  className?: string;
-}
-
-function DimensionsField({
-  question,
-  value,
-  onChange,
-  disabled,
-  className,
-}: DimensionsFieldProps) {
-  const currentValue = value || { length: 0, width: 0 };
-
-  const handleFieldChange = (
-    field: "length" | "width" | "height",
-    newVal: number | undefined
-  ) => {
-    const updated = { ...currentValue };
-    if (field === "height") {
-      if (newVal === undefined || newVal === 0) {
-        delete updated.height;
-      } else {
-        updated.height = newVal;
-      }
-    } else {
-      updated[field] = newVal ?? 0;
-    }
-    onChange(updated.length === 0 && updated.width === 0 ? undefined : updated);
-  };
-
-  return (
-    <Field className={className}>
-      <FieldLabel>
-        {question.label}
-        {question.required && " *"}
-      </FieldLabel>
-      {question.description && (
-        <RichText html={question.description} className="text-sm text-muted-foreground [&_p]:m-0" />
-      )}
-      <div className="grid grid-cols-2 gap-4 mt-2">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={`${question.question_key}-length`} className="text-sm text-stone-600">
-            Lengte (m)
-          </label>
-          <Input
-            id={`${question.question_key}-length`}
-            type="number"
-            min={0}
-            step={0.1}
-            value={currentValue.length || ""}
-            onChange={(e) => {
-              const val = e.target.value;
-              handleFieldChange("length", val === "" ? undefined : Number(val));
-            }}
-            disabled={disabled}
-            placeholder="0"
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={`${question.question_key}-width`} className="text-sm text-stone-600">
-            Breedte (m)
-          </label>
-          <Input
-            id={`${question.question_key}-width`}
-            type="number"
-            min={0}
-            step={0.1}
-            value={currentValue.width || ""}
-            onChange={(e) => {
-              const val = e.target.value;
-              handleFieldChange("width", val === "" ? undefined : Number(val));
-            }}
-            disabled={disabled}
-            placeholder="0"
-          />
-        </div>
-      </div>
-    </Field>
-  );
-}

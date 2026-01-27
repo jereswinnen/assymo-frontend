@@ -43,12 +43,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       price: {
         min: result.min,
-        max: result.max,
         min_formatted: formatPrice(result.min),
-        max_formatted: formatPrice(result.max),
-        range_formatted: formatPriceRange(result.min, result.max),
+        range_formatted: formatPriceRange(result.min),
       },
-      breakdown: result.breakdown,
     });
   } catch (error) {
     console.error("Error calculating configurator price:", error);
