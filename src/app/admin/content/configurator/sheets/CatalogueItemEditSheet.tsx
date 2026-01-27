@@ -70,6 +70,7 @@ export function CatalogueItemEditSheet({
   // Form state
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
+  const [isNewCategory, setIsNewCategory] = useState(false);
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
   const [unit, setUnit] = useState("");
@@ -93,6 +94,8 @@ export function CatalogueItemEditSheet({
     if (open && item) {
       setName(item.name);
       setCategory(item.category);
+      // Check if category is in existing categories
+      setIsNewCategory(!existingCategories.includes(item.category));
       setPriceMin((item.price_min / 100).toString());
       setPriceMax((item.price_max / 100).toString());
       setUnit(item.unit || "");
@@ -106,6 +109,7 @@ export function CatalogueItemEditSheet({
     } else if (open && !item) {
       setName("");
       setCategory("");
+      setIsNewCategory(false);
       setPriceMin("");
       setPriceMax("");
       setUnit("");
@@ -117,7 +121,7 @@ export function CatalogueItemEditSheet({
         unit: "",
       });
     }
-  }, [open, item]);
+  }, [open, item, existingCategories]);
 
   // Check for changes
   const hasChanges = useMemo(() => {
@@ -249,21 +253,57 @@ export function CatalogueItemEditSheet({
 
               <Field>
                 <FieldLabel htmlFor="item-category">{t("admin.labels.catalogueCategory")}</FieldLabel>
-                <Input
-                  id="item-category"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  placeholder={t("admin.placeholders.catalogueCategory")}
-                  list="category-suggestions"
-                />
-                <datalist id="category-suggestions">
-                  {existingCategories.map((cat) => (
-                    <option key={cat} value={cat} />
-                  ))}
-                </datalist>
-                <FieldDescription>
-                  Selecteer een bestaande categorie of typ een nieuwe
-                </FieldDescription>
+                {existingCategories.length > 0 && !isNewCategory ? (
+                  <Select
+                    value={category || "_select"}
+                    onValueChange={(v) => {
+                      if (v === "_new") {
+                        setIsNewCategory(true);
+                        setCategory("");
+                      } else if (v !== "_select") {
+                        setCategory(v);
+                      }
+                    }}
+                  >
+                    <SelectTrigger id="item-category">
+                      <SelectValue placeholder="Selecteer categorie" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {existingCategories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="_new" className="text-muted-foreground">
+                        + Nieuwe categorie...
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="flex gap-2">
+                    <Input
+                      id="item-category"
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      placeholder={t("admin.placeholders.catalogueCategory")}
+                      autoFocus={isNewCategory}
+                    />
+                    {existingCategories.length > 0 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          setIsNewCategory(false);
+                          setCategory("");
+                        }}
+                        title="Bestaande selecteren"
+                      >
+                        ×
+                      </Button>
+                    )}
+                  </div>
+                )}
               </Field>
             </FieldSet>
 
