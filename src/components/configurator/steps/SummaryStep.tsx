@@ -5,7 +5,12 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { CheckCircle2Icon, CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import {
+  CheckCircle2Icon,
+  CalendarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "lucide-react";
 import type { WizardAnswers, ContactDetails } from "../Wizard";
 
 // =============================================================================
@@ -190,7 +195,7 @@ export function SummaryStep({
       setSubmissionError(
         err instanceof Error
           ? err.message
-          : "Er is iets misgegaan bij het versturen."
+          : "Er is iets misgegaan bij het versturen.",
       );
       setSubmissionStatus("error");
     }
@@ -207,7 +212,7 @@ export function SummaryStep({
       const endStr = end.toISOString().split("T")[0];
 
       const response = await fetch(
-        `/api/appointments/availability?startDate=${start}&endDate=${endStr}`
+        `/api/appointments/availability?startDate=${start}&endDate=${endStr}`,
       );
 
       if (!response.ok) {
@@ -240,7 +245,9 @@ export function SummaryStep({
 
     try {
       // Parse address into components (best effort)
-      const addressParts = contactDetails.address.split(",").map((s) => s.trim());
+      const addressParts = contactDetails.address
+        .split(",")
+        .map((s) => s.trim());
       const street = addressParts[0] || contactDetails.address;
       let postalCode = "";
       let city = "";
@@ -293,7 +300,7 @@ export function SummaryStep({
       setBookingError(
         err instanceof Error
           ? err.message
-          : "Er is iets misgegaan bij het boeken."
+          : "Er is iets misgegaan bij het boeken.",
       );
     } finally {
       setBookingLoading(false);
@@ -363,9 +370,7 @@ export function SummaryStep({
         <div className="rounded-lg bg-green-50 border border-green-200 p-4 flex items-start gap-3">
           <CheckCircle2Icon className="size-5 text-green-600 mt-0.5 shrink-0" />
           <div>
-            <p className="font-medium text-green-800">
-              Uw offerte aanvraag is verstuurd!
-            </p>
+            <p className="font-medium text-green-800">Mail verstuurd!</p>
             <p className="text-sm text-green-700 mt-1">
               U ontvangt binnen enkele minuten een bevestiging per e-mail op{" "}
               <strong>{contactDetails.email}</strong>.
@@ -377,9 +382,7 @@ export function SummaryStep({
       {/* Error Banner */}
       {submissionStatus === "error" && submissionError && (
         <div className="rounded-lg bg-red-50 border border-red-200 p-4">
-          <p className="font-medium text-red-800">
-            Er is iets misgegaan
-          </p>
+          <p className="font-medium text-red-800">Er is iets misgegaan</p>
           <p className="text-sm text-red-700 mt-1">{submissionError}</p>
           <Button
             variant="outline"
@@ -398,7 +401,9 @@ export function SummaryStep({
       {/* Price Card */}
       <Card className="bg-accent-dark text-accent-light">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg opacity-80">Indicatie vanafprijs</CardTitle>
+          <CardTitle className="text-lg opacity-80">
+            Indicatie vanafprijs
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {priceLoading ? (
@@ -576,7 +581,7 @@ export function SummaryStep({
                             hasSlots
                               ? "hover:bg-stone-100 cursor-pointer"
                               : "text-stone-300 cursor-not-allowed",
-                            isSelected && "bg-accent-dark text-accent-light"
+                            isSelected && "bg-accent-dark text-accent-light",
                           )}
                         >
                           {new Date(day.date).getDate()}
@@ -603,7 +608,7 @@ export function SummaryStep({
                               "p-2 text-sm rounded-md border transition-colors",
                               selectedTime === slot.time
                                 ? "border-accent-dark bg-accent-dark text-accent-light"
-                                : "border-stone-200 hover:border-stone-300"
+                                : "border-stone-200 hover:border-stone-300",
                             )}
                           >
                             {slot.time}
@@ -720,7 +725,7 @@ function formatAnswerValue(
     | string[]
     | number
     | { length: number; width: number; height?: number }
-    | undefined
+    | undefined,
 ): string {
   if (value === undefined || value === null) {
     return "-";
