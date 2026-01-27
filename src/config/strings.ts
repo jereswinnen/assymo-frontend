@@ -222,6 +222,8 @@ export const ADMIN_STRINGS = {
       seo: "SEO",
       general: "Algemeen",
       unsavedChanges: "Niet-opgeslagen wijzigingen",
+      categories: "Categorieën",
+      priceCatalogue: "Prijscatalogus",
       questions: "Vragen",
       pricing: "Prijzen",
       submissions: "Aanvragen",
