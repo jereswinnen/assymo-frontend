@@ -3,8 +3,11 @@ import type {
   PriceCalculationResult,
   ConfiguratorPricing,
   ConfiguratorQuestion,
+  QuestionOption,
+  PriceCatalogueItem,
 } from "./types";
 import { getPricingForProduct, getQuestionsForProduct } from "./queries";
+import { getCatalogueItemsForSite } from "./catalogue";
 import { getDefaultPricing, getDefaultQuestions } from "@/config/configurator";
 
 /**
@@ -17,6 +20,9 @@ export async function calculatePrice(
   // Try database first, fall back to defaults
   let pricing = await getPricingForProduct(input.product_slug, siteSlug);
   let questions = await getQuestionsForProduct(input.product_slug, siteSlug);
+
+  // Fetch catalogue items for pricing lookups
+  const catalogueItems = await getCatalogueItemsForSite(siteSlug);
 
   // Fall back to default pricing if not in database
   if (!pricing) {
@@ -51,6 +57,10 @@ export async function calculatePrice(
       options: q.options || null,
       required: q.required,
       order_rank: q.order_rank,
+      price_per_m2_min: null,
+      price_per_m2_max: null,
+      price_per_unit_min: null,
+      price_per_unit_max: null,
       site_id: "default",
       created_at: new Date(),
       updated_at: new Date(),
@@ -70,91 +80,176 @@ export async function calculatePrice(
     };
   }
 
-  return calculatePriceFromConfig(pricing, questions, input.answers);
+  return calculatePriceFromConfig(pricing, questions, input.answers, catalogueItems);
+}
+
+/**
+ * Get option price from catalogue or manual price fields
+ */
+function getOptionPrice(
+  option: QuestionOption,
+  catalogueMap: Map<string, PriceCatalogueItem>
+): { min: number; max: number } | null {
+  // First check for catalogue reference
+  if (option.catalogueItemId) {
+    const catalogueItem = catalogueMap.get(option.catalogueItemId);
+    if (catalogueItem) {
+      return { min: catalogueItem.price_min, max: catalogueItem.price_max };
+    }
+    // Catalogue item was deleted - no price contribution
+    return null;
+  }
+
+  // Then check for manual price
+  if (option.priceModifierMin !== undefined || option.priceModifierMax !== undefined) {
+    return {
+      min: option.priceModifierMin || 0,
+      max: option.priceModifierMax || option.priceModifierMin || 0,
+    };
+  }
+
+  // Legacy support: old priceModifier field (flat amount for both min and max)
+  if (option.priceModifier !== undefined) {
+    return { min: option.priceModifier, max: option.priceModifier };
+  }
+
+  // No price set for this option
+  return null;
 }
 
 /**
  * Calculate price from pricing config and answers (pure function for testing)
+ *
+ * New calculation logic:
+ * 1. Start with base price (min/max) from category pricing
+ * 2. For each answered question:
+ *    - single-select: add selected option's price (from catalogue or manual)
+ *    - multi-select: sum all selected options' prices
+ *    - number: multiply value × pricePerUnit (min/max)
+ *    - dimensions: calculate area (length × width) × pricePerM2 (min/max)
+ * 3. Return total min/max
  */
 export function calculatePriceFromConfig(
   pricing: ConfiguratorPricing,
   questions: ConfiguratorQuestion[],
-  answers: PriceCalculationInput["answers"]
+  answers: PriceCalculationInput["answers"],
+  catalogueItems?: PriceCatalogueItem[]
 ): PriceCalculationResult {
   let totalModifierMin = 0;
   let totalModifierMax = 0;
   const modifierBreakdown: { label: string; amount: number }[] = [];
 
-  // Build a map of question keys to their options for label lookup
+  // Build catalogue lookup map
+  const catalogueMap = new Map<string, PriceCatalogueItem>();
+  if (catalogueItems) {
+    for (const item of catalogueItems) {
+      catalogueMap.set(item.id, item);
+    }
+  }
+
+  // Build a map of question keys to their questions
   const questionMap = new Map<string, ConfiguratorQuestion>();
   for (const q of questions) {
     questionMap.set(q.question_key, q);
   }
 
-  // Apply price modifiers based on answers
+  // Process each answered question
+  for (const [questionKey, answer] of Object.entries(answers)) {
+    if (answer === undefined || answer === null) continue;
+
+    const question = questionMap.get(questionKey);
+    if (!question) continue;
+
+    // Handle different question/answer types
+    if (question.type === "single-select" && typeof answer === "string") {
+      // Single-select: add selected option's price
+      const selectedOption = question.options?.find((o) => o.value === answer);
+      if (selectedOption) {
+        const price = getOptionPrice(selectedOption, catalogueMap);
+        if (price) {
+          totalModifierMin += price.min;
+          totalModifierMax += price.max;
+          modifierBreakdown.push({
+            label: selectedOption.label,
+            amount: price.min, // Use min for breakdown display
+          });
+        }
+      }
+    } else if (question.type === "multi-select" && Array.isArray(answer)) {
+      // Multi-select: sum all selected options' prices
+      for (const selectedValue of answer) {
+        const selectedOption = question.options?.find((o) => o.value === selectedValue);
+        if (selectedOption) {
+          const price = getOptionPrice(selectedOption, catalogueMap);
+          if (price) {
+            totalModifierMin += price.min;
+            totalModifierMax += price.max;
+            modifierBreakdown.push({
+              label: selectedOption.label,
+              amount: price.min, // Use min for breakdown display
+            });
+          }
+        }
+      }
+    } else if (question.type === "number" && typeof answer === "number") {
+      // Number: multiply value × pricePerUnit
+      if (question.price_per_unit_min || question.price_per_unit_max) {
+        const perUnitMin = question.price_per_unit_min || 0;
+        const perUnitMax = question.price_per_unit_max || perUnitMin;
+        totalModifierMin += perUnitMin * answer;
+        totalModifierMax += perUnitMax * answer;
+        modifierBreakdown.push({
+          label: `${question.label}: ${answer}`,
+          amount: perUnitMin * answer,
+        });
+      }
+    } else if (
+      question.type === "dimensions" &&
+      typeof answer === "object" &&
+      "length" in answer &&
+      "width" in answer
+    ) {
+      // Dimensions: calculate area × pricePerM2
+      // Note: dimensions are stored in meters
+      const area = answer.length * answer.width;
+      if (area > 0 && (question.price_per_m2_min || question.price_per_m2_max)) {
+        const perM2Min = question.price_per_m2_min || 0;
+        const perM2Max = question.price_per_m2_max || perM2Min;
+        totalModifierMin += perM2Min * area;
+        totalModifierMax += perM2Max * area;
+        modifierBreakdown.push({
+          label: `${question.label}: ${area.toFixed(1)} m²`,
+          amount: perM2Min * area,
+        });
+      }
+    }
+  }
+
+  // Legacy support: apply old-style price modifiers if present
+  // This ensures backward compatibility with existing configurations
   if (pricing.price_modifiers && Array.isArray(pricing.price_modifiers)) {
     for (const modifier of pricing.price_modifiers) {
       const answer = answers[modifier.questionKey];
-
       if (answer === undefined || answer === null) continue;
 
-      // Handle different answer types
-      if (typeof answer === "string") {
-        // Single-select: exact match
-        if (answer === modifier.optionValue) {
-          totalModifierMin += modifier.modifier;
-          totalModifierMax += modifier.modifier;
-
-          // Get label from question options
-          const question = questionMap.get(modifier.questionKey);
-          const option = question?.options?.find((o) => o.value === modifier.optionValue);
-          modifierBreakdown.push({
-            label: option?.label || modifier.optionValue,
-            amount: modifier.modifier,
-          });
-        }
-      } else if (Array.isArray(answer)) {
-        // Multi-select: check if value is in array
-        if (answer.includes(modifier.optionValue)) {
-          totalModifierMin += modifier.modifier;
-          totalModifierMax += modifier.modifier;
-
-          const question = questionMap.get(modifier.questionKey);
-          const option = question?.options?.find((o) => o.value === modifier.optionValue);
-          modifierBreakdown.push({
-            label: option?.label || modifier.optionValue,
-            amount: modifier.modifier,
-          });
-        }
-      } else if (typeof answer === "number") {
-        // Number input: modifier could be per-unit
-        // For now, apply modifier if any value is set
-        // Future: support per-unit pricing (modifier * answer)
-        if (modifier.optionValue === "*" || modifier.optionValue === "any") {
-          const scaledModifier = modifier.modifier * answer;
-          totalModifierMin += scaledModifier;
-          totalModifierMax += scaledModifier;
-
-          const question = questionMap.get(modifier.questionKey);
-          modifierBreakdown.push({
-            label: `${question?.label || modifier.questionKey}: ${answer}`,
-            amount: scaledModifier,
-          });
-        }
-      } else if (typeof answer === "object" && "length" in answer && "width" in answer) {
-        // Dimensions: calculate area and apply per-m² pricing
-        const area = (answer.length * answer.width) / 10000; // Convert cm² to m²
-        if (modifier.optionValue === "area" || modifier.optionValue === "m2") {
-          const scaledModifier = modifier.modifier * area;
-          totalModifierMin += scaledModifier;
-          totalModifierMax += scaledModifier;
-
-          const question = questionMap.get(modifier.questionKey);
-          modifierBreakdown.push({
-            label: `${question?.label || "Oppervlakte"}: ${area.toFixed(1)} m²`,
-            amount: scaledModifier,
-          });
-        }
+      if (typeof answer === "string" && answer === modifier.optionValue) {
+        totalModifierMin += modifier.modifier;
+        totalModifierMax += modifier.modifier;
+        const question = questionMap.get(modifier.questionKey);
+        const option = question?.options?.find((o) => o.value === modifier.optionValue);
+        modifierBreakdown.push({
+          label: option?.label || modifier.optionValue,
+          amount: modifier.modifier,
+        });
+      } else if (Array.isArray(answer) && answer.includes(modifier.optionValue)) {
+        totalModifierMin += modifier.modifier;
+        totalModifierMax += modifier.modifier;
+        const question = questionMap.get(modifier.questionKey);
+        const option = question?.options?.find((o) => o.value === modifier.optionValue);
+        modifierBreakdown.push({
+          label: option?.label || modifier.optionValue,
+          amount: modifier.modifier,
+        });
       }
     }
   }
