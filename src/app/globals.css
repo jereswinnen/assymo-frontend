@@ -191,6 +191,31 @@
   row-gap: calc(var(--u-grid-gap) * 1.25);
 }
 
+.o-grid--configurator {
+  padding-right: var(--u-grid-gap) !important;
+  display: grid;
+  grid-template-columns: 15% 1fr;
+  column-gap: var(--u-grid-gap);
+  min-height: 100vh;
+}
+
+.o-grid--configurator__sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  align-self: start;
+  background-image:
+    linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.2),
+      rgba(255, 255, 255, 1)
+    ),
+    url("/images/configurator-bg.avif");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 .o-grid--bleed {
   --_bleed: calc((100vw - var(--u-site-w)) / 2);
   margin-left: calc(-1 * var(--_bleed));

@@ -34,10 +34,10 @@ export default async function ConfiguratorPage({
       : null;
 
   return (
-    <section className="col-span-full grid grid-cols-subgrid gap-y-14">
+    <section className="mx-auto max-w-4xl grid gap-y-18! md:gap-y-30!">
       {/* Header Section */}
-      <header className="col-span-full md:col-span-6 md:col-start-2 lg:col-span-8 lg:col-start-3 py-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-stone-900 mb-4">
+      <header className="col-span-full">
+        <h1 className="text-3xl md:text-4xl font-bold text-stone-900">
           Configurator
         </h1>
         <p className="text-lg text-stone-600">
@@ -48,7 +48,7 @@ export default async function ConfiguratorPage({
       </header>
 
       {/* Wizard Section */}
-      <div className="col-span-full md:col-span-6 md:col-start-2 lg:col-span-8 lg:col-start-3 pb-16">
+      <div className="col-span-full">
         <Wizard products={products} initialProduct={validInitialProduct} />
       </div>
     </section>

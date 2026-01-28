@@ -56,7 +56,7 @@ import { toast } from "sonner";
 import { Section, getSectionLabel } from "@/types/sections";
 import { AddSectionButton } from "./AddSectionButton";
 import { PasteSectionButton, CLIPBOARD_KEY } from "./PasteSectionButton";
-import { SectionEditSheet } from "@/app/admin/content/sheets/SectionEditSheet";
+import { SectionEditSheet } from "@/app/(admin)/admin/content/sheets/SectionEditSheet";
 import { t } from "@/config/strings";
 
 interface SortableSectionRowProps {
