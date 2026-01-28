@@ -60,7 +60,7 @@ export function QuoteEmail({
 
         {/* Price Highlight */}
         <HighlightBox>
-          <Text style={highlightLabel}>Geschatte prijs</Text>
+          <Text style={highlightLabel}>Prijsschatting</Text>
           <Text style={highlightValue}>{priceRange}</Text>
         </HighlightBox>
 
@@ -173,7 +173,7 @@ export function QuoteAdminNotification({
 
         {/* Price Highlight */}
         <HighlightBox>
-          <Text style={highlightLabel}>Prijsindicatie</Text>
+          <Text style={highlightLabel}>Prijsschatting</Text>
           <Text style={highlightValue}>{priceRange}</Text>
         </HighlightBox>
 

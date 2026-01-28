@@ -401,9 +401,7 @@ export function SummaryStep({
       {/* Price Card */}
       <Card className="bg-accent-dark text-accent-light">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg opacity-80">
-            Indicatie vanafprijs
-          </CardTitle>
+          <CardTitle className="text-lg opacity-80">Prijsschatting</CardTitle>
         </CardHeader>
         <CardContent>
           {priceLoading ? (
