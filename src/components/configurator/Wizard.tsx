@@ -2,9 +2,8 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { useTracking } from "@/lib/tracking";
+import { actionVariants } from "@/components/shared/Action";
 import { ProgressBar } from "./ProgressBar";
 import { ProductStep } from "./steps/ProductStep";
 import { ContactStep, validateContactDetails } from "./steps/ContactStep";
@@ -238,28 +237,25 @@ export function Wizard({ products, initialProduct = null, className }: WizardPro
 
       {/* Navigation Buttons - Hide on step 3 when submission is complete */}
       {!(currentStep === 3 && submissionComplete) && (
-        <div className="flex items-center justify-between border-t pt-6">
-          <Button
+        <div className="flex items-center justify-start gap-3 border-t pt-6">
+          <button
             type="button"
-            variant="outline"
             onClick={handleBack}
             disabled={currentStep === 1}
-            className="flex items-center gap-2"
+            className={actionVariants({ variant: "secondary" })}
           >
-            <ArrowLeftIcon className="size-4" />
             Terug
-          </Button>
+          </button>
 
           {currentStep < 3 && (
-            <Button
+            <button
               type="button"
               onClick={handleNext}
               disabled={!canGoNext()}
-              className="flex items-center gap-2 bg-accent-dark text-accent-light hover:bg-accent-dark/90"
+              className={actionVariants({ variant: "primary" })}
             >
               Volgende
-              <ArrowRightIcon className="size-4" />
-            </Button>
+            </button>
           )}
         </div>
       )}
