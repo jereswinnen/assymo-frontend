@@ -1,7 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { CheckIcon } from "lucide-react";
+import {
+  BlocksIcon,
+  CircleUserRoundIcon,
+  NotepadTextDashedIcon,
+} from "lucide-react";
 
 interface ProgressBarProps {
   currentStep: number;
@@ -9,70 +13,44 @@ interface ProgressBarProps {
 }
 
 const STEPS = [
-  { number: 1, label: "Product" },
-  { number: 2, label: "Gegevens" },
-  { number: 3, label: "Offerte" },
+  { number: 1, label: "Configuratie", icon: BlocksIcon },
+  { number: 2, label: "Gegevens", icon: CircleUserRoundIcon },
+  { number: 3, label: "Overzicht", icon: NotepadTextDashedIcon },
 ];
 
 export function ProgressBar({ currentStep, className }: ProgressBarProps) {
   return (
-    <nav aria-label="Progress" className={cn("w-full", className)}>
-      <ol className="flex items-center justify-between">
-        {STEPS.map((step, index) => {
-          const isCompleted = step.number < currentStep;
-          const isCurrent = step.number === currentStep;
-          const isLast = index === STEPS.length - 1;
+    <nav aria-label="Progress" className={cn("flex gap-6", className)}>
+      {STEPS.map((step) => {
+        const Icon = step.icon;
+        const isActive = step.number === currentStep;
+        const isCompleted = step.number < currentStep;
 
-          return (
-            <li
-              key={step.number}
+        return (
+          <div key={step.number} className="flex-1 flex flex-col gap-3">
+            <div
               className={cn(
-                "flex items-center",
-                !isLast && "flex-1"
+                "flex items-center gap-1.5 text-sm",
+                isCompleted && "text-accent-dark",
+                isActive && "text-stone-800 font-medium",
+                !isActive && !isCompleted && "text-stone-600 font-normal"
               )}
             >
-              <div className="flex flex-col items-center">
-                <div
-                  className={cn(
-                    "flex size-10 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors",
-                    isCompleted && "border-accent-dark bg-accent-dark text-white",
-                    isCurrent && "border-accent-dark bg-white text-accent-dark",
-                    !isCompleted && !isCurrent && "border-stone-300 bg-white text-stone-400"
-                  )}
-                  aria-current={isCurrent ? "step" : undefined}
-                >
-                  {isCompleted ? (
-                    <CheckIcon className="size-5" />
-                  ) : (
-                    step.number
-                  )}
-                </div>
-                <span
-                  className={cn(
-                    "mt-2 text-sm font-medium",
-                    isCompleted && "text-accent-dark",
-                    isCurrent && "text-accent-dark",
-                    !isCompleted && !isCurrent && "text-stone-400"
-                  )}
-                >
-                  {step.label}
-                </span>
-              </div>
-
-              {/* Connector line */}
-              {!isLast && (
-                <div
-                  className={cn(
-                    "mx-4 h-0.5 flex-1 transition-colors",
-                    isCompleted ? "bg-accent-dark" : "bg-stone-200"
-                  )}
-                  aria-hidden="true"
-                />
+              <Icon className="size-4" />
+              <span>{step.label}</span>
+            </div>
+            <div
+              className={cn(
+                "h-0.5",
+                isCompleted && "bg-accent-light",
+                isActive && "bg-stone-500",
+                !isActive && !isCompleted && "bg-stone-200"
               )}
-            </li>
-          );
-        })}
-      </ol>
+              aria-current={isActive ? "step" : undefined}
+            />
+          </div>
+        );
+      })}
     </nav>
   );
 }

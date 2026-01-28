@@ -1,12 +1,13 @@
-import { Metadata } from "next";
 import { getCategoriesForSite } from "@/lib/configurator/categories";
 import { Wizard } from "@/components/configurator/Wizard";
+import { buildMetadata } from "@/lib/getPageMetadata";
 
-export const metadata: Metadata = {
-  title: "Configurator | Assymo",
+export const metadata = buildMetadata({
+  title: "Configurator",
   description:
     "Stel uw ideale tuinhuis, poolhouse of carport samen en ontvang direct een prijsindicatie.",
-};
+  path: "/configurator",
+});
 
 interface ConfiguratorPageProps {
   searchParams: Promise<{ product?: string }>;
