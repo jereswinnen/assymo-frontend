@@ -106,6 +106,7 @@ export const ADMIN_STRINGS = {
       subitems: "Subitems",
       items: "Items",
       images: "Afbeeldingen",
+      caption: "Onderschrift",
       layout: "Layout",
       verticalAlign: "Verticale uitlijning",
       background: "Achtergrond",
