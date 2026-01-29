@@ -19,6 +19,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { ImageUpload } from "@/components/admin/media/ImageUpload";
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from "lucide-react";
@@ -72,6 +73,15 @@ function SortableImageItem({
           })
         }
       />
+
+      <Field>
+        <FieldLabel>{t("admin.labels.caption")}</FieldLabel>
+        <Input
+          value={image.caption || ""}
+          onChange={(e) => onUpdate({ caption: e.target.value })}
+          placeholder={t("admin.labels.caption")}
+        />
+      </Field>
 
       <div className="flex items-center gap-2">
         <button
