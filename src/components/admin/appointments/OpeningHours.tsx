@@ -186,7 +186,7 @@ export function OpeningHours({
                           e.target.value,
                         )
                       }
-                      className="w-28 [&::-webkit-calendar-picker-indicator]:hidden"
+                      className="w-28 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                     />
                   </div>
 
@@ -202,7 +202,7 @@ export function OpeningHours({
                           e.target.value,
                         )
                       }
-                      className="w-28 [&::-webkit-calendar-picker-indicator]:hidden"
+                      className="w-28 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                     />
                   </div>
 

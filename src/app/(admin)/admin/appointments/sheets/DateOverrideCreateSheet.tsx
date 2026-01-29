@@ -312,7 +312,7 @@ export function DateOverrideCreateSheet({
                       onChange={(e) =>
                         setFormData({ ...formData, open_time: e.target.value })
                       }
-                      className="[&::-webkit-calendar-picker-indicator]:hidden"
+                      className="[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                     />
                   </Field>
                   <Field>
@@ -323,7 +323,7 @@ export function DateOverrideCreateSheet({
                       onChange={(e) =>
                         setFormData({ ...formData, close_time: e.target.value })
                       }
-                      className="[&::-webkit-calendar-picker-indicator]:hidden"
+                      className="[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                     />
                   </Field>
                 </div>

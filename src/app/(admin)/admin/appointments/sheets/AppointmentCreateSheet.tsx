@@ -176,6 +176,7 @@ export function AppointmentCreateSheet({
                         appointment_time: e.target.value,
                       })
                     }
+                    className="[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                   />
                 </Field>
               </div>

@@ -278,7 +278,7 @@ export function AppointmentEditSheet({
                           appointment_time: e.target.value,
                         })
                       }
-                      className="[&::-webkit-calendar-picker-indicator]:hidden"
+                      className="[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                     />
                   </Field>
                 </div>
