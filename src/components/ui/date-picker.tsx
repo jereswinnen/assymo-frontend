@@ -19,6 +19,7 @@ interface DatePickerProps {
   onChange?: (date: Date | undefined) => void;
   placeholder?: string;
   disabled?: boolean;
+  disablePast?: boolean;
   className?: string;
 }
 
@@ -27,6 +28,7 @@ export function DatePicker({
   onChange,
   placeholder = "Selecteer datum",
   disabled,
+  disablePast,
   className,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
@@ -55,6 +57,7 @@ export function DatePicker({
             onChange?.(date);
             setOpen(false);
           }}
+          disabled={disablePast ? { before: new Date() } : undefined}
           locale={nl}
           initialFocus
         />
