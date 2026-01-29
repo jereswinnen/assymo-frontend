@@ -12,6 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { DatePicker } from "@/components/ui/date-picker";
+import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
@@ -37,9 +39,9 @@ export function AppointmentCreateSheet({
 }: AppointmentCreateSheetProps) {
   const [saving, setSaving] = useState(false);
   const [sendConfirmation, setSendConfirmation] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
   const [formData, setFormData] = useState({
-    appointment_date: "",
     appointment_time: "",
     customer_name: "",
     customer_email: "",
@@ -52,8 +54,8 @@ export function AppointmentCreateSheet({
   });
 
   const resetForm = () => {
+    setSelectedDate(undefined);
     setFormData({
-      appointment_date: "",
       appointment_time: "",
       customer_name: "",
       customer_email: "",
@@ -69,7 +71,7 @@ export function AppointmentCreateSheet({
 
   const handleSubmit = async () => {
     // Basic validation
-    if (!formData.appointment_date || !formData.appointment_time) {
+    if (!selectedDate || !formData.appointment_time) {
       toast.error(t("admin.messages.selectDateTime"));
       return;
     }
@@ -99,6 +101,7 @@ export function AppointmentCreateSheet({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          appointment_date: format(selectedDate, "yyyy-MM-dd"),
           send_confirmation: sendConfirmation,
         }),
       });
@@ -130,7 +133,7 @@ export function AppointmentCreateSheet({
 
   // Check if required fields are filled
   const isFormValid =
-    formData.appointment_date &&
+    selectedDate &&
     formData.appointment_time &&
     formData.customer_name.trim() &&
     formData.customer_email.trim() &&
@@ -155,18 +158,10 @@ export function AppointmentCreateSheet({
             <FieldSet>
               <div className="grid grid-cols-2 gap-4">
                 <Field>
-                  <FieldLabel htmlFor="date">{t("admin.labels.date")}</FieldLabel>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={formData.appointment_date}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        appointment_date: e.target.value,
-                      })
-                    }
-                    className="[&::-webkit-calendar-picker-indicator]:hidden"
+                  <FieldLabel>{t("admin.labels.date")}</FieldLabel>
+                  <DatePicker
+                    value={selectedDate}
+                    onChange={setSelectedDate}
                   />
                 </Field>
                 <Field>
@@ -181,7 +176,6 @@ export function AppointmentCreateSheet({
                         appointment_time: e.target.value,
                       })
                     }
-                    className="[&::-webkit-calendar-picker-indicator]:hidden"
                   />
                 </Field>
               </div>
