@@ -11,6 +11,7 @@ function mapQuestionForFrontend(question: ConfiguratorQuestion) {
     question_key: question.question_key,
     label: question.label,
     type: question.type,
+    display_type: question.display_type || "select",
     options: question.options,
     required: question.required,
     description: question.subtitle, // Map subtitle -> description for frontend

@@ -2,6 +2,8 @@
 
 export type QuestionType = "single-select" | "multi-select" | "text" | "number";
 
+export type DisplayType = "select" | "radio-cards";
+
 export type HeadingLevel = "h2" | "h3" | "h4";
 
 // =============================================================================
@@ -59,6 +61,7 @@ export interface ConfiguratorQuestion {
   heading_level: HeadingLevel;
   subtitle: string | null;
   type: QuestionType;
+  display_type: DisplayType; // How to render the field (select dropdown or radio cards)
   options: QuestionOption[] | null; // For select types
   required: boolean;
   order_rank: number;
@@ -79,6 +82,7 @@ export interface CreateQuestionInput {
   heading_level?: HeadingLevel;
   subtitle?: string | null;
   type: QuestionType;
+  display_type?: DisplayType;
   options?: QuestionOption[];
   required?: boolean;
   order_rank?: number;
@@ -95,6 +99,7 @@ export interface UpdateQuestionInput {
   heading_level?: HeadingLevel;
   subtitle?: string | null;
   type?: QuestionType;
+  display_type?: DisplayType;
   options?: QuestionOption[] | null;
   required?: boolean;
   order_rank?: number;

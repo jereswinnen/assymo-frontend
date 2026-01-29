@@ -19,17 +19,13 @@ export function ContactStep({
 }: ContactStepProps) {
   const updateField = <K extends keyof ContactDetails>(
     field: K,
-    value: ContactDetails[K]
+    value: ContactDetails[K],
   ) => {
     onChange({ ...contactDetails, [field]: value });
   };
 
   return (
     <div className={cn("flex flex-col gap-2 max-w-md", className)}>
-      <p className="text-stone-600 mb-4">
-        Vul uw gegevens in zodat we contact met u kunnen opnemen voor uw offerte.
-      </p>
-
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="contact-name">Naam *</FieldLabel>

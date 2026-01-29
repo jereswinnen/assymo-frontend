@@ -35,7 +35,7 @@ export default async function ConfiguratorPage({
       : null;
 
   return (
-    <section className="mx-auto max-w-4xl grid gap-y-12! md:gap-y-20!">
+    <section className="mx-auto max-w-4xl pb-12 md:pb-20 grid gap-y-12! md:gap-y-20!">
       {/* Header Section */}
       <header className="col-span-full flex flex-col gap-2 md:w-[900px]">
         <h1 className="mb-0!">Configurator</h1>

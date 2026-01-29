@@ -15,12 +15,14 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { RichText } from "@/components/RichText";
-import type { QuestionOption, QuestionType } from "@/lib/configurator/types";
+import { RadioCardGroup } from "./RadioCardGroup";
+import type { QuestionOption, QuestionType, DisplayType } from "@/lib/configurator/types";
 
 export interface QuestionConfig {
   question_key: string;
   label: string;
   type: QuestionType;
+  display_type?: DisplayType;
   options?: QuestionOption[] | null;
   required: boolean;
   description?: string;
@@ -49,6 +51,18 @@ export function QuestionField({
 
   switch (question.type) {
     case "single-select":
+      // Use radio cards if display_type is set to "radio-cards"
+      if (question.display_type === "radio-cards") {
+        return (
+          <RadioCardsField
+            question={question}
+            value={value as string | undefined}
+            onChange={handleChange}
+            disabled={disabled}
+            className={className}
+          />
+        );
+      }
       return (
         <SingleSelectField
           question={question}
@@ -143,6 +157,49 @@ function SingleSelectField({
           ))}
         </SelectContent>
       </Select>
+    </Field>
+  );
+}
+
+// =============================================================================
+// Radio Cards Field (Visual card selection)
+// =============================================================================
+
+interface RadioCardsFieldProps {
+  question: QuestionConfig;
+  value: string | undefined;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  className?: string;
+}
+
+function RadioCardsField({
+  question,
+  value,
+  onChange,
+  disabled,
+  className,
+}: RadioCardsFieldProps) {
+  const options = question.options || [];
+
+  return (
+    <Field className={className}>
+      <FieldLabel>
+        {question.label}
+        {question.required && " *"}
+      </FieldLabel>
+      {question.description && (
+        <RichText html={question.description} className="text-sm text-muted-foreground [&_p]:m-0" />
+      )}
+      <RadioCardGroup
+        options={options.map((opt) => ({
+          value: opt.value,
+          label: opt.label,
+        }))}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+      />
     </Field>
   );
 }

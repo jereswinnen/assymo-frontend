@@ -39,6 +39,7 @@ import { t } from "@/config/strings";
 import type {
   ConfiguratorQuestion,
   QuestionType,
+  DisplayType,
   QuestionOption,
   HeadingLevel,
   PriceCatalogueItem,
@@ -70,6 +71,11 @@ const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
   { value: "number", label: t("admin.misc.questionTypes.number") },
 ];
 
+const DISPLAY_TYPES: { value: DisplayType; label: string }[] = [
+  { value: "select", label: "Dropdown" },
+  { value: "radio-cards", label: "Keuzekaarten" },
+];
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -95,6 +101,7 @@ export function QuestionEditSheet({
   const [subtitle, setSubtitle] = useState("");
   const [questionKey, setQuestionKey] = useState("");
   const [type, setType] = useState<QuestionType>("single-select");
+  const [displayType, setDisplayType] = useState<DisplayType>("select");
   const [required, setRequired] = useState(true);
   const [options, setOptions] = useState<QuestionOption[]>([]);
   const [saving, setSaving] = useState(false);
@@ -113,6 +120,7 @@ export function QuestionEditSheet({
     subtitle: "",
     questionKey: "",
     type: "single-select" as QuestionType,
+    displayType: "select" as DisplayType,
     required: true,
     options: [] as QuestionOption[],
     pricePerUnit: "",
@@ -149,6 +157,7 @@ export function QuestionEditSheet({
       setSubtitle(question.subtitle || "");
       setQuestionKey(question.question_key);
       setType(question.type);
+      setDisplayType(question.display_type || "select");
       setRequired(question.required);
       setOptions(question.options || []);
       setPricePerUnit(question.price_per_unit_min ? (question.price_per_unit_min / 100).toString() : "");
@@ -158,6 +167,7 @@ export function QuestionEditSheet({
         subtitle: question.subtitle || "",
         questionKey: question.question_key,
         type: question.type,
+        displayType: question.display_type || "select",
         required: question.required,
         options: question.options || [],
         pricePerUnit: question.price_per_unit_min ? (question.price_per_unit_min / 100).toString() : "",
@@ -168,6 +178,7 @@ export function QuestionEditSheet({
       setSubtitle("");
       setQuestionKey("");
       setType("single-select");
+      setDisplayType("select");
       setRequired(true);
       setOptions([]);
       setPricePerUnit("");
@@ -177,6 +188,7 @@ export function QuestionEditSheet({
         subtitle: "",
         questionKey: "",
         type: "single-select",
+        displayType: "select",
         required: true,
         options: [],
         pricePerUnit: "",
@@ -197,11 +209,12 @@ export function QuestionEditSheet({
       headingLevel !== originalValues.headingLevel ||
       subtitle !== originalValues.subtitle ||
       type !== originalValues.type ||
+      displayType !== originalValues.displayType ||
       required !== originalValues.required ||
       JSON.stringify(options) !== JSON.stringify(originalValues.options) ||
       pricePerUnit !== originalValues.pricePerUnit
     );
-  }, [isNew, label, headingLevel, subtitle, type, required, options, pricePerUnit, originalValues]);
+  }, [isNew, label, headingLevel, subtitle, type, displayType, required, options, pricePerUnit, originalValues]);
 
   // Group catalogue items by category
   const catalogueByCategory = useMemo(() => {
@@ -236,6 +249,7 @@ export function QuestionEditSheet({
         subtitle: subtitle || null,
         question_key: questionKey,
         type,
+        display_type: type === "single-select" ? displayType : "select", // Only relevant for single-select
         required,
         options: needsOptions ? options : null,
         category_id: categoryId,
@@ -397,6 +411,24 @@ export function QuestionEditSheet({
                 </SelectContent>
               </Select>
             </Field>
+
+            {type === "single-select" && (
+              <Field>
+                <FieldLabel htmlFor="question-display-type">Weergave</FieldLabel>
+                <Select value={displayType} onValueChange={(v) => setDisplayType(v as DisplayType)}>
+                  <SelectTrigger id="question-display-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DISPLAY_TYPES.map((dt) => (
+                      <SelectItem key={dt.value} value={dt.value}>
+                        {dt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
 
             <Field orientation="horizontal">
               <FieldLabel htmlFor="question-required">

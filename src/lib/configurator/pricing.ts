@@ -67,6 +67,7 @@ export async function calculatePrice(
       heading_level: "h2" as const,
       subtitle: null,
       type: q.type,
+      display_type: "select" as const,
       options: q.options || null,
       required: q.required,
       order_rank: q.order_rank,

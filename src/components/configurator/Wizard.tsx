@@ -41,7 +41,11 @@ interface WizardProps {
 // Wizard Component
 // =============================================================================
 
-export function Wizard({ products, initialProduct = null, className }: WizardProps) {
+export function Wizard({
+  products,
+  initialProduct = null,
+  className,
+}: WizardProps) {
   const { track } = useTracking();
 
   // Step management
@@ -49,7 +53,9 @@ export function Wizard({ products, initialProduct = null, className }: WizardPro
   const hasTrackedStartRef = useRef(false);
 
   // Step 1: Product configuration
-  const [selectedProduct, setSelectedProduct] = useState<string | null>(initialProduct);
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(
+    initialProduct,
+  );
   const [answers, setAnswers] = useState<WizardAnswers>({});
 
   // Step 2: Contact details
@@ -96,7 +102,7 @@ export function Wizard({ products, initialProduct = null, className }: WizardPro
       setAnswers((prev) => ({ ...prev, [key]: value }));
       setValidationError(null);
     },
-    []
+    [],
   );
 
   const handleContactChange = useCallback((details: ContactDetails) => {
@@ -128,7 +134,7 @@ export function Wizard({ products, initialProduct = null, className }: WizardPro
         });
       }
     },
-    [track, selectedProduct]
+    [track, selectedProduct],
   );
 
   // ==========================================================================
@@ -237,7 +243,7 @@ export function Wizard({ products, initialProduct = null, className }: WizardPro
 
       {/* Navigation Buttons - Hide on step 3 when submission is complete */}
       {!(currentStep === 3 && submissionComplete) && (
-        <div className="flex items-center justify-start gap-3 border-t pt-6">
+        <div className="flex items-center justify-start gap-3">
           <button
             type="button"
             onClick={handleBack}
