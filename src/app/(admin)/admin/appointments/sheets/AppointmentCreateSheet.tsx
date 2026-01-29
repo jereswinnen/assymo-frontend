@@ -162,6 +162,7 @@ export function AppointmentCreateSheet({
                   <DatePicker
                     value={selectedDate}
                     onChange={setSelectedDate}
+                    disablePast
                   />
                 </Field>
                 <Field>
