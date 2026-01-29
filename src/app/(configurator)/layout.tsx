@@ -26,7 +26,7 @@ export default async function ConfiguratorRootLayout({
         />
         <main className="o-grid--configurator">
           <div className="o-grid--configurator__sidebar" />
-          <section className="flex flex-col gap-y-12! md:gap-y-20!">
+          <section className="flex flex-col gap-y-12! md:gap-y-20! overflow-hidden">
             <ConfiguratorHeader phone={parameters?.phone ?? undefined} />
             {children}
           </section>

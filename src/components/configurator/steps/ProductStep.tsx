@@ -75,9 +75,9 @@ export function ProductStep({
   }, [selectedProduct]);
 
   return (
-    <div className={cn("flex flex-col gap-8 max-w-md", className)}>
+    <div className={cn("flex flex-col gap-8", className)}>
       {/* Product selector */}
-      <Field>
+      <Field className="max-w-md">
         <FieldLabel htmlFor="product-selector">
           Welk product zoekt u? *
         </FieldLabel>

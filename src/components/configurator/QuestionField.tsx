@@ -133,7 +133,7 @@ function SingleSelectField({
   const options = question.options || [];
 
   return (
-    <Field className={className}>
+    <Field className={cn("max-w-md", className)}>
       <FieldLabel htmlFor={question.question_key}>
         {question.label}
         {question.required && " *"}
@@ -234,7 +234,7 @@ function MultiSelectField({
   };
 
   return (
-    <Field className={className}>
+    <Field className={cn("max-w-md", className)}>
       <FieldLabel>
         {question.label}
         {question.required && " *"}
@@ -286,7 +286,7 @@ function TextField({
   className,
 }: TextFieldProps) {
   return (
-    <Field className={className}>
+    <Field className={cn("max-w-md", className)}>
       <FieldLabel htmlFor={question.question_key}>
         {question.label}
         {question.required && " *"}
@@ -328,7 +328,7 @@ function NumberField({
   className,
 }: NumberFieldProps) {
   return (
-    <Field className={className}>
+    <Field className={cn("max-w-md", className)}>
       <FieldLabel htmlFor={question.question_key}>
         {question.label}
         {question.required && " *"}
