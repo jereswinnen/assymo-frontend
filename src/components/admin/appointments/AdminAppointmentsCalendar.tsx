@@ -396,7 +396,7 @@ export function AdminAppointmentsCalendar({
                     {day.dayNumber && (
                       <span
                         className={cn(
-                          "size-6 flex items-center justify-center rounded-full text-sm mb-0.5",
+                          "size-6 flex items-center justify-center rounded-full text-sm mb-1.5",
                           day.isPast && "text-muted-foreground",
                           !day.isPast && "text-foreground font-medium",
                           day.isToday && "bg-primary text-primary-foreground font-semibold"
@@ -435,21 +435,16 @@ export function AdminAppointmentsCalendar({
                   "hover:bg-muted/80 cursor-pointer"
                 )}
               >
-                <div className="flex items-center gap-1 mb-1">
-                  <span
-                    className={cn(
-                      "size-8 flex items-center justify-center rounded-full text-lg font-medium",
-                      day.isPast && "text-muted-foreground",
-                      !day.isPast && "text-foreground",
-                      day.isToday && "bg-primary text-primary-foreground font-semibold"
-                    )}
-                  >
-                    {day.dayNumber}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {day.monthShort}
-                  </span>
-                </div>
+                <span
+                  className={cn(
+                    "size-8 flex items-center justify-center rounded-full text-lg font-medium mb-2",
+                    day.isPast && "text-muted-foreground",
+                    !day.isPast && "text-foreground",
+                    day.isToday && "bg-primary text-primary-foreground font-semibold"
+                  )}
+                >
+                  {day.dayNumber}
+                </span>
 
                 <div className="flex-1 flex flex-col gap-1 overflow-y-auto min-h-0">
                   {day.appointments.map(renderAppointmentBar)}
