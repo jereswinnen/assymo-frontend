@@ -437,7 +437,7 @@ export function AdminAppointmentsCalendar({
               >
                 <span
                   className={cn(
-                    "size-8 flex items-center justify-center rounded-full text-lg font-medium mb-2",
+                    "size-8 flex items-center justify-center rounded-full text-lg font-medium mb-4",
                     day.isPast && "text-muted-foreground",
                     !day.isPast && "text-foreground",
                     day.isToday && "bg-primary text-primary-foreground font-semibold"
