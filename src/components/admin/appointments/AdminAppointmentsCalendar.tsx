@@ -10,12 +10,14 @@ import { DAYS_OF_WEEK } from "@/types/appointments";
 interface AdminAppointmentsCalendarProps {
   appointments: Appointment[];
   onDateClick: (date: Date) => void;
+  onAppointmentClick: (appointment: Appointment) => void;
   loading?: boolean;
 }
 
 export function AdminAppointmentsCalendar({
   appointments,
   onDateClick,
+  onAppointmentClick,
   loading = false,
 }: AdminAppointmentsCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(() => {
@@ -219,7 +221,7 @@ export function AdminAppointmentsCalendar({
                   {day.dayNumber && (
                     <span
                       className={cn(
-                        "text-xs mb-0.5",
+                        "text-sm mb-0.5",
                         day.isPast && "text-muted-foreground",
                         !day.isPast && "text-foreground font-medium",
                         day.isToday && "text-primary font-semibold",
@@ -234,14 +236,26 @@ export function AdminAppointmentsCalendar({
                     {day.appointments.slice(0, 3).map((apt) => (
                       <div
                         key={apt.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAppointmentClick(apt);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.stopPropagation();
+                            onAppointmentClick(apt);
+                          }
+                        }}
                         className={cn(
-                          "flex items-center gap-1 text-[10px] leading-tight truncate",
+                          "flex items-center gap-1 text-xs leading-tight truncate rounded hover:bg-muted/50 cursor-pointer",
                           apt.status === "cancelled" && "opacity-50"
                         )}
                       >
                         <div
                           className={cn(
-                            "w-0.5 h-3 rounded-full shrink-0",
+                            "w-0.5 h-4 rounded-full shrink-0",
                             apt.status === "cancelled"
                               ? "bg-destructive"
                               : "bg-primary"
@@ -256,7 +270,7 @@ export function AdminAppointmentsCalendar({
                       </div>
                     ))}
                     {day.appointments.length > 3 && (
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         +{day.appointments.length - 3} meer
                       </span>
                     )}

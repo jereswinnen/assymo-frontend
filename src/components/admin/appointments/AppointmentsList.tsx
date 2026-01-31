@@ -231,6 +231,7 @@ export function AppointmentsList({
           <AdminAppointmentsCalendar
             appointments={appointments}
             onDateClick={handleCalendarDateClick}
+            onAppointmentClick={handleAppointmentClick}
             loading={loading}
           />
         </div>
