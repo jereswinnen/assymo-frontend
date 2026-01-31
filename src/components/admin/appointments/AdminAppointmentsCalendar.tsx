@@ -232,7 +232,7 @@ export function AdminAppointmentsCalendar({
                   )}
 
                   {/* Appointment bars */}
-                  <div className="flex-1 flex flex-col gap-0.5 overflow-hidden min-h-0">
+                  <div className="flex-1 flex flex-col gap-1 overflow-hidden min-h-0">
                     {day.appointments.slice(0, 3).map((apt) => (
                       <div
                         key={apt.id}
@@ -249,7 +249,7 @@ export function AdminAppointmentsCalendar({
                           }
                         }}
                         className={cn(
-                          "flex items-center gap-1 text-xs leading-tight rounded px-0.5 -mx-0.5 hover:bg-foreground/10 cursor-pointer",
+                          "flex items-center gap-1 text-xs leading-tight rounded px-0.5 -mx-0.5 hover:bg-foreground/10 cursor-pointer transition-colors",
                           apt.status === "cancelled" && "opacity-50"
                         )}
                       >
