@@ -396,10 +396,10 @@ export function AdminAppointmentsCalendar({
                     {day.dayNumber && (
                       <span
                         className={cn(
-                          "text-sm mb-0.5",
+                          "size-6 flex items-center justify-center rounded-full text-sm mb-0.5",
                           day.isPast && "text-muted-foreground",
                           !day.isPast && "text-foreground font-medium",
-                          day.isToday && "text-primary font-semibold"
+                          day.isToday && "bg-primary text-primary-foreground font-semibold"
                         )}
                       >
                         {day.dayNumber}
@@ -435,13 +435,13 @@ export function AdminAppointmentsCalendar({
                   "hover:bg-muted/80 cursor-pointer"
                 )}
               >
-                <div className="flex items-baseline gap-1 mb-1">
+                <div className="flex items-center gap-1 mb-1">
                   <span
                     className={cn(
-                      "text-lg font-medium",
+                      "size-8 flex items-center justify-center rounded-full text-lg font-medium",
                       day.isPast && "text-muted-foreground",
                       !day.isPast && "text-foreground",
-                      day.isToday && "text-primary font-semibold"
+                      day.isToday && "bg-primary text-primary-foreground font-semibold"
                     )}
                   >
                     {day.dayNumber}
