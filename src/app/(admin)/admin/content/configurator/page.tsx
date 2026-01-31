@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { Suspense, useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSiteContext } from "@/lib/permissions/site-context";
 import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
@@ -84,6 +84,22 @@ function formatPrice(cents: number): string {
 }
 
 export default function ConfiguratorPage() {
+  return (
+    <Suspense fallback={<ConfiguratorLoading />}>
+      <ConfiguratorContent />
+    </Suspense>
+  );
+}
+
+function ConfiguratorLoading() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+    </div>
+  );
+}
+
+function ConfiguratorContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { currentSite, loading: siteLoading } = useSiteContext();
