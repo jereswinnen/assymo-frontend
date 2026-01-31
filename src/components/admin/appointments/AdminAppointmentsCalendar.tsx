@@ -249,7 +249,7 @@ export function AdminAppointmentsCalendar({
                           }
                         }}
                         className={cn(
-                          "flex items-center gap-1 text-xs leading-tight truncate rounded hover:bg-muted/50 cursor-pointer",
+                          "flex items-center gap-1 text-xs leading-tight rounded px-0.5 -mx-0.5 hover:bg-accent cursor-pointer",
                           apt.status === "cancelled" && "opacity-50"
                         )}
                       >
@@ -261,10 +261,10 @@ export function AdminAppointmentsCalendar({
                               : "bg-primary"
                           )}
                         />
-                        <span className="truncate text-muted-foreground">
+                        <span className="truncate flex-1 text-muted-foreground">
                           {apt.customer_name}
                         </span>
-                        <span className="shrink-0 text-muted-foreground/70">
+                        <span className="shrink-0 text-foreground/70">
                           {formatTime(apt.appointment_time)}
                         </span>
                       </div>
