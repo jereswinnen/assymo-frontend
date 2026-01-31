@@ -249,7 +249,7 @@ export function AdminAppointmentsCalendar({
                           }
                         }}
                         className={cn(
-                          "flex items-center gap-1 text-xs leading-tight rounded px-0.5 -mx-0.5 hover:bg-primary/15 cursor-pointer",
+                          "flex items-center gap-1 text-xs leading-tight rounded px-0.5 -mx-0.5 hover:bg-foreground/10 cursor-pointer",
                           apt.status === "cancelled" && "opacity-50"
                         )}
                       >
