@@ -36,7 +36,7 @@ import {
 import { toast } from "sonner";
 import type { DateOverride } from "@/types/appointments";
 import { DAYS_OF_WEEK } from "@/types/appointments";
-import { DateOverrideCreateSheet } from "@/app/admin/appointments/sheets/DateOverrideCreateSheet";
+import { DateOverrideCreateSheet } from "@/app/(admin)/admin/appointments/sheets/DateOverrideCreateSheet";
 import { t } from "@/config/strings";
 
 interface DateOverridesProps {

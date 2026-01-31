@@ -97,12 +97,15 @@ interface SectionRendererProps {
   headerImage?: ImageWithUrl;
   /** Solution name to pass to form blocks for pre-selecting product */
   solutionName?: string;
+  /** Configurator category slug to pass to sections with openConfigurator action */
+  configuratorCategorySlug?: string | null;
 }
 
 export default function SectionRenderer({
   sections,
   headerImage,
   solutionName,
+  configuratorCategorySlug,
 }: SectionRendererProps) {
   return (
     <>
@@ -119,11 +122,12 @@ export default function SectionRenderer({
                 key={key}
                 section={section}
                 headerImage={headerImage}
+                configuratorCategorySlug={configuratorCategorySlug}
               />
             );
 
           case "splitSection":
-            return <SplitSection key={key} section={section} />;
+            return <SplitSection key={key} section={section} configuratorCategorySlug={configuratorCategorySlug} />;
 
           case "uspSection":
             return <UspSection key={key} section={section} />;
@@ -132,7 +136,7 @@ export default function SectionRenderer({
             return <SolutionsScroller key={key} section={section} />;
 
           case "flexibleSection":
-            return <FlexibleSection key={key} section={section} solutionName={solutionName} />;
+            return <FlexibleSection key={key} section={section} solutionName={solutionName} configuratorCategorySlug={configuratorCategorySlug} />;
 
           default:
             console.warn(`Unknown section type: ${(section as { _type: string })._type}`);

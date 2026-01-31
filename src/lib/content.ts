@@ -147,6 +147,7 @@ async function _getSolutionBySlug(slug: string, siteSlug: string = DEFAULT_SITE_
   const rows = await sql`
     SELECT s.*,
       im.alt_text as header_image_alt,
+      cc.slug as configurator_category_slug,
       COALESCE(
         json_agg(
           json_build_object('id', f.id, 'name', f.name, 'slug', f.slug)
@@ -157,8 +158,9 @@ async function _getSolutionBySlug(slug: string, siteSlug: string = DEFAULT_SITE_
     LEFT JOIN solution_filters sf ON s.id = sf.solution_id
     LEFT JOIN filters f ON sf.filter_id = f.id
     LEFT JOIN image_metadata im ON im.url = s.header_image->>'url'
+    LEFT JOIN configurator_categories cc ON s.configurator_category_id = cc.id
     WHERE s.slug = ${slug} AND s.site_id = ${siteId}
-    GROUP BY s.id, im.alt_text
+    GROUP BY s.id, im.alt_text, cc.slug
   `;
 
   if (!rows[0]) return null;

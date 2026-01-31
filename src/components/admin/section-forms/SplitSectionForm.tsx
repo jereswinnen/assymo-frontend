@@ -120,20 +120,29 @@ function SortableItem({
           />
         </Field>
 
-        <Field orientation="horizontal">
-          <FieldLabel>{t("admin.labels.openChatbot")}</FieldLabel>
-          <Switch
-            checked={item.actionType === "openChatbot"}
-            onCheckedChange={(checked) =>
+        <Field>
+          <FieldLabel>{t("admin.labels.action")}</FieldLabel>
+          <Select
+            value={item.actionType || "link"}
+            onValueChange={(value) =>
               onUpdate({
-                actionType: checked ? "openChatbot" : "link",
-                href: checked ? undefined : item.href,
+                actionType: value as "link" | "openChatbot" | "openConfigurator",
+                href: value !== "link" ? undefined : item.href,
               })
             }
-          />
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="link">Link</SelectItem>
+              <SelectItem value="openChatbot">{t("admin.labels.openChatbot")}</SelectItem>
+              <SelectItem value="openConfigurator">{t("admin.labels.openConfigurator")}</SelectItem>
+            </SelectContent>
+          </Select>
         </Field>
 
-        {item.actionType !== "openChatbot" && (
+        {item.actionType === "link" && (
           <Field>
             <FieldLabel>{t("admin.labels.linkUrl")}</FieldLabel>
             <Input

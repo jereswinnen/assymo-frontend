@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/select";
 import { Loader2Icon, SearchIcon } from "lucide-react";
 import { toast } from "sonner";
-import { AppointmentEditSheet } from "@/app/admin/appointments/sheets/AppointmentEditSheet";
-import { AppointmentCreateSheet } from "@/app/admin/appointments/sheets/AppointmentCreateSheet";
+import { AppointmentEditSheet } from "@/app/(admin)/admin/appointments/sheets/AppointmentEditSheet";
+import { AppointmentCreateSheet } from "@/app/(admin)/admin/appointments/sheets/AppointmentCreateSheet";
 import type { Appointment, AppointmentStatus } from "@/types/appointments";
 import { STATUS_LABELS } from "@/types/appointments";
 import {

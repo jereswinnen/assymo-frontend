@@ -19,7 +19,7 @@ interface SplitItem {
   };
   title: string;
   subtitle?: string;
-  actionType?: "link" | "openChatbot";
+  actionType?: "link" | "openChatbot" | "openConfigurator";
   href?: string;
   action?: SplitItemAction;
 }
@@ -29,9 +29,11 @@ interface SplitSectionProps {
     items: [SplitItem, SplitItem, SplitItem?];
   };
   className?: string;
+  /** Configurator category slug for pre-selecting product in configurator */
+  configuratorCategorySlug?: string | null;
 }
 
-export function SplitSection({ section, className }: SplitSectionProps) {
+export function SplitSection({ section, className, configuratorCategorySlug }: SplitSectionProps) {
   const router = useRouter();
   const rawItems = section.items;
   const items = rawItems.filter((item): item is SplitItem => item !== undefined);
@@ -40,6 +42,11 @@ export function SplitSection({ section, className }: SplitSectionProps) {
   const handleItemClick = (item: SplitItem) => {
     if (item.actionType === "openChatbot") {
       window.dispatchEvent(new CustomEvent("openChatbot"));
+    } else if (item.actionType === "openConfigurator") {
+      const configuratorUrl = configuratorCategorySlug
+        ? `/configurator?product=${configuratorCategorySlug}`
+        : "/configurator";
+      router.push(configuratorUrl);
     } else if (item.href) {
       router.push(item.href);
     }
@@ -85,7 +92,10 @@ export function SplitSection({ section, className }: SplitSectionProps) {
                   <Action
                     className="translate-y-1.5 blur-xs transition-all duration-600 ease-circ group-hover:translate-y-0 group-hover:blur-none"
                     href={
-                      item.actionType === "openChatbot" ? "#" : item.href || "#"
+                      item.actionType === "openChatbot" ||
+                      item.actionType === "openConfigurator"
+                        ? "#"
+                        : item.href || "#"
                     }
                     icon={IconComponent ? <IconComponent /> : undefined}
                     label={item.action.label}
@@ -98,7 +108,15 @@ export function SplitSection({ section, className }: SplitSectionProps) {
                               new CustomEvent("openChatbot"),
                             );
                           }
-                        : undefined
+                        : item.actionType === "openConfigurator"
+                          ? (e) => {
+                              e.preventDefault();
+                              const url = configuratorCategorySlug
+                                ? `/configurator?product=${configuratorCategorySlug}`
+                                : "/configurator";
+                              router.push(url);
+                            }
+                          : undefined
                     }
                   />
                 </div>

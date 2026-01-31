@@ -80,21 +80,30 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
 
       {block.button && (
         <div className="space-y-4">
-          <Field orientation="horizontal">
-            <FieldLabel>Open chatbot</FieldLabel>
-            <Switch
-              checked={block.button?.action === "openChatbot"}
-              onCheckedChange={(checked) =>
+          <Field>
+            <FieldLabel>{t("admin.labels.action")}</FieldLabel>
+            <Select
+              value={block.button?.action || "link"}
+              onValueChange={(value) =>
                 onChange({
                   ...block,
                   button: {
                     ...block.button,
-                    action: checked ? "openChatbot" : "link",
-                    url: checked ? undefined : block.button?.url,
+                    action: value as "link" | "openChatbot" | "openConfigurator",
+                    url: value !== "link" ? undefined : block.button?.url,
                   },
                 })
               }
-            />
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="link">Link</SelectItem>
+                <SelectItem value="openChatbot">{t("admin.labels.openChatbot")}</SelectItem>
+                <SelectItem value="openConfigurator">{t("admin.labels.openConfigurator")}</SelectItem>
+              </SelectContent>
+            </Select>
           </Field>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -111,11 +120,13 @@ export function FlexTextBlockForm({ block, onChange }: FlexTextBlockFormProps) {
                 placeholder={
                   block.button?.action === "openChatbot"
                     ? "Stel een vraag"
-                    : "Maak een afspraak"
+                    : block.button?.action === "openConfigurator"
+                      ? "Start configurator"
+                      : "Maak een afspraak"
                 }
               />
             </Field>
-            {block.button?.action !== "openChatbot" && (
+            {block.button?.action === "link" && (
               <Field>
                 <FieldLabel>URL</FieldLabel>
                 <Input
