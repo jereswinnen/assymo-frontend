@@ -164,9 +164,9 @@ export function AppointmentsList({
   });
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4 h-[calc(100vh-12rem)]">
       {/* Search, filter, and view toggle */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 shrink-0">
         <div className="flex flex-1 max-w-xl gap-2">
           <InputGroup className="flex flex-1">
             <InputGroupInput
@@ -227,11 +227,13 @@ export function AppointmentsList({
 
       {/* Calendar view */}
       {viewMode === "calendar" && (
-        <AdminAppointmentsCalendar
-          appointments={appointments}
-          onDateClick={handleCalendarDateClick}
-          loading={loading}
-        />
+        <div className="flex-1 min-h-0">
+          <AdminAppointmentsCalendar
+            appointments={appointments}
+            onDateClick={handleCalendarDateClick}
+            loading={loading}
+          />
+        </div>
       )}
 
       {/* List view */}

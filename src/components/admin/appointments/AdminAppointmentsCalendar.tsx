@@ -31,6 +31,13 @@ export function AdminAppointmentsCalendar({
       existing.push(apt);
       map.set(apt.appointment_date, existing);
     });
+    // Sort appointments by time for each date
+    map.forEach((apts, date) => {
+      map.set(
+        date,
+        apts.sort((a, b) => a.appointment_time.localeCompare(b.appointment_time))
+      );
+    });
     return map;
   }, [appointments]);
 
@@ -58,8 +65,8 @@ export function AdminAppointmentsCalendar({
     });
   };
 
-  // Generate calendar days
-  const calendarDays = useMemo(() => {
+  // Generate calendar days grouped by weeks
+  const calendarWeeks = useMemo(() => {
     const year = currentMonth.year;
     const month = currentMonth.month;
 
@@ -78,8 +85,6 @@ export function AdminAppointmentsCalendar({
       isToday: boolean;
       isPast: boolean;
       appointments: Appointment[];
-      confirmedCount: number;
-      cancelledCount: number;
     }> = [];
 
     // Add empty cells for days before the first of the month
@@ -90,8 +95,6 @@ export function AdminAppointmentsCalendar({
         isToday: false,
         isPast: true,
         appointments: [],
-        confirmedCount: 0,
-        cancelledCount: 0,
       });
     }
 
@@ -100,19 +103,12 @@ export function AdminAppointmentsCalendar({
     today.setHours(0, 0, 0, 0);
 
     for (let day = 1; day <= lastDay.getDate(); day++) {
-      // Format as YYYY-MM-DD without timezone conversion
       const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
       const dayDate = new Date(year, month, day);
       dayDate.setHours(0, 0, 0, 0);
       const isPast = dayDate < today;
       const isToday = dayDate.getTime() === today.getTime();
       const dayAppointments = appointmentsByDate.get(dateStr) || [];
-      const confirmedCount = dayAppointments.filter(
-        (a) => a.status === "confirmed" || a.status === "completed"
-      ).length;
-      const cancelledCount = dayAppointments.filter(
-        (a) => a.status === "cancelled"
-      ).length;
 
       days.push({
         date: dateStr,
@@ -120,12 +116,27 @@ export function AdminAppointmentsCalendar({
         isToday,
         isPast,
         appointments: dayAppointments,
-        confirmedCount,
-        cancelledCount,
       });
     }
 
-    return days;
+    // Pad end to complete the last week
+    while (days.length % 7 !== 0) {
+      days.push({
+        date: null,
+        dayNumber: null,
+        isToday: false,
+        isPast: true,
+        appointments: [],
+      });
+    }
+
+    // Split into weeks
+    const weeks: typeof days[] = [];
+    for (let i = 0; i < days.length; i += 7) {
+      weeks.push(days.slice(i, i + 7));
+    }
+
+    return weeks;
   }, [currentMonth, appointmentsByDate]);
 
   const monthName = new Date(
@@ -139,10 +150,12 @@ export function AdminAppointmentsCalendar({
     onDateClick(date);
   };
 
+  const formatTime = (time: string) => time.substring(0, 5);
+
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col h-full">
       {/* Month navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-3">
         <h3 className="mb-0! capitalize text-lg font-medium">{monthName}</h3>
         <div className="flex items-center gap-2">
           <Button
@@ -165,97 +178,94 @@ export function AdminAppointmentsCalendar({
       </div>
 
       {/* Day headers */}
-      <div className="py-2 grid grid-cols-7 bg-muted rounded-lg">
+      <div className="grid grid-cols-7 border-b border-border">
         {DAYS_OF_WEEK.map((day) => (
           <div
             key={day.value}
-            className="text-center text-sm font-medium text-muted-foreground"
+            className="py-2 text-center text-sm font-medium text-muted-foreground"
           >
             {day.shortName}
           </div>
         ))}
       </div>
 
-      {/* Calendar grid */}
-      <div className="grid grid-cols-7 border-l border-t border-border relative">
+      {/* Calendar grid - flex-1 to fill available space */}
+      <div className="flex-1 flex flex-col border-l border-border relative min-h-0">
         {loading && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
             <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
           </div>
         )}
-        {calendarDays.map((day, index) => {
-          const hasConfirmed = day.confirmedCount > 0;
-          const hasCancelled = day.cancelledCount > 0;
-          const isClickable = day.date !== null;
+        {calendarWeeks.map((week, weekIndex) => (
+          <div key={weekIndex} className="flex-1 grid grid-cols-7 min-h-0">
+            {week.map((day, dayIndex) => {
+              const isClickable = day.date !== null;
 
-          return (
-            <button
-              key={index}
-              type="button"
-              disabled={!isClickable}
-              onClick={() => isClickable && handleDateClick(day.date!)}
-              className={cn(
-                "aspect-square relative border-r border-b border-border p-1 min-h-[60px]",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
-                !day.date && "bg-transparent",
-                day.date && day.isPast && "bg-muted/50",
-                day.date && "hover:bg-muted/80 cursor-pointer",
-              )}
-            >
-              {/* Date number - top right */}
-              {day.dayNumber && (
-                <span
+              return (
+                <button
+                  key={dayIndex}
+                  type="button"
+                  disabled={!isClickable}
+                  onClick={() => isClickable && handleDateClick(day.date!)}
                   className={cn(
-                    "absolute top-1 right-2 text-sm",
-                    day.isPast && "text-muted-foreground",
-                    !day.isPast && "text-foreground font-medium",
-                    day.isToday && "text-primary font-semibold",
+                    "relative border-r border-b border-border p-1 text-left flex flex-col overflow-hidden",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
+                    !day.date && "bg-muted/30",
+                    day.date && day.isPast && "bg-muted/50",
+                    day.date && "hover:bg-muted/80 cursor-pointer",
                   )}
                 >
-                  {day.dayNumber}
-                </span>
-              )}
-
-              {/* Appointment indicators - bottom left */}
-              {day.date && (hasConfirmed || hasCancelled) && (
-                <div className="absolute bottom-1 left-1 flex gap-1">
-                  {hasConfirmed && (
-                    <div className="flex items-center gap-0.5">
-                      <div className="size-2 rounded-full bg-primary" />
-                      {day.confirmedCount > 1 && (
-                        <span className="text-xs text-muted-foreground">
-                          {day.confirmedCount}
-                        </span>
+                  {/* Date number */}
+                  {day.dayNumber && (
+                    <span
+                      className={cn(
+                        "text-xs mb-0.5",
+                        day.isPast && "text-muted-foreground",
+                        !day.isPast && "text-foreground font-medium",
+                        day.isToday && "text-primary font-semibold",
                       )}
-                    </div>
+                    >
+                      {day.dayNumber}
+                    </span>
                   )}
-                  {hasCancelled && (
-                    <div className="flex items-center gap-0.5">
-                      <div className="size-2 rounded-full bg-destructive" />
-                      {day.cancelledCount > 1 && (
-                        <span className="text-xs text-muted-foreground">
-                          {day.cancelledCount}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-        <div className="flex items-center gap-1.5">
-          <div className="size-2 rounded-full bg-primary" />
-          <span>Bevestigd/Afgerond</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="size-2 rounded-full bg-destructive" />
-          <span>Geannuleerd</span>
-        </div>
+                  {/* Appointment bars */}
+                  <div className="flex-1 flex flex-col gap-0.5 overflow-hidden min-h-0">
+                    {day.appointments.slice(0, 3).map((apt) => (
+                      <div
+                        key={apt.id}
+                        className={cn(
+                          "flex items-center gap-1 text-[10px] leading-tight truncate",
+                          apt.status === "cancelled" && "opacity-50"
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "w-0.5 h-3 rounded-full shrink-0",
+                            apt.status === "cancelled"
+                              ? "bg-destructive"
+                              : "bg-primary"
+                          )}
+                        />
+                        <span className="truncate text-muted-foreground">
+                          {apt.customer_name}
+                        </span>
+                        <span className="shrink-0 text-muted-foreground/70">
+                          {formatTime(apt.appointment_time)}
+                        </span>
+                      </div>
+                    ))}
+                    {day.appointments.length > 3 && (
+                      <span className="text-[10px] text-muted-foreground">
+                        +{day.appointments.length - 3} meer
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );
