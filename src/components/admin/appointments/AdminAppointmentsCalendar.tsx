@@ -3,9 +3,12 @@
 import { useState, useMemo } from "react";
 import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { Appointment } from "@/types/appointments";
 import { DAYS_OF_WEEK } from "@/types/appointments";
+
+type CalendarView = "month" | "week";
 
 interface AdminAppointmentsCalendarProps {
   appointments: Appointment[];
@@ -14,16 +17,33 @@ interface AdminAppointmentsCalendarProps {
   loading?: boolean;
 }
 
+// Get Monday of the week containing the given date
+function getWeekStart(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// Format date as YYYY-MM-DD
+function formatDateStr(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 export function AdminAppointmentsCalendar({
   appointments,
   onDateClick,
   onAppointmentClick,
   loading = false,
 }: AdminAppointmentsCalendarProps) {
+  const [viewMode, setViewMode] = useState<CalendarView>("month");
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() };
   });
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => getWeekStart(new Date()));
 
   // Create a map of date -> appointments for quick lookup
   const appointmentsByDate = useMemo(() => {
@@ -43,41 +63,54 @@ export function AdminAppointmentsCalendar({
     return map;
   }, [appointments]);
 
-  const goToPreviousMonth = () => {
-    setCurrentMonth((prev) => {
-      let newYear = prev.year;
-      let newMonth = prev.month - 1;
-      if (newMonth < 0) {
-        newYear = prev.year - 1;
-        newMonth = 11;
-      }
-      return { year: newYear, month: newMonth };
-    });
+  const goToPrevious = () => {
+    if (viewMode === "month") {
+      setCurrentMonth((prev) => {
+        let newYear = prev.year;
+        let newMonth = prev.month - 1;
+        if (newMonth < 0) {
+          newYear = prev.year - 1;
+          newMonth = 11;
+        }
+        return { year: newYear, month: newMonth };
+      });
+    } else {
+      setCurrentWeekStart((prev) => {
+        const newDate = new Date(prev);
+        newDate.setDate(newDate.getDate() - 7);
+        return newDate;
+      });
+    }
   };
 
-  const goToNextMonth = () => {
-    setCurrentMonth((prev) => {
-      let newYear = prev.year;
-      let newMonth = prev.month + 1;
-      if (newMonth > 11) {
-        newYear = prev.year + 1;
-        newMonth = 0;
-      }
-      return { year: newYear, month: newMonth };
-    });
+  const goToNext = () => {
+    if (viewMode === "month") {
+      setCurrentMonth((prev) => {
+        let newYear = prev.year;
+        let newMonth = prev.month + 1;
+        if (newMonth > 11) {
+          newYear = prev.year + 1;
+          newMonth = 0;
+        }
+        return { year: newYear, month: newMonth };
+      });
+    } else {
+      setCurrentWeekStart((prev) => {
+        const newDate = new Date(prev);
+        newDate.setDate(newDate.getDate() + 7);
+        return newDate;
+      });
+    }
   };
 
-  // Generate calendar days grouped by weeks
+  // Generate calendar days grouped by weeks (for month view)
   const calendarWeeks = useMemo(() => {
     const year = currentMonth.year;
     const month = currentMonth.month;
 
-    // First day of month
     const firstDay = new Date(year, month, 1);
-    // Last day of month
     const lastDay = new Date(year, month + 1, 0);
 
-    // Get the day of week for the first day (convert to Monday=0)
     let startDayOfWeek = firstDay.getDay();
     startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
 
@@ -89,7 +122,6 @@ export function AdminAppointmentsCalendar({
       appointments: Appointment[];
     }> = [];
 
-    // Add empty cells for days before the first of the month
     for (let i = 0; i < startDayOfWeek; i++) {
       days.push({
         date: null,
@@ -100,7 +132,6 @@ export function AdminAppointmentsCalendar({
       });
     }
 
-    // Add days of the month
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -121,7 +152,6 @@ export function AdminAppointmentsCalendar({
       });
     }
 
-    // Pad end to complete the last week
     while (days.length % 7 !== 0) {
       days.push({
         date: null,
@@ -132,7 +162,6 @@ export function AdminAppointmentsCalendar({
       });
     }
 
-    // Split into weeks
     const weeks: typeof days[] = [];
     for (let i = 0; i < days.length; i += 7) {
       weeks.push(days.slice(i, i + 7));
@@ -141,10 +170,67 @@ export function AdminAppointmentsCalendar({
     return weeks;
   }, [currentMonth, appointmentsByDate]);
 
-  const monthName = new Date(
-    currentMonth.year,
-    currentMonth.month
-  ).toLocaleDateString("nl-NL", { month: "long", year: "numeric" });
+  // Generate week days (for week view)
+  const weekDays = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const days: Array<{
+      date: string;
+      dayDate: Date;
+      dayNumber: number;
+      monthShort: string;
+      isToday: boolean;
+      isPast: boolean;
+      appointments: Appointment[];
+    }> = [];
+
+    for (let i = 0; i < 7; i++) {
+      const dayDate = new Date(currentWeekStart);
+      dayDate.setDate(currentWeekStart.getDate() + i);
+      const dateStr = formatDateStr(dayDate);
+      const isPast = dayDate < today;
+      const isToday = dayDate.getTime() === today.getTime();
+      const dayAppointments = appointmentsByDate.get(dateStr) || [];
+
+      days.push({
+        date: dateStr,
+        dayDate,
+        dayNumber: dayDate.getDate(),
+        monthShort: dayDate.toLocaleDateString("nl-NL", { month: "short" }),
+        isToday,
+        isPast,
+        appointments: dayAppointments,
+      });
+    }
+
+    return days;
+  }, [currentWeekStart, appointmentsByDate]);
+
+  // Format header label based on view mode
+  const headerLabel = useMemo(() => {
+    if (viewMode === "month") {
+      return new Date(currentMonth.year, currentMonth.month).toLocaleDateString(
+        "nl-NL",
+        { month: "long", year: "numeric" }
+      );
+    } else {
+      const weekEnd = new Date(currentWeekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      const startDay = currentWeekStart.getDate();
+      const endDay = weekEnd.getDate();
+      const startMonth = currentWeekStart.toLocaleDateString("nl-NL", { month: "short" });
+      const endMonth = weekEnd.toLocaleDateString("nl-NL", { month: "short" });
+      const year = weekEnd.getFullYear();
+
+      if (currentWeekStart.getMonth() === weekEnd.getMonth()) {
+        return `${startDay} - ${endDay} ${startMonth} ${year}`;
+      } else {
+        return `${startDay} ${startMonth} - ${endDay} ${endMonth} ${year}`;
+      }
+    }
+  }, [viewMode, currentMonth, currentWeekStart]);
 
   const handleDateClick = (dateStr: string) => {
     const [year, month, day] = dateStr.split("-").map(Number);
@@ -154,29 +240,76 @@ export function AdminAppointmentsCalendar({
 
   const formatTime = (time: string) => time.substring(0, 5);
 
+  const renderAppointmentBar = (apt: Appointment) => (
+    <div
+      key={apt.id}
+      role="button"
+      tabIndex={0}
+      onClick={(e) => {
+        e.stopPropagation();
+        onAppointmentClick(apt);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.stopPropagation();
+          onAppointmentClick(apt);
+        }
+      }}
+      className={cn(
+        "flex items-center gap-1 text-xs leading-tight rounded px-0.5 -mx-0.5 hover:bg-foreground/10 cursor-pointer transition-colors",
+        apt.status === "cancelled" && "opacity-50"
+      )}
+    >
+      <div
+        className={cn(
+          "w-0.5 h-4 rounded-full shrink-0",
+          apt.status === "cancelled" ? "bg-destructive" : "bg-primary"
+        )}
+      />
+      <span className="truncate flex-1 text-muted-foreground">
+        {apt.customer_name}
+      </span>
+      <span className="shrink-0 text-foreground/70">
+        {formatTime(apt.appointment_time)}
+      </span>
+    </div>
+  );
+
   return (
     <div className="w-full flex flex-col h-full">
-      {/* Month navigation */}
+      {/* Header with navigation and view toggle */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="mb-0! capitalize text-lg font-medium">{monthName}</h3>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
-            onClick={goToPreviousMonth}
-            aria-label="Vorige maand"
+            onClick={goToPrevious}
+            aria-label={viewMode === "month" ? "Vorige maand" : "Vorige week"}
           >
             <ChevronLeftIcon className="size-5" />
           </Button>
+          <h3 className="mb-0! capitalize text-lg font-medium min-w-48 text-center">
+            {headerLabel}
+          </h3>
           <Button
             variant="ghost"
             size="sm"
-            onClick={goToNextMonth}
-            aria-label="Volgende maand"
+            onClick={goToNext}
+            aria-label={viewMode === "month" ? "Volgende maand" : "Volgende week"}
           >
             <ChevronRightIcon className="size-5" />
           </Button>
         </div>
+
+        <Tabs
+          value={viewMode}
+          onValueChange={(value) => setViewMode(value as CalendarView)}
+        >
+          <TabsList>
+            <TabsTrigger value="month">Maand</TabsTrigger>
+            <TabsTrigger value="week">Week</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Day headers */}
@@ -191,95 +324,100 @@ export function AdminAppointmentsCalendar({
         ))}
       </div>
 
-      {/* Calendar grid - flex-1 to fill available space */}
+      {/* Calendar grid */}
       <div className="flex-1 flex flex-col border-l border-border relative min-h-0">
         {loading && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
             <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
           </div>
         )}
-        {calendarWeeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="flex-1 grid grid-cols-7 min-h-0">
-            {week.map((day, dayIndex) => {
-              const isClickable = day.date !== null;
 
-              return (
-                <button
-                  key={dayIndex}
-                  type="button"
-                  disabled={!isClickable}
-                  onClick={() => isClickable && handleDateClick(day.date!)}
-                  className={cn(
-                    "relative border-r border-b border-border p-1 text-left flex flex-col overflow-hidden",
-                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
-                    !day.date && "bg-muted/30",
-                    day.date && day.isPast && "bg-muted/50",
-                    day.date && "hover:bg-muted/80 cursor-pointer",
-                  )}
-                >
-                  {/* Date number */}
-                  {day.dayNumber && (
-                    <span
-                      className={cn(
-                        "text-sm mb-0.5",
-                        day.isPast && "text-muted-foreground",
-                        !day.isPast && "text-foreground font-medium",
-                        day.isToday && "text-primary font-semibold",
-                      )}
-                    >
-                      {day.dayNumber}
-                    </span>
-                  )}
+        {/* Month view */}
+        {viewMode === "month" &&
+          calendarWeeks.map((week, weekIndex) => (
+            <div key={weekIndex} className="flex-1 grid grid-cols-7 min-h-0">
+              {week.map((day, dayIndex) => {
+                const isClickable = day.date !== null;
 
-                  {/* Appointment bars */}
-                  <div className="flex-1 flex flex-col gap-1 overflow-hidden min-h-0">
-                    {day.appointments.slice(0, 3).map((apt) => (
-                      <div
-                        key={apt.id}
-                        role="button"
-                        tabIndex={0}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onAppointmentClick(apt);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.stopPropagation();
-                            onAppointmentClick(apt);
-                          }
-                        }}
+                return (
+                  <button
+                    key={dayIndex}
+                    type="button"
+                    disabled={!isClickable}
+                    onClick={() => isClickable && handleDateClick(day.date!)}
+                    className={cn(
+                      "relative border-r border-b border-border p-1 text-left flex flex-col overflow-hidden",
+                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
+                      !day.date && "bg-muted/30",
+                      day.date && day.isPast && "bg-muted/50",
+                      day.date && "hover:bg-muted/80 cursor-pointer"
+                    )}
+                  >
+                    {day.dayNumber && (
+                      <span
                         className={cn(
-                          "flex items-center gap-1 text-xs leading-tight rounded px-0.5 -mx-0.5 hover:bg-foreground/10 cursor-pointer transition-colors",
-                          apt.status === "cancelled" && "opacity-50"
+                          "text-sm mb-0.5",
+                          day.isPast && "text-muted-foreground",
+                          !day.isPast && "text-foreground font-medium",
+                          day.isToday && "text-primary font-semibold"
                         )}
                       >
-                        <div
-                          className={cn(
-                            "w-0.5 h-4 rounded-full shrink-0",
-                            apt.status === "cancelled"
-                              ? "bg-destructive"
-                              : "bg-primary"
-                          )}
-                        />
-                        <span className="truncate flex-1 text-muted-foreground">
-                          {apt.customer_name}
-                        </span>
-                        <span className="shrink-0 text-foreground/70">
-                          {formatTime(apt.appointment_time)}
-                        </span>
-                      </div>
-                    ))}
-                    {day.appointments.length > 3 && (
-                      <span className="text-xs text-muted-foreground">
-                        +{day.appointments.length - 3} meer
+                        {day.dayNumber}
                       </span>
                     )}
-                  </div>
-                </button>
-              );
-            })}
+
+                    <div className="flex-1 flex flex-col gap-1 overflow-hidden min-h-0">
+                      {day.appointments.slice(0, 3).map(renderAppointmentBar)}
+                      {day.appointments.length > 3 && (
+                        <span className="text-xs text-muted-foreground">
+                          +{day.appointments.length - 3} meer
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+
+        {/* Week view */}
+        {viewMode === "week" && (
+          <div className="flex-1 grid grid-cols-7 min-h-0">
+            {weekDays.map((day, dayIndex) => (
+              <button
+                key={dayIndex}
+                type="button"
+                onClick={() => handleDateClick(day.date)}
+                className={cn(
+                  "relative border-r border-b border-border p-2 text-left flex flex-col overflow-hidden",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
+                  day.isPast && "bg-muted/50",
+                  "hover:bg-muted/80 cursor-pointer"
+                )}
+              >
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span
+                    className={cn(
+                      "text-lg font-medium",
+                      day.isPast && "text-muted-foreground",
+                      !day.isPast && "text-foreground",
+                      day.isToday && "text-primary font-semibold"
+                    )}
+                  >
+                    {day.dayNumber}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {day.monthShort}
+                  </span>
+                </div>
+
+                <div className="flex-1 flex flex-col gap-1 overflow-y-auto min-h-0">
+                  {day.appointments.map(renderAppointmentBar)}
+                </div>
+              </button>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
