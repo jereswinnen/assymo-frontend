@@ -3,6 +3,12 @@
 import { useState, useMemo } from "react";
 import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { Appointment } from "@/types/appointments";
@@ -44,6 +50,19 @@ export function AdminAppointmentsCalendar({
     return { year: now.getFullYear(), month: now.getMonth() };
   });
   const [currentWeekStart, setCurrentWeekStart] = useState(() => getWeekStart(new Date()));
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+
+  // Handle date selection from the popover calendar
+  const handleDatePickerSelect = (date: Date | undefined) => {
+    if (!date) return;
+
+    if (viewMode === "month") {
+      setCurrentMonth({ year: date.getFullYear(), month: date.getMonth() });
+    } else {
+      setCurrentWeekStart(getWeekStart(date));
+    }
+    setDatePickerOpen(false);
+  };
 
   // Create a map of date -> appointments for quick lookup
   const appointmentsByDate = useMemo(() => {
@@ -279,25 +298,46 @@ export function AdminAppointmentsCalendar({
     <div className="w-full flex flex-col h-full">
       {/* Header with navigation and view toggle */}
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center">
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={goToPrevious}
             aria-label={viewMode === "month" ? "Vorige maand" : "Vorige week"}
+            className="rounded-r-none border-r-0"
           >
-            <ChevronLeftIcon className="size-5" />
+            <ChevronLeftIcon className="size-4" />
           </Button>
-          <h3 className="mb-0! capitalize text-lg font-medium min-w-48 text-center">
-            {headerLabel}
-          </h3>
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="rounded-none capitalize min-w-40"
+              >
+                {headerLabel}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                defaultMonth={
+                  viewMode === "month"
+                    ? new Date(currentMonth.year, currentMonth.month)
+                    : currentWeekStart
+                }
+                onSelect={handleDatePickerSelect}
+              />
+            </PopoverContent>
+          </Popover>
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={goToNext}
             aria-label={viewMode === "month" ? "Volgende maand" : "Volgende week"}
+            className="rounded-l-none border-l-0"
           >
-            <ChevronRightIcon className="size-5" />
+            <ChevronRightIcon className="size-4" />
           </Button>
         </div>
 
