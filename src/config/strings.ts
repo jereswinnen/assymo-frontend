@@ -232,6 +232,8 @@ export const ADMIN_STRINGS = {
       catalogue: "Prijscatalogus",
       newCatalogueItem: "Nieuw catalogusitem",
       editCatalogueItem: "Catalogusitem bewerken",
+      list: "Lijst",
+      calendar: "Kalender",
     },
 
     /**

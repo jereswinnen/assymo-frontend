@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
@@ -30,16 +30,18 @@ interface AppointmentCreateSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
+  initialDate?: Date;
 }
 
 export function AppointmentCreateSheet({
   open,
   onOpenChange,
   onCreated,
+  initialDate,
 }: AppointmentCreateSheetProps) {
   const [saving, setSaving] = useState(false);
   const [sendConfirmation, setSendConfirmation] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(initialDate);
 
   const [formData, setFormData] = useState({
     appointment_time: "",
@@ -52,6 +54,13 @@ export function AppointmentCreateSheet({
     remarks: "",
     admin_notes: "",
   });
+
+  // Sync selectedDate when initialDate changes (e.g., when opening from calendar)
+  useEffect(() => {
+    if (initialDate) {
+      setSelectedDate(initialDate);
+    }
+  }, [initialDate]);
 
   const resetForm = () => {
     setSelectedDate(undefined);
