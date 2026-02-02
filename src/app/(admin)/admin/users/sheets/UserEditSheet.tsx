@@ -78,7 +78,8 @@ interface UserEditSheetProps {
   sites: Site[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdate: () => void;
+  onUpdate: (user: User) => void;
+  onDelete?: (userId: string) => void;
 }
 
 const ROLE_LABELS: Record<Role, string> = {
@@ -132,6 +133,7 @@ export function UserEditSheet({
   open,
   onOpenChange,
   onUpdate,
+  onDelete,
 }: UserEditSheetProps) {
   const [saving, setSaving] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -199,9 +201,10 @@ export function UserEditSheet({
         throw new Error(data.error || "Failed to update");
       }
 
+      const savedUser = await response.json();
       toast.success(t("admin.messages.userUpdated"));
       onOpenChange(false);
-      onUpdate();
+      onUpdate(savedUser.user || savedUser);
     } catch (error) {
       console.error("Failed to update user:", error);
       toast.error(
@@ -229,7 +232,7 @@ export function UserEditSheet({
       toast.success(t("admin.messages.userDeleted"));
       setDeleteConfirmOpen(false);
       onOpenChange(false);
-      onUpdate();
+      onDelete?.(user.id);
     } catch (error) {
       console.error("Failed to delete user:", error);
       toast.error(

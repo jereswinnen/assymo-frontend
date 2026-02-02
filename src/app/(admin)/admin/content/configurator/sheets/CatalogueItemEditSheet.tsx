@@ -54,7 +54,8 @@ interface CatalogueItemEditSheetProps {
   existingCategories: string[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSaved: () => void;
+  onSaved: (item: PriceCatalogueItem) => void;
+  onDelete?: (itemId: string) => void;
 }
 
 export function CatalogueItemEditSheet({
@@ -64,6 +65,7 @@ export function CatalogueItemEditSheet({
   open,
   onOpenChange,
   onSaved,
+  onDelete,
 }: CatalogueItemEditSheetProps) {
   const isNew = !item;
 
@@ -170,13 +172,14 @@ export function CatalogueItemEditSheet({
         throw new Error(error.error || "Failed to save");
       }
 
+      const savedItem = await response.json();
       toast.success(
         item
           ? t("admin.messages.catalogueItemUpdated")
           : t("admin.messages.catalogueItemCreated")
       );
       onOpenChange(false);
-      onSaved();
+      onSaved(savedItem);
     } catch (error) {
       console.error("Failed to save catalogue item:", error);
       toast.error(t("admin.messages.catalogueItemSaveFailed"));
@@ -200,7 +203,7 @@ export function CatalogueItemEditSheet({
       toast.success(t("admin.messages.catalogueItemDeleted"));
       setShowDeleteDialog(false);
       onOpenChange(false);
-      onSaved();
+      onDelete?.(item.id);
     } catch (error) {
       console.error("Failed to delete catalogue item:", error);
       toast.error(t("admin.messages.catalogueItemDeleteFailed"));

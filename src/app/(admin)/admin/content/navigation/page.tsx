@@ -178,8 +178,8 @@ export default function NavigationPage() {
       );
       if (!response.ok) throw new Error("Failed to delete");
 
+      setLinks((prev) => prev.filter((l) => l.id !== deleteTarget.id));
       toast.success(t("admin.messages.linkDeleted"));
-      fetchLinks();
     } catch (error) {
       console.error("Failed to delete link:", error);
       toast.error(t("admin.messages.linkDeleteFailed"));
@@ -310,7 +310,9 @@ export default function NavigationPage() {
         solutions={solutions}
         open={sheetOpen}
         onOpenChange={handleSheetOpenChange}
-        onSaved={fetchLinks}
+        onSaved={(newLink) => {
+          setLinks((prev) => [...prev, newLink]);
+        }}
         onLinkUpdated={handleLinkUpdated}
       />
 

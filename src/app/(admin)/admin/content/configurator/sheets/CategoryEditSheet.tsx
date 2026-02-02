@@ -38,7 +38,8 @@ interface CategoryEditSheetProps {
   siteId: string | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSaved: () => void;
+  onSaved: (category: ConfiguratorCategory) => void;
+  onDelete?: (categoryId: string) => void;
 }
 
 function slugify(text: string): string {
@@ -56,6 +57,7 @@ export function CategoryEditSheet({
   open,
   onOpenChange,
   onSaved,
+  onDelete,
 }: CategoryEditSheetProps) {
   const isNew = !category;
 
@@ -131,13 +133,14 @@ export function CategoryEditSheet({
         throw new Error(error.error || "Failed to save");
       }
 
+      const savedCategory = await response.json();
       toast.success(
         category
           ? t("admin.messages.itemUpdated")
           : t("admin.messages.itemCreated")
       );
       onOpenChange(false);
-      onSaved();
+      onSaved(savedCategory);
     } catch (error) {
       console.error("Failed to save category:", error);
       toast.error(t("admin.messages.itemSaveFailed"));
@@ -161,7 +164,7 @@ export function CategoryEditSheet({
       toast.success(t("admin.messages.itemDeleted"));
       setShowDeleteDialog(false);
       onOpenChange(false);
-      onSaved();
+      onDelete?.(category.id);
     } catch (error) {
       console.error("Failed to delete category:", error);
       toast.error(t("admin.messages.itemDeleteFailed"));

@@ -150,9 +150,9 @@ export default function UsersPage() {
         throw new Error(data.error || "Failed to delete");
       }
 
+      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
       toast.success(t("admin.messages.userDeleted"));
       setDeleteTarget(null);
-      loadUsers();
     } catch (error) {
       console.error("Failed to delete user:", error);
       toast.error(
@@ -303,14 +303,23 @@ export default function UsersPage() {
         sites={sites}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
-        onUpdate={loadUsers}
+        onUpdate={(updatedUser) => {
+          setUsers((prev) =>
+            prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+          );
+        }}
+        onDelete={(userId) => {
+          setUsers((prev) => prev.filter((u) => u.id !== userId));
+        }}
       />
 
       <UserCreateSheet
         sites={sites}
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
-        onCreated={loadUsers}
+        onCreated={(newUser) => {
+          setUsers((prev) => [...prev, newUser]);
+        }}
       />
 
       {/* Delete Confirmation */}

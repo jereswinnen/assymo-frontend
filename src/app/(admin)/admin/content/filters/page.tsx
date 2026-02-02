@@ -158,12 +158,12 @@ export default function FiltersPage() {
       );
       if (!response.ok) throw new Error("Failed to delete");
 
+      setCategories((prev) => prev.filter((c) => c.id !== deleteTarget.id));
       toast.success(t("admin.messages.categoryDeleted"));
       if (editingCategory?.id === deleteTarget.id) {
         setSheetOpen(false);
         setEditingCategory(null);
       }
-      fetchCategories();
     } catch (error) {
       console.error("Failed to delete category:", error);
       toast.error(t("admin.messages.categoryDeleteFailed"));
@@ -301,7 +301,9 @@ export default function FiltersPage() {
         siteId={currentSite?.id}
         open={sheetOpen}
         onOpenChange={handleSheetOpenChange}
-        onSaved={fetchCategories}
+        onSaved={(newCategory) => {
+          setCategories((prev) => [...prev, newCategory]);
+        }}
         onCategoryUpdated={handleCategoryUpdated}
       />
 

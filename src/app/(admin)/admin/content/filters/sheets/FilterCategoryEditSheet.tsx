@@ -76,7 +76,7 @@ interface FilterCategoryEditSheetProps {
   siteId: string | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSaved: () => void;
+  onSaved: (category: FilterCategory) => void;
   onCategoryUpdated: (category: FilterCategory) => void;
 }
 
@@ -195,7 +195,10 @@ export function FilterCategoryEditSheet({
           },
         );
         if (!response.ok) throw new Error("Failed to update");
+        const savedCategory = await response.json();
         toast.success(t("admin.messages.categoryUpdated"));
+        onOpenChange(false);
+        onCategoryUpdated(savedCategory);
       } else {
         if (!siteId) return;
         const response = await fetch("/api/admin/content/filter-categories", {
@@ -204,11 +207,11 @@ export function FilterCategoryEditSheet({
           body: JSON.stringify({ name: categoryName, slug, siteId }),
         });
         if (!response.ok) throw new Error("Failed to create");
+        const savedCategory = await response.json();
         toast.success(t("admin.messages.categoryCreated"));
+        onOpenChange(false);
+        onSaved(savedCategory);
       }
-
-      onOpenChange(false);
-      onSaved();
     } catch (error) {
       console.error("Failed to save category:", error);
       toast.error(t("admin.messages.categorySaveFailed"));

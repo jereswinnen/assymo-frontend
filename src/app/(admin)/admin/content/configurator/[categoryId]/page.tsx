@@ -214,8 +214,8 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
       );
       if (!response.ok) throw new Error("Failed to delete");
 
+      setQuestions((prev) => prev.filter((q) => q.id !== deleteTarget.id));
       toast.success(t("admin.messages.questionDeleted"));
-      loadData();
     } catch (error) {
       console.error("Failed to delete question:", error);
       toast.error(t("admin.messages.questionDeleteFailed"));
@@ -448,7 +448,17 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
         siteId={currentSite?.id}
         open={sheetOpen}
         onOpenChange={handleSheetOpenChange}
-        onSaved={loadData}
+        onSaved={(savedQuestion) => {
+          if (editingQuestion) {
+            // Update existing
+            setQuestions((prev) =>
+              prev.map((q) => (q.id === savedQuestion.id ? savedQuestion : q))
+            );
+          } else {
+            // Add new
+            setQuestions((prev) => [...prev, savedQuestion]);
+          }
+        }}
       />
 
       {/* Delete Confirmation */}

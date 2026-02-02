@@ -506,7 +506,20 @@ function ConfiguratorContent() {
         siteId={currentSite?.id}
         open={categorySheetOpen}
         onOpenChange={handleCategorySheetOpenChange}
-        onSaved={loadCategories}
+        onSaved={(savedCategory) => {
+          if (editingCategory) {
+            // Update existing
+            setCategories((prev) =>
+              prev.map((c) => (c.id === savedCategory.id ? savedCategory : c))
+            );
+          } else {
+            // Add new
+            setCategories((prev) => [...prev, savedCategory]);
+          }
+        }}
+        onDelete={(categoryId) => {
+          setCategories((prev) => prev.filter((c) => c.id !== categoryId));
+        }}
       />
 
       {/* Catalogue Item Edit/Create Sheet */}
@@ -516,7 +529,20 @@ function ConfiguratorContent() {
         existingCategories={catalogueCategories}
         open={catalogueSheetOpen}
         onOpenChange={handleCatalogueSheetOpenChange}
-        onSaved={loadCatalogue}
+        onSaved={(savedItem) => {
+          if (editingCatalogueItem) {
+            // Update existing
+            setCatalogueItems((prev) =>
+              prev.map((item) => (item.id === savedItem.id ? savedItem : item))
+            );
+          } else {
+            // Add new
+            setCatalogueItems((prev) => [...prev, savedItem]);
+          }
+        }}
+        onDelete={(itemId) => {
+          setCatalogueItems((prev) => prev.filter((item) => item.id !== itemId));
+        }}
       />
 
       {/* Delete Category Confirmation */}

@@ -83,7 +83,7 @@ interface NavLinkEditSheetProps {
   solutions: Solution[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSaved: () => void;
+  onSaved: (link: NavigationLink) => void;
   onLinkUpdated: (link: NavigationLink) => void;
 }
 
@@ -189,7 +189,10 @@ export function NavLinkEditSheet({
           },
         );
         if (!response.ok) throw new Error("Failed to update");
+        const savedLink = await response.json();
         toast.success(t("admin.messages.linkUpdated"));
+        onOpenChange(false);
+        onLinkUpdated(savedLink);
       } else {
         if (!siteId) return;
         const response = await fetch("/api/admin/content/navigation", {
@@ -204,11 +207,11 @@ export function NavLinkEditSheet({
           }),
         });
         if (!response.ok) throw new Error("Failed to create");
+        const savedLink = await response.json();
         toast.success(t("admin.messages.linkCreated"));
+        onOpenChange(false);
+        onSaved(savedLink);
       }
-
-      onOpenChange(false);
-      onSaved();
     } catch (error) {
       console.error("Failed to save link:", error);
       toast.error(t("admin.messages.linkSaveFailed"));

@@ -38,11 +38,22 @@ interface Site {
   slug: string;
 }
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  feature_overrides: null;
+  created_at: string;
+  two_factor_enabled: boolean;
+  sites: Site[];
+}
+
 interface UserCreateSheetProps {
   sites: Site[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreated: () => void;
+  onCreated: (user: User) => void;
 }
 
 export function UserCreateSheet({
@@ -94,9 +105,10 @@ export function UserCreateSheet({
         throw new Error(data.error || "Failed to create user");
       }
 
+      const savedUser = await response.json();
       toast.success(t("admin.messages.userCreated"));
       handleOpenChange(false);
-      onCreated();
+      onCreated(savedUser.user || savedUser);
     } catch (error) {
       console.error("Failed to create user:", error);
       toast.error(

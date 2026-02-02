@@ -157,7 +157,7 @@ export default function EmailsPage() {
 
       if (!response.ok) throw new Error("Failed to delete draft");
 
-      await loadDrafts();
+      setDrafts((prev) => prev.filter((d) => d.id !== newsletterToDelete.id));
       toast.success(t("admin.messages.draftDeleted"));
     } catch (error) {
       console.error("Failed to delete draft:", error);

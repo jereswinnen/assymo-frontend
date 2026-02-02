@@ -185,9 +185,19 @@ export default function SitesPage() {
         throw new Error(data.error || "Failed to save");
       }
 
+      const savedSite = await response.json();
+      const site = savedSite.site || savedSite;
+
+      if (editingSite) {
+        setSites((prev) =>
+          prev.map((s) => (s.id === site.id ? site : s))
+        );
+      } else {
+        setSites((prev) => [...prev, site]);
+      }
+
       toast.success(editingSite ? t("admin.misc.siteUpdated") : t("admin.misc.siteCreated"));
       setDialogOpen(false);
-      loadSites();
     } catch (error) {
       console.error("Failed to save site:", error);
       toast.error(
@@ -212,9 +222,9 @@ export default function SitesPage() {
         throw new Error(data.error || "Failed to delete");
       }
 
+      setSites((prev) => prev.filter((s) => s.id !== deleteTarget.id));
       toast.success(t("admin.messages.siteDeleted"));
       setDeleteTarget(null);
-      loadSites();
     } catch (error) {
       console.error("Failed to delete site:", error);
       toast.error(

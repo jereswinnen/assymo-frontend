@@ -51,7 +51,7 @@ interface QuestionEditSheetProps {
   siteId: string | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSaved: () => void;
+  onSaved: (question: ConfiguratorQuestion) => void;
 }
 
 // Helper to format price in euros
@@ -270,13 +270,14 @@ export function QuestionEditSheet({
 
       if (!response.ok) throw new Error("Failed to save");
 
+      const savedQuestion = await response.json();
       toast.success(
         question
           ? t("admin.messages.questionUpdated")
           : t("admin.messages.questionCreated")
       );
       onOpenChange(false);
-      onSaved();
+      onSaved(savedQuestion);
     } catch (error) {
       console.error("Failed to save question:", error);
       toast.error(t("admin.messages.questionSaveFailed"));
