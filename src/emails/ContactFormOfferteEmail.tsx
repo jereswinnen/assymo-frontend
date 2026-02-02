@@ -7,7 +7,9 @@ interface ContactFormOfferteEmailProps {
   name: string;
   email: string;
   phone: string;
-  address: string;
+  street: string;
+  postalCode: string;
+  city: string;
   product: string;
   budget?: string;
   extraInfo?: string;
@@ -20,7 +22,9 @@ export function ContactFormOfferteEmail({
   name,
   email,
   phone,
-  address,
+  street,
+  postalCode,
+  city,
   product,
   budget,
   extraInfo,
@@ -28,6 +32,7 @@ export function ContactFormOfferteEmail({
   hasBestand,
   bestandNaam,
 }: ContactFormOfferteEmailProps) {
+  const fullAddress = `${street}, ${postalCode} ${city}`;
   return (
     <EmailLayout preview={`Offerteaanvraag van ${name} voor ${product}`}>
       <Section style={layout.content}>
@@ -58,10 +63,10 @@ export function ContactFormOfferteEmail({
         <Text style={typography.label}>Adres</Text>
         <Text style={typography.value}>
           <Link
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`}
             style={components.link}
           >
-            {address}
+            {fullAddress}
           </Link>
         </Text>
 

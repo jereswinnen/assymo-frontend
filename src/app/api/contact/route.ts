@@ -28,7 +28,9 @@ export async function POST(req: NextRequest) {
     const name = (form.get("name") as string) || "";
     const email = (form.get("email") as string) || "";
     const phone = (form.get("phone") as string) || "";
-    const address = (form.get("address") as string) || "";
+    const street = (form.get("street") as string) || "";
+    const postalCode = (form.get("postalCode") as string) || "";
+    const city = (form.get("city") as string) || "";
     const newsletterOptIn = form.get("newsletterOptIn") === "true";
 
     // Send email based on subject
@@ -57,7 +59,9 @@ export async function POST(req: NextRequest) {
           name,
           email,
           phone,
-          address,
+          street,
+          postalCode,
+          city,
           product,
           budget: budget || undefined,
           extraInfo: extraInfo || undefined,
@@ -87,7 +91,9 @@ export async function POST(req: NextRequest) {
           name,
           email,
           phone,
-          address,
+          street,
+          postalCode,
+          city,
           message,
         }),
       });

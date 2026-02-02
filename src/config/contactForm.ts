@@ -67,11 +67,25 @@ export const FORM_FIELDS: FieldConfig[] = [
     autoComplete: "tel",
   },
   {
-    name: "address",
-    label: "Adres",
+    name: "street",
+    label: "Straat en huisnummer",
     type: "text",
     required: true,
     autoComplete: "street-address",
+  },
+  {
+    name: "postalCode",
+    label: "Postcode",
+    type: "text",
+    required: true,
+    autoComplete: "postal-code",
+  },
+  {
+    name: "city",
+    label: "Plaats",
+    type: "text",
+    required: true,
+    autoComplete: "address-level2",
   },
   {
     name: "subject",

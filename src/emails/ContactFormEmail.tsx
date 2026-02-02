@@ -7,7 +7,9 @@ interface ContactFormEmailProps {
   name: string;
   email: string;
   phone: string;
-  address: string;
+  street: string;
+  postalCode: string;
+  city: string;
   message: string;
 }
 
@@ -15,9 +17,12 @@ export function ContactFormEmail({
   name,
   email,
   phone,
-  address,
+  street,
+  postalCode,
+  city,
   message,
 }: ContactFormEmailProps) {
+  const fullAddress = `${street}, ${postalCode} ${city}`;
   return (
     <EmailLayout preview={`Nieuw bericht van ${name}`}>
       <Section style={layout.content}>
@@ -46,10 +51,10 @@ export function ContactFormEmail({
         <Text style={typography.label}>Adres</Text>
         <Text style={typography.value}>
           <Link
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`}
             style={components.link}
           >
-            {address}
+            {fullAddress}
           </Link>
         </Text>
 
