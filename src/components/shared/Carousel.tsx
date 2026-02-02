@@ -5,7 +5,6 @@ import Image from "next/image";
 import { motion, AnimatePresence, type PanInfo } from "motion/react";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
-import { useTracking } from "@/lib/tracking";
 
 const CAROUSEL_INTERVAL = 4000;
 const TRANSITION_DURATION = 0.4;
@@ -34,7 +33,6 @@ export default function Slideshow({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
-  const { track } = useTracking();
 
   const isLoading = !loadedImages.has(currentIndex);
 
@@ -51,21 +49,17 @@ export default function Slideshow({
   }, [images.length]);
 
   const handlePrevClick = () => {
-    track("carousel_navigated", { direction: "prev", index: currentIndex });
     goToPrevious();
   };
 
   const handleNextClick = () => {
-    track("carousel_navigated", { direction: "next", index: currentIndex });
     goToNext();
   };
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.x > SWIPE_THRESHOLD) {
-      track("carousel_navigated", { direction: "prev", index: currentIndex });
       goToPrevious();
     } else if (info.offset.x < -SWIPE_THRESHOLD) {
-      track("carousel_navigated", { direction: "next", index: currentIndex });
       goToNext();
     }
   };

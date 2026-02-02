@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useCookieConsent, type ConsentLevel } from "@/hooks/useCookieConsent";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -12,12 +12,6 @@ export default function CookieBanner() {
   const { showBanner, updateConsent } = useCookieConsent();
   const [isExiting, setIsExiting] = useState(false);
   const { track } = useTracking();
-
-  useEffect(() => {
-    if (showBanner) {
-      track("cookie_banner_shown");
-    }
-  }, [showBanner, track]);
 
   const handleConsent = (level: ConsentLevel) => {
     track("cookie_consent_given", { level });
