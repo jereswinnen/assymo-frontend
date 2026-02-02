@@ -807,6 +807,7 @@ export const ADMIN_STRINGS = {
       noSections: "Geen secties",
       clipboardEmpty: "Geen sectie gekopieerd",
       noExceptions: "Geen uitzonderingen",
+      noExceptionsDesc: "Voeg uitzonderingen toe voor feestdagen of andere aangepaste openingsuren.",
       noAppointmentsFound: "Geen afspraken gevonden",
       noPasskeysRegistered: "Geen passkeys geregistreerd",
       noImagesYet: "Nog geen afbeeldingen",

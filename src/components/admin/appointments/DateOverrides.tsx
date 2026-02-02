@@ -28,11 +28,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   CalendarDaysIcon,
+  CalendarOffIcon,
   GlobeIcon,
   Loader2Icon,
+  PlusIcon,
   RefreshCwIcon,
   Trash2Icon,
 } from "lucide-react";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 import { toast } from "sonner";
 import type { DateOverride } from "@/types/appointments";
 import { DAYS_OF_WEEK } from "@/types/appointments";
@@ -162,9 +171,21 @@ export function DateOverrides({
   return (
     <div className="space-y-4">
       {activeOverrides.length === 0 ? (
-        <div className="text-muted-foreground text-center text-sm py-8">
-          {t("admin.misc.noExceptions")}
-        </div>
+        <Empty className="border py-12">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <CalendarOffIcon className="size-5" />
+            </EmptyMedia>
+            <EmptyTitle>{t("admin.misc.noExceptions")}</EmptyTitle>
+            <EmptyDescription>
+              {t("admin.misc.noExceptionsDesc")}
+            </EmptyDescription>
+          </EmptyHeader>
+          <Button size="sm" onClick={() => onCreateDialogOpenChange(true)}>
+            <PlusIcon className="size-4" />
+            {t("admin.misc.addOverride")}
+          </Button>
+        </Empty>
       ) : (
         <Table>
           <TableHeader>
