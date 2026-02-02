@@ -134,8 +134,9 @@ export default function Slideshow({
           />
         )}
 
+        {/* Desktop navigation overlay */}
         {hasMultiple && (
-          <div className="absolute bottom-0 left-0 z-10 flex items-center gap-4 bg-stone-200 px-3 p-2.5">
+          <div className="absolute bottom-0 left-0 z-10 hidden items-center gap-4 bg-stone-200 px-3 p-2.5 md:flex">
             <span className="text-sm font-medium text-stone-600 tabular-nums">
               {currentIndex + 1}/{images.length}
             </span>
@@ -158,6 +159,31 @@ export default function Slideshow({
           </div>
         )}
       </div>
+
+      {/* Mobile navigation below image */}
+      {hasMultiple && (
+        <div className="mt-2 flex items-center justify-between md:hidden">
+          <div className="flex items-center gap-1 bg-stone-100 p-1">
+            <button
+              onClick={handlePrevClick}
+              className="cursor-pointer p-2 text-stone-600"
+              aria-label="Previous image"
+            >
+              <ArrowLeftIcon className="size-4" />
+            </button>
+            <button
+              onClick={handleNextClick}
+              className="cursor-pointer p-2 text-stone-600"
+              aria-label="Next image"
+            >
+              <ArrowRightIcon className="size-4" />
+            </button>
+          </div>
+          <span className="text-sm font-medium text-stone-600 tabular-nums">
+            {currentIndex + 1}/{images.length}
+          </span>
+        </div>
+      )}
 
       {currentImage.caption && (
         <AnimatePresence mode="wait">
