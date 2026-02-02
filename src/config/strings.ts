@@ -25,6 +25,7 @@ export const ADMIN_STRINGS = {
       deleting: "Verwijderen...",
       add: "Toevoegen",
       edit: "Bewerken",
+      print: "Afdrukken",
       create: "Aanmaken",
       creating: "Aanmaken...",
       back: "Terug",

@@ -156,12 +156,19 @@ export function AppointmentsList({
     }
   };
 
-  // Filter by date - upcoming first, then past
-  const sortedAppointments = [...appointments].sort((a, b) => {
-    const dateA = new Date(`${a.appointment_date}T${a.appointment_time}`);
-    const dateB = new Date(`${b.appointment_date}T${b.appointment_time}`);
-    return dateB.getTime() - dateA.getTime();
-  });
+  // Filter out past appointments and sort by earliest date first
+  const sortedAppointments = [...appointments]
+    .filter((appointment) => {
+      const appointmentDateTime = new Date(
+        `${appointment.appointment_date}T${appointment.appointment_time}`
+      );
+      return appointmentDateTime >= new Date();
+    })
+    .sort((a, b) => {
+      const dateA = new Date(`${a.appointment_date}T${a.appointment_time}`);
+      const dateB = new Date(`${b.appointment_date}T${b.appointment_time}`);
+      return dateA.getTime() - dateB.getTime();
+    });
 
   return (
     <div className="flex flex-col gap-4 h-[calc(100vh-12rem)]">

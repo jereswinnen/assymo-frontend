@@ -39,21 +39,30 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  BanIcon,
   CalendarIcon,
   CheckIcon,
   ClockIcon,
   MailIcon,
   MapPinIcon,
+  MoreHorizontalIcon,
   PhoneIcon,
   Loader2Icon,
   PencilIcon,
-  TrashIcon,
+  PrinterIcon,
   UserIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Appointment, AppointmentStatus } from "@/types/appointments";
 import { STATUS_LABELS } from "@/types/appointments";
 import { t } from "@/config/strings";
+import { printHTML } from "@/lib/print";
 
 interface AppointmentEditSheetProps {
   appointment: Appointment | null;
@@ -220,6 +229,69 @@ export function AppointmentEditSheet({
       default:
         return "outline";
     }
+  };
+
+  const handlePrint = () => {
+    if (!displayData) return;
+
+    const content = `
+      <h1>Afspraak - ${displayData.customer_name}</h1>
+
+      <div class="highlight">
+        <div class="field">
+          <span class="field-label">Datum:</span>
+          <span class="field-value">${formatDate(displayData.appointment_date)}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">Tijd:</span>
+          <span class="field-value">${formatTime(displayData.appointment_time)}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">Status:</span>
+          <span class="field-value">${STATUS_LABELS[displayData.status]}</span>
+        </div>
+      </div>
+
+      <h2>Klantgegevens</h2>
+      <div class="section">
+        <div class="field">
+          <span class="field-label">Naam:</span>
+          <span class="field-value">${displayData.customer_name}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">E-mail:</span>
+          <span class="field-value">${displayData.customer_email}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">Telefoon:</span>
+          <span class="field-value">${displayData.customer_phone}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">Adres:</span>
+          <span class="field-value">${displayData.customer_street}, ${displayData.customer_postal_code} ${displayData.customer_city}</span>
+        </div>
+      </div>
+
+      ${displayData.remarks ? `
+        <h2>Opmerkingen klant</h2>
+        <div class="section">
+          <p>${displayData.remarks.replace(/\n/g, "<br>")}</p>
+        </div>
+      ` : ""}
+
+      ${displayData.admin_notes ? `
+        <h2>Interne notities</h2>
+        <div class="section">
+          <p>${displayData.admin_notes.replace(/\n/g, "<br>")}</p>
+        </div>
+      ` : ""}
+
+      <div class="meta">
+        Aangemaakt op ${new Date(displayData.created_at).toLocaleString("nl-NL")}
+      </div>
+    `;
+
+    printHTML(`Afspraak - ${displayData.customer_name}`, content);
   };
 
   if (!appointment || !displayData) return null;
@@ -531,7 +603,7 @@ export function AppointmentEditSheet({
             </div>
           )}
 
-          <SheetFooter className="px-0">
+          <SheetFooter className="px-0 flex-row justify-between sm:justify-between">
             {editing ? (
               <Button onClick={handleSave} disabled={saving}>
                 {saving ? (
@@ -543,20 +615,32 @@ export function AppointmentEditSheet({
               </Button>
             ) : (
               <>
-                <Button variant="outline" onClick={startEditing}>
+                <Button onClick={startEditing} className="flex-1">
                   <PencilIcon className="size-4" />
                   {t("admin.buttons.edit")}
                 </Button>
-                {displayData.status !== "cancelled" && (
-                  <Button
-                    variant="destructive"
-                    onClick={() => setShowCancelConfirm(true)}
-                    disabled={cancelling}
-                  >
-                    <TrashIcon className="size-4" />
-                    {t("admin.misc.cancelAppointment")}
-                  </Button>
-                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <MoreHorizontalIcon className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handlePrint}>
+                      <PrinterIcon className="size-4" />
+                      {t("admin.buttons.print")}
+                    </DropdownMenuItem>
+                    {displayData.status !== "cancelled" && (
+                      <DropdownMenuItem
+                        onClick={() => setShowCancelConfirm(true)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <BanIcon className="size-4 text-destructive" />
+                        {t("admin.misc.cancelAppointment")}
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             )}
           </SheetFooter>
