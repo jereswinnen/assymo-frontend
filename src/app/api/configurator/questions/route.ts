@@ -46,22 +46,32 @@ export async function GET(request: NextRequest) {
       dbQuestions = await getQuestionsForProduct(productSlug, siteSlug);
     }
 
+    const cacheHeaders = {
+      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
+    };
+
     // If no questions in database, use defaults
     if (dbQuestions.length === 0) {
       const defaultQuestions = getDefaultQuestions(productSlug);
-      return NextResponse.json({
-        questions: defaultQuestions,
-        source: "default",
-      });
+      return NextResponse.json(
+        {
+          questions: defaultQuestions,
+          source: "default",
+        },
+        { headers: cacheHeaders }
+      );
     }
 
     // Map database questions to frontend format
     const questions = dbQuestions.map(mapQuestionForFrontend);
 
-    return NextResponse.json({
-      questions,
-      source: "database",
-    });
+    return NextResponse.json(
+      {
+        questions,
+        source: "database",
+      },
+      { headers: cacheHeaders }
+    );
   } catch (error) {
     console.error("Error fetching configurator questions:", error);
     return NextResponse.json(

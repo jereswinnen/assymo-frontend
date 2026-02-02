@@ -25,12 +25,26 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      return NextResponse.json({ solution });
+      return NextResponse.json(
+        { solution },
+        {
+          headers: {
+            "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
+          },
+        }
+      );
     }
 
     // Otherwise return all solutions
     const solutions = await getAllSolutions(siteSlug);
-    return NextResponse.json({ solutions });
+    return NextResponse.json(
+      { solutions },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error fetching solutions:", error);
     return NextResponse.json(

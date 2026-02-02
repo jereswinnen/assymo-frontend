@@ -30,6 +30,10 @@ export async function GET(request: NextRequest) {
       dbPricing = await getPricingForProduct(productSlug, siteSlug);
     }
 
+    const cacheHeaders = {
+      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
+    };
+
     // If no pricing in database, use defaults
     if (!dbPricing) {
       const defaultPricing = getDefaultPricing(productSlug);
@@ -41,32 +45,38 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      return NextResponse.json({
-        pricing: {
-          ...defaultPricing,
-          base_price_min_formatted: formatPrice(defaultPricing.base_price_min),
-          base_price_max_formatted: formatPrice(defaultPricing.base_price_max),
-          base_price_range_formatted: formatPriceRange(
-            defaultPricing.base_price_min,
-            defaultPricing.base_price_max
-          ),
+      return NextResponse.json(
+        {
+          pricing: {
+            ...defaultPricing,
+            base_price_min_formatted: formatPrice(defaultPricing.base_price_min),
+            base_price_max_formatted: formatPrice(defaultPricing.base_price_max),
+            base_price_range_formatted: formatPriceRange(
+              defaultPricing.base_price_min,
+              defaultPricing.base_price_max
+            ),
+          },
+          source: "default",
         },
-        source: "default",
-      });
+        { headers: cacheHeaders }
+      );
     }
 
-    return NextResponse.json({
-      pricing: {
-        ...dbPricing,
-        base_price_min_formatted: formatPrice(dbPricing.base_price_min),
-        base_price_max_formatted: formatPrice(dbPricing.base_price_max),
-        base_price_range_formatted: formatPriceRange(
-          dbPricing.base_price_min,
-          dbPricing.base_price_max
-        ),
+    return NextResponse.json(
+      {
+        pricing: {
+          ...dbPricing,
+          base_price_min_formatted: formatPrice(dbPricing.base_price_min),
+          base_price_max_formatted: formatPrice(dbPricing.base_price_max),
+          base_price_range_formatted: formatPriceRange(
+            dbPricing.base_price_min,
+            dbPricing.base_price_max
+          ),
+        },
+        source: "database",
       },
-      source: "database",
-    });
+      { headers: cacheHeaders }
+    );
   } catch (error) {
     console.error("Error fetching configurator pricing:", error);
     return NextResponse.json(

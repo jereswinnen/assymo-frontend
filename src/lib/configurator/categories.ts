@@ -78,7 +78,7 @@ export const getCategoriesForSite = (siteSlug: string = DEFAULT_SITE_SLUG) =>
     [`configurator-categories-${siteSlug}`],
     {
       tags: [CATEGORIES_CACHE_TAG],
-      revalidate: 60,
+      revalidate: false, // Only revalidate via revalidateTag() when admin publishes
     }
   )(siteSlug);
 
@@ -111,7 +111,7 @@ export const getCategoryBySlug = (
     [`configurator-category-slug-${siteSlug}-${slug}`],
     {
       tags: [CATEGORIES_CACHE_TAG],
-      revalidate: 60,
+      revalidate: false, // Only revalidate via revalidateTag() when admin publishes
     }
   )(slug, siteSlug);
 

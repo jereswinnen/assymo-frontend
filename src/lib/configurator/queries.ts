@@ -84,7 +84,7 @@ export const getQuestionsForProduct = (
     [`configurator-questions-${siteSlug}-${productSlug || "all"}`],
     {
       tags: [CONFIGURATOR_CACHE_TAGS.questions],
-      revalidate: 60,
+      revalidate: false, // Only revalidate via revalidateTag() when admin publishes
     }
   )(productSlug, siteSlug);
 
@@ -119,7 +119,7 @@ export const getQuestionsForCategory = (
     [`configurator-questions-category-${siteSlug}-${categorySlug}`],
     {
       tags: [CONFIGURATOR_CACHE_TAGS.questions],
-      revalidate: 60,
+      revalidate: false, // Only revalidate via revalidateTag() when admin publishes
     }
   )(categorySlug, siteSlug);
 
@@ -156,7 +156,7 @@ export const getPricingForProduct = (
     [`configurator-pricing-${siteSlug}-${productSlug}`],
     {
       tags: [CONFIGURATOR_CACHE_TAGS.pricing],
-      revalidate: 60,
+      revalidate: false, // Only revalidate via revalidateTag() when admin publishes
     }
   )(productSlug, siteSlug);
 
@@ -190,7 +190,7 @@ export const getPricingForCategory = (
     [`configurator-pricing-category-${siteSlug}-${categorySlug}`],
     {
       tags: [CONFIGURATOR_CACHE_TAGS.pricing],
-      revalidate: 60,
+      revalidate: false, // Only revalidate via revalidateTag() when admin publishes
     }
   )(categorySlug, siteSlug);
 

@@ -14,12 +14,19 @@ export async function GET(request: NextRequest) {
 
     const categories = await getCategoriesForSite(siteSlug);
 
-    return NextResponse.json({
-      categories: categories.map((c) => ({
-        slug: c.slug,
-        name: c.name,
-      })),
-    });
+    return NextResponse.json(
+      {
+        categories: categories.map((c) => ({
+          slug: c.slug,
+          name: c.name,
+        })),
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error fetching configurator categories:", error);
     return NextResponse.json(

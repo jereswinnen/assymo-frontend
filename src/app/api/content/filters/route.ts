@@ -13,7 +13,14 @@ export async function GET(request: NextRequest) {
     const siteSlug = searchParams.get("site") || "assymo";
 
     const categories = await getFilterCategories(siteSlug);
-    return NextResponse.json({ categories });
+    return NextResponse.json(
+      { categories },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error fetching filter categories:", error);
     return NextResponse.json(

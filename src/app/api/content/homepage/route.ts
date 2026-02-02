@@ -21,7 +21,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ page: homepage });
+    return NextResponse.json(
+      { page: homepage },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error fetching homepage:", error);
     return NextResponse.json(
