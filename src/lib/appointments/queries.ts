@@ -293,13 +293,20 @@ export async function getPublicClosures(): Promise<DateOverride[]> {
     FROM appointment_date_overrides
     WHERE show_on_website = true
       AND (
-        -- Future or today (single date)
-        (end_date IS NULL AND recurrence_day_of_week IS NULL AND date >= CURRENT_DATE)
-        -- Future or today (date range - check if end_date is still in future)
-        OR (end_date IS NOT NULL AND end_date >= CURRENT_DATE)
-        -- Yearly recurring overrides always show
-        OR is_recurring = true
-        -- Weekly recurring overrides always show
+        -- Single date: show from 7 days before until day passes
+        (end_date IS NULL AND recurrence_day_of_week IS NULL AND NOT is_recurring
+         AND date >= CURRENT_DATE AND date <= CURRENT_DATE + INTERVAL '7 days')
+        -- Date range: show from 7 days before start until end passes
+        OR (end_date IS NOT NULL AND NOT is_recurring
+            AND date <= CURRENT_DATE + INTERVAL '7 days' AND end_date >= CURRENT_DATE)
+        -- Yearly recurring: show if this/next year's occurrence is within 7 days
+        OR (is_recurring = true AND (
+          MAKE_DATE(EXTRACT(YEAR FROM CURRENT_DATE)::int, EXTRACT(MONTH FROM date)::int, EXTRACT(DAY FROM date)::int)
+            BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days'
+          OR MAKE_DATE(EXTRACT(YEAR FROM CURRENT_DATE)::int + 1, EXTRACT(MONTH FROM date)::int, EXTRACT(DAY FROM date)::int)
+            BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days'
+        ))
+        -- Weekly recurring: next occurrence is always within 7 days
         OR recurrence_day_of_week IS NOT NULL
       )
     ORDER BY

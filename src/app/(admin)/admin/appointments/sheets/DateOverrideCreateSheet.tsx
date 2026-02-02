@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -93,7 +94,7 @@ export function DateOverrideCreateSheet({
         return;
       }
 
-      if (exceptionType === "one-time" && formData.hasDateRange && !formData.end_date) {
+      if (formData.hasDateRange && !formData.end_date) {
         toast.error(t("admin.messages.selectEndDate"));
         return;
       }
@@ -109,7 +110,7 @@ export function DateOverrideCreateSheet({
           date: exceptionType === "weekly"
             ? new Date().toISOString().split("T")[0]
             : formData.date,
-          end_date: exceptionType === "one-time" && formData.hasDateRange
+          end_date: (exceptionType === "one-time" || exceptionType === "yearly") && formData.hasDateRange
             ? formData.end_date
             : null,
           is_closed: formData.is_closed,
@@ -228,58 +229,46 @@ export function DateOverrideCreateSheet({
                         ? t("admin.labels.startDate")
                         : t("admin.labels.date")}
                     </FieldLabel>
-                    <Input
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) =>
-                        setFormData({ ...formData, date: e.target.value })
-                      }
-                      min={
-                        exceptionType === "yearly"
-                          ? undefined
-                          : new Date().toISOString().split("T")[0]
-                      }
-                      className="[&::-webkit-calendar-picker-indicator]:hidden"
+                    <DatePicker
+                      value={formData.date ? new Date(formData.date + "T00:00:00") : undefined}
+                      onChange={(date) => {
+                        const dateStr = date ? date.toISOString().split("T")[0] : "";
+                        setFormData({ ...formData, date: dateStr });
+                      }}
+                      disablePast={exceptionType !== "yearly"}
                     />
                   </Field>
 
-                  {/* Date range option - only for one-time */}
-                  {exceptionType === "one-time" && (
-                    <>
-                      <Field orientation="horizontal">
-                        <Checkbox
-                          id="hasDateRange"
-                          checked={formData.hasDateRange}
-                          onCheckedChange={(checked) =>
-                            setFormData({
-                              ...formData,
-                              hasDateRange: !!checked,
-                              end_date: "",
-                            })
-                          }
-                        />
-                        <FieldLabel htmlFor="hasDateRange">
-                          {t("admin.misc.multipleDays")}
-                        </FieldLabel>
-                      </Field>
+                  {/* Date range option - for one-time and yearly */}
+                  <Field orientation="horizontal">
+                    <Checkbox
+                      id="hasDateRange"
+                      checked={formData.hasDateRange}
+                      onCheckedChange={(checked) =>
+                        setFormData({
+                          ...formData,
+                          hasDateRange: !!checked,
+                          end_date: "",
+                        })
+                      }
+                    />
+                    <FieldLabel htmlFor="hasDateRange">
+                      {t("admin.misc.multipleDays")}
+                    </FieldLabel>
+                  </Field>
 
-                      {formData.hasDateRange && (
-                        <Field>
-                          <FieldLabel>{t("admin.labels.endDate")}</FieldLabel>
-                          <Input
-                            type="date"
-                            value={formData.end_date}
-                            onChange={(e) =>
-                              setFormData({ ...formData, end_date: e.target.value })
-                            }
-                            min={
-                              formData.date || new Date().toISOString().split("T")[0]
-                            }
-                            className="[&::-webkit-calendar-picker-indicator]:hidden"
-                          />
-                        </Field>
-                      )}
-                    </>
+                  {formData.hasDateRange && (
+                    <Field>
+                      <FieldLabel>{t("admin.labels.endDate")}</FieldLabel>
+                      <DatePicker
+                        value={formData.end_date ? new Date(formData.end_date + "T00:00:00") : undefined}
+                        onChange={(date) => {
+                          const dateStr = date ? date.toISOString().split("T")[0] : "";
+                          setFormData({ ...formData, end_date: dateStr });
+                        }}
+                        disablePast={exceptionType !== "yearly"}
+                      />
+                    </Field>
                   )}
                 </>
               )}
