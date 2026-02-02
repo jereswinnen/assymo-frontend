@@ -1,9 +1,60 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth-utils";
 import { hasFeatureAccess, canAccessSite } from "./check";
-import { getUserSiteIds, getUserPermissions } from "./queries";
-import type { Feature, PermissionContext } from "./types";
+import { getUserPermissionsWithSites } from "./queries";
+import type { Feature, PermissionContext, Role, FeatureOverrides } from "./types";
 import { DEFAULT_ROLE } from "./types";
+
+// In-memory cache for user permissions with 5-minute TTL
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+interface CachedPermissions {
+  role: Role;
+  featureOverrides: FeatureOverrides | null;
+  siteIds: string[];
+  cachedAt: number;
+}
+
+const permissionsCache = new Map<string, CachedPermissions>();
+
+function getCachedPermissions(userId: string): CachedPermissions | null {
+  const cached = permissionsCache.get(userId);
+  if (!cached) return null;
+
+  // Check if cache has expired
+  if (Date.now() - cached.cachedAt > CACHE_TTL_MS) {
+    permissionsCache.delete(userId);
+    return null;
+  }
+
+  return cached;
+}
+
+function setCachedPermissions(
+  userId: string,
+  permissions: { role: Role; featureOverrides: FeatureOverrides | null; siteIds: string[] }
+): void {
+  permissionsCache.set(userId, {
+    ...permissions,
+    cachedAt: Date.now(),
+  });
+}
+
+/**
+ * Invalidate cached permissions for a user.
+ * Call this when a user's role, feature overrides, or site assignments change.
+ */
+export function invalidatePermissionsCache(userId: string): void {
+  permissionsCache.delete(userId);
+}
+
+/**
+ * Clear all cached permissions.
+ * Useful for testing or when doing bulk permission changes.
+ */
+export function clearPermissionsCache(): void {
+  permissionsCache.clear();
+}
 
 export interface ProtectRouteOptions {
   /** Required feature to access this route */
@@ -55,22 +106,30 @@ export async function protectRoute(
 
   const user = session.user;
 
-  // Query fresh permissions from database (not cached session)
-  const [userSites, permissions] = await Promise.all([
-    getUserSiteIds(user.id),
-    getUserPermissions(user.id),
-  ]);
+  // Check cache first, then query if needed (single combined query)
+  let cached = getCachedPermissions(user.id);
 
-  // Build permission context with fresh data from DB
+  if (!cached) {
+    const permissions = await getUserPermissionsWithSites(user.id);
+    if (permissions) {
+      setCachedPermissions(user.id, permissions);
+      cached = {
+        ...permissions,
+        cachedAt: Date.now(),
+      };
+    }
+  }
+
+  // Build permission context
   const ctx: PermissionContext = {
     user: {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: permissions?.role || DEFAULT_ROLE,
-      featureOverrides: permissions?.featureOverrides || null,
+      role: cached?.role || DEFAULT_ROLE,
+      featureOverrides: cached?.featureOverrides || null,
     },
-    userSites,
+    userSites: cached?.siteIds || [],
   };
 
   // Check feature access
@@ -124,21 +183,29 @@ export async function requireAuth(): Promise<{
 
   const user = session.user;
 
-  // Query fresh permissions from database
-  const [userSites, permissions] = await Promise.all([
-    getUserSiteIds(user.id),
-    getUserPermissions(user.id),
-  ]);
+  // Check cache first, then query if needed (single combined query)
+  let cached = getCachedPermissions(user.id);
+
+  if (!cached) {
+    const permissions = await getUserPermissionsWithSites(user.id);
+    if (permissions) {
+      setCachedPermissions(user.id, permissions);
+      cached = {
+        ...permissions,
+        cachedAt: Date.now(),
+      };
+    }
+  }
 
   const ctx: PermissionContext = {
     user: {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: permissions?.role || DEFAULT_ROLE,
-      featureOverrides: permissions?.featureOverrides || null,
+      role: cached?.role || DEFAULT_ROLE,
+      featureOverrides: cached?.featureOverrides || null,
     },
-    userSites,
+    userSites: cached?.siteIds || [],
   };
 
   return {

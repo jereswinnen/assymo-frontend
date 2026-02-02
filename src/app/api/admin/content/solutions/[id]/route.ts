@@ -69,25 +69,30 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Fetch existing solution to check site access
-    const existing = await sql`SELECT site_id FROM solutions WHERE id = ${id}`;
-    if (existing.length === 0) {
+    // Combined query: check existence, get site_id, and check slug uniqueness in one round-trip
+    const validation = await sql`
+      SELECT
+        s.site_id,
+        EXISTS(
+          SELECT 1 FROM solutions
+          WHERE slug = ${slug} AND id != ${id} AND site_id = s.site_id
+        ) as slug_exists
+      FROM solutions s
+      WHERE s.id = ${id}
+    `;
+
+    if (validation.length === 0) {
       return NextResponse.json({ error: "Solution not found" }, { status: 404 });
     }
 
-    const siteId = existing[0].site_id;
+    const { site_id: siteId, slug_exists: slugExists } = validation[0];
 
     const isSuperAdmin = ctx!.user.role === "super_admin";
     if (!isSuperAdmin && !ctx!.userSites.includes(siteId)) {
       return NextResponse.json({ error: "Geen toegang tot deze realisatie" }, { status: 403 });
     }
 
-    // Check if slug already exists for another solution in the same site
-    const slugExists = await sql`
-      SELECT id FROM solutions WHERE slug = ${slug} AND id != ${id} AND site_id = ${siteId}
-    `;
-
-    if (slugExists.length > 0) {
+    if (slugExists) {
       return NextResponse.json(
         { error: "A solution with this slug already exists" },
         { status: 409 }
@@ -114,14 +119,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Solution not found" }, { status: 404 });
     }
 
-    // Update filters if provided
+    // Update filters if provided - batch insert for efficiency
     if (Array.isArray(filter_ids)) {
       await sql`DELETE FROM solution_filters WHERE solution_id = ${id}`;
 
-      for (const filterId of filter_ids) {
+      if (filter_ids.length > 0) {
         await sql`
           INSERT INTO solution_filters (solution_id, filter_id)
-          VALUES (${id}, ${filterId})
+          SELECT ${id}, unnest(${filter_ids}::uuid[])
           ON CONFLICT DO NOTHING
         `;
       }

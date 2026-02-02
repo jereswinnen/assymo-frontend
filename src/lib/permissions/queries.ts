@@ -132,6 +132,41 @@ export async function getUserPermissions(
 }
 
 /**
+ * Get user's permissions and site IDs in a single query
+ * Combines getUserSiteIds + getUserPermissions for efficiency
+ */
+export async function getUserPermissionsWithSites(
+  userId: string
+): Promise<{
+  role: Role;
+  featureOverrides: FeatureOverrides | null;
+  siteIds: string[];
+} | null> {
+  const rows = await sql`
+    SELECT
+      u.role,
+      u.feature_overrides,
+      COALESCE(
+        array_agg(us.site_id) FILTER (WHERE us.site_id IS NOT NULL),
+        '{}'
+      ) as site_ids
+    FROM "user" u
+    LEFT JOIN user_sites us ON u.id = us.user_id
+    WHERE u.id = ${userId}
+    GROUP BY u.id
+  `;
+
+  if (rows.length === 0) return null;
+
+  const row = rows[0];
+  return {
+    role: row.role as Role,
+    featureOverrides: row.feature_overrides as FeatureOverrides | null,
+    siteIds: (row.site_ids as string[]) || [],
+  };
+}
+
+/**
  * Assign a user to a site
  */
 export async function assignUserToSite(

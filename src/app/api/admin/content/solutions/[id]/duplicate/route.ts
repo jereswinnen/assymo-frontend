@@ -42,18 +42,27 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Geen toegang tot deze realisatie" }, { status: 403 });
     }
 
-    // Generate unique slug within the same site
+    // Generate unique slug within the same site - single query for efficiency
     const baseSlug = `${original.slug}-kopie`;
-    let newSlug = baseSlug;
-    let counter = 1;
 
-    while (true) {
-      const existing = await sql`
-        SELECT id FROM solutions WHERE slug = ${newSlug} AND site_id = ${original.site_id}
-      `;
-      if (existing.length === 0) break;
-      counter++;
-      newSlug = `${baseSlug}-${counter}`;
+    // Find all existing slugs matching the pattern in one query
+    const existingSlugs = await sql`
+      SELECT slug FROM solutions
+      WHERE site_id = ${original.site_id}
+      AND (slug = ${baseSlug} OR slug LIKE ${baseSlug + '-%'})
+    `;
+
+    let newSlug = baseSlug;
+    if (existingSlugs.length > 0) {
+      const slugSet = new Set(existingSlugs.map(r => r.slug as string));
+      // If base slug is taken, find the next available number
+      if (slugSet.has(baseSlug)) {
+        let counter = 2;
+        while (slugSet.has(`${baseSlug}-${counter}`)) {
+          counter++;
+        }
+        newSlug = `${baseSlug}-${counter}`;
+      }
     }
 
     // Get the highest order_rank for this site
@@ -79,16 +88,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const newSolution = duplicated[0];
 
-    // Copy filter associations
+    // Copy filter associations - batch insert for efficiency
     const filterIds = original.filter_ids as string[];
     if (filterIds && filterIds.length > 0) {
-      for (const filterId of filterIds) {
-        await sql`
-          INSERT INTO solution_filters (solution_id, filter_id)
-          VALUES (${newSolution.id}, ${filterId})
-          ON CONFLICT DO NOTHING
-        `;
-      }
+      await sql`
+        INSERT INTO solution_filters (solution_id, filter_id)
+        SELECT ${newSolution.id}, unnest(${filterIds}::uuid[])
+        ON CONFLICT DO NOTHING
+      `;
     }
 
     // Invalidate solutions cache

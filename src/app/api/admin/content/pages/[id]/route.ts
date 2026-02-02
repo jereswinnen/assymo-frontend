@@ -58,20 +58,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Fetch existing page to check site access
-    const existing = await sql`SELECT site_id FROM pages WHERE id = ${id}`;
-    if (existing.length === 0) {
-      return NextResponse.json({ error: "Page not found" }, { status: 404 });
-    }
-
-    const siteId = existing[0].site_id;
-
-    // Verify user has access to this page's site
-    const isSuperAdmin = ctx!.user.role === "super_admin";
-    if (!isSuperAdmin && !ctx!.userSites.includes(siteId)) {
-      return NextResponse.json({ error: "Geen toegang tot deze pagina" }, { status: 403 });
-    }
-
     // Homepage doesn't need a slug
     if (!is_homepage && !slug) {
       return NextResponse.json(
@@ -80,18 +66,38 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Check if slug already exists for another page in the same site
-    if (slug) {
-      const slugExists = await sql`
-        SELECT id FROM pages WHERE slug = ${slug} AND id != ${id} AND site_id = ${siteId}
-      `;
+    // Combined query: check existence, get site_id, and check slug uniqueness in one round-trip
+    const validation = await sql`
+      SELECT
+        p.site_id,
+        CASE
+          WHEN ${slug}::text IS NULL THEN false
+          ELSE EXISTS(
+            SELECT 1 FROM pages
+            WHERE slug = ${slug} AND id != ${id} AND site_id = p.site_id
+          )
+        END as slug_exists
+      FROM pages p
+      WHERE p.id = ${id}
+    `;
 
-      if (slugExists.length > 0) {
-        return NextResponse.json(
-          { error: "A page with this slug already exists" },
-          { status: 409 }
-        );
-      }
+    if (validation.length === 0) {
+      return NextResponse.json({ error: "Page not found" }, { status: 404 });
+    }
+
+    const { site_id: siteId, slug_exists: slugExists } = validation[0];
+
+    // Verify user has access to this page's site
+    const isSuperAdmin = ctx!.user.role === "super_admin";
+    if (!isSuperAdmin && !ctx!.userSites.includes(siteId)) {
+      return NextResponse.json({ error: "Geen toegang tot deze pagina" }, { status: 403 });
+    }
+
+    if (slugExists) {
+      return NextResponse.json(
+        { error: "A page with this slug already exists" },
+        { status: 409 }
+      );
     }
 
     // If setting as homepage, unset any existing homepage for this site

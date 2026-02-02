@@ -41,6 +41,7 @@ export {
   getSiteById,
   getSiteBySlug,
   getUserPermissions,
+  getUserPermissionsWithSites,
   assignUserToSite,
   removeUserFromSite,
   updateUserRole,
@@ -48,7 +49,7 @@ export {
 } from "./queries";
 
 // Route protection middleware
-export { protectRoute, requireAuth } from "./middleware";
+export { protectRoute, requireAuth, invalidatePermissionsCache, clearPermissionsCache } from "./middleware";
 export type { ProtectRouteOptions, ProtectRouteResult } from "./middleware";
 
 // Note: useRequireFeature is a client-only hook

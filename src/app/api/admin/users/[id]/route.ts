@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { protectRoute } from "@/lib/permissions";
+import { protectRoute, invalidatePermissionsCache } from "@/lib/permissions";
 import type { Role, FeatureOverrides } from "@/lib/permissions/types";
 
 const sql = neon(process.env.DATABASE_URL!);
@@ -74,19 +74,25 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const body = await request.json();
     const { role, featureOverrides, siteIds } = body;
 
-    // Check if user exists
-    const existingUser = await sql`
-      SELECT id FROM "user" WHERE id = ${id}
+    // Combined query: check existence, get current role, and count super_admins in one round-trip
+    const validation = await sql`
+      SELECT
+        u.role as current_role,
+        (SELECT COUNT(*) FROM "user" WHERE role = 'super_admin') as super_admin_count
+      FROM "user" u
+      WHERE u.id = ${id}
     `;
 
-    if (existingUser.length === 0) {
+    if (validation.length === 0) {
       return NextResponse.json(
         { error: "Gebruiker niet gevonden" },
         { status: 404 }
       );
     }
 
-    // Update role if provided
+    const { current_role: currentRole, super_admin_count: superAdminCount } = validation[0];
+
+    // Validate and prepare role update if provided
     if (role) {
       const validRoles: Role[] = ["super_admin", "admin", "content_editor", "user"];
       if (!validRoles.includes(role)) {
@@ -105,43 +111,50 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       }
 
       // Check if this would remove the last super_admin
-      const currentUser = await sql`SELECT role FROM "user" WHERE id = ${id}`;
-      if (currentUser[0]?.role === "super_admin" && role !== "super_admin") {
-        const superAdminCount = await sql`
-          SELECT COUNT(*) as count FROM "user" WHERE role = 'super_admin'
-        `;
-        if (parseInt(superAdminCount[0].count) <= 1) {
+      if (currentRole === "super_admin" && role !== "super_admin") {
+        if (parseInt(superAdminCount) <= 1) {
           return NextResponse.json(
             { error: "Er moet minimaal één super admin zijn" },
             { status: 400 }
           );
         }
       }
-
-      await sql`UPDATE "user" SET role = ${role} WHERE id = ${id}`;
     }
 
-    // Update feature overrides if provided
-    if (featureOverrides !== undefined) {
-      const overridesJson = featureOverrides
-        ? JSON.stringify(featureOverrides as FeatureOverrides)
-        : null;
-      await sql`UPDATE "user" SET feature_overrides = ${overridesJson} WHERE id = ${id}`;
+    // Combined update for role and feature_overrides in single query
+    const hasRoleUpdate = role !== undefined;
+    const hasOverridesUpdate = featureOverrides !== undefined;
+
+    if (hasRoleUpdate || hasOverridesUpdate) {
+      const overridesJson = hasOverridesUpdate
+        ? (featureOverrides ? JSON.stringify(featureOverrides as FeatureOverrides) : null)
+        : undefined;
+
+      if (hasRoleUpdate && hasOverridesUpdate) {
+        await sql`UPDATE "user" SET role = ${role}, feature_overrides = ${overridesJson} WHERE id = ${id}`;
+      } else if (hasRoleUpdate) {
+        await sql`UPDATE "user" SET role = ${role} WHERE id = ${id}`;
+      } else if (hasOverridesUpdate) {
+        await sql`UPDATE "user" SET feature_overrides = ${overridesJson} WHERE id = ${id}`;
+      }
     }
 
-    // Update site assignments if provided
+    // Update site assignments if provided - batch insert for efficiency
     if (siteIds !== undefined && Array.isArray(siteIds)) {
       // Remove existing assignments
       await sql`DELETE FROM user_sites WHERE user_id = ${id}`;
 
-      // Add new assignments
-      for (const siteId of siteIds) {
+      // Add new assignments in single query
+      if (siteIds.length > 0) {
         await sql`
           INSERT INTO user_sites (user_id, site_id)
-          VALUES (${id}, ${siteId})
+          SELECT ${id}, unnest(${siteIds}::uuid[])
         `;
       }
     }
+
+    // Invalidate permission cache since user's permissions may have changed
+    invalidatePermissionsCache(id);
 
     // Fetch updated user
     const updatedUser = await sql`
@@ -196,12 +209,16 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Check if user exists
-    const existingUser = await sql`
-      SELECT id, role FROM "user" WHERE id = ${id}
+    // Combined query: check existence, get role, and count super_admins in one round-trip
+    const validation = await sql`
+      SELECT
+        u.role,
+        (SELECT COUNT(*) FROM "user" WHERE role = 'super_admin') as super_admin_count
+      FROM "user" u
+      WHERE u.id = ${id}
     `;
 
-    if (existingUser.length === 0) {
+    if (validation.length === 0) {
       return NextResponse.json(
         { error: "Gebruiker niet gevonden" },
         { status: 404 }
@@ -209,22 +226,24 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Prevent deleting the last super_admin
-    if (existingUser[0].role === "super_admin") {
-      const superAdminCount = await sql`
-        SELECT COUNT(*) as count FROM "user" WHERE role = 'super_admin'
-      `;
-      if (parseInt(superAdminCount[0].count) <= 1) {
-        return NextResponse.json(
-          { error: "Er moet minimaal één super admin zijn" },
-          { status: 400 }
-        );
-      }
+    const { role, super_admin_count: superAdminCount } = validation[0];
+    if (role === "super_admin" && parseInt(superAdminCount) <= 1) {
+      return NextResponse.json(
+        { error: "Er moet minimaal één super admin zijn" },
+        { status: 400 }
+      );
     }
 
-    // Delete in order: sessions, accounts, site assignments, then user
-    await sql`DELETE FROM "session" WHERE "userId" = ${id}`;
-    await sql`DELETE FROM "account" WHERE "userId" = ${id}`;
-    await sql`DELETE FROM user_sites WHERE user_id = ${id}`;
+    // Invalidate permission cache for the deleted user
+    invalidatePermissionsCache(id);
+
+    // Delete all user data - sessions and accounts have foreign key constraints
+    // so we need to delete them first, but we can do site assignments in parallel
+    await Promise.all([
+      sql`DELETE FROM "session" WHERE "userId" = ${id}`,
+      sql`DELETE FROM "account" WHERE "userId" = ${id}`,
+      sql`DELETE FROM user_sites WHERE user_id = ${id}`,
+    ]);
     await sql`DELETE FROM "user" WHERE id = ${id}`;
 
     return NextResponse.json({ success: true });
