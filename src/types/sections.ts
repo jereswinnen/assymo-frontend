@@ -6,7 +6,8 @@ export type SectionType =
   | "solutionsScroller"
   | "splitSection"
   | "uspSection"
-  | "flexibleSection";
+  | "flexibleSection"
+  | "solutionHighlight";
 
 export interface BaseSection {
   _key: string;
@@ -44,6 +45,12 @@ export interface SolutionsScrollerSection extends BaseSection {
   _type: "solutionsScroller";
   heading?: string;
   subtitle?: string;
+}
+
+export interface SolutionHighlightSection extends BaseSection {
+  _type: "solutionHighlight";
+  solutionId?: string;
+  subtitle?: string; // HTML from Tiptap
 }
 
 export interface SplitSectionItem {
@@ -149,7 +156,8 @@ export type Section =
   | SolutionsScrollerSection
   | SplitSectionSection
   | UspSectionSection
-  | FlexibleSectionSection;
+  | FlexibleSectionSection
+  | SolutionHighlightSection;
 
 // Section metadata for the UI
 export const SECTION_TYPES: {
@@ -186,6 +194,11 @@ export const SECTION_TYPES: {
     type: "flexibleSection",
     label: "Flexibele Sectie",
     description: "Aanpasbare layout met tekst, afbeeldingen, formulier of kaart",
+  },
+  {
+    type: "solutionHighlight",
+    label: "Realisatie",
+    description: "Toon een specifieke realisatie met link",
   },
 ];
 
@@ -245,6 +258,13 @@ export function createSection(type: SectionType): Section {
         blockMain: [],
         blockLeft: [],
         blockRight: [],
+      };
+    case "solutionHighlight":
+      return {
+        _key,
+        _type: "solutionHighlight",
+        solutionId: "",
+        subtitle: "",
       };
   }
 }

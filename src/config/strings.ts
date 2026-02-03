@@ -177,6 +177,7 @@ export const ADMIN_STRINGS = {
       optionPrice: "Optieprijs",
       fromCatalogue: "Uit catalogus",
       manualPrice: "Handmatig",
+      solution: "Realisatie",
     },
 
     /**
@@ -514,6 +515,7 @@ export const ADMIN_STRINGS = {
       unitExample: "Bijv. per stuk, per m\u00B2",
       selectCatalogueItem: "Selecteer catalogusitem",
       noCatalogueItem: "Geen (handmatig)",
+      selectSolution: "Selecteer realisatie",
     },
 
     /**
@@ -546,6 +548,7 @@ export const ADMIN_STRINGS = {
       addSelectQuestionsForModifiers: "Voeg keuzevragen toe om prijsmodifiers in te stellen.",
       noCatalogueItems: "Nog geen catalogusitems",
       noCatalogueItemsDesc: "Voeg items toe aan de prijscatalogus.",
+      noSolutionSelected: "Geen realisatie geselecteerd",
     },
 
     /**
@@ -680,6 +683,7 @@ export const ADMIN_STRINGS = {
       splitSection: "Split Section",
       uspSection: "USPs",
       flexibleSection: "Flexibele Sectie",
+      solutionHighlight: "Realisatie",
     },
 
     /**

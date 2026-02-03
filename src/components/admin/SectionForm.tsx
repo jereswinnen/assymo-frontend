@@ -8,6 +8,7 @@ import {
   SplitSectionSection,
   UspSectionSection,
   FlexibleSectionSection,
+  SolutionHighlightSection,
 } from "@/types/sections";
 import { PageHeaderForm } from "./section-forms/PageHeaderForm";
 import { SlideshowForm } from "./section-forms/SlideshowForm";
@@ -15,6 +16,7 @@ import { SolutionsScrollerForm } from "./section-forms/SolutionsScrollerForm";
 import { SplitSectionForm } from "./section-forms/SplitSectionForm";
 import { UspSectionForm } from "./section-forms/UspSectionForm";
 import { FlexibleSectionForm } from "./section-forms/FlexibleSectionForm";
+import { SolutionHighlightForm } from "./section-forms/SolutionHighlightForm";
 
 interface SectionFormProps {
   section: Section;
@@ -67,6 +69,14 @@ export function SectionForm({ section, onChange }: SectionFormProps) {
       return (
         <FlexibleSectionForm
           section={section as FlexibleSectionSection}
+          onChange={onChange}
+        />
+      );
+
+    case "solutionHighlight":
+      return (
+        <SolutionHighlightForm
+          section={section as SolutionHighlightSection}
           onChange={onChange}
         />
       );

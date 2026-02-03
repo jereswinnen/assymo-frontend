@@ -4,6 +4,7 @@ import { SplitSection } from "../sections/SplitSection";
 import UspSection from "../sections/UspSection";
 import SolutionsScroller from "../sections/SolutionsScroller";
 import FlexibleSection from "../sections/FlexibleSection";
+import SolutionHighlight from "../sections/SolutionHighlight";
 import type { FlexibleSectionData } from "../sections/FlexibleSection/types";
 
 // Image type with direct URL
@@ -82,6 +83,12 @@ interface SolutionsScrollerSection extends BaseSection {
   subtitle?: string;
 }
 
+interface SolutionHighlightSection extends BaseSection {
+  _type: "solutionHighlight";
+  solutionId?: string;
+  subtitle?: string;
+}
+
 type FlexibleSectionType = FlexibleSectionData;
 
 type Section =
@@ -90,7 +97,8 @@ type Section =
   | SplitSectionType
   | UspSectionType
   | SolutionsScrollerSection
-  | FlexibleSectionType;
+  | FlexibleSectionType
+  | SolutionHighlightSection;
 
 interface SectionRendererProps {
   sections: Section[];
@@ -137,6 +145,9 @@ export default function SectionRenderer({
 
           case "flexibleSection":
             return <FlexibleSection key={key} section={section} solutionName={solutionName} configuratorCategorySlug={configuratorCategorySlug} />;
+
+          case "solutionHighlight":
+            return <SolutionHighlight key={key} section={section} />;
 
           default:
             console.warn(`Unknown section type: ${(section as { _type: string })._type}`);
