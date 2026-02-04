@@ -184,6 +184,7 @@ export async function createCatalogueItem(
       site_id,
       name,
       category,
+      image,
       price_min,
       price_max,
       unit
@@ -191,6 +192,7 @@ export async function createCatalogueItem(
       ${siteId},
       ${input.name},
       ${input.category},
+      ${input.image ?? null},
       ${input.price_min},
       ${input.price_max},
       ${input.unit ?? null}
@@ -217,6 +219,7 @@ export async function updateCatalogueItem(
     SET
       name = ${input.name ?? existing.name},
       category = ${input.category ?? existing.category},
+      image = ${input.image !== undefined ? input.image : existing.image},
       price_min = ${input.price_min ?? existing.price_min},
       price_max = ${input.price_max ?? existing.price_max},
       unit = ${input.unit !== undefined ? input.unit : existing.unit},

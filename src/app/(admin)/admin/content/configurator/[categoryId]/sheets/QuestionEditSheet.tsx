@@ -29,6 +29,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { toast } from "sonner";
+import Image from "next/image";
 import {
   CheckIcon,
   Loader2Icon,
@@ -106,9 +107,6 @@ export function QuestionEditSheet({
   const [options, setOptions] = useState<QuestionOption[]>([]);
   const [saving, setSaving] = useState(false);
 
-  // Pricing fields for number types (per-unit pricing)
-  const [pricePerUnit, setPricePerUnit] = useState("");
-
   // Catalogue items for option pricing
   const [catalogueItems, setCatalogueItems] = useState<PriceCatalogueItem[]>([]);
   const [loadingCatalogue, setLoadingCatalogue] = useState(false);
@@ -123,7 +121,6 @@ export function QuestionEditSheet({
     displayType: "select" as DisplayType,
     required: true,
     options: [] as QuestionOption[],
-    pricePerUnit: "",
   });
 
   // Load catalogue items when sheet opens
@@ -160,7 +157,6 @@ export function QuestionEditSheet({
       setDisplayType(question.display_type || "select");
       setRequired(question.required);
       setOptions(question.options || []);
-      setPricePerUnit(question.price_per_unit_min ? (question.price_per_unit_min / 100).toString() : "");
       setOriginalValues({
         label: question.label,
         headingLevel: question.heading_level || "h2",
@@ -170,7 +166,6 @@ export function QuestionEditSheet({
         displayType: question.display_type || "select",
         required: question.required,
         options: question.options || [],
-        pricePerUnit: question.price_per_unit_min ? (question.price_per_unit_min / 100).toString() : "",
       });
     } else if (open && !question) {
       setLabel("");
@@ -181,7 +176,6 @@ export function QuestionEditSheet({
       setDisplayType("select");
       setRequired(true);
       setOptions([]);
-      setPricePerUnit("");
       setOriginalValues({
         label: "",
         headingLevel: "h2",
@@ -191,7 +185,6 @@ export function QuestionEditSheet({
         displayType: "select",
         required: true,
         options: [],
-        pricePerUnit: "",
       });
     }
   }, [open, question]);
@@ -211,10 +204,9 @@ export function QuestionEditSheet({
       type !== originalValues.type ||
       displayType !== originalValues.displayType ||
       required !== originalValues.required ||
-      JSON.stringify(options) !== JSON.stringify(originalValues.options) ||
-      pricePerUnit !== originalValues.pricePerUnit
+      JSON.stringify(options) !== JSON.stringify(originalValues.options)
     );
-  }, [isNew, label, headingLevel, subtitle, type, displayType, required, options, pricePerUnit, originalValues]);
+  }, [isNew, label, headingLevel, subtitle, type, displayType, required, options, originalValues]);
 
   // Group catalogue items by category
   const catalogueByCategory = useMemo(() => {
@@ -241,7 +233,17 @@ export function QuestionEditSheet({
 
     setSaving(true);
     try {
-      const pricePerUnitCents = type === "number" && pricePerUnit ? Math.round(parseFloat(pricePerUnit) * 100) : null;
+      // Copy catalogue item images to options for denormalization
+      const optionsWithImages = needsOptions
+        ? options.map((opt) => {
+            if (opt.catalogueItemId) {
+              const catalogueItem = getCatalogueItem(opt.catalogueItemId);
+              return { ...opt, image: catalogueItem?.image || undefined };
+            }
+            return { ...opt, image: undefined };
+          })
+        : null;
+
       const body = {
         siteId,
         label,
@@ -251,10 +253,8 @@ export function QuestionEditSheet({
         type,
         display_type: type === "single-select" ? displayType : "select", // Only relevant for single-select
         required,
-        options: needsOptions ? options : null,
+        options: optionsWithImages,
         category_id: categoryId,
-        price_per_unit_min: pricePerUnitCents,
-        price_per_unit_max: pricePerUnitCents, // Same as min - single price
       };
 
       const url = question
@@ -465,6 +465,19 @@ export function QuestionEditSheet({
                           key={index}
                           className="space-y-2 rounded-md border bg-muted/30 p-3"
                         >
+                          {/* Show catalogue item image (read-only) for radio-cards display type */}
+                          {displayType === "radio-cards" && catalogueItem?.image && (
+                            <div className="relative size-12 rounded border bg-muted overflow-hidden">
+                              <Image
+                                src={catalogueItem.image}
+                                alt={catalogueItem.name}
+                                fill
+                                className="object-cover"
+                                sizes="48px"
+                              />
+                            </div>
+                          )}
+
                           {/* Option label row */}
                           <div className="flex items-center gap-2">
                             <Input
@@ -555,27 +568,6 @@ export function QuestionEditSheet({
                   <PlusIcon className="size-4" />
                   {t("admin.buttons.addItem")}
                 </Button>
-              </FieldSet>
-            </>
-          )}
-
-          {/* Price per unit for number type */}
-          {type === "number" && (
-            <>
-              <Separator />
-              <FieldSet>
-                <Field>
-                  <FieldLabel htmlFor="price-unit">{t("admin.labels.pricePerUnit")} (EUR)</FieldLabel>
-                  <Input
-                    id="price-unit"
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={pricePerUnit}
-                    onChange={(e) => setPricePerUnit(e.target.value)}
-                    placeholder="50"
-                  />
-                </Field>
               </FieldSet>
             </>
           )}

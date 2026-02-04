@@ -38,6 +38,7 @@ import {
 import { toast } from "sonner";
 import { CheckIcon, Loader2Icon, Trash2Icon } from "lucide-react";
 import { t } from "@/config/strings";
+import { ImageUploadCompact } from "@/components/admin/media/ImageUploadCompact";
 import type { PriceCatalogueItem } from "@/lib/configurator/types";
 
 const UNIT_OPTIONS = [
@@ -73,6 +74,7 @@ export function CatalogueItemEditSheet({
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [isNewCategory, setIsNewCategory] = useState(false);
+  const [image, setImage] = useState<string | null>(null);
   const [price, setPrice] = useState("");
   const [unit, setUnit] = useState("");
   const [saving, setSaving] = useState(false);
@@ -85,6 +87,7 @@ export function CatalogueItemEditSheet({
   const [originalValues, setOriginalValues] = useState({
     name: "",
     category: "",
+    image: null as string | null,
     price: "",
     unit: "",
   });
@@ -96,11 +99,13 @@ export function CatalogueItemEditSheet({
       setCategory(item.category);
       // Check if category is in existing categories
       setIsNewCategory(!existingCategories.includes(item.category));
+      setImage(item.image);
       setPrice((item.price_min / 100).toString());
       setUnit(item.unit || "");
       setOriginalValues({
         name: item.name,
         category: item.category,
+        image: item.image,
         price: (item.price_min / 100).toString(),
         unit: item.unit || "",
       });
@@ -108,11 +113,13 @@ export function CatalogueItemEditSheet({
       setName("");
       setCategory("");
       setIsNewCategory(false);
+      setImage(null);
       setPrice("");
       setUnit("");
       setOriginalValues({
         name: "",
         category: "",
+        image: null,
         price: "",
         unit: "",
       });
@@ -127,10 +134,11 @@ export function CatalogueItemEditSheet({
     return (
       name !== originalValues.name ||
       category !== originalValues.category ||
+      image !== originalValues.image ||
       price !== originalValues.price ||
       unit !== originalValues.unit
     );
-  }, [isNew, name, category, price, unit, originalValues]);
+  }, [isNew, name, category, image, price, unit, originalValues]);
 
   const handleSave = async () => {
     if (!name.trim() || !category.trim()) {
@@ -151,6 +159,7 @@ export function CatalogueItemEditSheet({
         siteId,
         name: name.trim(),
         category: category.trim(),
+        image,
         price_min: priceCents,
         price_max: priceCents, // Same as min - we use single price now
         unit: unit.trim() || null,
@@ -239,6 +248,11 @@ export function CatalogueItemEditSheet({
                   onChange={(e) => setName(e.target.value)}
                   placeholder={t("admin.placeholders.catalogueItemName")}
                 />
+              </Field>
+
+              <Field>
+                <FieldLabel>{t("admin.labels.image")}</FieldLabel>
+                <ImageUploadCompact value={image} onChange={setImage} />
               </Field>
 
               <Field>
@@ -335,18 +349,8 @@ export function CatalogueItemEditSheet({
             </FieldSet>
           </FieldGroup>
 
-          <SheetFooter className="px-0 flex-row justify-between">
-            {item && (
-              <Button
-                variant="outline"
-                onClick={() => setShowDeleteDialog(true)}
-                className="text-destructive hover:text-destructive"
-              >
-                <Trash2Icon className="size-4" />
-                {t("admin.buttons.delete")}
-              </Button>
-            )}
-            <Button onClick={handleSave} disabled={saving || !hasChanges} className="ml-auto">
+          <SheetFooter className="px-0 flex-row justify-end gap-2">
+            <Button onClick={handleSave} disabled={saving || !hasChanges} className="flex-1">
               {saving ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
@@ -359,6 +363,16 @@ export function CatalogueItemEditSheet({
                 </>
               )}
             </Button>
+            {item && (
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-destructive hover:text-destructive shrink-0"
+              >
+                <Trash2Icon className="size-4" />
+              </Button>
+            )}
           </SheetFooter>
         </SheetContent>
       </Sheet>

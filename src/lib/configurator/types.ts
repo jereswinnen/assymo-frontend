@@ -15,6 +15,7 @@ export interface PriceCatalogueItem {
   site_id: string;
   name: string;
   category: string;
+  image: string | null; // URL to product image
   price_min: number; // in cents
   price_max: number; // in cents
   unit: string | null; // e.g., "per stuk", "per m²", null for flat price
@@ -25,6 +26,7 @@ export interface PriceCatalogueItem {
 export interface CreatePriceCatalogueInput {
   name: string;
   category: string;
+  image?: string | null;
   price_min: number;
   price_max: number;
   unit?: string | null;
@@ -33,6 +35,7 @@ export interface CreatePriceCatalogueInput {
 export interface UpdatePriceCatalogueInput {
   name?: string;
   category?: string;
+  image?: string | null;
   price_min?: number;
   price_max?: number;
   unit?: string | null;
@@ -45,6 +48,7 @@ export interface UpdatePriceCatalogueInput {
 export interface QuestionOption {
   value: string;
   label: string;
+  image?: string; // URL to image (for radio-cards display type)
   catalogueItemId?: string; // Reference to price catalogue (linked pricing)
   priceModifierMin?: number; // Manual price override (in cents)
   priceModifierMax?: number; // Manual price override (in cents)
