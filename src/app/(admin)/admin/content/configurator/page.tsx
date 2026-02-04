@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { useSiteContext } from "@/lib/permissions/site-context";
 import { useRequireFeature } from "@/lib/permissions/useRequireFeature";
 import { useAdminHeaderActions } from "@/components/admin/AdminHeaderContext";
@@ -61,6 +62,7 @@ import {
   CoinsIcon,
   CopyIcon,
   GripVerticalIcon,
+  ImageIcon,
   Loader2Icon,
   MoreHorizontalIcon,
   PlusIcon,
@@ -452,6 +454,7 @@ function ConfiguratorContent() {
                   <Table className="table-fixed">
                     <TableHeader>
                       <TableRow>
+                        <TableHead className="w-14"></TableHead>
                         <TableHead>{t("admin.labels.name")}</TableHead>
                         <TableHead className="hidden sm:table-cell w-32">{t("admin.labels.startingPrice")}</TableHead>
                         <TableHead className="hidden md:table-cell w-40">{t("admin.labels.unit")}</TableHead>
@@ -465,6 +468,23 @@ function ConfiguratorContent() {
                           className="cursor-pointer group"
                           onClick={() => openEditCatalogueSheet(item)}
                         >
+                          <TableCell className="w-14">
+                            {item.image ? (
+                              <div className="relative size-10 shrink-0 overflow-hidden rounded">
+                                <Image
+                                  src={item.image}
+                                  alt={item.name}
+                                  fill
+                                  className="object-cover"
+                                  sizes="40px"
+                                />
+                              </div>
+                            ) : (
+                              <div className="flex size-10 shrink-0 items-center justify-center rounded bg-muted">
+                                <ImageIcon className="size-4 text-muted-foreground" />
+                              </div>
+                            )}
+                          </TableCell>
                           <TableCell className="font-medium">{item.name}</TableCell>
                           <TableCell className="hidden sm:table-cell w-32">
                             {formatPrice(item.price_min)}
