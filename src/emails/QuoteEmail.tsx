@@ -39,7 +39,8 @@ export function QuoteEmail({
   appointmentTime,
 }: QuoteEmailProps) {
   const bookingUrl = "https://assymo.be/afspraak";
-  const priceRange = priceMin === priceMax ? priceMin : `${priceMin} - ${priceMax}`;
+  const priceRange =
+    priceMin === priceMax ? priceMin : `${priceMin} - ${priceMax}`;
 
   return (
     <EmailLayout preview={`Uw offerte aanvraag voor ${productName}`}>
@@ -100,9 +101,8 @@ export function QuoteEmail({
           <>
             <Text style={sectionTitle}>Volgende stappen</Text>
             <Text style={typography.paragraph}>
-              Om een nauwkeurige offerte te kunnen maken, komen we graag bij u
-              langs voor een vrijblijvend plaatsbezoek. Tijdens dit bezoek nemen
-              we de exacte afmetingen op en bespreken we uw wensen.
+              Maak een afspraak in onze toonzaal zodat wij uw project samen
+              kunnen overlopen en een nauwkeurige offerte kunnen opmaken.
             </Text>
             <EmailButton href={bookingUrl}>Afspraak inplannen</EmailButton>
           </>
@@ -161,10 +161,13 @@ export function QuoteAdminNotification({
   appointmentDate,
   appointmentTime,
 }: QuoteAdminNotificationProps) {
-  const priceRange = priceMin === priceMax ? priceMin : `${priceMin} - ${priceMax}`;
+  const priceRange =
+    priceMin === priceMax ? priceMin : `${priceMin} - ${priceMax}`;
 
   return (
-    <EmailLayout preview={`Nieuwe offerte aanvraag: ${customerName} - ${productName}`}>
+    <EmailLayout
+      preview={`Nieuwe offerte aanvraag: ${customerName} - ${productName}`}
+    >
       <Section style={layout.content}>
         <Text style={typography.heading}>Nieuwe offerte aanvraag</Text>
         <Text style={typography.subheading}>Via de online configurator</Text>

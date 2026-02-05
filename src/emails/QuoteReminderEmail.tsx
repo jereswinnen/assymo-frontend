@@ -24,12 +24,12 @@ export function QuoteReminderEmail({
   const bookingUrl = "https://assymo.be/afspraak";
 
   return (
-    <EmailLayout preview={`Herinnering: uw offerte aanvraag voor ${productName}`}>
+    <EmailLayout
+      preview={`Herinnering: uw offerte aanvraag voor ${productName}`}
+    >
       <Section style={layout.content}>
         <Text style={typography.heading}>Herinnering offerte</Text>
-        <Text style={typography.subheading}>
-          Nog geen afspraak ingepland?
-        </Text>
+        <Text style={typography.subheading}>Nog geen afspraak ingepland?</Text>
 
         <Hr style={layout.divider} />
 
@@ -38,7 +38,7 @@ export function QuoteReminderEmail({
         <Text style={typography.paragraph}>
           Een paar dagen geleden vroeg u een offerte aan voor een {productName}.
           We zagen dat u nog geen afspraak heeft ingepland voor een vrijblijvend
-          plaatsbezoek.
+          gesprek in onze toonzaal.
         </Text>
 
         {/* Price Reminder */}
@@ -49,15 +49,11 @@ export function QuoteReminderEmail({
 
         <Hr style={layout.divider} />
 
-        <Text style={sectionTitle}>Waarom een plaatsbezoek?</Text>
+        <Text style={sectionTitle}>Waarom een afspraak?</Text>
         <Text style={typography.paragraph}>
-          Tijdens een vrijblijvend plaatsbezoek nemen we de exacte afmetingen op
-          en bespreken we uw wensen. Zo kunnen we u een nauwkeurige offerte
+          Tijdens een gesprek in onze toonzaal overlopen we uw project en
+          bespreken we uw wensen. Zo kunnen we u een nauwkeurige offerte
           bezorgen die perfect aansluit bij uw situatie.
-        </Text>
-
-        <Text style={typography.paragraph}>
-          Het plaatsbezoek is geheel vrijblijvend en duurt ongeveer 30 minuten.
         </Text>
 
         <EmailButton href={bookingUrl}>Afspraak inplannen</EmailButton>
@@ -65,8 +61,8 @@ export function QuoteReminderEmail({
         <Hr style={layout.divider} />
 
         <Text style={typography.paragraph}>
-          Heeft u vragen of wilt u liever telefonisch een afspraak maken?
-          Neem gerust contact met ons op via{" "}
+          Heeft u vragen of wilt u liever telefonisch een afspraak maken? Neem
+          gerust contact met ons op via{" "}
           <Link href="mailto:info@assymo.be" style={components.link}>
             info@assymo.be
           </Link>{" "}
