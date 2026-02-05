@@ -39,6 +39,13 @@ Next.js 16 application with a custom admin CMS, AI chatbot with RAG, and appoint
 - **UI**: Tailwind CSS v4, Radix UI primitives
 - **Testing**: Vitest with React Testing Library
 
+### Route Groups
+
+The app uses three distinct layout groups in `src/app/`:
+- `(site)` - Public pages with header, footer, chatbot, cookie banner
+- `(admin)` - Admin panel with sidebar and breadcrumbs
+- `(configurator)` - Standalone configurator with minimal chrome
+
 ### Key Architecture Patterns
 
 **Page Builder Pattern**: Pages and solutions use a `sections` JSONB array with typed section blocks. Section types are defined in `src/types/sections.ts` with factory functions for creating new sections.
@@ -61,6 +68,8 @@ Next.js 16 application with a custom admin CMS, AI chatbot with RAG, and appoint
 - `emails` - Newsletter management
 
 **Section Forms**: Each section type has a corresponding form component in `src/components/admin/section-forms/`. The `SectionForm.tsx` component routes to the appropriate form based on `_type`.
+
+**Admin Sheet Pattern**: Modal editing throughout admin uses "sheet" components in `sheets/` subdirectories (e.g., `QuestionEditSheet`, `CategoryEditSheet`, `NavLinkEditSheet`). These are side-panel overlays for editing nested resources.
 
 **Admin UI Strings**: All Dutch UI text is centralized in `src/config/strings.ts`. Use the `t()` helper for string access:
 ```typescript
@@ -92,6 +101,8 @@ The chatbot uses RAG with booking tools for appointment scheduling.
 2. Chunks embedded with OpenAI embeddings → stored in Postgres with pgvector
 3. User queries retrieve relevant chunks via `src/lib/retrieval.ts`
 
+**Rate Limiting**: Database-backed session rate limiting in `src/lib/rateLimit.ts`. Tracks requests per session with configurable windows, auto-cleanup of entries older than 7 days.
+
 ### Appointments Module
 
 Self-contained in `src/lib/appointments/`:
@@ -102,6 +113,41 @@ Self-contained in `src/lib/appointments/`:
 - `utils.ts` - Validation and formatting
 
 API routes handle public booking (`/api/appointments`) and admin management (`/api/admin/appointments`).
+
+### Configurator Module
+
+Product configuration wizard at `/configurator` with quote generation.
+
+**Structure** (`src/lib/configurator/`):
+- `types.ts` - Category, question, and pricing types
+- `pricing.ts` - Price calculation logic
+- `queries.ts` - Database operations
+
+**Pricing System**:
+- Base prices per category
+- Option-level price modifiers (radio/checkbox questions)
+- Per-unit pricing for number questions
+- Price catalogue items with image support
+
+**Quote Flow**:
+1. User completes configurator steps → contact form
+2. Quote submitted with full configuration and price estimate
+3. Confirmation email sent (`QuoteEmail.tsx`)
+4. Reminder email after 3 days (`QuoteReminderEmail.tsx`, configurable in `src/config/configurator.ts`)
+
+**Admin** at `/admin/content/configurator`:
+- Category management with questions
+- Price catalogue with images
+- Question types: radio, checkbox, number, text
+
+### Email Templates
+
+React Email templates in `src/emails/` sent via Resend:
+- **Appointments**: Confirmation, reminder, cancellation, update, admin notification
+- **Contact**: Form submission, offerte request
+- **Newsletter**: Broadcast, welcome
+- **Configurator**: Quote, reminder
+- **Auth**: Password reset
 
 ### Auth Flow
 
@@ -183,3 +229,24 @@ Required:
 - `BLOB_READ_WRITE_TOKEN` - Vercel Blob storage
 - `RESEND_API_KEY` - Email sending
 - `BETTER_AUTH_SECRET` - Auth session encryption
+
+## MCP Server (assymo-admin)
+
+A local MCP server in `mcp-server/` provides direct CMS content management tools. Available when running Claude Code in this project.
+
+**Setup:** `cd mcp-server && pnpm install && pnpm build`
+
+**Available tools:**
+- **Sites**: `list_sites`, `set_site` (must set site before other operations)
+- **Pages**: `list_pages`, `get_page`, `create_page`, `update_page`, `delete_page`
+- **Solutions**: `list_solutions`, `get_solution`, `create_solution`, `update_solution`, `delete_solution`, `reorder_solutions`
+- **Configurator**: `list_configurator_categories`, `create_configurator_category`, `list_questions`, `create_question`, `list_catalogue_items`, `create_catalogue_item`, etc.
+- **Filters**: `list_filter_categories`, `create_filter_category`, `list_filters`, `create_filter`, etc.
+- **Navigation**: `list_navigation`, `create_nav_link`, `add_nav_subitem`, etc.
+- **Parameters**: `get_parameters`, `update_parameters`
+- **Sections**: `get_section`, `add_section`, `update_section`, `remove_section`, `reorder_sections`
+
+**Usage pattern:**
+1. `list_sites` → see available sites
+2. `set_site` → select site context
+3. Use content tools (all operations are scoped to selected site)
