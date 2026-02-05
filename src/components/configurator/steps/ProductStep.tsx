@@ -25,6 +25,7 @@ interface ProductStepProps {
   answers: WizardAnswers;
   onProductChange: (product: string) => void;
   onAnswerChange: (key: string, value: WizardAnswers[string]) => void;
+  onQuestionsLoaded?: (questions: QuestionConfig[]) => void;
   className?: string;
 }
 
@@ -34,6 +35,7 @@ export function ProductStep({
   answers,
   onProductChange,
   onAnswerChange,
+  onQuestionsLoaded,
   className,
 }: ProductStepProps) {
   const [questions, setQuestions] = useState<QuestionConfig[]>([]);
@@ -44,6 +46,7 @@ export function ProductStep({
   useEffect(() => {
     if (!selectedProduct) {
       setQuestions([]);
+      onQuestionsLoaded?.([]);
       return;
     }
 
@@ -61,11 +64,14 @@ export function ProductStep({
         }
 
         const data = await response.json();
-        setQuestions(data.questions || []);
+        const loadedQuestions = data.questions || [];
+        setQuestions(loadedQuestions);
+        onQuestionsLoaded?.(loadedQuestions);
       } catch (err) {
         console.error("Error fetching questions:", err);
         setError("Er is iets misgegaan bij het laden van de vragen.");
         setQuestions([]);
+        onQuestionsLoaded?.([]);
       } finally {
         setIsLoading(false);
       }

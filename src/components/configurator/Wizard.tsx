@@ -8,6 +8,7 @@ import { ProgressBar } from "./ProgressBar";
 import { ProductStep } from "./steps/ProductStep";
 import { ContactStep, validateContactDetails } from "./steps/ContactStep";
 import { SummaryStep } from "./steps/SummaryStep";
+import type { QuestionConfig } from "./QuestionField";
 
 // =============================================================================
 // Types
@@ -57,6 +58,8 @@ export function Wizard({
     initialProduct,
   );
   const [answers, setAnswers] = useState<WizardAnswers>({});
+  const [questions, setQuestions] = useState<QuestionConfig[]>([]);
+  const [questionsLoading, setQuestionsLoading] = useState(false);
 
   // Step 2: Contact details
   const [contactDetails, setContactDetails] = useState<ContactDetails>({
@@ -92,9 +95,16 @@ export function Wizard({
 
   const handleProductChange = useCallback((product: string) => {
     setSelectedProduct(product);
-    // Clear answers when product changes
+    // Clear answers and questions when product changes
     setAnswers({});
+    setQuestions([]);
+    setQuestionsLoading(true);
     setValidationError(null);
+  }, []);
+
+  const handleQuestionsLoaded = useCallback((loadedQuestions: QuestionConfig[]) => {
+    setQuestions(loadedQuestions);
+    setQuestionsLoading(false);
   }, []);
 
   const handleAnswerChange = useCallback(
@@ -141,9 +151,32 @@ export function Wizard({
   // Navigation
   // ==========================================================================
 
+  /**
+   * Validate that all required questions have been answered
+   * Returns error message or null if valid
+   */
+  const validateRequiredQuestions = (): string | null => {
+    for (const question of questions) {
+      if (!question.required) continue;
+
+      const answer = answers[question.question_key];
+
+      // Check if answer is empty
+      if (answer === undefined || answer === null || answer === "") {
+        return `Vul "${question.label}" in`;
+      }
+
+      // For arrays (multi-select), check if at least one option is selected
+      if (Array.isArray(answer) && answer.length === 0) {
+        return `Selecteer minstens één optie voor "${question.label}"`;
+      }
+    }
+    return null;
+  };
+
   const canGoNext = (): boolean => {
     if (currentStep === 1) {
-      return selectedProduct !== null;
+      return selectedProduct !== null && !questionsLoading && validateRequiredQuestions() === null;
     }
     if (currentStep === 2) {
       return validateContactDetails(contactDetails) === null;
@@ -157,6 +190,12 @@ export function Wizard({
     if (currentStep === 1) {
       if (!selectedProduct) {
         setValidationError("Selecteer eerst een product");
+        return;
+      }
+
+      const questionError = validateRequiredQuestions();
+      if (questionError) {
+        setValidationError(questionError);
         return;
       }
 
@@ -213,6 +252,7 @@ export function Wizard({
             answers={answers}
             onProductChange={handleProductChange}
             onAnswerChange={handleAnswerChange}
+            onQuestionsLoaded={handleQuestionsLoaded}
           />
         )}
 
