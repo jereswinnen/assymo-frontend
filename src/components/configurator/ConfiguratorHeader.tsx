@@ -1,36 +1,19 @@
-"use client";
-
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
-import { Action } from "@/components/shared/Action";
-import { PhoneIcon } from "lucide-react";
-import { useTracking } from "@/lib/tracking";
 
-interface ConfiguratorHeaderProps {
-  phone?: string;
-}
-
-export function ConfiguratorHeader({ phone }: ConfiguratorHeaderProps) {
-  const { track } = useTracking();
-
+export function ConfiguratorHeader() {
   return (
     <header className="flex items-center justify-between py-8">
       <Link href="/">
         <Logo className="w-28" />
       </Link>
 
-      {phone && (
-        <Action
-          href={`tel:${phone}`}
-          icon={<PhoneIcon />}
-          label={phone}
-          onClick={() =>
-            track("outbound_clicked", {
-              type: "phone",
-            })
-          }
-        />
-      )}
+      <Link
+        href="/"
+        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+      >
+        Terug naar Assymo
+      </Link>
     </header>
   );
 }
