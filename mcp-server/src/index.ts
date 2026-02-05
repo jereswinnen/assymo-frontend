@@ -8,6 +8,8 @@ import { registerSolutionTools } from "./tools/solutions.js";
 import { registerConfiguratorTools } from "./tools/configurator.js";
 import { registerFilterTools } from "./tools/filters.js";
 import { registerNavigationTools } from "./tools/navigation.js";
+import { registerParameterTools } from "./tools/parameters.js";
+import { registerSectionTools } from "./tools/sections.js";
 
 const server = new McpServer({
   name: "assymo-admin",
@@ -120,6 +122,12 @@ registerFilterTools(server);
 
 // Register navigation tools
 registerNavigationTools(server);
+
+// Register parameter tools
+registerParameterTools(server);
+
+// Register section tools
+registerSectionTools(server);
 
 async function main() {
   const transport = new StdioServerTransport();
