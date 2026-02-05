@@ -3,6 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { listSites } from "./db.js";
 import { getSiteContext, setSiteContext } from "./context.js";
+import { registerPageTools } from "./tools/pages.js";
 
 const server = new McpServer({
   name: "assymo-admin",
@@ -100,6 +101,9 @@ server.tool(
     }
   }
 );
+
+// Register page tools
+registerPageTools(server);
 
 async function main() {
   const transport = new StdioServerTransport();
