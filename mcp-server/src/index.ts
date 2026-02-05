@@ -5,6 +5,7 @@ import { listSites } from "./db.js";
 import { getSiteContext, setSiteContext } from "./context.js";
 import { registerPageTools } from "./tools/pages.js";
 import { registerSolutionTools } from "./tools/solutions.js";
+import { registerConfiguratorTools } from "./tools/configurator.js";
 
 const server = new McpServer({
   name: "assymo-admin",
@@ -108,6 +109,9 @@ registerPageTools(server);
 
 // Register solution tools
 registerSolutionTools(server);
+
+// Register configurator tools
+registerConfiguratorTools(server);
 
 async function main() {
   const transport = new StdioServerTransport();
