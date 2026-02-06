@@ -1,6 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getQuestionsForProduct, getQuestionsForCategory, type ConfiguratorQuestion } from "@/lib/configurator";
+import { getCatalogueItemsForSite } from "@/lib/configurator/catalogue";
 import { getDefaultQuestions } from "@/config/configurator";
+
+/**
+ * Resolve catalogue item images into question options.
+ * Options store a `catalogueItemId` reference but not the image URL itself,
+ * so we batch-fetch catalogue items and inject images at query time.
+ */
+async function resolveOptionImages(questions: ConfiguratorQuestion[], siteSlug: string) {
+  // Collect all catalogueItemIds across all options
+  const catalogueIds = new Set<string>();
+  for (const q of questions) {
+    if (!q.options) continue;
+    for (const opt of q.options) {
+      if (opt.catalogueItemId) catalogueIds.add(opt.catalogueItemId);
+    }
+  }
+
+  if (catalogueIds.size === 0) return questions;
+
+  // Batch-fetch catalogue items
+  const catalogueItems = await getCatalogueItemsForSite(siteSlug);
+  const catalogueMap = new Map(catalogueItems.map((item) => [item.id, item]));
+
+  // Inject images into options
+  return questions.map((q) => ({
+    ...q,
+    options: q.options?.map((opt) => {
+      if (opt.catalogueItemId) {
+        const item = catalogueMap.get(opt.catalogueItemId);
+        if (item?.image) return { ...opt, image: item.image };
+      }
+      return opt;
+    }) ?? null,
+  }));
+}
 
 /**
  * Maps database question to frontend format
@@ -62,8 +97,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Resolve catalogue item images into options
+    const questionsWithImages = await resolveOptionImages(dbQuestions, siteSlug);
+
     // Map database questions to frontend format
-    const questions = dbQuestions.map(mapQuestionForFrontend);
+    const questions = questionsWithImages.map(mapQuestionForFrontend);
 
     return NextResponse.json(
       {

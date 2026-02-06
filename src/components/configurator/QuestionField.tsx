@@ -195,6 +195,7 @@ function RadioCardsField({
         options={options.map((opt) => ({
           value: opt.value,
           label: opt.label,
+          image: opt.image,
         }))}
         value={value}
         onChange={onChange}
