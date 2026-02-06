@@ -23,7 +23,9 @@ export interface ContactDetails {
   name: string;
   email: string;
   phone: string;
-  address: string;
+  street: string;
+  postalCode: string;
+  city: string;
   newsletterOptIn: boolean;
 }
 
@@ -66,7 +68,9 @@ export function Wizard({
     name: "",
     email: "",
     phone: "",
-    address: "",
+    street: "",
+    postalCode: "",
+    city: "",
     newsletterOptIn: false,
   });
 

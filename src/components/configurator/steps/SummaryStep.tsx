@@ -163,7 +163,7 @@ export function SummaryStep({
             name: contactDetails.name,
             email: contactDetails.email,
             phone: contactDetails.phone,
-            address: contactDetails.address,
+            address: `${contactDetails.street}, ${contactDetails.postalCode} ${contactDetails.city}`,
           },
           appointment: appointmentData,
         }),
@@ -244,25 +244,6 @@ export function SummaryStep({
     setBookingError(null);
 
     try {
-      // Parse address into components (best effort)
-      const addressParts = contactDetails.address
-        .split(",")
-        .map((s) => s.trim());
-      const street = addressParts[0] || contactDetails.address;
-      let postalCode = "";
-      let city = "";
-
-      if (addressParts.length > 1) {
-        // Try to parse "1234 AB City" format
-        const match = addressParts[1].match(/^(\d{4}\s*[A-Za-z]{2})\s+(.+)$/);
-        if (match) {
-          postalCode = match[1];
-          city = match[2];
-        } else {
-          city = addressParts[1];
-        }
-      }
-
       const response = await fetch("/api/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -272,9 +253,9 @@ export function SummaryStep({
           customer_name: contactDetails.name,
           customer_email: contactDetails.email,
           customer_phone: contactDetails.phone,
-          customer_street: street,
-          customer_postal_code: postalCode || "0000",
-          customer_city: city || "-",
+          customer_street: contactDetails.street,
+          customer_postal_code: contactDetails.postalCode,
+          customer_city: contactDetails.city,
           remarks: `Offerte aanvraag via configurator - ${productName}`,
         }),
       });
@@ -474,7 +455,7 @@ export function SummaryStep({
             <SummaryRow label="Naam" value={contactDetails.name} />
             <SummaryRow label="E-mail" value={contactDetails.email} />
             <SummaryRow label="Telefoon" value={contactDetails.phone} />
-            <SummaryRow label="Adres" value={contactDetails.address} />
+            <SummaryRow label="Adres" value={`${contactDetails.street}, ${contactDetails.postalCode} ${contactDetails.city}`} />
           </dl>
         </CardContent>
       </Card>

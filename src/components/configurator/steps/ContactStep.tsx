@@ -67,15 +67,41 @@ export function ContactStep({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="contact-address">Adres *</FieldLabel>
+          <FieldLabel htmlFor="contact-street">Straat en huisnummer *</FieldLabel>
           <Input
-            id="contact-address"
+            id="contact-street"
             type="text"
             required
-            value={contactDetails.address}
-            onChange={(e) => updateField("address", e.target.value)}
+            value={contactDetails.street}
+            onChange={(e) => updateField("street", e.target.value)}
             autoComplete="street-address"
-            placeholder="Straat nr, postcode gemeente"
+            placeholder="Straat en huisnummer"
+          />
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="contact-postalCode">Postcode *</FieldLabel>
+          <Input
+            id="contact-postalCode"
+            type="text"
+            required
+            value={contactDetails.postalCode}
+            onChange={(e) => updateField("postalCode", e.target.value)}
+            autoComplete="postal-code"
+            placeholder="Postcode"
+          />
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="contact-city">Plaats *</FieldLabel>
+          <Input
+            id="contact-city"
+            type="text"
+            required
+            value={contactDetails.city}
+            onChange={(e) => updateField("city", e.target.value)}
+            autoComplete="address-level2"
+            placeholder="Plaats"
           />
         </Field>
 
@@ -117,8 +143,14 @@ export function validateContactDetails(details: ContactDetails): string | null {
   if (!details.phone.trim()) {
     return "Vul uw telefoonnummer in";
   }
-  if (!details.address.trim()) {
-    return "Vul uw adres in";
+  if (!details.street.trim()) {
+    return "Vul uw straat en huisnummer in";
+  }
+  if (!details.postalCode.trim()) {
+    return "Vul uw postcode in";
+  }
+  if (!details.city.trim()) {
+    return "Vul uw plaats in";
   }
   return null;
 }
