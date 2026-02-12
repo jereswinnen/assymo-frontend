@@ -40,9 +40,6 @@ export function ProgressBar({
                 !isActive && !isCompleted && "text-stone-600 font-normal"
               )}
             >
-              <span className="size-4 flex items-center justify-center text-xs font-medium">
-                {step.number}
-              </span>
               <span className="truncate">{step.label}</span>
             </div>
             <div
