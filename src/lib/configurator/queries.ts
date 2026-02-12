@@ -17,6 +17,7 @@ const sql = neon(process.env.DATABASE_URL!);
 export const CONFIGURATOR_CACHE_TAGS = {
   questions: "configurator-questions",
   pricing: "configurator-pricing",
+  steps: "configurator-steps",
 } as const;
 
 // Default site slug
@@ -296,6 +297,7 @@ export async function createQuestion(
       catalogue_item_id,
       price_per_unit_min,
       price_per_unit_max,
+      step_id,
       site_id
     ) VALUES (
       ${input.product_slug},
@@ -312,6 +314,7 @@ export async function createQuestion(
       ${input.catalogue_item_id ?? null},
       ${input.price_per_unit_min ?? null},
       ${input.price_per_unit_max ?? null},
+      ${input.step_id ?? null},
       ${siteId}
     )
     RETURNING *
@@ -347,6 +350,7 @@ export async function updateQuestion(
       catalogue_item_id = ${input.catalogue_item_id !== undefined ? input.catalogue_item_id : existing.catalogue_item_id},
       price_per_unit_min = ${input.price_per_unit_min !== undefined ? input.price_per_unit_min : existing.price_per_unit_min},
       price_per_unit_max = ${input.price_per_unit_max !== undefined ? input.price_per_unit_max : existing.price_per_unit_max},
+      step_id = ${input.step_id !== undefined ? input.step_id : existing.step_id},
       updated_at = now()
     WHERE id = ${questionId}
       AND site_id = ${siteId}

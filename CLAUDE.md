@@ -120,6 +120,7 @@ Product configuration wizard at `/configurator` with quote generation.
 
 **Structure** (`src/lib/configurator/`):
 - `types.ts` - Category, question, and pricing types
+- `steps.ts` - Step queries (grouping questions into wizard pages)
 - `pricing.ts` - Price calculation logic
 - `queries.ts` - Database operations
 
@@ -136,7 +137,8 @@ Product configuration wizard at `/configurator` with quote generation.
 4. Reminder email after 3 days (`QuoteReminderEmail.tsx`, configurable in `src/config/configurator.ts`)
 
 **Admin** at `/admin/content/configurator`:
-- Category management with questions
+- Category management with questions and steps
+- Steps group questions into separate wizard pages (optional per category)
 - Price catalogue with images
 - Question types: radio, checkbox, number, text
 
@@ -240,7 +242,7 @@ A local MCP server in `mcp-server/` provides direct CMS content management tools
 - **Sites**: `list_sites`, `set_site` (must set site before other operations)
 - **Pages**: `list_pages`, `get_page`, `create_page`, `update_page`, `delete_page`
 - **Solutions**: `list_solutions`, `get_solution`, `create_solution`, `update_solution`, `delete_solution`, `reorder_solutions`
-- **Configurator**: `list_configurator_categories`, `create_configurator_category`, `list_questions`, `create_question`, `list_catalogue_items`, `create_catalogue_item`, etc.
+- **Configurator**: `list_configurator_categories`, `create_configurator_category`, `list_questions`, `create_question`, `list_catalogue_items`, `create_catalogue_item`, `list_configurator_steps`, `create_configurator_step`, `update_configurator_step`, `delete_configurator_step`, `reorder_configurator_steps`, etc.
 - **Filters**: `list_filter_categories`, `create_filter_category`, `list_filters`, `create_filter`, etc.
 - **Navigation**: `list_navigation`, `create_nav_link`, `add_nav_subitem`, etc.
 - **Parameters**: `get_parameters`, `update_parameters`

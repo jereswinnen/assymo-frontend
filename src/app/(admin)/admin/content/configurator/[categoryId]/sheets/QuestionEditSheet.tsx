@@ -45,11 +45,13 @@ import type {
   HeadingLevel,
   PriceCatalogueItem,
 } from "@/lib/configurator/types";
+import type { ConfiguratorStep } from "@/lib/configurator/steps";
 
 interface QuestionEditSheetProps {
   question: ConfiguratorQuestion | null;
   categoryId: string;
   siteId: string | undefined;
+  steps?: ConfiguratorStep[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved: (question: ConfiguratorQuestion) => void;
@@ -90,6 +92,7 @@ export function QuestionEditSheet({
   question,
   categoryId,
   siteId,
+  steps = [],
   open,
   onOpenChange,
   onSaved,
@@ -105,6 +108,7 @@ export function QuestionEditSheet({
   const [displayType, setDisplayType] = useState<DisplayType>("select");
   const [required, setRequired] = useState(true);
   const [options, setOptions] = useState<QuestionOption[]>([]);
+  const [stepId, setStepId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Catalogue items for option pricing
@@ -121,6 +125,7 @@ export function QuestionEditSheet({
     displayType: "select" as DisplayType,
     required: true,
     options: [] as QuestionOption[],
+    stepId: null as string | null,
   });
 
   // Load catalogue items when sheet opens
@@ -157,6 +162,7 @@ export function QuestionEditSheet({
       setDisplayType(question.display_type || "select");
       setRequired(question.required);
       setOptions(question.options || []);
+      setStepId(question.step_id ?? null);
       setOriginalValues({
         label: question.label,
         headingLevel: question.heading_level || "h2",
@@ -166,6 +172,7 @@ export function QuestionEditSheet({
         displayType: question.display_type || "select",
         required: question.required,
         options: question.options || [],
+        stepId: question.step_id ?? null,
       });
     } else if (open && !question) {
       setLabel("");
@@ -176,6 +183,7 @@ export function QuestionEditSheet({
       setDisplayType("select");
       setRequired(true);
       setOptions([]);
+      setStepId(null);
       setOriginalValues({
         label: "",
         headingLevel: "h2",
@@ -185,6 +193,7 @@ export function QuestionEditSheet({
         displayType: "select",
         required: true,
         options: [],
+        stepId: null,
       });
     }
   }, [open, question]);
@@ -204,9 +213,10 @@ export function QuestionEditSheet({
       type !== originalValues.type ||
       displayType !== originalValues.displayType ||
       required !== originalValues.required ||
+      stepId !== originalValues.stepId ||
       JSON.stringify(options) !== JSON.stringify(originalValues.options)
     );
-  }, [isNew, label, headingLevel, subtitle, type, displayType, required, options, originalValues]);
+  }, [isNew, label, headingLevel, subtitle, type, displayType, required, stepId, options, originalValues]);
 
   // Group catalogue items by category
   const catalogueByCategory = useMemo(() => {
@@ -255,6 +265,7 @@ export function QuestionEditSheet({
         required,
         options: optionsWithImages,
         category_id: categoryId,
+        step_id: stepId,
       };
 
       const url = question
@@ -392,6 +403,28 @@ export function QuestionEditSheet({
               value={subtitle}
               onChange={setSubtitle}
             />
+
+            {steps.length > 0 && (
+              <Field>
+                <FieldLabel htmlFor="question-step">{t("admin.misc.step")}</FieldLabel>
+                <Select
+                  value={stepId || "_none"}
+                  onValueChange={(v) => setStepId(v === "_none" ? null : v)}
+                >
+                  <SelectTrigger id="question-step">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">{t("admin.misc.noStep")}</SelectItem>
+                    {steps.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
           </FieldSet>
 
           <Separator />

@@ -13,6 +13,7 @@ import { Field, FieldLabel, FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { QuestionField, type QuestionConfig } from "../QuestionField";
 import type { WizardAnswers } from "../Wizard";
+import type { WizardStep } from "./QuestionStep";
 
 interface ProductOption {
   slug: string;
@@ -23,9 +24,11 @@ interface ProductStepProps {
   products: ProductOption[];
   selectedProduct: string | null;
   answers: WizardAnswers;
+  showQuestions?: boolean;
   onProductChange: (product: string) => void;
   onAnswerChange: (key: string, value: WizardAnswers[string]) => void;
   onQuestionsLoaded?: (questions: QuestionConfig[]) => void;
+  onStepsLoaded?: (steps: WizardStep[]) => void;
   className?: string;
 }
 
@@ -33,9 +36,11 @@ export function ProductStep({
   products,
   selectedProduct,
   answers,
+  showQuestions = true,
   onProductChange,
   onAnswerChange,
   onQuestionsLoaded,
+  onStepsLoaded,
   className,
 }: ProductStepProps) {
   const [questions, setQuestions] = useState<QuestionConfig[]>([]);
@@ -47,6 +52,7 @@ export function ProductStep({
     if (!selectedProduct) {
       setQuestions([]);
       onQuestionsLoaded?.([]);
+      onStepsLoaded?.([]);
       return;
     }
 
@@ -67,11 +73,19 @@ export function ProductStep({
         const loadedQuestions = data.questions || [];
         setQuestions(loadedQuestions);
         onQuestionsLoaded?.(loadedQuestions);
+
+        // Pass step data to parent if steps exist
+        if (data.steps && Array.isArray(data.steps)) {
+          onStepsLoaded?.(data.steps);
+        } else {
+          onStepsLoaded?.([]);
+        }
       } catch (err) {
         console.error("Error fetching questions:", err);
         setError("Er is iets misgegaan bij het laden van de vragen.");
         setQuestions([]);
         onQuestionsLoaded?.([]);
+        onStepsLoaded?.([]);
       } finally {
         setIsLoading(false);
       }
@@ -119,8 +133,8 @@ export function ProductStep({
         </div>
       )}
 
-      {/* Dynamic questions */}
-      {!isLoading && !error && questions.length > 0 && (
+      {/* Dynamic questions (only when showQuestions is true, i.e. no config steps) */}
+      {showQuestions && !isLoading && !error && questions.length > 0 && (
         <FieldGroup>
           {questions.map((question) => (
             <QuestionField
@@ -134,7 +148,7 @@ export function ProductStep({
       )}
 
       {/* Empty state when product selected but no questions */}
-      {!isLoading && !error && selectedProduct && questions.length === 0 && (
+      {showQuestions && !isLoading && !error && selectedProduct && questions.length === 0 && (
         <p className="text-sm text-stone-500">
           Geen aanvullende vragen voor dit product.
         </p>

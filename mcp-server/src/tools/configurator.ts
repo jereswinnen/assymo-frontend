@@ -47,6 +47,7 @@ interface ConfiguratorQuestion {
   catalogue_item_id: string | null;
   price_per_unit_min: number | null;
   price_per_unit_max: number | null;
+  step_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -57,8 +58,28 @@ interface ConfiguratorQuestionListItem {
   label: string;
   type: string;
   category_id: string | null;
+  step_id: string | null;
   order_rank: number;
   required: boolean;
+  updated_at: string;
+}
+
+interface ConfiguratorStep {
+  id: string;
+  site_id: string;
+  category_id: string;
+  name: string;
+  description: string | null;
+  order_rank: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ConfiguratorStepListItem {
+  id: string;
+  name: string;
+  category_id: string;
+  order_rank: number;
   updated_at: string;
 }
 
@@ -541,14 +562,14 @@ export function registerConfiguratorTools(server: McpServer): void {
         let questions: ConfiguratorQuestionListItem[];
         if (categoryId !== undefined) {
           questions = (await sql`
-            SELECT id, question_key, label, type, category_id, order_rank, required, updated_at
+            SELECT id, question_key, label, type, category_id, step_id, order_rank, required, updated_at
             FROM configurator_questions
             WHERE site_id = ${siteId} AND category_id = ${categoryId}
             ORDER BY order_rank
           `) as ConfiguratorQuestionListItem[];
         } else {
           questions = (await sql`
-            SELECT id, question_key, label, type, category_id, order_rank, required, updated_at
+            SELECT id, question_key, label, type, category_id, step_id, order_rank, required, updated_at
             FROM configurator_questions
             WHERE site_id = ${siteId}
             ORDER BY order_rank
@@ -575,7 +596,10 @@ export function registerConfiguratorTools(server: McpServer): void {
             const categoryStr = question.category_id
               ? `Category: ${question.category_id}`
               : "No category";
-            return `- ${question.label} (${question.question_key}) ${requiredStr}\n  ID: ${question.id}\n  Type: ${question.type}\n  ${categoryStr}\n  Order: ${question.order_rank}\n  Updated: ${question.updated_at}`;
+            const stepStr = question.step_id
+              ? `\n  Step: ${question.step_id}`
+              : "";
+            return `- ${question.label} (${question.question_key}) ${requiredStr}\n  ID: ${question.id}\n  Type: ${question.type}\n  ${categoryStr}${stepStr}\n  Order: ${question.order_rank}\n  Updated: ${question.updated_at}`;
           })
           .join("\n\n");
 
@@ -616,7 +640,7 @@ export function registerConfiguratorTools(server: McpServer): void {
         const questions = (await sql`
           SELECT id, site_id, category_id, question_key, label, heading_level, subtitle,
                  type, display_type, options, required, order_rank, catalogue_item_id,
-                 price_per_unit_min, price_per_unit_max, created_at, updated_at
+                 price_per_unit_min, price_per_unit_max, step_id, created_at, updated_at
           FROM configurator_questions
           WHERE id = ${id} AND site_id = ${siteId}
         `) as ConfiguratorQuestion[];
@@ -711,6 +735,11 @@ export function registerConfiguratorTools(server: McpServer): void {
         .nullable()
         .optional()
         .describe("Maximum price per unit in cents"),
+      stepId: z
+        .string()
+        .nullable()
+        .optional()
+        .describe("UUID of the step this question belongs to"),
     },
     async ({
       label,
@@ -726,6 +755,7 @@ export function registerConfiguratorTools(server: McpServer): void {
       catalogue_item_id,
       price_per_unit_min,
       price_per_unit_max,
+      stepId,
     }) => {
       try {
         const siteId = requireSiteContext();
@@ -758,7 +788,7 @@ export function registerConfiguratorTools(server: McpServer): void {
           INSERT INTO configurator_questions (
             site_id, category_id, question_key, label, heading_level, subtitle,
             type, display_type, options, required, order_rank, catalogue_item_id,
-            price_per_unit_min, price_per_unit_max
+            price_per_unit_min, price_per_unit_max, step_id
           )
           VALUES (
             ${siteId},
@@ -774,11 +804,12 @@ export function registerConfiguratorTools(server: McpServer): void {
             ${finalOrderRank},
             ${catalogue_item_id ?? null},
             ${price_per_unit_min ?? null},
-            ${price_per_unit_max ?? null}
+            ${price_per_unit_max ?? null},
+            ${stepId ?? null}
           )
           RETURNING id, site_id, category_id, question_key, label, heading_level, subtitle,
                     type, display_type, options, required, order_rank, catalogue_item_id,
-                    price_per_unit_min, price_per_unit_max, created_at, updated_at
+                    price_per_unit_min, price_per_unit_max, step_id, created_at, updated_at
         `) as ConfiguratorQuestion[];
 
         const question = result[0];
@@ -854,6 +885,11 @@ export function registerConfiguratorTools(server: McpServer): void {
         .nullable()
         .optional()
         .describe("Maximum price per unit in cents"),
+      stepId: z
+        .string()
+        .nullable()
+        .optional()
+        .describe("UUID of the step this question belongs to"),
     },
     async ({
       id,
@@ -870,6 +906,7 @@ export function registerConfiguratorTools(server: McpServer): void {
       catalogue_item_id,
       price_per_unit_min,
       price_per_unit_max,
+      stepId,
     }) => {
       try {
         const siteId = requireSiteContext();
@@ -894,7 +931,7 @@ export function registerConfiguratorTools(server: McpServer): void {
         // Fetch current question to merge values
         const currentQuestion = (await sql`
           SELECT category_id, question_key, label, heading_level, subtitle, type, display_type,
-                 options, required, order_rank, catalogue_item_id, price_per_unit_min, price_per_unit_max
+                 options, required, order_rank, catalogue_item_id, price_per_unit_min, price_per_unit_max, step_id
           FROM configurator_questions WHERE id = ${id}
         `) as ConfiguratorQuestion[];
 
@@ -919,6 +956,7 @@ export function registerConfiguratorTools(server: McpServer): void {
           price_per_unit_min !== undefined ? price_per_unit_min : current.price_per_unit_min;
         const finalPricePerUnitMax =
           price_per_unit_max !== undefined ? price_per_unit_max : current.price_per_unit_max;
+        const finalStepId = stepId !== undefined ? stepId : current.step_id;
 
         const result = (await sql`
           UPDATE configurator_questions
@@ -936,11 +974,12 @@ export function registerConfiguratorTools(server: McpServer): void {
             catalogue_item_id = ${finalCatalogueItemId},
             price_per_unit_min = ${finalPricePerUnitMin},
             price_per_unit_max = ${finalPricePerUnitMax},
+            step_id = ${finalStepId},
             updated_at = NOW()
           WHERE id = ${id} AND site_id = ${siteId}
           RETURNING id, site_id, category_id, question_key, label, heading_level, subtitle,
                     type, display_type, options, required, order_rank, catalogue_item_id,
-                    price_per_unit_min, price_per_unit_max, created_at, updated_at
+                    price_per_unit_min, price_per_unit_max, step_id, created_at, updated_at
         `) as ConfiguratorQuestion[];
 
         const question = result[0];
@@ -1091,6 +1130,217 @@ export function registerConfiguratorTools(server: McpServer): void {
           ],
           isError: true,
         };
+      }
+    }
+  );
+
+  // ========================================
+  // Step Tools
+  // ========================================
+
+  // Tool: list_configurator_steps
+  server.tool(
+    "list_configurator_steps",
+    "List all configurator steps for a category, ordered by order_rank. Steps group questions into separate wizard pages.",
+    {
+      categoryId: z.string().describe("The UUID of the category to list steps for (required)"),
+    },
+    async ({ categoryId }) => {
+      try {
+        const siteId = requireSiteContext();
+
+        const steps = (await sql`
+          SELECT id, name, category_id, order_rank, updated_at
+          FROM configurator_steps
+          WHERE site_id = ${siteId} AND category_id = ${categoryId}
+          ORDER BY order_rank, created_at
+        `) as ConfiguratorStepListItem[];
+
+        if (steps.length === 0) {
+          return {
+            content: [{ type: "text" as const, text: `No configurator steps found for category ${categoryId}.` }],
+          };
+        }
+
+        const stepList = steps
+          .map((s) => `- ${s.name} (rank: ${s.order_rank})\n  ID: ${s.id}`)
+          .join("\n\n");
+
+        return {
+          content: [{ type: "text" as const, text: `Configurator steps for category ${categoryId}:\n\n${stepList}` }],
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        return { content: [{ type: "text" as const, text: `Error listing steps: ${message}` }], isError: true };
+      }
+    }
+  );
+
+  // Tool: get_configurator_step
+  server.tool(
+    "get_configurator_step",
+    "Get a single configurator step by ID.",
+    {
+      id: z.string().describe("The UUID of the step to retrieve"),
+    },
+    async ({ id }) => {
+      try {
+        const siteId = requireSiteContext();
+
+        const steps = (await sql`
+          SELECT * FROM configurator_steps WHERE id = ${id} AND site_id = ${siteId}
+        `) as ConfiguratorStep[];
+
+        if (steps.length === 0) {
+          return { content: [{ type: "text" as const, text: `Step with ID "${id}" not found.` }], isError: true };
+        }
+
+        return { content: [{ type: "text" as const, text: JSON.stringify(steps[0], null, 2) }] };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        return { content: [{ type: "text" as const, text: `Error getting step: ${message}` }], isError: true };
+      }
+    }
+  );
+
+  // Tool: create_configurator_step
+  server.tool(
+    "create_configurator_step",
+    "Create a new configurator step within a category. Steps group questions into separate wizard pages.",
+    {
+      categoryId: z.string().describe("The UUID of the category (required)"),
+      name: z.string().min(1).describe("Step name (required)"),
+      description: z.string().nullable().optional().describe("Optional step description"),
+      order_rank: z.number().int().optional().describe("Order rank (auto-calculated if not provided)"),
+    },
+    async ({ categoryId, name, description, order_rank }) => {
+      try {
+        const siteId = requireSiteContext();
+
+        let finalOrderRank = order_rank;
+        if (finalOrderRank === undefined) {
+          const maxRankResult = (await sql`
+            SELECT COALESCE(MAX(order_rank), 0) + 1 as next_rank
+            FROM configurator_steps
+            WHERE site_id = ${siteId} AND category_id = ${categoryId}
+          `) as { next_rank: number }[];
+          finalOrderRank = maxRankResult[0].next_rank;
+        }
+
+        const result = (await sql`
+          INSERT INTO configurator_steps (site_id, category_id, name, description, order_rank)
+          VALUES (${siteId}, ${categoryId}, ${name}, ${description ?? null}, ${finalOrderRank})
+          RETURNING *
+        `) as ConfiguratorStep[];
+
+        return {
+          content: [{ type: "text" as const, text: `Step created successfully:\n\n${JSON.stringify(result[0], null, 2)}` }],
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        return { content: [{ type: "text" as const, text: `Error creating step: ${message}` }], isError: true };
+      }
+    }
+  );
+
+  // Tool: update_configurator_step
+  server.tool(
+    "update_configurator_step",
+    "Update an existing configurator step. Only provided fields will be updated.",
+    {
+      id: z.string().describe("The UUID of the step to update (required)"),
+      name: z.string().min(1).optional().describe("Step name"),
+      description: z.string().nullable().optional().describe("Step description"),
+    },
+    async ({ id, name, description }) => {
+      try {
+        const siteId = requireSiteContext();
+
+        const existing = (await sql`
+          SELECT * FROM configurator_steps WHERE id = ${id} AND site_id = ${siteId}
+        `) as ConfiguratorStep[];
+
+        if (existing.length === 0) {
+          return { content: [{ type: "text" as const, text: `Step with ID "${id}" not found.` }], isError: true };
+        }
+
+        const current = existing[0];
+        const finalName = name !== undefined ? name : current.name;
+        const finalDescription = description !== undefined ? description : current.description;
+
+        const result = (await sql`
+          UPDATE configurator_steps
+          SET name = ${finalName}, description = ${finalDescription}, updated_at = NOW()
+          WHERE id = ${id} AND site_id = ${siteId}
+          RETURNING *
+        `) as ConfiguratorStep[];
+
+        return {
+          content: [{ type: "text" as const, text: `Step updated successfully:\n\n${JSON.stringify(result[0], null, 2)}` }],
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        return { content: [{ type: "text" as const, text: `Error updating step: ${message}` }], isError: true };
+      }
+    }
+  );
+
+  // Tool: delete_configurator_step
+  server.tool(
+    "delete_configurator_step",
+    "Delete a configurator step by ID. Questions assigned to this step will have their step_id set to NULL.",
+    {
+      id: z.string().describe("The UUID of the step to delete"),
+    },
+    async ({ id }) => {
+      try {
+        const siteId = requireSiteContext();
+
+        const existing = (await sql`
+          SELECT id, name FROM configurator_steps WHERE id = ${id} AND site_id = ${siteId}
+        `) as { id: string; name: string }[];
+
+        if (existing.length === 0) {
+          return { content: [{ type: "text" as const, text: `Step with ID "${id}" not found.` }], isError: true };
+        }
+
+        await sql`DELETE FROM configurator_steps WHERE id = ${id} AND site_id = ${siteId}`;
+
+        return {
+          content: [{ type: "text" as const, text: `Step "${existing[0].name}" (ID: ${id}) deleted successfully.` }],
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        return { content: [{ type: "text" as const, text: `Error deleting step: ${message}` }], isError: true };
+      }
+    }
+  );
+
+  // Tool: reorder_configurator_steps
+  server.tool(
+    "reorder_configurator_steps",
+    "Reorder configurator steps by providing an array of step IDs in the desired order.",
+    {
+      ids: z.array(z.string()).min(1).describe("Array of step IDs in the desired order"),
+    },
+    async ({ ids }) => {
+      try {
+        const siteId = requireSiteContext();
+
+        for (let i = 0; i < ids.length; i++) {
+          await sql`
+            UPDATE configurator_steps
+            SET order_rank = ${i}, updated_at = NOW()
+            WHERE id = ${ids[i]} AND site_id = ${siteId}
+          `;
+        }
+
+        return {
+          content: [{ type: "text" as const, text: `Successfully reordered ${ids.length} configurator steps.` }],
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        return { content: [{ type: "text" as const, text: `Error reordering steps: ${message}` }], isError: true };
       }
     }
   );

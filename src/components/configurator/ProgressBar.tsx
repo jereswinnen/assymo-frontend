@@ -1,28 +1,32 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import {
-  BlocksIcon,
-  CircleUserRoundIcon,
-  NotepadTextDashedIcon,
-} from "lucide-react";
+
+interface ProgressStep {
+  number: number;
+  label: string;
+}
 
 interface ProgressBarProps {
   currentStep: number;
+  steps?: ProgressStep[];
   className?: string;
 }
 
-const STEPS = [
-  { number: 1, label: "Configuratie", icon: BlocksIcon },
-  { number: 2, label: "Gegevens", icon: CircleUserRoundIcon },
-  { number: 3, label: "Overzicht", icon: NotepadTextDashedIcon },
+const DEFAULT_STEPS: ProgressStep[] = [
+  { number: 1, label: "Configuratie" },
+  { number: 2, label: "Gegevens" },
+  { number: 3, label: "Overzicht" },
 ];
 
-export function ProgressBar({ currentStep, className }: ProgressBarProps) {
+export function ProgressBar({
+  currentStep,
+  steps = DEFAULT_STEPS,
+  className,
+}: ProgressBarProps) {
   return (
     <nav aria-label="Progress" className={cn("flex gap-6", className)}>
-      {STEPS.map((step) => {
-        const Icon = step.icon;
+      {steps.map((step) => {
         const isActive = step.number === currentStep;
         const isCompleted = step.number < currentStep;
 
@@ -36,8 +40,10 @@ export function ProgressBar({ currentStep, className }: ProgressBarProps) {
                 !isActive && !isCompleted && "text-stone-600 font-normal"
               )}
             >
-              <Icon className="size-4" />
-              <span>{step.label}</span>
+              <span className="size-4 flex items-center justify-center text-xs font-medium">
+                {step.number}
+              </span>
+              <span className="truncate">{step.label}</span>
             </div>
             <div
               className={cn(

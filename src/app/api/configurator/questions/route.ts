@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getQuestionsForProduct, getQuestionsForCategory, type ConfiguratorQuestion } from "@/lib/configurator";
+import { getStepsForCategory } from "@/lib/configurator/steps";
 import { getCatalogueItemsForSite } from "@/lib/configurator/catalogue";
 import { getDefaultQuestions } from "@/config/configurator";
 
@@ -102,6 +103,48 @@ export async function GET(request: NextRequest) {
 
     // Map database questions to frontend format
     const questions = questionsWithImages.map(mapQuestionForFrontend);
+
+    // Fetch steps for this category
+    const steps = await getStepsForCategory(productSlug, siteSlug);
+
+    // If steps exist, group questions by step
+    if (steps.length > 0) {
+      const questionsByStepId = new Map<string | null, ReturnType<typeof mapQuestionForFrontend>[]>();
+
+      // Map original DB questions to get step_id, then use mapped questions for output
+      for (let i = 0; i < questionsWithImages.length; i++) {
+        const dbQ = questionsWithImages[i];
+        const mappedQ = questions[i];
+        const stepId = dbQ.step_id;
+
+        if (!questionsByStepId.has(stepId)) {
+          questionsByStepId.set(stepId, []);
+        }
+        questionsByStepId.get(stepId)!.push(mappedQ);
+      }
+
+      // Questions without a step go into the first step
+      const unassigned = questionsByStepId.get(null) || [];
+
+      const stepsResponse = steps.map((step, index) => ({
+        id: step.id,
+        name: step.name,
+        description: step.description,
+        questions: [
+          ...(index === 0 ? unassigned : []),
+          ...(questionsByStepId.get(step.id) || []),
+        ],
+      }));
+
+      return NextResponse.json(
+        {
+          questions, // flat list for backward compat
+          steps: stepsResponse,
+          source: "database",
+        },
+        { headers: cacheHeaders }
+      );
+    }
 
     return NextResponse.json(
       {

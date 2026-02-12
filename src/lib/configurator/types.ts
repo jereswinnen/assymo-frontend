@@ -74,6 +74,7 @@ export interface ConfiguratorQuestion {
   catalogue_item_id: string | null; // Reference to price catalogue for per-unit pricing
   price_per_unit_min: number | null; // Manual per-unit price (in cents)
   price_per_unit_max: number | null; // Manual per-unit price (in cents)
+  step_id: string | null; // Links to configurator_steps
   created_at: Date;
   updated_at: Date;
 }
@@ -93,6 +94,7 @@ export interface CreateQuestionInput {
   catalogue_item_id?: string | null;
   price_per_unit_min?: number | null;
   price_per_unit_max?: number | null;
+  step_id?: string | null;
 }
 
 export interface UpdateQuestionInput {
@@ -110,6 +112,7 @@ export interface UpdateQuestionInput {
   catalogue_item_id?: string | null;
   price_per_unit_min?: number | null;
   price_per_unit_max?: number | null;
+  step_id?: string | null;
 }
 
 export interface PriceModifier {
