@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
       for (let i = 0; i < questionsWithImages.length; i++) {
         const dbQ = questionsWithImages[i];
         const mappedQ = questions[i];
-        const stepId = dbQ.step_id;
+        const stepId = dbQ.step_id ?? null;
 
         if (!questionsByStepId.has(stepId)) {
           questionsByStepId.set(stepId, []);

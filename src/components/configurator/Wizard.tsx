@@ -92,7 +92,7 @@ export function Wizard({
 
   // Total steps: product + N config steps + contact + summary
   // Without config steps: product + contact + summary = 3
-  const totalSteps = hasConfigSteps ? 2 + configSteps.length : 3;
+  const totalSteps = hasConfigSteps ? 3 + configSteps.length : 3;
   const contactStepNum = hasConfigSteps ? 2 + configSteps.length : 2;
   const summaryStepNum = totalSteps;
 
