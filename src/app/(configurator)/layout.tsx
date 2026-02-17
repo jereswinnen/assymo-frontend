@@ -23,7 +23,7 @@ export default function ConfiguratorRootLayout({
         />
         <main className="o-grid--configurator">
           <div className="o-grid--configurator__sidebar" />
-          <section className="flex flex-col gap-y-12! md:gap-y-20! overflow-hidden">
+          <section className="flex flex-col gap-y-12! md:gap-y-20!">
             <ConfiguratorHeader />
             {children}
           </section>

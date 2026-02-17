@@ -193,11 +193,18 @@
 
 @layer components {
   .o-grid--configurator {
-    padding-right: var(--u-grid-gap) !important;
+    padding-right: 1rem !important;
     display: grid;
     grid-template-columns: 15% 1fr;
-    column-gap: var(--u-grid-gap);
+    column-gap: 1rem;
     min-height: 100vh;
+  }
+
+  @media (min-width: 768px) {
+    .o-grid--configurator {
+      padding-right: var(--u-grid-gap) !important;
+      column-gap: var(--u-grid-gap);
+    }
   }
 
   .o-grid--configurator__sidebar {

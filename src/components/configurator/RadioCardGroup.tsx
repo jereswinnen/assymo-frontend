@@ -33,7 +33,7 @@ export function RadioCardGroup({
       value={value || ""}
       onValueChange={onChange}
       disabled={disabled}
-      className={cn("grid gap-3 grid-cols-2 lg:grid-cols-4", className)}
+      className={cn("grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4", className)}
     >
       {options.map((option) => (
         <Label
@@ -61,7 +61,7 @@ export function RadioCardGroup({
           </div>
 
           {/* Content */}
-          <div className="flex items-center justify-between gap-2 p-4">
+          <div className="flex items-center justify-between gap-2 p-3 sm:p-4">
             <div className="flex-1">
               <span className="text-sm font-medium text-stone-900">
                 {option.label}

@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
 
 interface ProgressStep {
   number: number;
@@ -25,32 +26,32 @@ export function ProgressBar({
   className,
 }: ProgressBarProps) {
   return (
-    <nav aria-label="Progress" className={cn("flex gap-6", className)}>
-      {steps.map((step) => {
+    <nav
+      aria-label="Progress"
+      className={cn("flex flex-col gap-0.5 text-right", className)}
+    >
+      {steps.map((step, index) => {
         const isActive = step.number === currentStep;
         const isCompleted = step.number < currentStep;
 
         return (
-          <div key={step.number} className="flex-1 flex flex-col gap-3">
-            <div
-              className={cn(
-                "flex items-center gap-1.5 text-sm",
-                isCompleted && "text-accent-dark",
-                isActive && "text-stone-800 font-medium",
-                !isActive && !isCompleted && "text-stone-600 font-normal"
-              )}
-            >
-              <span className="truncate">{step.label}</span>
-            </div>
-            <div
-              className={cn(
-                "h-0.5",
-                isCompleted && "bg-accent-light",
-                isActive && "bg-stone-500",
-                !isActive && !isCompleted && "bg-stone-200"
-              )}
-              aria-current={isActive ? "step" : undefined}
-            />
+          <div
+            key={step.number}
+            className={cn(
+              "flex items-center justify-end gap-1.5 py-1 text-[13px] transition-colors",
+              isCompleted && "text-emerald-500",
+              isActive && "text-stone-900 font-medium",
+              !isActive && !isCompleted && "text-stone-300",
+            )}
+            aria-current={isActive ? "step" : undefined}
+          >
+            {isCompleted ? (
+              <Check className="size-4 shrink-0" strokeWidth={2.5} />
+            ) : isActive ? (
+              <span className="size-[6px] shrink-0 rounded-full bg-stone-900" />
+            ) : null}
+
+            <span>{step.label}</span>
           </div>
         );
       })}

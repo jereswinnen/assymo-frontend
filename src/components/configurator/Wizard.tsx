@@ -320,10 +320,34 @@ export function Wizard({
   const isContactStep = currentStep === contactStepNum;
   const isSummaryStep = currentStep === summaryStepNum;
 
+  const currentStepLabel = progressSteps.find(
+    (s) => s.number === currentStep,
+  )?.label;
+
   return (
     <div className={cn("flex flex-col gap-8", className)}>
-      {/* Progress Bar */}
-      <ProgressBar currentStep={currentStep} steps={progressSteps} />
+      {/* Mobile: dot progress + step name */}
+      <div className="flex items-center gap-1.5 lg:hidden">
+        {progressSteps.map((step) => (
+          <div
+            key={step.number}
+            className={cn(
+              "size-1.5 rounded-full transition-colors",
+              step.number < currentStep && "bg-accent-light",
+              step.number === currentStep && "bg-stone-700",
+              step.number > currentStep && "bg-stone-300",
+            )}
+          />
+        ))}
+        <span className="ml-1 text-sm font-medium text-stone-700">
+          {currentStepLabel}
+        </span>
+      </div>
+
+      {/* Desktop: floating step sidebar, vertically centered on right */}
+      <div className="hidden lg:block fixed right-5 top-1/2 -translate-y-1/2 z-10">
+        <ProgressBar currentStep={currentStep} steps={progressSteps} />
+      </div>
 
       {/* Step Content */}
       <div className="min-h-[400px]">
