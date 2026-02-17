@@ -33,7 +33,7 @@ export function RadioCardGroup({
       value={value || ""}
       onValueChange={onChange}
       disabled={disabled}
-      className={cn("grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4", className)}
+      className={cn("grid gap-3 grid-cols-2 lg:grid-cols-4", className)}
     >
       {options.map((option) => (
         <Label
