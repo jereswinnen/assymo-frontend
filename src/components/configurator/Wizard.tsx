@@ -326,22 +326,24 @@ export function Wizard({
 
   return (
     <div className={cn("flex flex-col gap-8", className)}>
-      {/* Mobile: dot progress + step name */}
-      <div className="flex items-center gap-1.5 lg:hidden">
-        {progressSteps.map((step) => (
-          <div
-            key={step.number}
-            className={cn(
-              "size-1.5 rounded-full transition-colors",
-              step.number < currentStep && "bg-accent-light",
-              step.number === currentStep && "bg-stone-700",
-              step.number > currentStep && "bg-stone-300",
-            )}
-          />
-        ))}
-        <span className="ml-1 text-sm font-medium text-stone-700">
+      {/* Mobile: fixed bottom dot progress */}
+      <div className="fixed bottom-0 inset-x-0 z-10 flex items-center justify-between px-4 py-3 backdrop-blur-sm bg-white/70 lg:hidden">
+        <span className="text-sm font-medium text-stone-700">
           {currentStepLabel}
         </span>
+        <div className="flex items-center gap-1.5">
+          {progressSteps.map((step) => (
+            <div
+              key={step.number}
+              className={cn(
+                "size-1.5 rounded-full transition-colors",
+                step.number < currentStep && "bg-accent-light",
+                step.number === currentStep && "bg-stone-700",
+                step.number > currentStep && "bg-stone-300",
+              )}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Desktop: floating step sidebar, vertically centered on right */}
