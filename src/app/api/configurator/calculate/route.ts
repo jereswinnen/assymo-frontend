@@ -3,8 +3,10 @@ import {
   calculatePrice,
   formatPrice,
   formatPriceRange,
+  getQuestionsForCategory,
   type PriceCalculationInput,
 } from "@/lib/configurator";
+import { isQuestionVisible } from "@/lib/configurator/visibility";
 
 /**
  * POST /api/configurator/calculate
@@ -33,9 +35,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Filter out answers for hidden questions and hidden options (server-side guard)
+    const questions = await getQuestionsForCategory(product_slug, site);
+    const filteredAnswers = { ...answers };
+    for (const q of questions) {
+      if (!isQuestionVisible(q.visibility_rules, answers)) {
+        delete filteredAnswers[q.question_key];
+        continue;
+      }
+
+      // Filter hidden option values
+      if (!q.options) continue;
+      const answer = filteredAnswers[q.question_key];
+      if (!answer) continue;
+      const visibleValues = new Set(
+        q.options
+          .filter((opt) => isQuestionVisible(opt.visibility_rules, answers))
+          .map((opt) => opt.value),
+      );
+      if (typeof answer === "string" && !visibleValues.has(answer)) {
+        delete filteredAnswers[q.question_key];
+      }
+      if (Array.isArray(answer)) {
+        filteredAnswers[q.question_key] = answer.filter((v: string) =>
+          visibleValues.has(v),
+        );
+      }
+    }
+
     const input: PriceCalculationInput = {
       product_slug,
-      answers,
+      answers: filteredAnswers,
     };
 
     const result = await calculatePrice(input, site);

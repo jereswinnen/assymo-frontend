@@ -29,6 +29,19 @@ interface QuestionOption {
   catalogueItemId?: string;
   priceModifierMin?: number;
   priceModifierMax?: number;
+  visibility_rules?: VisibilityConfig | null;
+}
+
+interface VisibilityRule {
+  questionKey: string;
+  operator: string;
+  value?: string | number;
+}
+
+interface VisibilityConfig {
+  rules: VisibilityRule[];
+  logic: "all" | "any";
+  action?: "show" | "hide";
 }
 
 interface ConfiguratorQuestion {
@@ -48,6 +61,7 @@ interface ConfiguratorQuestion {
   price_per_unit_min: number | null;
   price_per_unit_max: number | null;
   step_id: string | null;
+  visibility_rules: VisibilityConfig | null;
   created_at: string;
   updated_at: string;
 }
@@ -107,6 +121,21 @@ interface CatalogueItemListItem {
 }
 
 // Zod schemas for validation
+const optionVisibilityConfigSchema = z.object({
+  rules: z.array(z.object({
+    questionKey: z.string(),
+    operator: z.enum([
+      "equals", "not_equals",
+      "includes", "not_includes",
+      "is_not_empty", "is_empty",
+      "greater_than", "less_than",
+    ]),
+    value: z.union([z.string(), z.number()]).optional(),
+  })),
+  logic: z.enum(["all", "any"]),
+  action: z.enum(["show", "hide"]).optional(),
+}).nullable().optional();
+
 const questionOptionSchema = z.object({
   value: z.string(),
   label: z.string(),
@@ -114,9 +143,27 @@ const questionOptionSchema = z.object({
   catalogueItemId: z.string().optional(),
   priceModifierMin: z.number().int().optional(),
   priceModifierMax: z.number().int().optional(),
+  visibility_rules: optionVisibilityConfigSchema,
 });
 
 const questionOptionsSchema = z.array(questionOptionSchema).nullable().optional();
+
+const visibilityRuleSchema = z.object({
+  questionKey: z.string(),
+  operator: z.enum([
+    "equals", "not_equals",
+    "includes", "not_includes",
+    "is_not_empty", "is_empty",
+    "greater_than", "less_than",
+  ]),
+  value: z.union([z.string(), z.number()]).optional(),
+});
+
+const visibilityConfigSchema = z.object({
+  rules: z.array(visibilityRuleSchema),
+  logic: z.enum(["all", "any"]),
+  action: z.enum(["show", "hide"]).optional(),
+}).nullable().optional();
 
 export function registerConfiguratorTools(server: McpServer): void {
   // ========================================
@@ -508,15 +555,14 @@ export function registerConfiguratorTools(server: McpServer): void {
           };
         }
 
-        // Update order_rank for each category
-        for (let i = 0; i < ids.length; i++) {
-          const orderRank = i + 1;
-          await sql`
-            UPDATE configurator_categories
-            SET order_rank = ${orderRank}, updated_at = NOW()
-            WHERE id = ${ids[i]} AND site_id = ${siteId}
-          `;
-        }
+        // Batch update order_rank for all categories in a single query
+        const ranks = ids.map((_: string, i: number) => i + 1);
+        await sql`
+          UPDATE configurator_categories AS t
+          SET order_rank = v.rank, updated_at = NOW()
+          FROM (SELECT unnest(${ids}::uuid[]) AS id, unnest(${ranks}::int[]) AS rank) AS v
+          WHERE t.id = v.id AND t.site_id = ${siteId}
+        `;
 
         return {
           content: [
@@ -640,7 +686,8 @@ export function registerConfiguratorTools(server: McpServer): void {
         const questions = (await sql`
           SELECT id, site_id, category_id, question_key, label, heading_level, subtitle,
                  type, display_type, options, required, order_rank, catalogue_item_id,
-                 price_per_unit_min, price_per_unit_max, step_id, created_at, updated_at
+                 price_per_unit_min, price_per_unit_max, step_id, visibility_rules,
+                 created_at, updated_at
           FROM configurator_questions
           WHERE id = ${id} AND site_id = ${siteId}
         `) as ConfiguratorQuestion[];
@@ -740,6 +787,9 @@ export function registerConfiguratorTools(server: McpServer): void {
         .nullable()
         .optional()
         .describe("UUID of the step this question belongs to"),
+      visibility_rules: visibilityConfigSchema.describe(
+        "Visibility rules that control when this question is shown based on other answers"
+      ),
     },
     async ({
       label,
@@ -756,6 +806,7 @@ export function registerConfiguratorTools(server: McpServer): void {
       price_per_unit_min,
       price_per_unit_max,
       stepId,
+      visibility_rules,
     }) => {
       try {
         const siteId = requireSiteContext();
@@ -782,13 +833,14 @@ export function registerConfiguratorTools(server: McpServer): void {
 
         // Prepare JSONB values
         const optionsJson = options ? JSON.stringify(options) : null;
+        const visibilityJson = visibility_rules ? JSON.stringify(visibility_rules) : null;
 
         // Insert the question
         const result = (await sql`
           INSERT INTO configurator_questions (
             site_id, category_id, question_key, label, heading_level, subtitle,
             type, display_type, options, required, order_rank, catalogue_item_id,
-            price_per_unit_min, price_per_unit_max, step_id
+            price_per_unit_min, price_per_unit_max, step_id, visibility_rules
           )
           VALUES (
             ${siteId},
@@ -805,11 +857,13 @@ export function registerConfiguratorTools(server: McpServer): void {
             ${catalogue_item_id ?? null},
             ${price_per_unit_min ?? null},
             ${price_per_unit_max ?? null},
-            ${stepId ?? null}
+            ${stepId ?? null},
+            ${visibilityJson}::jsonb
           )
           RETURNING id, site_id, category_id, question_key, label, heading_level, subtitle,
                     type, display_type, options, required, order_rank, catalogue_item_id,
-                    price_per_unit_min, price_per_unit_max, step_id, created_at, updated_at
+                    price_per_unit_min, price_per_unit_max, step_id, visibility_rules,
+                    created_at, updated_at
         `) as ConfiguratorQuestion[];
 
         const question = result[0];
@@ -890,6 +944,9 @@ export function registerConfiguratorTools(server: McpServer): void {
         .nullable()
         .optional()
         .describe("UUID of the step this question belongs to"),
+      visibility_rules: visibilityConfigSchema.describe(
+        "Visibility rules that control when this question is shown based on other answers"
+      ),
     },
     async ({
       id,
@@ -907,6 +964,7 @@ export function registerConfiguratorTools(server: McpServer): void {
       price_per_unit_min,
       price_per_unit_max,
       stepId,
+      visibility_rules,
     }) => {
       try {
         const siteId = requireSiteContext();
@@ -931,7 +989,8 @@ export function registerConfiguratorTools(server: McpServer): void {
         // Fetch current question to merge values
         const currentQuestion = (await sql`
           SELECT category_id, question_key, label, heading_level, subtitle, type, display_type,
-                 options, required, order_rank, catalogue_item_id, price_per_unit_min, price_per_unit_max, step_id
+                 options, required, order_rank, catalogue_item_id, price_per_unit_min,
+                 price_per_unit_max, step_id, visibility_rules
           FROM configurator_questions WHERE id = ${id}
         `) as ConfiguratorQuestion[];
 
@@ -957,6 +1016,10 @@ export function registerConfiguratorTools(server: McpServer): void {
         const finalPricePerUnitMax =
           price_per_unit_max !== undefined ? price_per_unit_max : current.price_per_unit_max;
         const finalStepId = stepId !== undefined ? stepId : current.step_id;
+        const finalVisibilityRules =
+          visibility_rules !== undefined
+            ? JSON.stringify(visibility_rules)
+            : JSON.stringify(current.visibility_rules);
 
         const result = (await sql`
           UPDATE configurator_questions
@@ -975,11 +1038,13 @@ export function registerConfiguratorTools(server: McpServer): void {
             price_per_unit_min = ${finalPricePerUnitMin},
             price_per_unit_max = ${finalPricePerUnitMax},
             step_id = ${finalStepId},
+            visibility_rules = ${finalVisibilityRules}::jsonb,
             updated_at = NOW()
           WHERE id = ${id} AND site_id = ${siteId}
           RETURNING id, site_id, category_id, question_key, label, heading_level, subtitle,
                     type, display_type, options, required, order_rank, catalogue_item_id,
-                    price_per_unit_min, price_per_unit_max, step_id, created_at, updated_at
+                    price_per_unit_min, price_per_unit_max, step_id, visibility_rules,
+                    created_at, updated_at
         `) as ConfiguratorQuestion[];
 
         const question = result[0];
@@ -1101,15 +1166,14 @@ export function registerConfiguratorTools(server: McpServer): void {
           };
         }
 
-        // Update order_rank for each question
-        for (let i = 0; i < ids.length; i++) {
-          const orderRank = i + 1;
-          await sql`
-            UPDATE configurator_questions
-            SET order_rank = ${orderRank}, updated_at = NOW()
-            WHERE id = ${ids[i]} AND site_id = ${siteId}
-          `;
-        }
+        // Batch update order_rank for all questions in a single query
+        const ranks = ids.map((_: string, i: number) => i + 1);
+        await sql`
+          UPDATE configurator_questions AS t
+          SET order_rank = v.rank, updated_at = NOW()
+          FROM (SELECT unnest(${ids}::uuid[]) AS id, unnest(${ranks}::int[]) AS rank) AS v
+          WHERE t.id = v.id AND t.site_id = ${siteId}
+        `;
 
         return {
           content: [
@@ -1327,13 +1391,14 @@ export function registerConfiguratorTools(server: McpServer): void {
       try {
         const siteId = requireSiteContext();
 
-        for (let i = 0; i < ids.length; i++) {
-          await sql`
-            UPDATE configurator_steps
-            SET order_rank = ${i}, updated_at = NOW()
-            WHERE id = ${ids[i]} AND site_id = ${siteId}
-          `;
-        }
+        // Batch update order_rank for all steps in a single query
+        const ranks = ids.map((_: string, i: number) => i);
+        await sql`
+          UPDATE configurator_steps AS t
+          SET order_rank = v.rank, updated_at = NOW()
+          FROM (SELECT unnest(${ids}::uuid[]) AS id, unnest(${ranks}::int[]) AS rank) AS v
+          WHERE t.id = v.id AND t.site_id = ${siteId}
+        `;
 
         return {
           content: [{ type: "text" as const, text: `Successfully reordered ${ids.length} configurator steps.` }],

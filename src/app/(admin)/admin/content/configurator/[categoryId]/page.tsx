@@ -59,10 +59,12 @@ import {
   EmptyDescription,
 } from "@/components/ui/empty";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   ChevronDownIcon,
   EuroIcon,
+  EyeIcon,
   GripVerticalIcon,
   Loader2Icon,
   PencilIcon,
@@ -73,6 +75,7 @@ import {
 import { t } from "@/config/strings";
 import { QuestionEditSheet } from "./sheets/QuestionEditSheet";
 import { StepEditSheet } from "./sheets/StepEditSheet";
+import { RulesTab } from "./components/RulesTab";
 import type {
   ConfiguratorQuestion,
   ConfiguratorPricing,
@@ -119,6 +122,9 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
     type: "question" | "step";
   } | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState("vragen");
 
   // Pricing state (vanafprijs only - no max)
   const [pricing, setPricing] = useState<ConfiguratorPricing | null>(null);
@@ -401,21 +407,22 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
     }
   }, [currentSite, categoryId, basePrice]);
 
-  // Header actions
+  // Header actions (only on Vragen tab)
   const headerActions = useMemo(
-    () => (
-      <div className="flex items-center gap-2">
-        <Button size="sm" variant="outline" onClick={openNewStepSheet}>
-          <PlusIcon className="size-4" />
-          {t("admin.headings.newStep")}
-        </Button>
-        <Button size="sm" onClick={openNewQuestionSheet}>
-          <PlusIcon className="size-4" />
-          {t("admin.headings.newQuestion")}
-        </Button>
-      </div>
-    ),
-    [openNewQuestionSheet, openNewStepSheet],
+    () =>
+      activeTab === "vragen" ? (
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={openNewStepSheet}>
+            <PlusIcon className="size-4" />
+            {t("admin.headings.newStep")}
+          </Button>
+          <Button size="sm" onClick={openNewQuestionSheet}>
+            <PlusIcon className="size-4" />
+            {t("admin.headings.newQuestion")}
+          </Button>
+        </div>
+      ) : null,
+    [openNewQuestionSheet, openNewStepSheet, activeTab],
   );
   useAdminHeaderActions(headerActions);
   useAdminBreadcrumbTitle(category?.name || null);
@@ -471,7 +478,14 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
                 })
               }
             >
-              <TableCell className="font-medium">{question.label}</TableCell>
+              <TableCell className="font-medium">
+                <span className="flex items-center gap-1.5">
+                  {question.label}
+                  {question.visibility_rules && (
+                    <EyeIcon className="size-3.5 text-muted-foreground shrink-0" />
+                  )}
+                </span>
+              </TableCell>
               <TableCell className="hidden sm:table-cell text-muted-foreground">
                 <Badge variant="outline">
                   {QUESTION_TYPE_LABELS[question.type]}
@@ -504,6 +518,17 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
 
   return (
     <>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="vragen">{t("admin.headings.questions")}</TabsTrigger>
+          <TabsTrigger value="regels">{t("admin.headings.rules")}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="regels">
+          <RulesTab questions={questions} siteId={currentSite?.id} />
+        </TabsContent>
+
+        <TabsContent value="vragen">
       <div className="grid gap-6 md:grid-cols-3">
         {/* Main content */}
         <div className="space-y-4 md:col-span-2">
@@ -637,6 +662,8 @@ export default function CategoryQuestionsPage({ params }: PageProps) {
           </Button>
         </div>
       </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Question Edit/Create Sheet */}
       <QuestionEditSheet

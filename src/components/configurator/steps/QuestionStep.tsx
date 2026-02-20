@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { FieldGroup } from "@/components/ui/field";
+import { isQuestionVisible } from "@/lib/configurator/visibility";
 import { QuestionField, type QuestionConfig } from "../QuestionField";
 import type { WizardAnswers } from "../Wizard";
 
@@ -25,6 +27,22 @@ export function QuestionStep({
   onAnswerChange,
   className,
 }: QuestionStepProps) {
+  const visibleQuestions = useMemo(
+    () =>
+      step.questions
+        .filter((q) => isQuestionVisible(q.visibility_rules, answers))
+        .map((q) => {
+          if (!q.options) return q;
+          const visibleOpts = q.options.filter((opt) =>
+            isQuestionVisible(opt.visibility_rules, answers),
+          );
+          return visibleOpts.length === q.options.length
+            ? q
+            : { ...q, options: visibleOpts };
+        }),
+    [step.questions, answers],
+  );
+
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       <div>
@@ -34,9 +52,9 @@ export function QuestionStep({
         )}
       </div>
 
-      {step.questions.length > 0 && (
+      {visibleQuestions.length > 0 && (
         <FieldGroup>
-          {step.questions.map((question) => (
+          {visibleQuestions.map((question) => (
             <QuestionField
               key={question.question_key}
               question={question}

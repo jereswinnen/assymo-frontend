@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { isQuestionVisible } from "@/lib/configurator/visibility";
 import {
   Select,
   SelectContent,
@@ -94,6 +95,22 @@ export function ProductStep({
     fetchQuestions();
   }, [selectedProduct]);
 
+  const visibleQuestions = useMemo(
+    () =>
+      questions
+        .filter((q) => isQuestionVisible(q.visibility_rules, answers))
+        .map((q) => {
+          if (!q.options) return q;
+          const visibleOpts = q.options.filter((opt) =>
+            isQuestionVisible(opt.visibility_rules, answers),
+          );
+          return visibleOpts.length === q.options.length
+            ? q
+            : { ...q, options: visibleOpts };
+        }),
+    [questions, answers],
+  );
+
   return (
     <div className={cn("flex flex-col gap-8", className)}>
       {/* Product selector */}
@@ -134,9 +151,9 @@ export function ProductStep({
       )}
 
       {/* Dynamic questions (only when showQuestions is true, i.e. no config steps) */}
-      {showQuestions && !isLoading && !error && questions.length > 0 && (
+      {showQuestions && !isLoading && !error && visibleQuestions.length > 0 && (
         <FieldGroup>
-          {questions.map((question) => (
+          {visibleQuestions.map((question) => (
             <QuestionField
               key={question.question_key}
               question={question}
@@ -148,7 +165,7 @@ export function ProductStep({
       )}
 
       {/* Empty state when product selected but no questions */}
-      {showQuestions && !isLoading && !error && selectedProduct && questions.length === 0 && (
+      {showQuestions && !isLoading && !error && selectedProduct && visibleQuestions.length === 0 && (
         <p className="text-sm text-stone-500">
           Geen aanvullende vragen voor dit product.
         </p>

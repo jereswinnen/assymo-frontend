@@ -9,6 +9,7 @@ import { ProductStep } from "./steps/ProductStep";
 import { ContactStep, validateContactDetails } from "./steps/ContactStep";
 import { SummaryStep } from "./steps/SummaryStep";
 import { QuestionStep, type WizardStep } from "./steps/QuestionStep";
+import { isQuestionVisible } from "@/lib/configurator/visibility";
 import type { QuestionConfig } from "./QuestionField";
 
 // =============================================================================
@@ -127,6 +128,71 @@ export function Wizard({
   }, [track, initialProduct]);
 
   // ==========================================================================
+  // Answer cleanup: clear answers for hidden questions
+  // ==========================================================================
+
+  useEffect(() => {
+    const allQuestions = hasConfigSteps
+      ? configSteps.flatMap((s) => s.questions)
+      : questions;
+    if (allQuestions.length === 0) return;
+
+    const keysToRemove: string[] = [];
+    const answersToUpdate: Record<string, string[] | undefined> = {};
+
+    for (const q of allQuestions) {
+      // Question-level: clear answer if entire question is hidden
+      if (
+        q.visibility_rules &&
+        !isQuestionVisible(q.visibility_rules, answers) &&
+        answers[q.question_key] !== undefined
+      ) {
+        keysToRemove.push(q.question_key);
+        continue;
+      }
+
+      // Option-level: clear answer if selected option is hidden
+      if (!q.options) continue;
+      const answer = answers[q.question_key];
+      if (answer === undefined) continue;
+
+      const visibleValues = new Set(
+        q.options
+          .filter((opt) => isQuestionVisible(opt.visibility_rules, answers))
+          .map((opt) => opt.value),
+      );
+
+      if (typeof answer === "string" && !visibleValues.has(answer)) {
+        keysToRemove.push(q.question_key);
+      }
+      if (Array.isArray(answer)) {
+        const filtered = answer.filter((v) => visibleValues.has(v));
+        if (filtered.length !== answer.length) {
+          answersToUpdate[q.question_key] =
+            filtered.length > 0 ? filtered : undefined;
+        }
+      }
+    }
+
+    if (keysToRemove.length > 0 || Object.keys(answersToUpdate).length > 0) {
+      setAnswers((prev) => {
+        const next = { ...prev };
+        for (const key of keysToRemove) {
+          delete next[key];
+        }
+        for (const [key, val] of Object.entries(answersToUpdate)) {
+          if (val === undefined) {
+            delete next[key];
+          } else {
+            next[key] = val;
+          }
+        }
+        return next;
+      });
+    }
+  }, [answers, questions, configSteps, hasConfigSteps]);
+
+  // ==========================================================================
   // Handlers
   // ==========================================================================
 
@@ -206,11 +272,12 @@ export function Wizard({
   };
 
   /**
-   * Validate required questions for a given list
+   * Validate required questions for a given list (skips hidden questions)
    */
   const validateQuestions = (questionList: QuestionConfig[]): string | null => {
     for (const question of questionList) {
       if (!question.required) continue;
+      if (!isQuestionVisible(question.visibility_rules, answers)) continue;
       const answer = answers[question.question_key];
       if (answer === undefined || answer === null || answer === "") {
         return `Vul "${question.label}" in`;

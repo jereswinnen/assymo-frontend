@@ -2,6 +2,32 @@
 
 export type QuestionType = "single-select" | "multi-select" | "text" | "number";
 
+// =============================================================================
+// Visibility Rules
+// =============================================================================
+
+export type VisibilityOperator =
+  | "equals"
+  | "not_equals"
+  | "includes"
+  | "not_includes"
+  | "is_not_empty"
+  | "is_empty"
+  | "greater_than"
+  | "less_than";
+
+export interface VisibilityRule {
+  questionKey: string;
+  operator: VisibilityOperator;
+  value?: string | number;
+}
+
+export interface VisibilityConfig {
+  rules: VisibilityRule[];
+  logic: "all" | "any";
+  action?: "show" | "hide"; // default "show"
+}
+
 export type DisplayType = "select" | "radio-cards";
 
 export type HeadingLevel = "h2" | "h3" | "h4";
@@ -54,6 +80,7 @@ export interface QuestionOption {
   priceModifierMax?: number; // Manual price override (in cents)
   /** @deprecated Use catalogueItemId or priceModifierMin/Max instead */
   priceModifier?: number; // Legacy: in cents, can be positive or negative
+  visibility_rules?: VisibilityConfig | null; // Option-level visibility rules
 }
 
 export interface ConfiguratorQuestion {
@@ -75,6 +102,7 @@ export interface ConfiguratorQuestion {
   price_per_unit_min: number | null; // Manual per-unit price (in cents)
   price_per_unit_max: number | null; // Manual per-unit price (in cents)
   step_id: string | null; // Links to configurator_steps
+  visibility_rules: VisibilityConfig | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -95,6 +123,7 @@ export interface CreateQuestionInput {
   price_per_unit_min?: number | null;
   price_per_unit_max?: number | null;
   step_id?: string | null;
+  visibility_rules?: VisibilityConfig | null;
 }
 
 export interface UpdateQuestionInput {
@@ -113,6 +142,7 @@ export interface UpdateQuestionInput {
   price_per_unit_min?: number | null;
   price_per_unit_max?: number | null;
   step_id?: string | null;
+  visibility_rules?: VisibilityConfig | null;
 }
 
 export interface PriceModifier {

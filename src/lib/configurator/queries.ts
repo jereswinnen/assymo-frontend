@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 import type {
   ConfiguratorQuestion,
@@ -10,8 +10,6 @@ import type {
   UpdatePricingInput,
   CreateQuoteSubmissionInput,
 } from "./types";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 // Cache tags for on-demand revalidation
 export const CONFIGURATOR_CACHE_TAGS = {
@@ -298,6 +296,7 @@ export async function createQuestion(
       price_per_unit_min,
       price_per_unit_max,
       step_id,
+      visibility_rules,
       site_id
     ) VALUES (
       ${input.product_slug},
@@ -315,6 +314,7 @@ export async function createQuestion(
       ${input.price_per_unit_min ?? null},
       ${input.price_per_unit_max ?? null},
       ${input.step_id ?? null},
+      ${input.visibility_rules ? JSON.stringify(input.visibility_rules) : null},
       ${siteId}
     )
     RETURNING *
@@ -351,6 +351,7 @@ export async function updateQuestion(
       price_per_unit_min = ${input.price_per_unit_min !== undefined ? input.price_per_unit_min : existing.price_per_unit_min},
       price_per_unit_max = ${input.price_per_unit_max !== undefined ? input.price_per_unit_max : existing.price_per_unit_max},
       step_id = ${input.step_id !== undefined ? input.step_id : existing.step_id},
+      visibility_rules = ${input.visibility_rules !== undefined ? (input.visibility_rules ? JSON.stringify(input.visibility_rules) : null) : (existing.visibility_rules ? JSON.stringify(existing.visibility_rules) : null)},
       updated_at = now()
     WHERE id = ${questionId}
       AND site_id = ${siteId}
