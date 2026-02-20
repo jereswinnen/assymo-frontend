@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { resend } from "@/lib/resend";
 import { RESEND_CONFIG, DEFAULT_TEST_EMAIL } from "@/config/resend";
 import {
@@ -10,8 +10,6 @@ import {
 } from "@/lib/configurator";
 import { QuoteEmail, QuoteAdminNotification } from "@/emails";
 import { formatDateNL, formatTimeNL } from "@/lib/appointments/utils";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 /**
  * Get the recipient email - in test mode, all emails go to test email

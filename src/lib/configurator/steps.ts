@@ -1,7 +1,5 @@
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { unstable_cache } from "next/cache";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 // =============================================================================
 // Types

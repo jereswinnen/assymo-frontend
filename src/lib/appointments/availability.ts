@@ -9,6 +9,7 @@ import {
   getAppointmentSettings,
   getDateOverrides,
   getBookedSlots,
+  getBookedSlotsInRange,
 } from "./queries";
 import {
   generateTimeSlots,
@@ -287,16 +288,13 @@ export async function getAvailability(
   ) + 1;
   const dates = getDateRange(start, dayCount);
 
-  // Get all booked slots in range (batch query for performance)
-  const allBookedPromises = dates.map((date) => getBookedSlots(date));
-  const allBooked = await Promise.all(allBookedPromises);
+  // Get all booked slots in range (single batch query for performance)
+  const bookedSlotsMap = await getBookedSlotsInRange(startDate, endDate);
   const bookedByDate = new Map<string, Set<string>>();
-  dates.forEach((date, i) => {
-    bookedByDate.set(
-      date,
-      new Set(allBooked[i].map((t) => t.substring(0, 5)))
-    );
-  });
+  for (const date of dates) {
+    const slots = bookedSlotsMap.get(date) ?? [];
+    bookedByDate.set(date, new Set(slots.map((t: string) => t.substring(0, 5))));
+  }
 
   // Build availability for each date
   const availability: DateAvailability[] = [];

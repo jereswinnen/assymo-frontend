@@ -2,10 +2,8 @@ import { NextRequest, NextResponse, after } from "next/server";
 import { protectRoute } from "@/lib/permissions";
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { CHATBOT_CONFIG } from "@/config/chatbot";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 async function generateAltTextInBackground(
   imageUrl: string,

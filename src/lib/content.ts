@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 import type {
   Page,
@@ -9,8 +9,6 @@ import type {
   NavigationLink,
   SiteParameters,
 } from "@/types/content";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 // Cache tags for on-demand revalidation
 export const CACHE_TAGS = {

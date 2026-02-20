@@ -614,15 +614,14 @@ export function registerSolutionTools(server: McpServer): void {
           };
         }
 
-        // Update order_rank for each solution
-        for (let i = 0; i < ids.length; i++) {
-          const orderRank = i + 1;
-          await sql`
-            UPDATE solutions
-            SET order_rank = ${orderRank}, updated_at = NOW()
-            WHERE id = ${ids[i]} AND site_id = ${siteId}
-          `;
-        }
+        // Batch update order_rank for all solutions in a single query
+        const ranks = ids.map((_: string, i: number) => i + 1);
+        await sql`
+          UPDATE solutions AS t
+          SET order_rank = v.rank, updated_at = NOW()
+          FROM (SELECT unnest(${ids}::uuid[]) AS id, unnest(${ranks}::int[]) AS rank) AS v
+          WHERE t.id = v.id AND t.site_id = ${siteId}
+        `;
 
         return {
           content: [

@@ -18,6 +18,7 @@ export {
   getAppointmentByToken,
   isSlotBooked,
   getBookedSlots,
+  getBookedSlotsInRange,
   createAppointment,
   updateAppointment,
   cancelAppointment,

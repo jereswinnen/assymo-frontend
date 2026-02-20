@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { list } from "@vercel/blob";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { protectRoute } from "@/lib/permissions";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 export interface MediaItem {
   url: string;

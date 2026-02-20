@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { protectRoute, invalidatePermissionsCache } from "@/lib/permissions";
 import type { Role, FeatureOverrides } from "@/lib/permissions/types";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 interface RouteParams {
   params: Promise<{ id: string }>;

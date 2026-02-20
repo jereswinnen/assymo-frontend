@@ -1,12 +1,10 @@
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 import type {
   PriceCatalogueItem,
   CreatePriceCatalogueInput,
   UpdatePriceCatalogueInput,
 } from "./types";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 // Cache tags for on-demand revalidation
 export const CATALOGUE_CACHE_TAG = "configurator-catalogue";

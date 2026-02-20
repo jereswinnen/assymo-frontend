@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { protectRoute } from "@/lib/permissions";
 import { resend } from "@/lib/resend";
 import { RESEND_CONFIG } from "@/config/resend";
 import { NewsletterBroadcast } from "@/emails";
 import { getUnsubscribeUrl, type NewsletterSection } from "@/config/newsletter";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 // POST: Send newsletter to all subscribers
 export async function POST(

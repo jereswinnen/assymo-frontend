@@ -381,15 +381,14 @@ export function registerFilterTools(server: McpServer): void {
           };
         }
 
-        // Update order_rank for each category
-        for (let i = 0; i < ids.length; i++) {
-          const orderRank = i + 1;
-          await sql`
-            UPDATE filter_categories
-            SET order_rank = ${orderRank}
-            WHERE id = ${ids[i]} AND site_id = ${siteId}
-          `;
-        }
+        // Batch update order_rank for all categories in a single query
+        const ranks = ids.map((_: string, i: number) => i + 1);
+        await sql`
+          UPDATE filter_categories AS t
+          SET order_rank = v.rank
+          FROM (SELECT unnest(${ids}::uuid[]) AS id, unnest(${ranks}::int[]) AS rank) AS v
+          WHERE t.id = v.id AND t.site_id = ${siteId}
+        `;
 
         return {
           content: [
@@ -807,15 +806,14 @@ export function registerFilterTools(server: McpServer): void {
           };
         }
 
-        // Update order_rank for each filter
-        for (let i = 0; i < ids.length; i++) {
-          const orderRank = i + 1;
-          await sql`
-            UPDATE filters
-            SET order_rank = ${orderRank}
-            WHERE id = ${ids[i]} AND category_id = ${categoryId}
-          `;
-        }
+        // Batch update order_rank for all filters in a single query
+        const ranks = ids.map((_: string, i: number) => i + 1);
+        await sql`
+          UPDATE filters AS t
+          SET order_rank = v.rank
+          FROM (SELECT unnest(${ids}::uuid[]) AS id, unnest(${ranks}::int[]) AS rank) AS v
+          WHERE t.id = v.id AND t.category_id = ${categoryId}
+        `;
 
         return {
           content: [

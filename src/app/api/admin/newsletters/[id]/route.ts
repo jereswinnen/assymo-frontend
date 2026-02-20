@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { protectRoute } from "@/lib/permissions";
 import type { Newsletter, NewsletterSection } from "@/config/newsletter";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 // GET: Get a single newsletter
 export async function GET(

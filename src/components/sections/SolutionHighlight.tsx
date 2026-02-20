@@ -1,11 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { Action } from "@/components/shared/Action";
 import { RichText } from "@/components/RichText";
 import { EyeIcon } from "lucide-react";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 interface SolutionHighlightProps {
   section: {

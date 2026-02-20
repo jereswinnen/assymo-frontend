@@ -365,15 +365,14 @@ export function registerNavigationTools(server: McpServer): void {
           };
         }
 
-        // Update order_rank for each link
-        for (let i = 0; i < ids.length; i++) {
-          const orderRank = i + 1;
-          await sql`
-            UPDATE navigation_links
-            SET order_rank = ${orderRank}
-            WHERE id = ${ids[i]} AND site_id = ${siteId} AND location = ${location}
-          `;
-        }
+        // Batch update order_rank for all links in a single query
+        const ranks = ids.map((_: string, i: number) => i + 1);
+        await sql`
+          UPDATE navigation_links AS t
+          SET order_rank = v.rank
+          FROM (SELECT unnest(${ids}::uuid[]) AS id, unnest(${ranks}::int[]) AS rank) AS v
+          WHERE t.id = v.id AND t.site_id = ${siteId} AND t.location = ${location}
+        `;
 
         return {
           content: [
@@ -805,15 +804,14 @@ export function registerNavigationTools(server: McpServer): void {
           };
         }
 
-        // Update order_rank for each subitem
-        for (let i = 0; i < ids.length; i++) {
-          const orderRank = i + 1;
-          await sql`
-            UPDATE navigation_subitems
-            SET order_rank = ${orderRank}
-            WHERE id = ${ids[i]} AND link_id = ${linkId}
-          `;
-        }
+        // Batch update order_rank for all subitems in a single query
+        const ranks = ids.map((_: string, i: number) => i + 1);
+        await sql`
+          UPDATE navigation_subitems AS t
+          SET order_rank = v.rank
+          FROM (SELECT unnest(${ids}::uuid[]) AS id, unnest(${ranks}::int[]) AS rank) AS v
+          WHERE t.id = v.id AND t.link_id = ${linkId}
+        `;
 
         return {
           content: [

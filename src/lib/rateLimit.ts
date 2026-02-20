@@ -2,7 +2,6 @@ import {
   getRateLimitStatus,
   resetRateLimitCounter,
   incrementRateLimitCounter,
-  cleanupOldRateLimits,
 } from "./rateLimitQueries";
 
 export async function checkRateLimit(
@@ -11,9 +10,6 @@ export async function checkRateLimit(
   windowSeconds: number = 86400, // 24 hours
 ): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
   try {
-    // Cleanup: Remove old rate limit entries (older than 7 days)
-    await cleanupOldRateLimits();
-
     // Get current rate limit status
     const { current_count, expired, reset_time, current_time } =
       await getRateLimitStatus(sessionId, windowSeconds);

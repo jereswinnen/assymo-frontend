@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import type {
   Appointment,
   AppointmentSettings,
@@ -10,8 +10,6 @@ import type {
   AppointmentStatus,
 } from "@/types/appointments";
 import { generateEditToken } from "./utils";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 // =============================================================================
 // Appointment Settings (Weekly Schedule)
@@ -531,6 +529,35 @@ export async function getBookedSlots(date: string): Promise<string[]> {
   `;
 
   return rows.map((row) => (row as { time: string }).time);
+}
+
+/**
+ * Get all booked slots for a date range in a single query
+ */
+export async function getBookedSlotsInRange(
+  startDate: string,
+  endDate: string
+): Promise<Map<string, string[]>> {
+  const rows = await sql`
+    SELECT appointment_date::text as date, appointment_time::text as time
+    FROM appointments
+    WHERE appointment_date >= ${startDate}::date
+      AND appointment_date <= ${endDate}::date
+      AND status != 'cancelled'
+  `;
+
+  const map = new Map<string, string[]>();
+  for (const row of rows) {
+    const { date, time } = row as { date: string; time: string };
+    const existing = map.get(date);
+    if (existing) {
+      existing.push(time);
+    } else {
+      map.set(date, [time]);
+    }
+  }
+
+  return map;
 }
 
 /**

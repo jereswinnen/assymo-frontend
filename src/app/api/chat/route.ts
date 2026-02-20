@@ -2,14 +2,12 @@ import { openai } from "@ai-sdk/openai";
 import { streamText, convertToModelMessages, stepCountIs } from "ai";
 import { NextRequest } from "next/server";
 import { checkRateLimit } from "@/lib/rateLimit";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { CHATBOT_CONFIG } from "@/config/chatbot";
 import { retrieveRelevantChunks, hasDocuments } from "@/lib/retrieval";
 import { bookingTools } from "@/lib/chatbot/booking-tools";
 
 export const maxDuration = 30;
-
-const sql = neon(process.env.DATABASE_URL!);
 
 function anonymizeIP(ip: string): string {
   const parts = ip.split(".");

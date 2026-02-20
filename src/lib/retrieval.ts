@@ -1,7 +1,5 @@
-import { neon } from '@neondatabase/serverless';
+import { sql } from '@/lib/db';
 import { generateEmbedding } from './embeddings';
-
-const sql = neon(process.env.DATABASE_URL!);
 
 /**
  * Retrieve the most relevant text chunks for a given query using vector similarity search

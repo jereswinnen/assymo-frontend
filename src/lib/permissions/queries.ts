@@ -1,7 +1,5 @@
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import type { Site, Role, FeatureOverrides, Feature } from "./types";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 /**
  * Get all site IDs that a user has access to

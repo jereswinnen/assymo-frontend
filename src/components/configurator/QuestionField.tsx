@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/field";
 import { RichText } from "@/components/RichText";
 import { RadioCardGroup } from "./RadioCardGroup";
-import type { QuestionOption, QuestionType, DisplayType } from "@/lib/configurator/types";
+import type { QuestionOption, QuestionType, DisplayType, VisibilityConfig } from "@/lib/configurator/types";
 
 export interface QuestionConfig {
   question_key: string;
@@ -26,6 +26,7 @@ export interface QuestionConfig {
   options?: QuestionOption[] | null;
   required: boolean;
   description?: string;
+  visibility_rules?: VisibilityConfig | null;
 }
 
 type AnswerValue = string | string[] | number | undefined;

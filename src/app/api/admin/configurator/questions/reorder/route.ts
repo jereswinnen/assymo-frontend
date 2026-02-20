@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { revalidateTag } from "next/cache";
 import { protectRoute } from "@/lib/permissions";
 import { CONFIGURATOR_CACHE_TAGS } from "@/lib/configurator/queries";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 export async function PUT(request: NextRequest) {
   try {

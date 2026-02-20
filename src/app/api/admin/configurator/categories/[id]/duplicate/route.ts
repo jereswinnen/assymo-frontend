@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { revalidateTag } from "next/cache";
 import { protectRoute } from "@/lib/permissions";
 import { CATEGORIES_CACHE_TAG } from "@/lib/configurator/categories";
-
-const sql = neon(process.env.DATABASE_URL!);
 
 interface RouteParams {
   params: Promise<{ id: string }>;

@@ -1,9 +1,7 @@
 import { embed, embedMany } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { neon } from '@neondatabase/serverless';
+import { sql } from '@/lib/db';
 import type { DocumentInfo } from '@/types/chat';
-
-const sql = neon(process.env.DATABASE_URL!);
 
 /**
  * Generate a single embedding using OpenAI's text-embedding-3-small model

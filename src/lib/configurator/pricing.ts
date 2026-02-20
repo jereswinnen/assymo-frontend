@@ -23,19 +23,30 @@ export async function calculatePrice(
   siteSlug: string = "assymo"
 ): Promise<PriceCalculationResult> {
   // Try category-based lookup first (new system), then product-based (legacy)
-  let pricing = await getPricingForCategory(input.product_slug, siteSlug);
-  let questions = await getQuestionsForCategory(input.product_slug, siteSlug);
+  // All three initial queries are independent — run them in parallel
+  let [pricing, questions, catalogueItems] = await Promise.all([
+    getPricingForCategory(input.product_slug, siteSlug),
+    getQuestionsForCategory(input.product_slug, siteSlug),
+    getCatalogueItemsForSite(siteSlug),
+  ]);
 
   // Fall back to legacy product_slug based lookup
-  if (!pricing) {
+  // Both fallbacks are independent of each other — parallelize when both are needed
+  const needsPricingFallback = !pricing;
+  const needsQuestionsFallback = questions.length === 0;
+
+  if (needsPricingFallback && needsQuestionsFallback) {
+    const [fallbackPricing, fallbackQuestions] = await Promise.all([
+      getPricingForProduct(input.product_slug, siteSlug),
+      getQuestionsForProduct(input.product_slug, siteSlug),
+    ]);
+    pricing = fallbackPricing;
+    questions = fallbackQuestions;
+  } else if (needsPricingFallback) {
     pricing = await getPricingForProduct(input.product_slug, siteSlug);
-  }
-  if (questions.length === 0) {
+  } else if (needsQuestionsFallback) {
     questions = await getQuestionsForProduct(input.product_slug, siteSlug);
   }
-
-  // Fetch catalogue items for pricing lookups
-  const catalogueItems = await getCatalogueItemsForSite(siteSlug);
 
   // Fall back to default pricing if not in database
   if (!pricing) {
@@ -75,6 +86,7 @@ export async function calculatePrice(
       price_per_unit_min: null,
       price_per_unit_max: null,
       step_id: null,
+      visibility_rules: null,
       site_id: "default",
       created_at: new Date(),
       updated_at: new Date(),
