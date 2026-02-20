@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { FieldGroup } from "@/components/ui/field";
 import { isQuestionVisible } from "@/lib/configurator/visibility";
@@ -43,6 +43,27 @@ export function QuestionStep({
     [step.questions, answers],
   );
 
+  const handleAnswerChange = useCallback(
+    (key: string, value: WizardAnswers[string]) => {
+      onAnswerChange(key, value);
+
+      // Smooth-scroll to the next question for single-select answers
+      const q = visibleQuestions.find((q) => q.question_key === key);
+      if (!q || q.type !== "single-select" || value === undefined) return;
+
+      const idx = visibleQuestions.indexOf(q);
+      const next = visibleQuestions[idx + 1];
+      if (!next) return;
+
+      requestAnimationFrame(() => {
+        document
+          .getElementById(`question-${next.question_key}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    },
+    [onAnswerChange, visibleQuestions],
+  );
+
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       <div>
@@ -55,12 +76,13 @@ export function QuestionStep({
       {visibleQuestions.length > 0 && (
         <FieldGroup>
           {visibleQuestions.map((question) => (
-            <QuestionField
-              key={question.question_key}
-              question={question}
-              value={answers[question.question_key]}
-              onChange={onAnswerChange}
-            />
+            <div key={question.question_key} id={`question-${question.question_key}`}>
+              <QuestionField
+                question={question}
+                value={answers[question.question_key]}
+                onChange={handleAnswerChange}
+              />
+            </div>
           ))}
         </FieldGroup>
       )}

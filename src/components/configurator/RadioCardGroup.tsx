@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { ImageIcon } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
@@ -47,18 +46,15 @@ export function RadioCardGroup({
             disabled && "cursor-not-allowed opacity-50",
           )}
         >
-          {/* Image placeholder */}
-          <div className="w-full flex h-24 items-center justify-center bg-stone-100">
-            {option.image ? (
+          {option.image && (
+            <div className="w-full flex h-24 items-center justify-center bg-stone-100">
               <img
                 src={option.image}
                 alt={option.label}
                 className="h-full w-full object-cover"
               />
-            ) : (
-              <ImageIcon className="size-8 text-stone-300" />
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Content */}
           <div className="flex items-center justify-between gap-2 p-3 sm:p-4">
